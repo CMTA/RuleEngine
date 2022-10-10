@@ -1,3 +1,6 @@
-[submodule "CMTAT"]
-	path = CMTAT
-	url = git@github.com:CMTA/CMTAT.git
+[submodule "lib/forge-std"]
+	path = lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "lib/CMTAT"]
+	path = lib/CMTAT
+	url = https://github.com/CMTA/CMTAT
