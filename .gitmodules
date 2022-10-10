@@ -1,0 +1,3 @@
+[submodule "CMTAT"]
+	path = CMTAT
+	url = git@github.com:CMTA/CMTAT.git
