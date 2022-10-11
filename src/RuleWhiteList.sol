@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 
 import "CMTAT/interfaces/IRule.sol";
 import "./CodeList.sol";
-
 contract RuleWhitelist is IRule, CodeList {
 
 // Number of addresses in the whitelist at the moment
@@ -19,17 +18,39 @@ contract RuleWhitelist is IRule, CodeList {
   
   mapping(address => bool) whitelist;
 
-  function addAddressToTheWhitelist(address _newWhitelistAddress) public {
+  function addListAddressToTheWhitelist(address[] calldata listWhitelistedAddress) 
+  public{
+   
+    for(uint256 i = 0; i < listWhitelistedAddress.length; ++i){
+        if(!whitelist[listWhitelistedAddress[i]]){
+        whitelist[listWhitelistedAddress[i]] = true;
+        ++numAddressesWhitelisted;
+      }
+    }
+  }
+
+  function removeListAddressToTheWhitelist(address[] calldata listWhitelistedAddress) public {
+    // require(whitelist[_removeWhitelistAddress], "Address is not in the whitelist");
+   for(uint256 i = 0; i < listWhitelistedAddress.length; ++i){
+        if(whitelist[listWhitelistedAddress[i]]){
+        whitelist[listWhitelistedAddress[i]] = false;
+        --numAddressesWhitelisted;
+      }
+    }
+  }
+
+
+  function addOneAddressToTheWhitelist(address _newWhitelistAddress) public {
     require(_newWhitelistAddress != address(0), "Address 0 is not allowed");
-    // require(!whitelist[_newWhitelistAddress], "Address is already in the whitelist");
+    require(!whitelist[_newWhitelistAddress], "Address is already in the whitelist");
     if(!whitelist[_newWhitelistAddress]){
         whitelist[_newWhitelistAddress] = true;
         ++numAddressesWhitelisted;
     }
   }
 
-   function removeAddressToTheWhitelist(address _removeWhitelistAddress) public {
-    // require(whitelist[_removeWhitelistAddress], "Address is not in the whitelist");
+   function removeOneAddressToTheWhitelist(address _removeWhitelistAddress) public {
+    require(whitelist[_removeWhitelistAddress], "Address is not in the whitelist");
     if(whitelist[_removeWhitelistAddress]){
         whitelist[_removeWhitelistAddress] = false;
         --numAddressesWhitelisted;
