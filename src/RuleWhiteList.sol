@@ -111,10 +111,6 @@ contract RuleWhitelist is IRule, CodeList {
         return TEXT_ADDRESS_TO_NOT_WHITELISTED;
     }
 
-    else if(_restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED  ){
-        return TEXT_ADDRESS_TO_NOT_WHITELISTED;
-    }
-
     else {
         return TEXT_CODE_NOT_FOUND;
     }
