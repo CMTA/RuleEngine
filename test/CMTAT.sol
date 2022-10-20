@@ -145,7 +145,7 @@ contract RuleEngineTestOneAddress is Test, HelperContract, ValidationModule, Rul
     function testCannotTranferIfToIsNotWhitelisted() public {
         // Arrange
         // We add the sender to the whitelist
-        ruleWhitelist.addOneAddressToTheWhitelist(ADDRESS1);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
         // Arrange - Assert
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         assertEq(resBool, true);
@@ -167,7 +167,7 @@ contract RuleEngineTestOneAddress is Test, HelperContract, ValidationModule, Rul
 
     function testCannotTranferIfFromIsNotWhitelisted() public {
         // We add the recipient to the whitelist
-        ruleWhitelist.addOneAddressToTheWhitelist(ADDRESS2);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS2);
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
         // Assert
         assertEq(resBool, true);
@@ -206,12 +206,12 @@ contract RuleEngineTestOneAddress is Test, HelperContract, ValidationModule, Rul
     function testCanCheckTransferIsValid() public {
         // Act
         // We add the sender and the recipient to the whitelist.
-        ruleWhitelist.addOneAddressToTheWhitelist(ADDRESS1);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         // Assert
         assertEq(resBool, true);
         // Act
-        ruleWhitelist.addOneAddressToTheWhitelist(ADDRESS2);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS2);
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
         // Assert
         assertEq(resBool, true);
@@ -234,17 +234,17 @@ contract RuleEngineTestOneAddress is Test, HelperContract, ValidationModule, Rul
     // allows ADDRESS1 to transfer tokens to ADDRESS2
     function testAllowTransfer() public {
         // Act
-        ruleWhitelist.addOneAddressToTheWhitelist(ADDRESS1);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
         // Assert
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         assertEq(resBool, true);
         // Act
-        ruleWhitelist.addOneAddressToTheWhitelist(ADDRESS2);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS2);
         // Assert
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
         assertEq(resBool, true);
         // Act
-        ruleWhitelist.addOneAddressToTheWhitelist (ADDRESS3);
+        ruleWhitelist.addAddressToTheWhitelist (ADDRESS3);
         // Assert
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS3);
         assertEq(resBool, true);
@@ -311,7 +311,7 @@ contract RuleEngineArrayAddressTest is Test, HelperContract, ValidationModule, R
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         (bool success, )  = address(ruleWhitelist).call(
-            abi.encodeWithSignature("addListAddressToTheWhitelist(address[])", whitelist)
+            abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
         require(success);
         // Act
@@ -338,7 +338,7 @@ contract RuleEngineArrayAddressTest is Test, HelperContract, ValidationModule, R
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         (bool success, )  = address(ruleWhitelist).call(
-            abi.encodeWithSignature("addListAddressToTheWhitelist(address[])", whitelist)
+            abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
         require(success);
         vm.prank(ADDRESS1);

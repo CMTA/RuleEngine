@@ -16,6 +16,7 @@ contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitel
     RuleEngineMock ruleEngineMock;
     RuleWhitelist ruleWhitelist = new RuleWhitelist();
     uint256 resUint256;
+    uint8 resUint8;
     bool resBool;
     string resString;
     uint8 CODE_NONEXISTENT = 255;
@@ -66,12 +67,12 @@ contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitel
         assertFalse(resBool);
     }
 
-         function testAddressIsIndicatedAsWhitelisted() public {
-        // Arrange
-        ruleWhitelist.addOneAddressToTheWhitelist(ADDRESS1);
+    function testAddressIsIndicatedAsWhitelisted() public {
         // Act
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
+
         // Assert
+        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         assertEq(resBool, true);
     }
 
@@ -83,7 +84,7 @@ contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitel
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         (bool success, )  = address(ruleWhitelist).call(
-            abi.encodeWithSignature("addListAddressToTheWhitelist(address[])", whitelist)
+            abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
         require(success);
         // Act
@@ -100,23 +101,44 @@ contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitel
         assertFalse(resBool);
     }
 
-    function testAddOneAddressToTheWhitelist() public {
-        // Arrange
-        ruleWhitelist.addOneAddressToTheWhitelist(ADDRESS1);
+    function testAddAddressToTheWhitelist() public {
         // Act
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
         // Assert
+        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         assertEq(resBool, true);
+
+        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        assertEq(resUint256, 1);
+    }
+
+    function testRemoveAddressFromTheWhitelist() public {
+        // Arrange
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
+        // Arrange - Assert
+        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        assertEq(resBool, true);
+        // Act
+        ruleWhitelist.removeAddressFromTheWhitelist(ADDRESS1);
+        // Assert
+        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        assertFalse(resBool);
+        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        assertEq(resUint256, 0);
     }
 
 
-    function testAddListAddressToTheWhitelist() public {
+    function testAddAddressesToTheWhitelist() public {
         // Arrange
+        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        assertEq(resUint256, 0);
+
+        // Act
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         (bool success, )  = address(ruleWhitelist).call(
-            abi.encodeWithSignature("addListAddressToTheWhitelist(address[])", whitelist)
+            abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
         require(success);
         // Assert
@@ -126,15 +148,17 @@ contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitel
         assertEq(resBool, true);
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS3);
         assertFalse(resBool);
+        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        assertEq(resUint256, 2);
     }
 
-    function testRemoveListAddressToTheWhitelist() public {
+    function testRemoveAddressesFromTheWhitelist() public {
         // Arrange
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         (bool success, )  = address(ruleWhitelist).call(
-            abi.encodeWithSignature("addListAddressToTheWhitelist(address[])", whitelist)
+            abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
         require(success);
         // Arrange - Assert
@@ -145,7 +169,7 @@ contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitel
 
         // Act
         (success, )  = address(ruleWhitelist).call(
-            abi.encodeWithSignature("removeListAddressToTheWhitelist(address[])", whitelist)
+            abi.encodeWithSignature("removeAddressesFromTheWhitelist(address[])", whitelist)
         );
 
         // Assert
@@ -153,6 +177,8 @@ contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitel
         assertFalse(resBool);
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
         assertFalse(resBool);
+        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        assertEq(resUint256, 0);
     }
 
     function testCanReturnTransferRestrictionCode() public{
@@ -196,7 +222,7 @@ contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitel
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         (bool success, )  = address(ruleWhitelist).call(
-            abi.encodeWithSignature("addListAddressToTheWhitelist(address[])", whitelist)
+            abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
         require(success);
         // Arrange - Assert
@@ -221,4 +247,57 @@ contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitel
         assertFalse(resBool);
     }
 
+    function testNumberWhitelistedAddress() public{
+        // Act 
+        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        // Assert
+        assertEq(resUint256, 0);
+
+        // Arrange
+        address[] memory whitelist = new address[](2);
+        whitelist[0] = ADDRESS1;
+        whitelist[1] = ADDRESS2;
+        (bool success, )  = address(ruleWhitelist).call(
+            abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
+        );
+        require(success);
+        // Act 
+        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        // Assert
+        assertEq(resUint256, 2);
+        // Arrange
+        (success, )  = address(ruleWhitelist).call(
+            abi.encodeWithSignature("removeAddressesFromTheWhitelist(address[])", whitelist)
+        );
+        // Act 
+        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        // Assert
+        assertEq(resUint256, 0);
+    }
+
+    function testDetectTransferRestrictionFrom() public {
+        // Act
+        resUint8 = ruleWhitelist.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
+        // Assert
+        assertEq(resUint8, CODE_ADDRESS_FROM_NOT_WHITELISTED);
+    }
+
+     function testDetectTransferRestrictionTo() public {
+        // Arrange
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
+        // Act
+        resUint8 = ruleWhitelist.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
+        // Assert
+        assertEq(resUint8, CODE_ADDRESS_TO_NOT_WHITELISTED);
+    }
+
+    function testDetectTransferRestrictionOk() public {
+        // Arrange
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS2);
+        // Act
+        resUint8 = ruleWhitelist.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
+        // Assert
+        assertEq(resUint8, NO_ERROR);
+    }
 }

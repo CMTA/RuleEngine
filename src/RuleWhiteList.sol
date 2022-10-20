@@ -18,7 +18,7 @@ contract RuleWhitelist is IRule, CodeList {
   
   mapping(address => bool) whitelist;
 
-  function addListAddressToTheWhitelist(address[] calldata listWhitelistedAddress) 
+  function addAddressesToTheWhitelist(address[] calldata listWhitelistedAddress) 
   public{
    
     for(uint256 i = 0; i < listWhitelistedAddress.length; ++i){
@@ -29,7 +29,7 @@ contract RuleWhitelist is IRule, CodeList {
     }
   }
 
-  function removeListAddressToTheWhitelist(address[] calldata listWhitelistedAddress) public {
+  function removeAddressesFromTheWhitelist(address[] calldata listWhitelistedAddress) public {
     // require(whitelist[_removeWhitelistAddress], "Address is not in the whitelist");
    for(uint256 i = 0; i < listWhitelistedAddress.length; ++i){
         if(whitelist[listWhitelistedAddress[i]]){
@@ -40,7 +40,7 @@ contract RuleWhitelist is IRule, CodeList {
   }
 
 
-  function addOneAddressToTheWhitelist(address _newWhitelistAddress) public {
+  function addAddressToTheWhitelist(address _newWhitelistAddress) public {
     require(_newWhitelistAddress != address(0), "Address 0 is not allowed");
     require(!whitelist[_newWhitelistAddress], "Address is already in the whitelist");
     if(!whitelist[_newWhitelistAddress]){
@@ -49,7 +49,7 @@ contract RuleWhitelist is IRule, CodeList {
     }
   }
 
-   function removeOneAddressToTheWhitelist(address _removeWhitelistAddress) public {
+   function removeAddressFromTheWhitelist(address _removeWhitelistAddress) public {
     require(whitelist[_removeWhitelistAddress], "Address is not in the whitelist");
     if(whitelist[_removeWhitelistAddress]){
         whitelist[_removeWhitelistAddress] = false;
