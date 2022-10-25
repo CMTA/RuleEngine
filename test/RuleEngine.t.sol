@@ -9,43 +9,22 @@ import "src/RuleEngine.sol";
 
 
 contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist {
-    //Defined in CMTAT.sol
-    uint8 constant TRANSFER_OK = 0;
-    string constant TEXT_TRANSFER_OK = "No restriction";
-    
     RuleEngineMock ruleEngineMock;
     RuleWhitelist ruleWhitelist = new RuleWhitelist();
-    uint256 resUint256;
     uint8 resUint8;
+    uint256 resUint256;
     bool resBool;
     string resString;
     uint8 CODE_NONEXISTENT = 255;
-    
+
     // Arrange
     function setUp() public {
-        // global arrange
-        vm.prank(OWNER);
-        CMTAT_CONTRACT = new CMTAT();
-        CMTAT_CONTRACT.initialize(
-            OWNER,
-            ZERO_ADDRESS,
-            "CMTA Token",
-            "CMTAT",
-            "CMTAT_ISIN",
-            "https://cmta.ch"
-        );
-        // specific arrange
         vm.prank(OWNER);
         ruleEngineMock = new RuleEngineMock(ruleWhitelist);
-        vm.prank(OWNER);
-        CMTAT_CONTRACT.mint(ADDRESS1, 31);
-        vm.prank(OWNER);
-        CMTAT_CONTRACT.mint(ADDRESS2, 32);
-        vm.prank(OWNER);
-        CMTAT_CONTRACT.mint(ADDRESS3, 33);
-        vm.prank(OWNER);
+        resUint256 = ruleEngineMock.ruleLength();
 
-        CMTAT_CONTRACT.setRuleEngine(ruleEngineMock);
+        // Assert
+        assertEq(resUint256, 1);
     }
 
     function testCanSetRules() public { 
@@ -57,6 +36,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         (bool success, )  = address(ruleEngineMock).call(
         abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        
         // Arrange - Assert
         assertEq(success, true);
 
@@ -109,7 +89,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         IRule[] memory ruleWhitelistTab = new IRule[](1);
         ruleWhitelistTab[0] = ruleWhitelist1;
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
-         (bool success, )  = address(ruleEngineMock).call(
+        (bool success, )  = address(ruleEngineMock).call(
         abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
         
         // Arrange - Assert
@@ -121,4 +101,104 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         // Assert 
         assertEq(resUint8, CODE_ADDRESS_TO_NOT_WHITELISTED);
     } 
+
+
+     function testMessageForTransferRestrictionWithValidRC() public{
+        // Act
+        resString = ruleEngineMock.messageForTransferRestriction(CODE_ADDRESS_FROM_NOT_WHITELISTED);
+        
+        // Assert 
+        assertEq(resString, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
+    }
+
+    function testMessageForTransferRestrictionWithUnknownRestrictionCode() public{
+        // Act
+        resString = ruleEngineMock.messageForTransferRestriction(50);
+        
+        // Assert 
+        assertEq(resString, "Unknown restriction code");
+    }
+
+    function testValidateTransferOK() public{
+         // Arrange
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        IRule[] memory ruleWhitelistTab = new IRule[](1);
+        ruleWhitelistTab[0] = ruleWhitelist1;
+        (bool success, )  = address(ruleEngineMock).call(
+        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        
+        // Arrange - Assert
+        assertEq(success, true);
+        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
+        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS2);
+        
+        // Act
+        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        
+        // Assert 
+        assertEq(resBool, true);
+    }
+
+    function testValidateTransferRestricted() public {
+        // Arrange
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        IRule[] memory ruleWhitelistTab = new IRule[](1);
+        ruleWhitelistTab[0] = ruleWhitelist1;
+        (bool success, )  = address(ruleEngineMock).call(
+        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        
+        // Arrange - Assert
+        assertEq(success, true);
+        
+        // Act
+        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        
+        // Assert 
+        assertFalse(resBool);
+    }
+
+    function testRuleLength() public {
+        // Act
+        resUint256 = ruleEngineMock.ruleLength();
+
+        // Assert
+        assertEq(resUint256, 1);
+        
+        // Arrange
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        RuleWhitelist ruleWhitelist2 = new RuleWhitelist();
+        IRule[] memory ruleWhitelistTab = new IRule[](2);
+        ruleWhitelistTab[0] = IRule(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRule(ruleWhitelist2);
+        (bool success, ) = address(ruleEngineMock).call(
+        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        
+        // Arrange - Assert
+        assertEq(success, true);
+
+        // Act
+        resUint256 = ruleEngineMock.ruleLength(); 
+        
+        // Assert
+        assertEq(resUint256, 2);
+    }
+
+    function testGetRule() public {
+        // Arrange
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        RuleWhitelist ruleWhitelist2 = new RuleWhitelist();
+        IRule[] memory ruleWhitelistTab = new IRule[](2);
+        ruleWhitelistTab[0] = IRule(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRule(ruleWhitelist2);
+        (bool success, )  = address(ruleEngineMock).call(
+        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        // Arrange - Assert
+        assertEq(success, true);
+        
+        // Act
+        IRule rule = ruleEngineMock.rule(0);
+        
+        // Assert
+        assertEq(address(rule), address(ruleWhitelist1));
+    }
 }
