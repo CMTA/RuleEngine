@@ -8,7 +8,7 @@ import "./HelperContract.sol";
 import "src/RuleEngine.sol";
 
 
-contract RuleEngineTestOneAddress is Test, HelperContract, ValidationModule, RuleWhitelist {
+contract CMTATIntegration is Test, HelperContract, ValidationModule, RuleWhitelist {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";

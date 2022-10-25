@@ -111,7 +111,25 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         assertEq(resString, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
     }
 
-    function testMessageForTransferRestrictionWithUnknownRestrictionCode() public{
+    function testMessageForTransferRestrictionNoRule() public{
+        // Act
+        resString = ruleEngineMock.messageForTransferRestriction(50);
+        
+        // Assert 
+        assertEq(resString, "Unknown restriction code");
+    }
+
+
+    function testMessageForTransferRestrictionWUnknownRestrictionCode() public{
+        // Arrange
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        IRule[] memory ruleWhitelistTab = new IRule[](1);
+        ruleWhitelistTab[0] = ruleWhitelist1;
+        (bool success, )  = address(ruleEngineMock).call(
+        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        // Arrange - Assert
+        assertEq(success, true);
+        
         // Act
         resString = ruleEngineMock.messageForTransferRestriction(50);
         
@@ -200,5 +218,28 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         
         // Assert
         assertEq(address(rule), address(ruleWhitelist1));
+    }
+
+     function testGetRules() public {
+        // Arrange
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        RuleWhitelist ruleWhitelist2 = new RuleWhitelist();
+        IRule[] memory ruleWhitelistTab = new IRule[](2);
+        ruleWhitelistTab[0] = IRule(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRule(ruleWhitelist2);
+        (bool success, )  = address(ruleEngineMock).call(
+        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        // Arrange - Assert
+        assertEq(success, true);
+        
+        // Act
+        IRule[] memory rules = ruleEngineMock.rules();
+        
+        // Assert
+        assertEq(ruleWhitelistTab.length, rules.length);
+        for(uint256 i = 0; i < rules.length; ++i){
+            assertEq(address(ruleWhitelistTab[i]), address(rules[i]));
+        }
+        
     }
 }

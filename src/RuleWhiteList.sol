@@ -23,7 +23,7 @@ contract RuleWhitelist is IRule, CodeList {
    
     for(uint256 i = 0; i < listWhitelistedAddress.length; ++i){
         if(!whitelist[listWhitelistedAddress[i]]){
-        require( listWhitelistedAddress[i] != address(0), "Address 0 is not allowed");
+        require( listWhitelistedAddress[i] != address(0x0), "Address 0 is not allowed");
         whitelist[listWhitelistedAddress[i]] = true;
         ++numAddressesWhitelisted;
       }
@@ -43,7 +43,7 @@ contract RuleWhitelist is IRule, CodeList {
 
 
   function addAddressToTheWhitelist(address _newWhitelistAddress) public {
-    require(_newWhitelistAddress != address(0), "Address 0 is not allowed");
+    require(_newWhitelistAddress != address(0x0), "Address 0 is not allowed");
     require(!whitelist[_newWhitelistAddress], "Address is already in the whitelist");
     if(!whitelist[_newWhitelistAddress]){
         whitelist[_newWhitelistAddress] = true;
