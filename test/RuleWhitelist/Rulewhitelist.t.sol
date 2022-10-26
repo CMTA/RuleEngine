@@ -7,7 +7,6 @@ import "src/RuleEngine.sol";
 
 
 contract RuleWhitelistTest is Test, HelperContract, ValidationModule, RuleWhitelist {
-    RuleEngineMock ruleEngineMock;
     RuleWhitelist ruleWhitelist = new RuleWhitelist();
     uint256 resUint256;
     uint8 resUint8;

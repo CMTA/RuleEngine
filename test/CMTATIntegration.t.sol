@@ -13,7 +13,7 @@ contract CMTATIntegration is Test, HelperContract, ValidationModule, RuleWhiteli
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
     
-    RuleEngineMock ruleEngineMock;
+    RuleEngine ruleEngineMock;
     RuleWhitelist ruleWhitelist = new RuleWhitelist();
     uint256 resUint256;
     bool resBool;
@@ -34,7 +34,7 @@ contract CMTATIntegration is Test, HelperContract, ValidationModule, RuleWhiteli
 
         // specific arrange
         vm.prank(OWNER);
-        ruleEngineMock = new RuleEngineMock(ruleWhitelist);
+        ruleEngineMock = new RuleEngine(ruleWhitelist);
         vm.prank(OWNER);
         CMTAT_CONTRACT.mint(ADDRESS1, 31);
         vm.prank(OWNER);

@@ -7,7 +7,7 @@ import "CMTAT/interfaces/IRuleEngine.sol";
 import "./RuleWhiteList.sol";
 
 
-contract RuleEngineMock is IRuleEngine {
+contract RuleEngine is IRuleEngine {
   IRule[] internal _rules;
 
   constructor(RuleWhitelist _ruleWhitelist ) {

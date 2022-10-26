@@ -9,7 +9,7 @@ import "src/RuleEngine.sol";
 
 
 contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist {
-    RuleEngineMock ruleEngineMock;
+    RuleEngine ruleEngineMock;
     RuleWhitelist ruleWhitelist = new RuleWhitelist();
     uint8 resUint8;
     uint256 resUint256;
@@ -20,7 +20,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
     // Arrange
     function setUp() public {
         vm.prank(OWNER);
-        ruleEngineMock = new RuleEngineMock(ruleWhitelist);
+        ruleEngineMock = new RuleEngine(ruleWhitelist);
         resUint256 = ruleEngineMock.ruleLength();
 
         // Assert
@@ -35,7 +35,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         
         // Arrange - Assert
         assertEq(success, true);
@@ -51,7 +51,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         IRule[] memory ruleWhitelistTab = new IRule[](1);
         ruleWhitelistTab[0] = ruleWhitelist1;
         (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         
         // Arrange - Assert
         assertEq(success, true);
@@ -71,7 +71,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         IRule[] memory ruleWhitelistTab = new IRule[](1);
         ruleWhitelistTab[0] = ruleWhitelist1;
          (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
 
         // Arrange - Assert
         assertEq(success, true);
@@ -90,7 +90,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         ruleWhitelistTab[0] = ruleWhitelist1;
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
         (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         
         // Arrange - Assert
         assertEq(success, true);
@@ -126,7 +126,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         IRule[] memory ruleWhitelistTab = new IRule[](1);
         ruleWhitelistTab[0] = ruleWhitelist1;
         (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         // Arrange - Assert
         assertEq(success, true);
         
@@ -143,7 +143,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         IRule[] memory ruleWhitelistTab = new IRule[](1);
         ruleWhitelistTab[0] = ruleWhitelist1;
         (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         
         // Arrange - Assert
         assertEq(success, true);
@@ -163,7 +163,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         IRule[] memory ruleWhitelistTab = new IRule[](1);
         ruleWhitelistTab[0] = ruleWhitelist1;
         (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         
         // Arrange - Assert
         assertEq(success, true);
@@ -189,7 +189,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         (bool success, ) = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         
         // Arrange - Assert
         assertEq(success, true);
@@ -209,7 +209,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         // Arrange - Assert
         assertEq(success, true);
         
@@ -228,7 +228,7 @@ contract RuleEngineTest is Test, HelperContract, ValidationModule, RuleWhitelist
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngineMock.setRules, ruleWhitelistTab));
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         // Arrange - Assert
         assertEq(success, true);
         

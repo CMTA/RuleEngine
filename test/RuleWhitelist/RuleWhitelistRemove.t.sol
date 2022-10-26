@@ -11,7 +11,6 @@ contract RuleWhitelistRemoveTest is Test, HelperContract, ValidationModule, Rule
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
     
-    RuleEngineMock ruleEngineMock;
     RuleWhitelist ruleWhitelist = new RuleWhitelist();
     uint256 resUint256;
     uint8 resUint8;

@@ -68,6 +68,20 @@ You can configure the verbosity with these flags :
 
 ## Deployment
 The official documentation is available here : [website](https://book.getfoundry.sh/reference/forge/deploy-commands) 
+### Script
+To run the script for deployment, you need to create a .env file. The value for CMTAT.ADDRESS is require only to use the script **RuleEngine.s.sol**
+Warning : put your private key in a .env file is not the best secure way.
+
+* File .env
+```
+PRIVATE_KEY=<YOUR_PRIVATE_KEY>
+CMTAT_ADDRESS=<CMTAT ADDDRESS
+```
+* Command
+```
+forge script script/CMTATWithRuleEngine.s.sol:MyScript --rpc-url=<YOUR_RPC_URL>  --broadcast --verify -vvv
+```
+Value of YOUR_RPC_URL with a local instance of anvil : http://127.0.0.1:8545
 
 ### Local
 With anvil, you can create a local testnet node for deploying and testing smart contracts.  

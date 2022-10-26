@@ -11,18 +11,28 @@ contract MyScript is Script {
     function run() external {
         // Get env variable
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address CMTAT_Address = vm.envAddress("CMTAT_ADDRESS");
+          address OWNER =  vm.addr(deployerPrivateKey);
+        address trustedForwarder = address(0x0);
         vm.startBroadcast(deployerPrivateKey);
-        //whitelist
+      
+        // CMTAT
+        CMTAT CMTAT_CONTRACT = new CMTAT();
+        console.log("CMTAT CMTAT_CONTRACT : ", address(CMTAT_CONTRACT));
+        CMTAT_CONTRACT.initialize(
+            OWNER,
+            trustedForwarder,
+            "CMTA Token",
+            "CMTAT",
+            "CMTAT_ISIN",
+            "https://cmta.ch"
+        );
+        // whitelist
         RuleWhitelist ruleWhitelist = new RuleWhitelist();
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
         RuleEngine RULE_ENGINE = new RuleEngine(ruleWhitelist);
-        console.log("RuleEngine: ", address(RULE_ENGINE));
-        // Configure the new ruleEngine for CMTAT
-        (bool success, ) = address(CMTAT_Address).call(
-        abi.encodeCall(CMTAT.setRuleEngine, RULE_ENGINE));
-        require(success);
+        console.log("RuleEngine : ", address(RULE_ENGINE));
+        CMTAT_CONTRACT.setRuleEngine(RULE_ENGINE);
         vm.stopBroadcast();
     }
 }
