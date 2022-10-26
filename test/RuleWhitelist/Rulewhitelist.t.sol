@@ -6,7 +6,7 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 
-contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitelist {
+contract RuleWhitelistTest is Test, HelperContract, ValidationModule, RuleWhitelist {
     RuleEngineMock ruleEngineMock;
     RuleWhitelist ruleWhitelist = new RuleWhitelist();
     uint256 resUint256;
@@ -41,6 +41,10 @@ contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitel
     }
 
     function testAddressIsIndicatedAsWhitelisted() public {
+        // Arrange - Assert
+        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        assertFalse(resBool);
+
         // Act
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
 
@@ -49,7 +53,7 @@ contract RuleWhiteListTest is Test, HelperContract, ValidationModule, RuleWhitel
         assertEq(resBool, true);
     }
 
-    function testReturnTrueIfAddressIsWhitelisted() public {
+    function testAddressesIsIndicatedAsWhitelisted() public {
         // Arrange
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;

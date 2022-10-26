@@ -95,9 +95,6 @@ contract RuleWhitelist is IRule, CodeList {
       _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED 
       || 
       _restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED
-      ||
-      _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED
-    
      ){
         return true;
     }

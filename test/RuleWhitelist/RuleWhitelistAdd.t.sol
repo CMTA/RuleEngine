@@ -6,7 +6,7 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 
-contract RuleWhiteListAddTest is Test, HelperContract, ValidationModule, RuleWhitelist {
+contract RuleWhitelistAddTest is Test, HelperContract, ValidationModule, RuleWhitelist {
     //Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
@@ -34,6 +34,31 @@ contract RuleWhiteListAddTest is Test, HelperContract, ValidationModule, RuleWhi
         assertEq(resBool, true);
         resUint256 = ruleWhitelist.numberWhitelistedAddress();
         assertEq(resUint256, 1);
+    }
+
+        function testAddAddressesToTheWhitelist() public {
+        // Arrange
+        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        assertEq(resUint256, 0);
+        address[] memory whitelist = new address[](2);
+        whitelist[0] = ADDRESS1;
+        whitelist[1] = ADDRESS2;
+        
+        // Act
+        (resCallBool, )  = address(ruleWhitelist).call(
+            abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
+        );
+        
+        // Assert
+        assertEq(resCallBool, true);
+        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        assertEq(resBool, true);
+        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
+        assertEq(resBool, true);
+        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS3);
+        assertFalse(resBool);
+        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        assertEq(resUint256, 2);
     }
     
     function testCannotAddAddressZeroToTheWhitelist() public {
@@ -140,30 +165,5 @@ contract RuleWhiteListAddTest is Test, HelperContract, ValidationModule, RuleWhi
         assertEq(resBool, true);
         resUint256 = ruleWhitelist.numberWhitelistedAddress();
         assertEq(resUint256, 3);
-    }
-
-    function testAddAddressesToTheWhitelist() public {
-        // Arrange
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
-        assertEq(resUint256, 0);
-        address[] memory whitelist = new address[](2);
-        whitelist[0] = ADDRESS1;
-        whitelist[1] = ADDRESS2;
-        
-        // Act
-        (resCallBool, )  = address(ruleWhitelist).call(
-            abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
-        );
-        
-        // Assert
-        assertEq(resCallBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
-        assertEq(resBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
-        assertEq(resBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS3);
-        assertFalse(resBool);
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
-        assertEq(resUint256, 2);
     }
 }
