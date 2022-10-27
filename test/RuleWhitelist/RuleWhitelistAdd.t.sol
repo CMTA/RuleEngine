@@ -6,12 +6,10 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 
-contract RuleWhitelistAddTest is Test, HelperContract, ValidationModule, RuleWhitelist {
+contract RuleWhitelistAddTest is Test, HelperContract, RuleWhitelist {
     //Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
-    
-    RuleWhitelist ruleWhitelist = new RuleWhitelist();
     uint256 resUint256;
     uint8 resUint8;
     bool resBool;
@@ -21,11 +19,13 @@ contract RuleWhitelistAddTest is Test, HelperContract, ValidationModule, RuleWhi
 
     // Arrange
     function setUp() public {
-      // no need setUp
+      vm.prank(WHITELIST_OPERATOR_ADDRESS);
+      ruleWhitelist = new RuleWhitelist();
     }
 
     function testAddAddressToTheWhitelist() public {
         // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
         
         // Assert
@@ -44,6 +44,7 @@ contract RuleWhitelistAddTest is Test, HelperContract, ValidationModule, RuleWhi
         whitelist[1] = ADDRESS2;
         
         // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
@@ -69,6 +70,7 @@ contract RuleWhitelistAddTest is Test, HelperContract, ValidationModule, RuleWhi
         vm.expectRevert(bytes("Address 0 is not allowed"));
         
         // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(address(0x0));
         
         // Assert
@@ -90,6 +92,7 @@ contract RuleWhitelistAddTest is Test, HelperContract, ValidationModule, RuleWhi
         vm.expectRevert(bytes("Address 0 is not allowed"));
 
         // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
@@ -112,6 +115,7 @@ contract RuleWhitelistAddTest is Test, HelperContract, ValidationModule, RuleWhi
 
     function testAddAddressTwiceToTheWhitelist() public {
         // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
         // Arrange - Assert
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
@@ -119,6 +123,7 @@ contract RuleWhitelistAddTest is Test, HelperContract, ValidationModule, RuleWhi
         /// Arrange
         vm.expectRevert(bytes("Address is already in the whitelist"));
         // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
         // no change
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
@@ -135,6 +140,7 @@ contract RuleWhitelistAddTest is Test, HelperContract, ValidationModule, RuleWhi
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
@@ -149,6 +155,7 @@ contract RuleWhitelistAddTest is Test, HelperContract, ValidationModule, RuleWhi
         // new address in the whitelist
         whitelistDuplicate[2] = ADDRESS3;
         // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelistDuplicate)
         );

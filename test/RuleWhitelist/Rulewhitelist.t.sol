@@ -6,18 +6,18 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 
-contract RuleWhitelistTest is Test, HelperContract, ValidationModule, RuleWhitelist {
-    RuleWhitelist ruleWhitelist = new RuleWhitelist();
+contract RuleWhitelistTest is Test, HelperContract, RuleWhitelist {
     uint256 resUint256;
     uint8 resUint8;
     bool resBool;
     bool resCallBool;
     string resString;
     uint8 CODE_NONEXISTENT = 255;
-
+    
     // Arrange
     function setUp() public {
-      // no need setUp
+      vm.prank(WHITELIST_OPERATOR_ADDRESS);
+      ruleWhitelist = new RuleWhitelist();
     }
 
     function testReturnFalseIfAddressNotWhitelisted() public {
@@ -45,6 +45,7 @@ contract RuleWhitelistTest is Test, HelperContract, ValidationModule, RuleWhitel
         assertFalse(resBool);
 
         // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
 
         // Assert
@@ -57,6 +58,7 @@ contract RuleWhitelistTest is Test, HelperContract, ValidationModule, RuleWhitel
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
@@ -115,6 +117,7 @@ contract RuleWhitelistTest is Test, HelperContract, ValidationModule, RuleWhitel
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
@@ -151,6 +154,7 @@ contract RuleWhitelistTest is Test, HelperContract, ValidationModule, RuleWhitel
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
@@ -160,6 +164,7 @@ contract RuleWhitelistTest is Test, HelperContract, ValidationModule, RuleWhitel
         // Assert
         assertEq(resUint256, 2);
         // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("removeAddressesFromTheWhitelist(address[])", whitelist)
         );
@@ -180,6 +185,7 @@ contract RuleWhitelistTest is Test, HelperContract, ValidationModule, RuleWhitel
 
      function testDetectTransferRestrictionTo() public {
         // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
         // Act
         resUint8 = ruleWhitelist.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
@@ -189,7 +195,9 @@ contract RuleWhitelistTest is Test, HelperContract, ValidationModule, RuleWhitel
 
     function testDetectTransferRestrictionOk() public {
         // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS2);
         // Act
         resUint8 = ruleWhitelist.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
