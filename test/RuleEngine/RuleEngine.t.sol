@@ -253,4 +253,5 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         }
         
     }
+
 }
