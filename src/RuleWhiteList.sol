@@ -18,19 +18,21 @@ contract RuleWhitelist is IRule, CodeList {
   
   mapping(address => bool) whitelist;
 
-  function addListAddressToTheWhitelist(address[] calldata listWhitelistedAddress) 
+  function addAddressesToTheWhitelist(address[] calldata listWhitelistedAddress) 
   public{
    
     for(uint256 i = 0; i < listWhitelistedAddress.length; ++i){
         if(!whitelist[listWhitelistedAddress[i]]){
+        require( listWhitelistedAddress[i] != address(0x0), "Address 0 is not allowed");
         whitelist[listWhitelistedAddress[i]] = true;
         ++numAddressesWhitelisted;
       }
     }
   }
 
-  function removeListAddressToTheWhitelist(address[] calldata listWhitelistedAddress) public {
+  function removeAddressesFromTheWhitelist(address[] calldata listWhitelistedAddress) public {
     // require(whitelist[_removeWhitelistAddress], "Address is not in the whitelist");
+    // we do not check address 0 for remove
    for(uint256 i = 0; i < listWhitelistedAddress.length; ++i){
         if(whitelist[listWhitelistedAddress[i]]){
         whitelist[listWhitelistedAddress[i]] = false;
@@ -40,8 +42,8 @@ contract RuleWhitelist is IRule, CodeList {
   }
 
 
-  function addOneAddressToTheWhitelist(address _newWhitelistAddress) public {
-    require(_newWhitelistAddress != address(0), "Address 0 is not allowed");
+  function addAddressToTheWhitelist(address _newWhitelistAddress) public {
+    require(_newWhitelistAddress != address(0x0), "Address 0 is not allowed");
     require(!whitelist[_newWhitelistAddress], "Address is already in the whitelist");
     if(!whitelist[_newWhitelistAddress]){
         whitelist[_newWhitelistAddress] = true;
@@ -49,7 +51,7 @@ contract RuleWhitelist is IRule, CodeList {
     }
   }
 
-   function removeOneAddressToTheWhitelist(address _removeWhitelistAddress) public {
+   function removeAddressFromTheWhitelist(address _removeWhitelistAddress) public {
     require(whitelist[_removeWhitelistAddress], "Address is not in the whitelist");
     if(whitelist[_removeWhitelistAddress]){
         whitelist[_removeWhitelistAddress] = false;
@@ -93,9 +95,6 @@ contract RuleWhitelist is IRule, CodeList {
       _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED 
       || 
       _restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED
-      ||
-      _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED
-    
      ){
         return true;
     }

@@ -1,4 +1,6 @@
 .env
+broadcast/
 lib/
 out/
 cache/
+.~lock.test.odt#

@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: MPL-2.0
 
 pragma solidity ^0.8.17;
 
@@ -7,7 +7,7 @@ import "CMTAT/interfaces/IRuleEngine.sol";
 import "./RuleWhiteList.sol";
 
 
-contract RuleEngineMock is IRuleEngine {
+contract RuleEngine is IRuleEngine {
   IRule[] internal _rules;
 
   constructor(RuleWhitelist _ruleWhitelist ) {
