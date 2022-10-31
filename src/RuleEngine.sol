@@ -5,16 +5,18 @@ pragma solidity ^0.8.17;
 import "CMTAT/interfaces/IRule.sol";
 import "CMTAT/interfaces/IRuleEngine.sol";
 import "./RuleWhiteList.sol";
+import "./AccessControlAbstract.sol";
 
-
-contract RuleEngine is IRuleEngine {
+contract RuleEngine is IRuleEngine, AccessControlAbstract {
   IRule[] internal _rules;
 
   constructor(RuleWhitelist _ruleWhitelist ) {
+    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    _grantRole(RULE_ENGINE_ROLE, msg.sender);
     _rules.push( _ruleWhitelist);
   }
 
-  function setRules(IRule[] calldata rules_) external override {
+  function setRules(IRule[] calldata rules_) onlyRole(RULE_ENGINE_ROLE) external override {
     _rules = rules_;
   }
 

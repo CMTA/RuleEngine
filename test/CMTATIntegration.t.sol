@@ -8,18 +8,18 @@ import "./HelperContract.sol";
 import "src/RuleEngine.sol";
 
 
-contract CMTATIntegration is Test, HelperContract, ValidationModule, RuleWhitelist {
+contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
     
     RuleEngine ruleEngineMock;
-    RuleWhitelist ruleWhitelist = new RuleWhitelist();
     uint256 resUint256;
     bool resBool;
 
     // Arrange
     function setUp() public {
+        ruleWhitelist = new RuleWhitelist();
         // global arrange
         vm.prank(OWNER);
         CMTAT_CONTRACT = new CMTAT();

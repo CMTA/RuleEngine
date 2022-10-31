@@ -4,7 +4,8 @@ pragma solidity ^0.8.17;
 
 import "CMTAT/interfaces/IRule.sol";
 import "./CodeList.sol";
-contract RuleWhitelist is IRule, CodeList {
+import "./AccessControlAbstract.sol";
+contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
 
 // Number of addresses in the whitelist at the moment
   uint256 private numAddressesWhitelisted;
@@ -18,8 +19,13 @@ contract RuleWhitelist is IRule, CodeList {
   
   mapping(address => bool) whitelist;
 
+  constructor(){
+    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    _grantRole(WHITELIST_ROLE, msg.sender);
+  }
+
   function addAddressesToTheWhitelist(address[] calldata listWhitelistedAddress) 
-  public{
+  public onlyRole(WHITELIST_ROLE) {
    
     for(uint256 i = 0; i < listWhitelistedAddress.length; ++i){
         if(!whitelist[listWhitelistedAddress[i]]){
@@ -30,7 +36,7 @@ contract RuleWhitelist is IRule, CodeList {
     }
   }
 
-  function removeAddressesFromTheWhitelist(address[] calldata listWhitelistedAddress) public {
+  function removeAddressesFromTheWhitelist(address[] calldata listWhitelistedAddress) public onlyRole(WHITELIST_ROLE) {
     // require(whitelist[_removeWhitelistAddress], "Address is not in the whitelist");
     // we do not check address 0 for remove
    for(uint256 i = 0; i < listWhitelistedAddress.length; ++i){
@@ -42,7 +48,7 @@ contract RuleWhitelist is IRule, CodeList {
   }
 
 
-  function addAddressToTheWhitelist(address _newWhitelistAddress) public {
+  function addAddressToTheWhitelist(address _newWhitelistAddress) public onlyRole(WHITELIST_ROLE){
     require(_newWhitelistAddress != address(0x0), "Address 0 is not allowed");
     require(!whitelist[_newWhitelistAddress], "Address is already in the whitelist");
     if(!whitelist[_newWhitelistAddress]){
@@ -51,7 +57,7 @@ contract RuleWhitelist is IRule, CodeList {
     }
   }
 
-   function removeAddressFromTheWhitelist(address _removeWhitelistAddress) public {
+   function removeAddressFromTheWhitelist(address _removeWhitelistAddress) public onlyRole(WHITELIST_ROLE){
     require(whitelist[_removeWhitelistAddress], "Address is not in the whitelist");
     if(whitelist[_removeWhitelistAddress]){
         whitelist[_removeWhitelistAddress] = false;

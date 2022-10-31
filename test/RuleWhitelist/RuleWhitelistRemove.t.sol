@@ -6,12 +6,11 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 
-contract RuleWhitelistRemoveTest is Test, HelperContract, ValidationModule, RuleWhitelist {
+contract RuleWhitelistRemoveTest is Test, HelperContract, RuleWhitelist {
     //Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
-    
-    RuleWhitelist ruleWhitelist = new RuleWhitelist();
+
     uint256 resUint256;
     uint8 resUint8;
     bool resBool;
@@ -21,11 +20,13 @@ contract RuleWhitelistRemoveTest is Test, HelperContract, ValidationModule, Rule
 
     // Arrange
     function setUp() public {
-      // no need setUp
+      vm.prank(WHITELIST_OPERATOR_ADDRESS);
+      ruleWhitelist = new RuleWhitelist();
     }
 
     function testRemoveAddressFromTheWhitelist() public {
         // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
         
         // Arrange - Assert
@@ -33,6 +34,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract, ValidationModule, Rule
         assertEq(resBool, true);
         
         // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.removeAddressFromTheWhitelist(ADDRESS1);
         
         // Assert
@@ -47,6 +49,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract, ValidationModule, Rule
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
@@ -58,6 +61,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract, ValidationModule, Rule
         assertEq(resBool, true);
 
         // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("removeAddressesFromTheWhitelist(address[])", whitelist)
         );
@@ -78,6 +82,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract, ValidationModule, Rule
         vm.expectRevert(bytes("Address is not in the whitelist"));
         
         // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.removeAddressFromTheWhitelist(ADDRESS1);
         
         // Assert
@@ -91,6 +96,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract, ValidationModule, Rule
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
@@ -110,6 +116,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract, ValidationModule, Rule
         whitelistRemove[2] = ADDRESS3;
 
         // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("removeAddressesFromTheWhitelist(address[])", whitelistRemove)
         );
