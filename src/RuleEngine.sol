@@ -64,4 +64,9 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
     }
     return "Unknown restriction code";
   }
+
+  function kill() public onlyRole(DEFAULT_ADMIN_ROLE) {
+        selfdestruct(payable(msg.sender));
+  }
+ 
 }

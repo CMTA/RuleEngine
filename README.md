@@ -3,6 +3,7 @@
 This repository includes the RuleEngine contract for the
 [CMTAT](https://github.com/CMTA/CMTAT) token.
 
+The CMTAT contracts are included as a [submodule](CMTAT/) of the present repository.
 
 ## Usage
 
@@ -10,18 +11,25 @@ This repository includes the RuleEngine contract for the
 
 
 ## Toolchain installation
-You can follow the instruction of the official foundry book here : [website](https://book.getfoundry.sh/getting-started/installation)
+To install the Foundry suite, please refer to the official instructions in the [Foundry book](https://book.getfoundry.sh/getting-started/installation).
 
-## Submodule
-You can install the submodules with the following command :  
+## Initialization
+
+You must first initialize the submodules, with
+
 ```
 forge install
 ```
-The official documentation is available here : [website - install](https://book.getfoundry.sh/reference/forge/forge-install) 
 
-You can update all the submodules with the following command :  
-`forge update`  
-The official documentation is available here : [website - update](https://book.getfoundry.sh/reference/forge/forge-update) 
+See also the command's [documentation](https://book.getfoundry.sh/reference/forge/forge-install).
+
+Later you can update all the submodules with:
+
+```
+forge update
+```
+
+See also the command's [documentation](https://book.getfoundry.sh/reference/forge/forge-update).
 
 
 ## Compilation
@@ -34,37 +42,32 @@ The official documentation is available here : [website](https://book.getfoundry
 ```
 
 ## Testing
-The official documentation is available here : 
-* [website - test](https://book.getfoundry.sh/forge/tests) 
-* [website - test-commands](https://book.getfoundry.sh/reference/forge/test-commands) 
+You can run the tests with
 
+```
+forge test
+```
 
-* Run test  
-`forge test`
+To run a specific test, use
 
-* Run specific test (contract)  
-`forge test --match-contract <contract name> --match-test <function name>`
+```
+forge test --match-contract <contract name> --match-test <function name>
+```
 
-* Exclude some tests  
-Same principle but with theses flags  
-`--no-match-contract
---no-match-test`
+See also the test framework's [official documentation](https://book.getfoundry.sh/forge/tests), and that of the [test commands](https://book.getfoundry.sh/reference/forge/test-commands).
 
-* match a glob pattern  
-You can run tests in filenames that match a glob pattern with --match-path  
-`forge test --match-path test/ContractB.t.sol`
+### Coverage
+* Perform a code coverage
+```
+forge coverage --report lcov
+```
 
-* Watch mode  
-Only test files changed  
-`forge test --watch`
+* Generate LCOV report
+```
+forge coverage --report lcov
+```
 
-* Re-run all tests  
-`forge test --watch --run-all`
-
-* Verbosity   
-You can configure the verbosity with these flags :  
-`-vv /-vvv / -vvvv / -vvvvv`
-
+See [Solidity Coverage in VS Code with Foundry](https://mirror.xyz/devanon.eth/RrDvKPnlD-pmpuW7hQeR5wWdVjklrpOgPCOA-PJkWFU)
 
 ## Deployment
 The official documentation is available here : [website](https://book.getfoundry.sh/reference/forge/deploy-commands) 
@@ -84,26 +87,33 @@ forge script script/CMTATWithRuleEngine.s.sol:MyScript --rpc-url=<YOUR_RPC_URL> 
 Value of YOUR_RPC_URL with a local instance of anvil : http://127.0.0.1:8545
 
 ### Local
-With anvil, you can create a local testnet node for deploying and testing smart contracts.  
-The official documentation by Foundry is available here : [website - reference](https://book.getfoundry.sh/reference/anvil/)  
-For the private key, you can use the private key offered by Anvil.  
-Warning : use these privates keys only for a local development !!!!    
-<br/>On Linux system :  
-`
-export RPC_URL=<RPC URL>`    
-Default RPC URL with Anvil :  
-`export RPC_URL=http://127.0.0.1:8545`  
-`export PRIVATE_KEY=<Local Private Key>`  
-`forge create CMTAT --rpc-url=$RPC_URL --private-key=$PRIVATE_KEY`
+With Foundry, you [can create a local testnet](https://book.getfoundry.sh/reference/anvil/) node for deploying and testing smart contracts, based on the [Anvil](https://anvil.works/) framework. 
 
-## Code Style
-The different libraries can be installed with `npm install`.  
-The libraries can be managed in the file [package.json](./package.json) 
+On Linux, using the default RPC URL, and Anvil's test private key, run:  
 
-**Prettier**  
-`npx prettier --write 'test/**/*.sol'`  
-[website - reference](https://github.com/prettier-solidity/prettier-plugin-solidity)
+```  
+export RPC_URL=http://127.0.0.1:8545`  
+export PRIVATE_KEY=<Local Private Key>
+forge create CMTAT --rpc-url=$RPC_URL --private-key=$PRIVATE_KEY
+```
 
-**Ethlint/ Solium**  
-`npx solium -d test`  
-[website - reference](https://github.com/duaraghav8/Ethlint)
+See also the command's [documentation](https://book.getfoundry.sh/reference/forge/deploy-command).
+
+## Code style guidelines
+We use the following tools to ensure consistent coding style:
+
+
+[Prettier](https://github.com/prettier-solidity/prettier-plugin-solidity):
+
+```
+npx prettier --write 'test/**/*.sol'
+```
+
+[Ethlint/ Solium](https://github.com/duaraghav8/Ethlint)
+
+```
+npx solium -d test
+```  
+
+The related components can be installed with `npm install` (see [package.json](./package.json)). 
+
