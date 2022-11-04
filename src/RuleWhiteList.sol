@@ -70,7 +70,7 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
   }
   
   
-  function isTransferValid(
+  function validateTransfer(
     address _from, address _to, uint256 _amount)
   public view override returns (bool isValid)
   {

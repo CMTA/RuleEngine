@@ -19,13 +19,13 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
 
     // Arrange
     function setUp() public {
+        vm.prank(OWNER);
         ruleWhitelist = new RuleWhitelist();
         // global arrange
         vm.prank(OWNER);
-        CMTAT_CONTRACT = new CMTAT();
+        CMTAT_CONTRACT = new CMTAT(ZERO_ADDRESS);
         CMTAT_CONTRACT.initialize(
             OWNER,
-            ZERO_ADDRESS,
             "CMTA Token",
             "CMTAT",
             "CMTAT_ISIN",
@@ -46,6 +46,29 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         CMTAT_CONTRACT.setRuleEngine(ruleEngineMock);
     }
 
+    function testCanMint() public {
+        // Arrange
+        // Add address zero to the whitelist
+        vm.prank(OWNER);
+        ruleWhitelist.addAddressToTheWhitelist(ZERO_ADDRESS);
+        vm.prank(OWNER);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
+        // Arrange - Assert
+        resBool = ruleWhitelist.addressIsWhitelisted(ZERO_ADDRESS);
+        assertEq(resBool, true);
+        // Act
+        vm.prank(OWNER);
+        CMTAT_CONTRACT.mint(
+            ADDRESS1, 11
+        );
+        // Act
+        string memory message1 = CMTAT_CONTRACT.messageForTransferRestriction(
+           CODE_ADDRESS_TO_NOT_WHITELISTED
+        );
+        // Assert
+        assertEq(message1, TEXT_ADDRESS_TO_NOT_WHITELISTED);
+    }
+
     function testCannotTransferWithoutAddressWhitelisted() public {
         // Arrange
         vm.prank(ADDRESS1);
@@ -60,6 +83,7 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
+        vm.prank(OWNER);
         (bool success, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
@@ -79,7 +103,7 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
     }
 
     function testCannotTranferIfFromIsNotWhitelisted() public {
-        // We add the recipient to the whitelist
+        vm.prank(OWNER);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS2);
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
         // Assert
@@ -101,6 +125,7 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
     function testCannotTranferIfToIsNotWhitelisted() public {
         // Arrange
         // We add the sender to the whitelist
+        vm.prank(OWNER);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
         // Arrange - Assert
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
@@ -120,7 +145,6 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         // Assert
         assertEq(message1, TEXT_ADDRESS_TO_NOT_WHITELISTED);
     }
-
     
      function testCannotTranferIf_From_To_NOT_Whitelisted() public {
         // Act
@@ -147,6 +171,7 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
+        vm.prank(OWNER);
         (bool success, )  = address(ruleWhitelist).call(
             abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
         );
@@ -166,8 +191,5 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         // Assert
         assertEq(message1, TEXT_TRANSFER_OK);
     }
-
-
-  
 }
 

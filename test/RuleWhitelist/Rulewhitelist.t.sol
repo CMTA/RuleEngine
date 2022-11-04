@@ -112,7 +112,7 @@ contract RuleWhitelistTest is Test, HelperContract, RuleWhitelist {
         assertEq(resString, TEXT_CODE_NOT_FOUND);
     }
 
-    function testIsTransferValid() public {
+    function testvalidateTransfer() public {
          // Arrange
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
@@ -130,16 +130,16 @@ contract RuleWhitelistTest is Test, HelperContract, RuleWhitelist {
         
         // Act
         // ADDRESS1 -> ADDRESS2
-        resBool = ruleWhitelist.isTransferValid(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleWhitelist.validateTransfer(ADDRESS1, ADDRESS2, 20);
         assertEq(resBool, true);
         // ADDRESS2 -> ADDRESS1
-        resBool = ruleWhitelist.isTransferValid(ADDRESS2, ADDRESS1, 20);
+        resBool = ruleWhitelist.validateTransfer(ADDRESS2, ADDRESS1, 20);
         assertEq(resBool, true);
     }
 
     function testTransferDetectedAsInvalid() public{
         // Act
-        resBool = isTransferValid(ADDRESS1, ADDRESS2, 20);
+        resBool = validateTransfer(ADDRESS1, ADDRESS2, 20);
         // Assert
         assertFalse(resBool);
     }
