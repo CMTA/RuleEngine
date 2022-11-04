@@ -29,7 +29,6 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
    
     for(uint256 i = 0; i < listWhitelistedAddress.length; ++i){
         if(!whitelist[listWhitelistedAddress[i]]){
-        require( listWhitelistedAddress[i] != address(0x0), "Address 0 is not allowed");
         whitelist[listWhitelistedAddress[i]] = true;
         ++numAddressesWhitelisted;
       }
@@ -37,8 +36,6 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
   }
 
   function removeAddressesFromTheWhitelist(address[] calldata listWhitelistedAddress) public onlyRole(WHITELIST_ROLE) {
-    // require(whitelist[_removeWhitelistAddress], "Address is not in the whitelist");
-    // we do not check address 0 for remove
    for(uint256 i = 0; i < listWhitelistedAddress.length; ++i){
         if(whitelist[listWhitelistedAddress[i]]){
         whitelist[listWhitelistedAddress[i]] = false;
@@ -49,7 +46,6 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
 
 
   function addAddressToTheWhitelist(address _newWhitelistAddress) public onlyRole(WHITELIST_ROLE){
-    require(_newWhitelistAddress != address(0x0), "Address 0 is not allowed");
     require(!whitelist[_newWhitelistAddress], "Address is already in the whitelist");
     if(!whitelist[_newWhitelistAddress]){
         whitelist[_newWhitelistAddress] = true;
