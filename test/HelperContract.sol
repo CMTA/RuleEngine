@@ -6,7 +6,7 @@ import "CMTAT/CMTAT.sol";
 import "src/RuleWhiteList.sol";
 abstract contract HelperContract {
     address constant ZERO_ADDRESS = address(0);
-    address constant OWNER = address(1);
+    address constant DEFAULT_ADMIN_ADDRESS = address(1);
     address constant WHITELIST_OPERATOR_ADDRESS = address(2);
     address constant RULE_ENGINE_OPERATOR_ADDRESS = address(3);
     address constant ATTACKER = address(4);

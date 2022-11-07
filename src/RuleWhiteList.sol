@@ -117,4 +117,12 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
     }
     
   }
+
+  /**
+  Warning: You can call this function only if the contract is not used by any ruleEngine.
+  Otherwise, the calls from the RuleEngine will revert.
+  */
+  function kill() public onlyRole(DEFAULT_ADMIN_ROLE) {
+        selfdestruct(payable(msg.sender));
+  }
 }
