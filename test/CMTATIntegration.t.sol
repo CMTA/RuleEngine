@@ -21,10 +21,10 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
     function setUp() public {
         ruleWhitelist = new RuleWhitelist();
         // global arrange
-        vm.prank(OWNER);
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT = new CMTAT();
         CMTAT_CONTRACT.initialize(
-            OWNER,
+            DEFAULT_ADMIN_ADDRESS,
             ZERO_ADDRESS,
             "CMTA Token",
             "CMTAT",
@@ -33,15 +33,15 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         );
 
         // specific arrange
-        vm.prank(OWNER);
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleEngineMock = new RuleEngine(ruleWhitelist);
-        vm.prank(OWNER);
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT.mint(ADDRESS1, 31);
-        vm.prank(OWNER);
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT.mint(ADDRESS2, 32);
-        vm.prank(OWNER);
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT.mint(ADDRESS3, 33);
-        vm.prank(OWNER);
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
         // We set the Rule Engine
         CMTAT_CONTRACT.setRuleEngine(ruleEngineMock);
     }
