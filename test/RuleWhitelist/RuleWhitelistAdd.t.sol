@@ -61,24 +61,21 @@ contract RuleWhitelistAddTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 2);
     }
     
-    function testCannotAddAddressZeroToTheWhitelist() public {
+    function testCanAddAddressZeroToTheWhitelist() public {
         // Arrange - Assert
         resBool = ruleWhitelist.addressIsWhitelisted(address(0x0));
         assertEq(resBool, false);
 
-        // Arrange
-        vm.expectRevert(bytes("Address 0 is not allowed"));
-        
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(address(0x0));
         
         // Assert
         resBool = ruleWhitelist.addressIsWhitelisted(address(0x0));
-        assertEq(resBool, false);
+        assertEq(resBool, true);
     }
 
-    function testCannotAddAddressesZeroToTheWhitelist() public {
+    function testCanAddAddressesZeroToTheWhitelist() public {
         // Arrange
         resUint256 = ruleWhitelist.numberWhitelistedAddress();
         assertEq(resUint256, 0);
@@ -88,9 +85,6 @@ contract RuleWhitelistAddTest is Test, HelperContract, RuleWhitelist {
         // our target address
         whitelist[2] = address(0x0);
         
-        // Arrange
-        vm.expectRevert(bytes("Address 0 is not allowed"));
-
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, )  = address(ruleWhitelist).call(
@@ -100,17 +94,16 @@ contract RuleWhitelistAddTest is Test, HelperContract, RuleWhitelist {
         // Assert - Main
         // Seem that call returns true even if the function is reverted 
         // TODO : check the return value of call
-        // assertFalse(resCallBool);
         resBool = ruleWhitelist.addressIsWhitelisted(address(0x0));
-        assertEq(resBool, false);
+        assertEq(resBool, true);
         
         // Assert - Secondary
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
-        assertEq(resBool, false);
+        assertEq(resBool, true);
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
-        assertEq(resBool, false);
+        assertEq(resBool, true);
         resUint256 = ruleWhitelist.numberWhitelistedAddress();
-        assertEq(resUint256, 0);
+        assertEq(resUint256, 3);
     }
 
     function testAddAddressTwiceToTheWhitelist() public {
