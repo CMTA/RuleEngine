@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
-import "../HelperContract.sol";
+import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 
@@ -23,27 +23,6 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
         resUint256 = ruleEngineMock.ruleLength();
         // Assert
         assertEq(resUint256, 1);
-    }
-
-    function testCannnotAttackerSetRules() public { 
-        // Arrange
-        vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
-        vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist();
-        IRule[] memory ruleWhitelistTab = new IRule[](2);
-        ruleWhitelistTab[0] = IRule(ruleWhitelist1);
-        ruleWhitelistTab[1] = IRule(ruleWhitelist2);
-
-        // Act
-        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
-        
-        // Assert
-        assertEq(success, true);
-        resUint256 = ruleEngineMock.ruleLength(); 
-        assertEq(resUint256, 2);
     }
 
     function testCanGrantRoleAsAdmin() public {
