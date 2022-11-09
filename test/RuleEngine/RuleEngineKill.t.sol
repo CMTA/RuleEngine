@@ -7,7 +7,7 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 
-contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
+contract RuleEngineKillTest is Test, HelperContract, RuleWhitelist {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
     uint256 resUint256;
