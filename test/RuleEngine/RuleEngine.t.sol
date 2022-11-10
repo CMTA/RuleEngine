@@ -89,6 +89,48 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 2);
     }
 
+    function testCanRemoveLatestRule() public{
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist1);
+        
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.removeRule(ruleWhitelist1);
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 1);
+    }
+
+    function testCanRemoveRule() public{
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist1);
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist2 = new RuleWhitelist();
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist2);
+        
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.removeRule(ruleWhitelist1);
+
+        // Assert
+        IRule[] memory _rules = ruleEngineMock.rules();
+        assertEq(address(_rules[0]), address(ruleWhitelist));
+        assertEq(address(_rules[1]), address(ruleWhitelist2));
+ 
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 2);
+
+
+    }
+
     function testRuleLength() public {
         // Act
         resUint256 = ruleEngineMock.ruleLength();
