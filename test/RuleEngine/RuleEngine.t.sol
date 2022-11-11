@@ -46,8 +46,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         resUint256 = ruleEngineMock.ruleLength(); 
         assertEq(resUint256, 2);
     }
-
-
+    
     function testCanClearRules() public{
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);

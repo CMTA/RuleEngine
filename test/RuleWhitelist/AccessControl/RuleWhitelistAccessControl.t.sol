@@ -147,4 +147,19 @@ contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
         resUint256 = ruleWhitelist.numberWhitelistedAddress();
         assertEq(resUint256, 2);
     } 
+    
+    function testCannotAttackerKillTheContract() public{
+        // Act
+        vm.prank(ATTACKER);
+        string memory message = string(
+            abi.encodePacked(
+                "AccessControl: account ",
+                vm.toString(ATTACKER),
+                " is missing role ",
+                DEFAULT_ADMIN_ROLE_HASH
+            )
+        );
+        vm.expectRevert(bytes(message));
+        ruleWhitelist.kill();
+    }
 }

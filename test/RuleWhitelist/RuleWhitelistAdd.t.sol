@@ -35,7 +35,7 @@ contract RuleWhitelistAddTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 1);
     }
 
-        function testAddAddressesToTheWhitelist() public {
+    function testAddAddressesToTheWhitelist() public {
         // Arrange
         resUint256 = ruleWhitelist.numberWhitelistedAddress();
         assertEq(resUint256, 0);

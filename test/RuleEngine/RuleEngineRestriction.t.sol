@@ -80,6 +80,10 @@ contract RuleEngineRestrictionTest is Test, HelperContract, RuleWhitelist {
     }
 
     function testMessageForTransferRestrictionNoRule() public{
+        // Arrange
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.clearRules();
+        
         // Act
         resString = ruleEngineMock.messageForTransferRestriction(50);
         
@@ -88,7 +92,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract, RuleWhitelist {
     }
 
 
-    function testMessageForTransferRestrictionWUnknownRestrictionCode() public{
+    function testMessageForTransferRestrictionWithUnknownRestrictionCode() public{
         // Act
         resString = ruleEngineMock.messageForTransferRestriction(50);
         
