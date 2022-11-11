@@ -23,6 +23,8 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
         resUint256 = ruleEngineMock.ruleLength();
         // Assert
         assertEq(resUint256, 1);
+
+       
     }
 
     function testCannnotAttackerSetRules() public { 
@@ -36,13 +38,79 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
 
         // Act
-        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        vm.prank(ATTACKER);
+        string memory message = string(
+            abi.encodePacked(
+                "AccessControl: account ",
+                vm.toString(ATTACKER),
+                " is missing role ",
+                RULE_ENGINE_ROLE_HASH
+            )
+        );
+        vm.expectRevert(bytes(message));
         (bool success, )  = address(ruleEngineMock).call(
         abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         
         // Assert
         assertEq(success, true);
         resUint256 = ruleEngineMock.ruleLength(); 
-        assertEq(resUint256, 2);
+        assertEq(resUint256, 1);
+    }
+
+    function testCannnotAttackerClearRules() public{
+        // Act
+        vm.prank(ATTACKER);
+        string memory message = string(
+            abi.encodePacked(
+                "AccessControl: account ",
+                vm.toString(ATTACKER),
+                " is missing role ",
+                RULE_ENGINE_ROLE_HASH
+            )
+        );
+        vm.expectRevert(bytes(message));
+        ruleEngineMock.clearRules();
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 1);
+    }
+
+    function testCannotAttackerAddRule() public{
+        // Act
+        vm.prank(ATTACKER);
+        string memory message = string(
+            abi.encodePacked(
+                "AccessControl: account ",
+                vm.toString(ATTACKER),
+                " is missing role ",
+                RULE_ENGINE_ROLE_HASH
+            )
+        );
+        vm.expectRevert(bytes(message));
+        ruleEngineMock.addRule(ruleWhitelist);
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 1);
+    }
+
+    function testCannotAttackerRemoveRule() public{
+        // Act
+        vm.prank(ATTACKER);
+        string memory message = string(
+            abi.encodePacked(
+                "AccessControl: account ",
+                vm.toString(ATTACKER),
+                " is missing role ",
+                RULE_ENGINE_ROLE_HASH
+            )
+        );
+        vm.expectRevert(bytes(message));
+        ruleEngineMock.removeRule(ruleWhitelist);
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 1);
     }
 }

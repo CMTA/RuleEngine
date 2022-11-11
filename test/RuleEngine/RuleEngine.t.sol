@@ -47,6 +47,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 2);
     }
 
+
     function testCanClearRules() public{
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
@@ -89,6 +90,20 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 2);
     }
 
+    function testCanRemoveNonExistantRule() public{
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.removeRule(ruleWhitelist1);
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 1);
+    }
+
     function testCanRemoveLatestRule() public{
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
@@ -127,8 +142,6 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
  
         resUint256 = ruleEngineMock.ruleLength(); 
         assertEq(resUint256, 2);
-
-
     }
 
     function testRuleLength() public {
