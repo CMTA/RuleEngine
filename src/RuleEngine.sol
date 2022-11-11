@@ -25,8 +25,20 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
     _rules = new IRule[](0);
   }
 
-  function addRule(IRule rule) onlyRole(RULE_ENGINE_ROLE) public{
-    _rules.push(rule);
+  function addRule(IRule rule_) onlyRole(RULE_ENGINE_ROLE) public{
+    _rules.push(rule_);
+  }
+
+  function removeRule(IRule rule_) onlyRole(RULE_ENGINE_ROLE) public{
+    for (uint256 i = 0; i < _rules.length; ++i) {
+      if(_rules[i] == rule_){
+        if(i != _rules.length - 1){
+          _rules[i] = _rules[_rules.length - 1];
+        }
+        _rules.pop();
+        break;
+      }
+    }
   }
 
   function ruleLength() external view override returns (uint256) {
