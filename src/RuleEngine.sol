@@ -17,7 +17,16 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
   }
 
   function setRules(IRule[] calldata rules_) onlyRole(RULE_ENGINE_ROLE) external override {
+    require(rules_.length != 0, "The array is empty");
     _rules = rules_;
+  }
+
+  function clearRules() onlyRole(RULE_ENGINE_ROLE) external{
+    _rules = new IRule[](0);
+  }
+
+  function addRule(IRule rule) onlyRole(RULE_ENGINE_ROLE) public{
+    _rules.push(rule);
   }
 
   function ruleLength() external view override returns (uint256) {

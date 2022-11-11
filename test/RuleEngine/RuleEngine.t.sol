@@ -47,140 +47,46 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 2);
     }
 
-    function testCanDetectTransferRestrictionOK() public { 
+    function testCanClearRules() public{
         // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
-        IRule[] memory ruleWhitelistTab = new IRule[](1);
-        ruleWhitelistTab[0] = ruleWhitelist1;
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist2 = new RuleWhitelist();
+        IRule[] memory ruleWhitelistTab = new IRule[](2);
+        ruleWhitelistTab[0] = IRule(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRule(ruleWhitelist2);
+
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool success, )  = address(ruleEngineMock).call(
         abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         
-        // Arrange - Assert
+        // Assert - Arrange
         assertEq(success, true);
-        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
-        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS2);
-        
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 2);
+
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
-        
-        // Assert 
-        assertEq(resUint8, 0);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.clearRules();
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 0);
     }
 
-    function testCanDetectTransferRestrictionWithFrom() public { 
+    function testCanAddRule() public{
         // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
-        IRule[] memory ruleWhitelistTab = new IRule[](1);
-        ruleWhitelistTab[0] = ruleWhitelist1;
+        
+        // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-         (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
+        ruleEngineMock.addRule(ruleWhitelist1);
 
-        // Arrange - Assert
-        assertEq(success, true);
-
-        // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
-        
-        // Assert 
-        assertEq(resUint8, CODE_ADDRESS_FROM_NOT_WHITELISTED);
-    }
-
-    function testCanDetectTransferRestrictionWithTo() public { 
-        // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
-        IRule[] memory ruleWhitelistTab = new IRule[](1);
-        ruleWhitelistTab[0] = ruleWhitelist1;
-        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
-        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
-        
-        // Arrange - Assert
-        assertEq(success, true);
-        
-        // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
-        
-        // Assert 
-        assertEq(resUint8, CODE_ADDRESS_TO_NOT_WHITELISTED);
-    } 
-
-
-     function testMessageForTransferRestrictionWithValidRC() public{
-        // Act
-        resString = ruleEngineMock.messageForTransferRestriction(CODE_ADDRESS_FROM_NOT_WHITELISTED);
-        
-        // Assert 
-        assertEq(resString, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
-    }
-
-    function testMessageForTransferRestrictionNoRule() public{
-        // Act
-        resString = ruleEngineMock.messageForTransferRestriction(50);
-        
-        // Assert 
-        assertEq(resString, "Unknown restriction code");
-    }
-
-
-    function testMessageForTransferRestrictionWUnknownRestrictionCode() public{
-        // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
-        IRule[] memory ruleWhitelistTab = new IRule[](1);
-        ruleWhitelistTab[0] = ruleWhitelist1;
-        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
-        // Arrange - Assert
-        assertEq(success, true);
-        
-        // Act
-        resString = ruleEngineMock.messageForTransferRestriction(50);
-        
-        // Assert 
-        assertEq(resString, "Unknown restriction code");
-    }
-
-    function testValidateTransferOK() public{
-         // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
-        IRule[] memory ruleWhitelistTab = new IRule[](1);
-        ruleWhitelistTab[0] = ruleWhitelist1;
-        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
-        
-        // Arrange - Assert
-        assertEq(success, true);
-        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
-        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS2);
-        
-        // Act
-        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
-        
-        // Assert 
-        assertEq(resBool, true);
-    }
-
-    function testValidateTransferRestricted() public {
-        // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
-        IRule[] memory ruleWhitelistTab = new IRule[](1);
-        ruleWhitelistTab[0] = ruleWhitelist1;
-        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
-        
-        // Arrange - Assert
-        assertEq(success, true);
-        
-        // Act
-        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
-        
-        // Assert 
-        assertFalse(resBool);
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 2);
     }
 
     function testRuleLength() public {
