@@ -81,7 +81,7 @@ contract RuleWhitelistTest is Test, HelperContract, RuleWhitelist {
 
     function testCanReturnTransferRestrictionCode() public {
         // Act
-        resBool = canReturnTransferRestrictionCode(
+        resBool = ruleWhitelist.canReturnTransferRestrictionCode(
             CODE_ADDRESS_FROM_NOT_WHITELISTED
         );
         // Assert
