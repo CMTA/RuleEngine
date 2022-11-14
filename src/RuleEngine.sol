@@ -15,10 +15,9 @@ contract RuleEngine is IRuleEngine, AccessControl {
         keccak256("RULE_ENGINE_ROLE");
     IRule[] internal _rules;
 
-   constructor(RuleWhitelist _ruleWhitelist) {
+   constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(RULE_ENGINE_ROLE, msg.sender);
-        _rules.push(_ruleWhitelist);
     }
 
     /**

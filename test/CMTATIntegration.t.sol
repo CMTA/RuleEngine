@@ -37,7 +37,9 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
 
         // specific arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleEngineMock = new RuleEngine(ruleWhitelist);
+        ruleEngineMock = new RuleEngine();
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT.mint(ADDRESS1, ADDRESS1_BALANCE_INIT);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
