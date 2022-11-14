@@ -7,7 +7,8 @@
     "lint:sol:script": "npx solium -d script",
     "lint:sol:script:fix": "npx solium -d script --fix",
     "lint:sol:prettier": "npx prettier --write 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
-    "uml": "npx sol2uml class src"
+    "uml": "npx sol2uml class src",
+    "uml:test": "npx sol2uml class test"
   },
   "devDependencies": {
     "ethlint": "^1.2.5",
