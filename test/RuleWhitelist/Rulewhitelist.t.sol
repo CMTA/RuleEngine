@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-pragma solidity ^0.8.17;
+pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
