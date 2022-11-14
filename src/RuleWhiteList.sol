@@ -96,7 +96,7 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
      * @return number of whitelisted addresses
      *
      */
-    function numberWhitelistedAddress() public view returns (uint256) {
+    function numberWhitelistedAddress() external view returns (uint256) {
         return numAddressesWhitelisted;
     }
 
@@ -108,7 +108,7 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
      */
     function addressIsWhitelisted(
         address _targetAddress
-    ) public view returns (bool) {
+    ) external view returns (bool) {
         return whitelist[_targetAddress];
     }
 
@@ -137,7 +137,7 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
 
     function canReturnTransferRestrictionCode(
         uint8 _restrictionCode
-    ) public pure override returns (bool) {
+    ) external pure override returns (bool) {
         if (
             _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED ||
             _restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED

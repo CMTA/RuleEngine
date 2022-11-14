@@ -40,7 +40,7 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
      * @dev clear all the rules of the array of rules
      *
      */
-    function clearRules() external onlyRole(RULE_ENGINE_ROLE) {
+    function clearRules() public onlyRole(RULE_ENGINE_ROLE) {
         _rules = new IRule[](0);
     }
 
@@ -116,7 +116,7 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
 
     function messageForTransferRestriction(
         uint8 _restrictionCode
-    ) public view override returns (string memory) {
+    ) external view override returns (string memory) {
         for (uint256 i = 0; i < _rules.length; i++) {
             if (_rules[i].canReturnTransferRestrictionCode(_restrictionCode)) {
                 return
