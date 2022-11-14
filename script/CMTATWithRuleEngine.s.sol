@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-// Documentation : 
+// Documentation :
 // https://book.getfoundry.sh/tutorials/solidity-scripting
 pragma solidity ^0.8.17;
 
@@ -11,10 +11,10 @@ contract MyScript is Script {
     function run() external {
         // Get env variable
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-          address OWNER =  vm.addr(deployerPrivateKey);
+        address OWNER = vm.addr(deployerPrivateKey);
         address trustedForwarder = address(0x0);
         vm.startBroadcast(deployerPrivateKey);
-      
+
         // CMTAT
         CMTAT CMTAT_CONTRACT = new CMTAT(trustedForwarder);
         console.log("CMTAT CMTAT_CONTRACT : ", address(CMTAT_CONTRACT));

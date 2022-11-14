@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-// Documentation : 
+// Documentation :
 // https://book.getfoundry.sh/tutorials/solidity-scripting
 pragma solidity ^0.8.17;
 
@@ -21,7 +21,8 @@ contract MyScript is Script {
         console.log("RuleEngine: ", address(RULE_ENGINE));
         // Configure the new ruleEngine for CMTAT
         (bool success, ) = address(CMTAT_Address).call(
-        abi.encodeCall(CMTAT.setRuleEngine, RULE_ENGINE));
+            abi.encodeCall(CMTAT.setRuleEngine, RULE_ENGINE)
+        );
         require(success);
         vm.stopBroadcast();
     }
