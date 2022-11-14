@@ -1,13 +1,12 @@
-//SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
-
 contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
-    //Defined in CMTAT.sol
+    // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
     uint256 resUint256;
@@ -19,8 +18,8 @@ contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
 
     // Arrange
     function setUp() public {
-      vm.prank(WHITELIST_OPERATOR_ADDRESS);
-      ruleWhitelist = new RuleWhitelist();
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        ruleWhitelist = new RuleWhitelist();
     }
 
     function testCannotAttackerAddAddressToTheWhitelist() public {
@@ -36,7 +35,7 @@ contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
         vm.expectRevert(bytes(message));
         vm.prank(ATTACKER);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
-        
+
         // Assert
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         assertEq(resBool, false);
@@ -51,7 +50,7 @@ contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
-        
+
         // Act
         string memory message = string(
             abi.encodePacked(
@@ -63,10 +62,13 @@ contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
         );
         vm.expectRevert(bytes(message));
         vm.prank(ATTACKER);
-        (resCallBool, )  = address(ruleWhitelist).call(
-            abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
+        (resCallBool, ) = address(ruleWhitelist).call(
+            abi.encodeWithSignature(
+                "addAddressesToTheWhitelist(address[])",
+                whitelist
+            )
         );
-        
+
         // Assert
         assertEq(resCallBool, true);
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
@@ -83,24 +85,24 @@ contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
-        
+
         // Arrange - Assert
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         assertEq(resBool, true);
-        
+
         // Act
         string memory message = string(
             abi.encodePacked(
                 "AccessControl: account ",
                 vm.toString(ATTACKER),
                 " is missing role ",
-               WHITELIST_ROLE_HASH
+                WHITELIST_ROLE_HASH
             )
         );
         vm.expectRevert(bytes(message));
         vm.prank(ATTACKER);
         ruleWhitelist.removeAddressFromTheWhitelist(ADDRESS1);
-        
+
         // Assert
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         assertEq(resBool, true);
@@ -114,8 +116,11 @@ contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        (resCallBool, )  = address(ruleWhitelist).call(
-            abi.encodeWithSignature("addAddressesToTheWhitelist(address[])", whitelist)
+        (resCallBool, ) = address(ruleWhitelist).call(
+            abi.encodeWithSignature(
+                "addAddressesToTheWhitelist(address[])",
+                whitelist
+            )
         );
         assertEq(resCallBool, true);
         // Arrange - Assert
@@ -135,8 +140,11 @@ contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
         );
         vm.expectRevert(bytes(message));
         vm.prank(ATTACKER);
-        (resCallBool, )  = address(ruleWhitelist).call(
-            abi.encodeWithSignature("removeAddressesFromTheWhitelist(address[])", whitelist)
+        (resCallBool, ) = address(ruleWhitelist).call(
+            abi.encodeWithSignature(
+                "removeAddressesFromTheWhitelist(address[])",
+                whitelist
+            )
         );
         // Assert
         assertEq(resCallBool, true);
@@ -146,9 +154,9 @@ contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
         assertEq(resBool, true);
         resUint256 = ruleWhitelist.numberWhitelistedAddress();
         assertEq(resUint256, 2);
-    } 
-    
-    function testCannotAttackerKillTheContract() public{
+    }
+
+    function testCannotAttackerKillTheContract() public {
         // Act
         vm.prank(ATTACKER);
         string memory message = string(

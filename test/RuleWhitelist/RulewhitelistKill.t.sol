@@ -1,11 +1,10 @@
-//SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
 import "../HelperContract.sol";
 import "src/RuleWhiteList.sol";
-
 
 contract RuleWhitelistKillTest is Test, HelperContract, RuleWhitelist {
     uint8 resUint8;
@@ -15,12 +14,11 @@ contract RuleWhitelistKillTest is Test, HelperContract, RuleWhitelist {
     uint8 CODE_NONEXISTENT = 255;
     uint256 BALANCE_ETHER = 20;
 
-    function setUp() public {  
+    function setUp() public {
         // Arrange - create contracts
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelist = new RuleWhitelist();
-       
-       
+
         // Arrange - balance of the contract
         vm.deal(address(ruleWhitelist), BALANCE_ETHER);
         // Arrange - Assert - size of the contract
@@ -28,8 +26,8 @@ contract RuleWhitelistKillTest is Test, HelperContract, RuleWhitelist {
         address ruleWhitelistLocal = address(ruleWhitelist);
         uint256 size;
         assembly {
-             size := extcodesize(ruleWhitelistLocal)
-             sizeIsDifferentOfZero := eq(size, 0) 
+            size := extcodesize(ruleWhitelistLocal)
+            sizeIsDifferentOfZero := eq(size, 0)
         }
         assertFalse(sizeIsDifferentOfZero);
         // Act
@@ -39,7 +37,7 @@ contract RuleWhitelistKillTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelist.kill();
     }
 
-    function testCanKill() public{
+    function testCanKill() public {
         address ruleWhitelistLocal = address(ruleWhitelist);
         uint256 size;
         // Assert
@@ -50,7 +48,7 @@ contract RuleWhitelistKillTest is Test, HelperContract, RuleWhitelist {
         assertEq(size, 0);
     }
 
-    function testCanKillSendEtherToTheRightAddress() public{
+    function testCanKillSendEtherToTheRightAddress() public {
         assertEq(address(ruleWhitelist).balance, 0);
         assertEq(address(DEFAULT_ADMIN_ADDRESS).balance, BALANCE_ETHER);
     }

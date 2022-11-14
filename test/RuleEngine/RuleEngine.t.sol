@@ -1,11 +1,10 @@
-//SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
-
 
 contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
     RuleEngine ruleEngineMock;
@@ -26,7 +25,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 1);
     }
 
-    function testCanSetRules() public { 
+    function testCanSetRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
@@ -35,30 +34,32 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         IRule[] memory ruleWhitelistTab = new IRule[](2);
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
-        
-        // Act
-        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool resCallBool, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
-        
-        // Assert
-        assertEq(resCallBool, true);
-        resUint256 = ruleEngineMock.ruleLength(); 
-        assertEq(resUint256, 2);
-    }
 
-     function testCannotSetEmptyRulesT1() public{
-        // Arrange
-        IRule[] memory ruleWhitelistTab = new IRule[](0);
-        
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
+
+        // Assert
+        assertEq(resCallBool, true);
+        resUint256 = ruleEngineMock.ruleLength();
+        assertEq(resUint256, 2);
+    }
+
+    function testCannotSetEmptyRulesT1() public {
+        // Arrange
+        IRule[] memory ruleWhitelistTab = new IRule[](0);
+
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
 
         // Assert
         assertFalse(resCallBool);
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
 
         // Assert2
@@ -67,22 +68,23 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertFalse(resBool);
     }
 
-    function testCannotSetEmptyRulesT2() public{
+    function testCannotSetEmptyRulesT2() public {
         // Arrange
         IRule[] memory ruleWhitelistTab = new IRule[](2);
-        
+
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         vm.expectRevert("The array is empty2");
-      
-        (bool resCallBool, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
+
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
 
         resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
-        
+
         // Assert1
         assertFalse(resCallBool);
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
 
         // Assert2
@@ -90,8 +92,8 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
         assertFalse(resBool);
     }
-    
-    function testCanClearRules() public{
+
+    function testCanClearRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
@@ -102,12 +104,13 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool resCallBool, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
-        
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
+
         // Assert - Arrange
         assertEq(resCallBool, true);
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 2);
 
         // Act
@@ -115,99 +118,99 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleEngineMock.clearRules();
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 0);
     }
 
-    function testCanAddRule() public{
+    function testCanAddRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
-        
+
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist1);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 2);
     }
 
-    function testCannotAddRuleZeroAddress() public{
+    function testCannotAddRuleZeroAddress() public {
         // Act
         vm.expectRevert("The rule can't be a zero address");
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(IRule(address(0x0)));
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
     }
 
-    function testCanRemoveWithEmptyRules() public{
+    function testCanRemoveWithEmptyRules() public {
         // Arrange
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist);
         // Arrange - Assert
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 0);
-        
+
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 0);
     }
 
-    function testCanRemoveNonExistantRule() public{
+    function testCanRemoveNonExistantRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
-        
+
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist1);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
     }
 
-    function testCanRemoveLatestRule() public{
+    function testCanRemoveLatestRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist1);
-        
+
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist1);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
     }
 
-     function testCanRemoveFirstRule() public{
+    function testCanRemoveFirstRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist1);
-        
+
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
     }
 
-    function testCanRemoveRule() public{
+    function testCanRemoveRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
@@ -217,7 +220,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         RuleWhitelist ruleWhitelist2 = new RuleWhitelist();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist2);
-        
+
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist1);
@@ -226,8 +229,8 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         IRule[] memory _rules = ruleEngineMock.rules();
         assertEq(address(_rules[0]), address(ruleWhitelist));
         assertEq(address(_rules[1]), address(ruleWhitelist2));
- 
-        resUint256 = ruleEngineMock.ruleLength(); 
+
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 2);
     }
 
@@ -237,7 +240,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
 
         // Assert
         assertEq(resUint256, 1);
-        
+
         // Arrange
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
         RuleWhitelist ruleWhitelist2 = new RuleWhitelist();
@@ -246,14 +249,15 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
-        
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
+
         // Arrange - Assert
         assertEq(resCallBool, true);
 
         // Act
-        resUint256 = ruleEngineMock.ruleLength(); 
-        
+        resUint256 = ruleEngineMock.ruleLength();
+
         // Assert
         assertEq(resUint256, 2);
     }
@@ -266,19 +270,20 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool resCallBool, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
         // Arrange - Assert
         assertEq(resCallBool, true);
-        
+
         // Act
         IRule rule = ruleEngineMock.rule(0);
-        
+
         // Assert
         assertEq(address(rule), address(ruleWhitelist1));
     }
 
-     function testGetRules() public {
+    function testGetRules() public {
         // Arrange
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
         RuleWhitelist ruleWhitelist2 = new RuleWhitelist();
@@ -286,20 +291,19 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool resCallBool, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
         // Arrange - Assert
         assertEq(resCallBool, true);
-        
+
         // Act
         IRule[] memory rules = ruleEngineMock.rules();
-        
+
         // Assert
         assertEq(ruleWhitelistTab.length, rules.length);
-        for(uint256 i = 0; i < rules.length; ++i){
+        for (uint256 i = 0; i < rules.length; ++i) {
             assertEq(address(ruleWhitelistTab[i]), address(rules[i]));
         }
-        
     }
-
 }

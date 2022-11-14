@@ -1,13 +1,12 @@
-//SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
-
 contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
-    //Defined in CMTAT.sol
+    // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
     uint256 resUint256;
@@ -19,8 +18,8 @@ contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
 
     // Arrange
     function setUp() public {
-      vm.prank(WHITELIST_OPERATOR_ADDRESS);
-      ruleWhitelist = new RuleWhitelist();
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        ruleWhitelist = new RuleWhitelist();
     }
 
     function testCanGrantRoleAsAdmin() public {

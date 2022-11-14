@@ -1,11 +1,10 @@
-//SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
 import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
-
 
 contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
     RuleEngine ruleEngineMock;
@@ -29,7 +28,11 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, false, true);
-        emit RoleGranted(RULE_ENGINE_ROLE, ADDRESS1, RULE_ENGINE_OPERATOR_ADDRESS);
+        emit RoleGranted(
+            RULE_ENGINE_ROLE,
+            ADDRESS1,
+            RULE_ENGINE_OPERATOR_ADDRESS
+        );
         ruleEngineMock.grantRole(RULE_ENGINE_ROLE, ADDRESS1);
         // Assert
         bool res1 = ruleEngineMock.hasRole(RULE_ENGINE_ROLE, ADDRESS1);
@@ -47,7 +50,11 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, false, true);
-        emit RoleRevoked(RULE_ENGINE_ROLE, ADDRESS1, RULE_ENGINE_OPERATOR_ADDRESS);
+        emit RoleRevoked(
+            RULE_ENGINE_ROLE,
+            ADDRESS1,
+            RULE_ENGINE_OPERATOR_ADDRESS
+        );
         ruleEngineMock.revokeRole(RULE_ENGINE_ROLE, ADDRESS1);
         // Assert
         bool res2 = ruleEngineMock.hasRole(RULE_ENGINE_ROLE, ADDRESS1);
