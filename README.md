@@ -102,12 +102,12 @@ See also the command's [documentation](https://book.getfoundry.sh/reference/forg
 ## Code style guidelines
 We use the following tools to ensure consistent coding style:
 
-[Prettier](https://github.com/prettier-solidity/prettier-plugin-solidity):
+[Prettier](https://github.com/prettier-solidity/prettier-plugin-solidity)
 ```
 npm run-script lint:sol:prettier 
 ```
 
-[Ethlint/ Solium](https://github.com/duaraghav8/Ethlint)
+[Ethlint / Solium](https://github.com/duaraghav8/Ethlint)
 
 ```
 npm run-script lint:sol 
