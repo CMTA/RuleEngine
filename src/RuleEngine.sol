@@ -6,7 +6,10 @@ import "CMTAT/interfaces/IRule.sol";
 import "CMTAT/interfaces/IRuleEngine.sol";
 import "./RuleWhiteList.sol";
 import "./AccessControlAbstract.sol";
-import "forge-std/Test.sol";
+
+/**
+@title Implementation of a ruleEngine defined by the CMTAT
+*/
 contract RuleEngine is IRuleEngine, AccessControlAbstract {
   IRule[] internal _rules;
 
@@ -16,6 +19,10 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
     _rules.push( _ruleWhitelist);
   }
 
+ /**
+  * @dev revert if one rule is a zero address
+  *
+  */
   function setRules(IRule[] calldata rules_) onlyRole(RULE_ENGINE_ROLE) external override {
     require(rules_.length != 0, "The array is empty");
     for(uint256 i = 0; i < rules_.length; ++i){
@@ -24,15 +31,31 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
     _rules = rules_;
   }
 
+ /**
+  * @dev clear all the rules of the array of rules
+  *
+  */
   function clearRules() onlyRole(RULE_ENGINE_ROLE) external{
     _rules = new IRule[](0);
   }
 
+  /**
+  * @dev Add a rule to the array of rules
+  * The address 0 can not be add
+  *
+  */
   function addRule(IRule rule_) onlyRole(RULE_ENGINE_ROLE) public{
     require(address(rule_) != address(0x0), "The rule can't be a zero address");
     _rules.push(rule_);
   }
 
+  /**
+  * @dev Remove a rule from the array of rules
+  * To reduce the array size, the last rule is moved to the location occupied 
+  * by the rule to remove
+  *
+  *
+  */
   function removeRule(IRule rule_) onlyRole(RULE_ENGINE_ROLE) public{
     for (uint256 i = 0; i < _rules.length; ++i) {
       if(_rules[i] == rule_){
@@ -90,6 +113,11 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
     return "Unknown restriction code";
   }
 
+  /**
+  * @dev Destroy the contract bytecode
+  * Warning: this action is irreversible and very critical
+  *
+  */
   function kill() public onlyRole(DEFAULT_ADMIN_ROLE) {
         selfdestruct(payable(msg.sender));
   }
