@@ -5,6 +5,9 @@ import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
+/**
+@title General functions of the RuleWhitelist
+*/
 contract RuleWhitelistTest is Test, HelperContract, RuleWhitelist {
     uint256 resUint256;
     uint8 resUint8;

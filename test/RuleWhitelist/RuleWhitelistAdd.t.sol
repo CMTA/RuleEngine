@@ -5,6 +5,9 @@ import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
+/**
+@title Tests the functions to add addresses to the whitelist
+*/
 contract RuleWhitelistAddTest is Test, HelperContract, RuleWhitelist {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;

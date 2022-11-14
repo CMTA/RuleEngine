@@ -6,6 +6,9 @@ import "CMTAT/CMTAT.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
+/**
+@title General functions of the RuleEngine
+*/
 contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
     RuleEngine ruleEngineMock;
     uint8 resUint8;

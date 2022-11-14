@@ -6,6 +6,9 @@ import "CMTAT/CMTAT.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
+/**
+@title tests concerning the restrictions and validation for the transfers
+*/
 contract RuleEngineRestrictionTest is Test, HelperContract, RuleWhitelist {
     RuleEngine ruleEngineMock;
     uint8 resUint8;

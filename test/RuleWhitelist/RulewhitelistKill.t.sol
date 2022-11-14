@@ -6,6 +6,9 @@ import "CMTAT/CMTAT.sol";
 import "../HelperContract.sol";
 import "src/RuleWhiteList.sol";
 
+/**
+@title Tests on the kill function
+*/
 contract RuleWhitelistKillTest is Test, HelperContract, RuleWhitelist {
     uint8 resUint8;
     uint256 resUint256;

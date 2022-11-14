@@ -6,6 +6,9 @@ import "CMTAT/CMTAT.sol";
 import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
+/**
+@title Tests on the Access Control
+*/
 contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
     RuleEngine ruleEngineMock;
     uint8 resUint8;

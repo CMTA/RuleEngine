@@ -6,6 +6,9 @@ import "CMTAT/CMTAT.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
+/**
+@title Tests on the kill function
+*/
 contract RuleEngineKillTest is Test, HelperContract, RuleWhitelist {
     RuleEngine ruleEngineMock;
     uint8 resUint8;

@@ -5,7 +5,10 @@ import "forge-std/Test.sol";
 import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
-contract RuleWhitelistAccessControl is Test, HelperContract, RuleWhitelist {
+/**
+@title Tests on the provided functions by OpenZeppelin
+*/
+contract RuleWhitelistAccessControlOZ is Test, HelperContract, RuleWhitelist {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
