@@ -122,6 +122,7 @@ The related components can be installed with `npm install` (see [package.json](.
 We use [sol2uml](https://github.com/naddison36/sol2uml) to generate UML for smart contracts.
 ```
 npm run-script uml
+npm run-script uml:test
 ```  
 
 The related component can be installed with `npm install` (see [package.json](./package.json)). 

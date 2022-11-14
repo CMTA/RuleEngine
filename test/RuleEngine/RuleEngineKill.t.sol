@@ -22,7 +22,9 @@ contract RuleEngineKillTest is Test, HelperContract, RuleWhitelist {
         // Arrange - create contracts
         ruleWhitelist = new RuleWhitelist();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(ruleWhitelist);
+        ruleEngineMock = new RuleEngine();
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist);
         // Arrange -  Assert
         resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);

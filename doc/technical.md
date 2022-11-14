@@ -34,7 +34,7 @@ To add /remove several addresses
 ### Null address
 It is possible to add the null address (0x0) to the whitelist. It is a requirement from the CMTAT to be able to mint tokens.
 
-It is not a security problem because OpenZeppelin doesn't autorize the transfer of tokens to the zero address.
+It is not a security problem because OpenZeppelin doesn't authorize the transfer of tokens to the zero address.
 
 ### Duplicate address
 

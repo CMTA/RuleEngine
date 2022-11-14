@@ -4,12 +4,13 @@ pragma solidity 0.8.17;
 
 import "CMTAT/interfaces/IRule.sol";
 import "./CodeList.sol";
-import "./AccessControlAbstract.sol";
+import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 
 /**
 @title a whitelist manager
 */
-contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
+contract RuleWhitelist is IRule, CodeList, AccessControl {
+    bytes32 public constant WHITELIST_ROLE = keccak256("WHITELIST_ROLE");
     // Number of addresses in the whitelist at the moment
     uint256 private numAddressesWhitelisted;
 

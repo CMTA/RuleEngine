@@ -5,18 +5,19 @@ pragma solidity 0.8.17;
 import "CMTAT/interfaces/IRule.sol";
 import "CMTAT/interfaces/IRuleEngine.sol";
 import "./RuleWhiteList.sol";
-import "./AccessControlAbstract.sol";
+import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 
 /**
 @title Implementation of a ruleEngine defined by the CMTAT
 */
-contract RuleEngine is IRuleEngine, AccessControlAbstract {
+contract RuleEngine is IRuleEngine, AccessControl {
+    bytes32 public constant RULE_ENGINE_ROLE =
+        keccak256("RULE_ENGINE_ROLE");
     IRule[] internal _rules;
 
-    constructor(RuleWhitelist _ruleWhitelist) {
+   constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(RULE_ENGINE_ROLE, msg.sender);
-        _rules.push(_ruleWhitelist);
     }
 
     /**

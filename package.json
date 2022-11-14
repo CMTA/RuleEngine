@@ -4,8 +4,11 @@
     "lint:sol:fix": "npx solium -d src --fix",
     "lint:sol:test": "npx solium -d test",
     "lint:sol:test:fix": "npx solium -d test --fix",
-    "lint:sol:prettier": "npx prettier --write 'src/**/*.sol' 'test/**/*.sol'",
-    "uml": "npx sol2uml class src"
+    "lint:sol:script": "npx solium -d script",
+    "lint:sol:script:fix": "npx solium -d script --fix",
+    "lint:sol:prettier": "npx prettier --write 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
+    "uml": "npx sol2uml class src",
+    "uml:test": "npx sol2uml class test"
   },
   "devDependencies": {
     "ethlint": "^1.2.5",

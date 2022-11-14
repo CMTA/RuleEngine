@@ -21,9 +21,13 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
     function setUp() public {
         ruleWhitelist = new RuleWhitelist();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(ruleWhitelist);
+        ruleEngineMock = new RuleEngine();
         resUint256 = ruleEngineMock.ruleLength();
-        // Assert
+
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist);
+        // Arrange - Assert
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
     }
 
