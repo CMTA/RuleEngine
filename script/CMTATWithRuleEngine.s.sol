@@ -7,6 +7,9 @@ import "forge-std/Script.sol";
 import "CMTAT/CMTAT.sol";
 import "src/RuleEngine.sol";
 
+/**
+@title Deploy a CMTAT, a RuleWhitelist and a RuleEngine
+*/
 contract MyScript is Script {
     function run() external {
         // Get env variable
