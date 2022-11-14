@@ -18,6 +18,9 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
 
   function setRules(IRule[] calldata rules_) onlyRole(RULE_ENGINE_ROLE) external override {
     require(rules_.length != 0, "The array is empty");
+    for(uint256 i = 0; i < rules_.length; ++i){
+      require(address(rules_[i]) != address(0x0), "One of the rules is a zero address");
+    }
     _rules = rules_;
   }
 
@@ -26,6 +29,7 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
   }
 
   function addRule(IRule rule_) onlyRole(RULE_ENGINE_ROLE) public{
+    require(address(rule_) != address(0x0), "The rule can't be a zero address");
     _rules.push(rule_);
   }
 

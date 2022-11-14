@@ -38,13 +38,57 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool success, )  = address(ruleEngineMock).call(
+        (bool resCallBool, )  = address(ruleEngineMock).call(
         abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         
         // Assert
-        assertEq(success, true);
+        assertEq(resCallBool, true);
         resUint256 = ruleEngineMock.ruleLength(); 
         assertEq(resUint256, 2);
+    }
+
+     function testCannotSetEmptyRulesT1() public{
+        // Arrange
+        IRule[] memory ruleWhitelistTab = new IRule[](0);
+        
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
+
+        // Assert
+        assertFalse(resCallBool);
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 1);
+
+        // Assert2
+        // The call has not to throw an error.
+        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        assertFalse(resBool);
+    }
+
+    function testCannotSetEmptyRulesT2() public{
+        // Arrange
+        IRule[] memory ruleWhitelistTab = new IRule[](2);
+        
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        vm.expectRevert("The array is empty2");
+      
+        (bool resCallBool, )  = address(ruleEngineMock).call(
+        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
+
+        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        
+        // Assert1
+        assertFalse(resCallBool);
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 1);
+
+        // Assert2
+        // The call has not to throw an error.
+        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        assertFalse(resBool);
     }
     
     function testCanClearRules() public{
@@ -58,11 +102,11 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool success, )  = address(ruleEngineMock).call(
+        (bool resCallBool, )  = address(ruleEngineMock).call(
         abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         
         // Assert - Arrange
-        assertEq(success, true);
+        assertEq(resCallBool, true);
         resUint256 = ruleEngineMock.ruleLength(); 
         assertEq(resUint256, 2);
 
@@ -87,6 +131,20 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         // Assert
         resUint256 = ruleEngineMock.ruleLength(); 
         assertEq(resUint256, 2);
+    }
+
+    function testCanAddRuleZeroAddress() public{
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        
+        // Act
+        vm.expectRevert("The rule can't be a zero address");
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(IRule(address(0x0)));
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 1);
     }
 
     function testCanRemoveNonExistantRule() public{
@@ -157,11 +215,11 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool success, ) = address(ruleEngineMock).call(
+        (bool resCallBool, ) = address(ruleEngineMock).call(
         abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         
         // Arrange - Assert
-        assertEq(success, true);
+        assertEq(resCallBool, true);
 
         // Act
         resUint256 = ruleEngineMock.ruleLength(); 
@@ -178,10 +236,10 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool success, )  = address(ruleEngineMock).call(
+        (bool resCallBool, )  = address(ruleEngineMock).call(
         abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         // Arrange - Assert
-        assertEq(success, true);
+        assertEq(resCallBool, true);
         
         // Act
         IRule rule = ruleEngineMock.rule(0);
@@ -198,10 +256,10 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool success, )  = address(ruleEngineMock).call(
+        (bool resCallBool, )  = address(ruleEngineMock).call(
         abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
         // Arrange - Assert
-        assertEq(success, true);
+        assertEq(resCallBool, true);
         
         // Act
         IRule[] memory rules = ruleEngineMock.rules();
