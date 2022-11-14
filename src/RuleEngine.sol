@@ -37,7 +37,7 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
     }
 
     /**
-     * @dev clear all the rules of the array of rules
+     * @notice clear all the rules of the array of rules
      *
      */
     function clearRules() public onlyRole(RULE_ENGINE_ROLE) {
@@ -45,8 +45,8 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
     }
 
     /**
-     * @dev Add a rule to the array of rules
-     * The address 0 can not be add
+     * @notice Add a rule to the array of rules
+     * @dev The address 0 can not be add
      *
      */
     function addRule(IRule rule_) public onlyRole(RULE_ENGINE_ROLE) {
@@ -58,8 +58,8 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
     }
 
     /**
-     * @dev Remove a rule from the array of rules
-     * To reduce the array size, the last rule is moved to the location occupied
+     * @notice Remove a rule from the array of rules
+     * @dev To reduce the array size, the last rule is moved to the location occupied
      * by the rule to remove
      *
      *
@@ -127,8 +127,8 @@ contract RuleEngine is IRuleEngine, AccessControlAbstract {
     }
 
     /**
-     * @dev Destroy the contract bytecode
-     * Warning: this action is irreversible and very critical
+     * @notice Destroy the contract bytecode
+     * @dev Warning: this action is irreversible and very critical
      *
      */
     function kill() public onlyRole(DEFAULT_ADMIN_ROLE) {

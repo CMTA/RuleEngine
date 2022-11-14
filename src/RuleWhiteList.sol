@@ -27,7 +27,7 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
     }
 
     /**
-     * @dev add addresses to the whitelist
+     * @notice Add addresses to the whitelist
      * @param listWhitelistedAddress an array with the addresses to whitelist
      */
     function addAddressesToTheWhitelist(
@@ -42,7 +42,7 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
     }
 
     /**
-     * @dev remove addresses from the whitelist
+     * @notice Remove addresses from the whitelist
      * @param listWhitelistedAddress an array with the addresses to remove
      */
     function removeAddressesFromTheWhitelist(
@@ -57,7 +57,7 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
     }
 
     /**
-     * @dev add one address to the whitelist
+     * @notice Add one address to the whitelist
      * @param _newWhitelistAddress the address to whitelist
      */
     function addAddressToTheWhitelist(
@@ -74,7 +74,7 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
     }
 
     /**
-     * @dev remove one address from the whitelist
+     * @notice Remove one address from the whitelist
      * @param _removeWhitelistAddress the address to remove
      *
      */
@@ -92,7 +92,7 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
     }
 
     /**
-     * @dev Get the number of whitelisted addresses
+     * @notice Get the number of whitelisted addresses
      * @return number of whitelisted addresses
      *
      */
@@ -101,7 +101,7 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
     }
 
     /**
-     * @dev Know if an address is whitelisted or not
+     * @notice Know if an address is whitelisted or not
      * @param _targetAddress the concerned address
      * @return true if the address is whitelisted, false otherwise
      *
@@ -160,8 +160,8 @@ contract RuleWhitelist is IRule, CodeList, AccessControlAbstract {
     }
 
     /**
-     * @dev Destroy the contract bytecode
-     * Warning: this action is irreversible and very critical
+     * @notice Destroy the contract bytecode
+     * @dev Warning: this action is irreversible and very critical
      * You can call this function only if the contract is not used by any ruleEngine.
      * Otherwise, the calls from the RuleEngine will revert.
      */
