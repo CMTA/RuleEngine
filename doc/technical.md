@@ -49,3 +49,9 @@ If the address does not exist in the whitelist, the transaction is reverted to s
 **removeAddresses**
 If the address does not exist in the whitelist, there is no change for this address. The transaction remains valid (no revert).
 
+## Gas Optimization
+Inside a loop, we use `uncheck` to increment to save gas because an array has a length of < 2\**256.
+```
+ unchecked { ++i; }
+```
+See [hackmd.io - gas-optimization-loops](https://hackmd.io/@totomanov/gas-optimization-loops) and [https://github.com/ethereum/solidity/issues/10698](https://github.com/ethereum/solidity/issues/10698)
