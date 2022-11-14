@@ -8,7 +8,7 @@ The default admin is the Deployer/issuer, it is set in the constructor
 Here a schema of the Access Control.
 
 ## Upgradable
-The Rule Engine and the whitelist are not upgradeable. The reason is the following.
+The Rule Engine and the whitelist are not upgradeable. The reason is the following:
 
 If we need a new on, we just issue a new one, and tell the token to use the new. This would happen if we need more than just whitelisting, for ex.
  
@@ -23,7 +23,7 @@ b) Is it possible to use the generic kill()?
 ##Whitelist
  
 ###Add/remove addresses
-To add /emove on address
+To add /remove on address
 * addAddress(address)
 * removeAddress(address)
 To add/remove several addresses

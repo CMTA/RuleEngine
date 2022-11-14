@@ -5,7 +5,6 @@
     "lint:sol:test": "npx solium -d test",
     "lint:sol:test:fix": "npx solium -d test --fix",
     "lint:sol:prettier": "npx prettier --write 'src/**/*.sol' 'test/**/*.sol'",
-    "coverage": "npx solidity-coverage",
     "uml": "npx sol2uml class src"
   },
   "devDependencies": {
