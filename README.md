@@ -1,9 +1,10 @@
 # RuleEngine
 
-This repository includes the RuleEngine contract for the
-[CMTAT](https://github.com/CMTA/CMTAT) token.
+This repository includes the RuleEngine contract for the [CMTAT](https://github.com/CMTA/CMTAT) token. 
+- The CMTAT version used is the version [2.0](https://github.com/CMTA/CMTAT/releases/tag/2.0)
+- The OpenZeppelin version used is the version [4.7.3](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v4.7.3)
 
-The CMTAT contracts are included as a [submodule](CMTAT/) of the present repository.
+The CMTAT contracts and the OpenZeppelin library are included as a submodule of the present repository.
 
 ## Usage
 
