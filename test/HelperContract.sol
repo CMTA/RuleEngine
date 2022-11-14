@@ -5,6 +5,9 @@ import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
 import "src/RuleWhiteList.sol";
 
+/**
+@title Constants used by the tests
+*/
 abstract contract HelperContract {
     address constant ZERO_ADDRESS = address(0);
     address constant DEFAULT_ADMIN_ADDRESS = address(1);

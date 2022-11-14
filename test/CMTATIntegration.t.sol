@@ -7,6 +7,9 @@ import "CMTAT/modules/PauseModule.sol";
 import "./HelperContract.sol";
 import "src/RuleEngine.sol";
 
+/**
+@title Integration test with the CMTAT
+*/
 contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
