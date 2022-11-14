@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "lint:sol": "npx solium -d src",
+    "lint:sol:fix": "npx solium -d src --fix",
+    "lint:sol:test": "npx solium -d test",
+    "lint:sol:test:fix": "npx solium -d test --fix",
+    "lint:sol:prettier": "npx prettier --write 'src/**/*.sol' 'test/**/*.sol'",
+    "uml": "npx sol2uml class src"
+  },
+  "devDependencies": {
+    "ethlint": "^1.2.5",
+    "prettier-plugin-solidity": "^1.0.0-rc.1",
+    "sol2uml": "^2.2.6"
+  }
+}

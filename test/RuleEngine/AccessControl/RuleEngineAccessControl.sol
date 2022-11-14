@@ -1,12 +1,14 @@
-//SPDX-License-Identifier: MPL-2.0
-pragma solidity ^0.8.17;
+// SPDX-License-Identifier: MPL-2.0
+pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
 import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
-
+/**
+@title Tests on the Access Control
+*/
 contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
@@ -23,11 +25,9 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
         resUint256 = ruleEngineMock.ruleLength();
         // Assert
         assertEq(resUint256, 1);
-
-       
     }
 
-    function testCannnotAttackerSetRules() public { 
+    function testCannnotAttackerSetRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
@@ -48,16 +48,17 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
             )
         );
         vm.expectRevert(bytes(message));
-        (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
-        
+        (bool success, ) = address(ruleEngineMock).call(
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
+
         // Assert
         assertEq(success, true);
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
     }
 
-    function testCannnotAttackerClearRules() public{
+    function testCannnotAttackerClearRules() public {
         // Act
         vm.prank(ATTACKER);
         string memory message = string(
@@ -72,11 +73,11 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
         ruleEngineMock.clearRules();
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
     }
 
-    function testCannotAttackerAddRule() public{
+    function testCannotAttackerAddRule() public {
         // Act
         vm.prank(ATTACKER);
         string memory message = string(
@@ -91,11 +92,11 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
         ruleEngineMock.addRule(ruleWhitelist);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
     }
 
-    function testCannotAttackerRemoveRule() public{
+    function testCannotAttackerRemoveRule() public {
         // Act
         vm.prank(ATTACKER);
         string memory message = string(
@@ -110,7 +111,26 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
         ruleEngineMock.removeRule(ruleWhitelist);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength(); 
+        resUint256 = ruleEngineMock.ruleLength();
+        assertEq(resUint256, 1);
+    }
+
+    function testCannotAttackerKillTheContract() public {
+        // Act
+        vm.prank(ATTACKER);
+        string memory message = string(
+            abi.encodePacked(
+                "AccessControl: account ",
+                vm.toString(ATTACKER),
+                " is missing role ",
+                DEFAULT_ADMIN_ROLE_HASH
+            )
+        );
+        vm.expectRevert(bytes(message));
+        ruleEngineMock.kill();
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
     }
 }

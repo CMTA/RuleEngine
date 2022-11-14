@@ -2,55 +2,50 @@
 
 ## Access Control
 whitelist 
-The default admin is the Deployer/issuer, it is set 
-RuleENgine
-The default admin is the Deployer/issuer, it is set in the constructor
+The default admin is the Deployer/issuer. It is set when the contract is deployed in the constructor.
+RuleEngine
+The default admin is the Deployer/issuer. It is set when the contract is deployed in the constructor.
 Here a schema of the Access Control.
+**RuleEngine**
+![alt text](./Access-Control/access-control-RuleEngine.png)
+**RuleWhitelist**
+![alt text](./Access-Control/access-control-RuleWhitelist.png)
 
 ## Upgradable
-The Rule Engine and the whitelist are not upgradeable. The reason is the following.
-
+The Rule Engine and the whitelist are not upgradeable. The reason is the following:
 If we need a new on, we just issue a new one, and tell the token to use the new. This would happen if we need more than just whitelisting, for ex.
  
 ## Urgency mechanism
-    a) Should it be possible to hold in pause the contract (pause / unpause) ?
-    b) Should it be possible to destroy the contract bytecode (self destruct) ?
-
-a) Let's maybe have a function clearRules() to remove all the whitelisted addresses.
-
-b) Is it possible to use the generic kill()?
+* Pause
+There are no functionalities to put in pause the contracts.
+* Kill
+The whitelist and the RuleEngine contracts have a function kill to destroy the bytecode of the contract.
 
 ##Whitelist
  
-###Add/remove addresses
-To add /emove on address
+### Add/remove addresses
+To add /remove an address
 * addAddress(address)
 * removeAddress(address)
-To add/remove several addresses
+To add /remove several addresses
 * addAddresses(addresses[])
 * removeAddresses(addresses[])
-### Null address
-The possibility to add the null address (0x0) to the whitelist is not really a security problem because OpenZeppelin doesn't autorize the transfer of tokens to the zero address.
 
-**addAddress**
-If the aprameter is the null address, the transaction is reverted.
-**addAddresses**
-If one address is the null adress, the transaction is reveerted
-With the array list, the gas cost will improve because we have to make a check for each iteration
-**removeAddress**
-No check because it is not a problem if we remove the null address from the whitelist.
-**removeAddresses**
-No check because it is not a problem if we remove the null address from the whitelist.
+### Null address
+It is possible to add the null address (0x0) to the whitelist. It is a requirement from the CMTAT to be able to mint tokens.
+
+It is not a security problem because OpenZeppelin doesn't autorize the transfer of tokens to the zero address.
 
 ### Duplicate address
 
 **addAddress**
 If the address already exists, the transaction is reverted to save gas.
 **addAddresses**
-We do not perform check on duplicate, because it will cost more gas to check for each address. 
-###NonExistentAddress
+If the address already exists, there is no change for this address. The transaction remains valid (no revert).
+
+### NonExistent Address
 **removeAddress**
-If the address does not exist, the transaction is reverted to save gas.
+If the address does not exist in the whitelist, the transaction is reverted to save gas.
 **removeAddresses**
-We do not if the address is in the whitelist or not, because it will cost more gas to check for each address. 
+If the address does not exist in the whitelist, there is no change for this address. The transaction remains valid (no revert).
 

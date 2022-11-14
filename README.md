@@ -1,9 +1,10 @@
 # RuleEngine
 
-This repository includes the RuleEngine contract for the
-[CMTAT](https://github.com/CMTA/CMTAT) token.
+This repository includes the RuleEngine contract for the [CMTAT](https://github.com/CMTA/CMTAT) token. 
+- The CMTAT version used is the version [2.0](https://github.com/CMTA/CMTAT/releases/tag/2.0)
+- The OpenZeppelin version used is the version [4.7.3](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v4.7.3)
 
-The CMTAT contracts are included as a [submodule](CMTAT/) of the present repository.
+The CMTAT contracts and the OpenZeppelin library are included as a submodule of the present repository.
 
 ## Usage
 
@@ -102,18 +103,26 @@ See also the command's [documentation](https://book.getfoundry.sh/reference/forg
 ## Code style guidelines
 We use the following tools to ensure consistent coding style:
 
-
-[Prettier](https://github.com/prettier-solidity/prettier-plugin-solidity):
-
+[Prettier](https://github.com/prettier-solidity/prettier-plugin-solidity)
 ```
-npx prettier --write 'test/**/*.sol'
+npm run-script lint:sol:prettier 
 ```
 
-[Ethlint/ Solium](https://github.com/duaraghav8/Ethlint)
+[Ethlint / Solium](https://github.com/duaraghav8/Ethlint)
 
 ```
-npx solium -d test
+npm run-script lint:sol 
+npm run-script lint:sol:fix 
+npm run-script lint:sol:test 
+npm run-script lint:sol:test:fix
+```  
+The related components can be installed with `npm install` (see [package.json](./package.json)). 
+
+## UML
+We use [sol2uml](https://github.com/naddison36/sol2uml) to generate UML for smart contracts.
+```
+npm run-script uml
 ```  
 
-The related components can be installed with `npm install` (see [package.json](./package.json)). 
+The related component can be installed with `npm install` (see [package.json](./package.json)). 
 

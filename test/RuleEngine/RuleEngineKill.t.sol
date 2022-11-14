@@ -1,12 +1,14 @@
-//SPDX-License-Identifier: MPL-2.0
-pragma solidity ^0.8.17;
+// SPDX-License-Identifier: MPL-2.0
+pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
-
+/**
+@title Tests on the kill function
+*/
 contract RuleEngineKillTest is Test, HelperContract, RuleWhitelist {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
@@ -16,7 +18,7 @@ contract RuleEngineKillTest is Test, HelperContract, RuleWhitelist {
     uint8 CODE_NONEXISTENT = 255;
     uint256 BALANCE_ETHER = 20;
 
-    function setUp() public {  
+    function setUp() public {
         // Arrange - create contracts
         ruleWhitelist = new RuleWhitelist();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -31,8 +33,8 @@ contract RuleEngineKillTest is Test, HelperContract, RuleWhitelist {
         address ruleEngineLocal = address(ruleEngineMock);
         uint256 size;
         assembly {
-             size := extcodesize(ruleEngineLocal)
-             sizeIsDifferentOfZero := eq(size, 0) 
+            size := extcodesize(ruleEngineLocal)
+            sizeIsDifferentOfZero := eq(size, 0)
         }
         assertFalse(sizeIsDifferentOfZero);
         // Act
@@ -42,7 +44,7 @@ contract RuleEngineKillTest is Test, HelperContract, RuleWhitelist {
         ruleEngineMock.kill();
     }
 
-    function testCanKill() public{
+    function testCanKill() public {
         address ruleEngineLocal = address(ruleEngineMock);
         uint256 size;
         // Assert
@@ -59,7 +61,7 @@ contract RuleEngineKillTest is Test, HelperContract, RuleWhitelist {
         // ruleEngineMock.rules();
     }
 
-    function testCanKillSendEtherToTheRightAddress() public{
+    function testCanKillSendEtherToTheRightAddress() public {
         assertEq(address(ruleEngineMock).balance, 0);
         assertEq(address(RULE_ENGINE_OPERATOR_ADDRESS).balance, BALANCE_ETHER);
     }

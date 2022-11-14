@@ -1,12 +1,14 @@
-//SPDX-License-Identifier: MPL-2.0
-pragma solidity ^0.8.17;
+// SPDX-License-Identifier: MPL-2.0
+pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
-
+/**
+@title tests concerning the restrictions and validation for the transfers
+*/
 contract RuleEngineRestrictionTest is Test, HelperContract, RuleWhitelist {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
@@ -31,89 +33,106 @@ contract RuleEngineRestrictionTest is Test, HelperContract, RuleWhitelist {
         IRule[] memory ruleWhitelistTab = new IRule[](1);
         ruleWhitelistTab[0] = ruleWhitelist1;
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-         (bool success, )  = address(ruleEngineMock).call(
-        abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab));
+        (bool success, ) = address(ruleEngineMock).call(
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
 
         // Arrange - Assert
         assertEq(success, true);
     }
 
-
-    function testCanDetectTransferRestrictionOK() public { 
+    function testCanDetectTransferRestrictionOK() public {
         // Arrange
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS2);
-        
+
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
-        
-        // Assert 
+        resUint8 = ruleEngineMock.detectTransferRestriction(
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+
+        // Assert
         assertEq(resUint8, 0);
     }
 
-    function testCanDetectTransferRestrictionWithFrom() public { 
+    function testCanDetectTransferRestrictionWithFrom() public {
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
-        
-        // Assert 
+        resUint8 = ruleEngineMock.detectTransferRestriction(
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+
+        // Assert
         assertEq(resUint8, CODE_ADDRESS_FROM_NOT_WHITELISTED);
     }
 
-    function testCanDetectTransferRestrictionWithTo() public { 
+    function testCanDetectTransferRestrictionWithTo() public {
         // Arrange
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
-        
+
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
-        
-        // Assert 
+        resUint8 = ruleEngineMock.detectTransferRestriction(
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+
+        // Assert
         assertEq(resUint8, CODE_ADDRESS_TO_NOT_WHITELISTED);
-    } 
+    }
 
-
-     function testMessageForTransferRestrictionWithValidRC() public{
+    function testMessageForTransferRestrictionWithValidRC() public {
         // Act
-        resString = ruleEngineMock.messageForTransferRestriction(CODE_ADDRESS_FROM_NOT_WHITELISTED);
-        
-        // Assert 
+        resString = ruleEngineMock.messageForTransferRestriction(
+            CODE_ADDRESS_FROM_NOT_WHITELISTED
+        );
+
+        // Assert
         assertEq(resString, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
     }
 
-    function testMessageForTransferRestrictionNoRule() public{
+    function testMessageForTransferRestrictionNoRule() public {
+        // Arrange
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.clearRules();
+
         // Act
         resString = ruleEngineMock.messageForTransferRestriction(50);
-        
-        // Assert 
+
+        // Assert
         assertEq(resString, "Unknown restriction code");
     }
 
-
-    function testMessageForTransferRestrictionWUnknownRestrictionCode() public{
+    function testMessageForTransferRestrictionWithUnknownRestrictionCode()
+        public
+    {
         // Act
         resString = ruleEngineMock.messageForTransferRestriction(50);
-        
-        // Assert 
+
+        // Assert
         assertEq(resString, "Unknown restriction code");
     }
 
-    function testValidateTransferOK() public{
-         // Arrange
+    function testValidateTransferOK() public {
+        // Arrange
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS2);
-        
+
         // Act
         resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
-        
-        // Assert 
+
+        // Assert
         assertEq(resBool, true);
     }
 
     function testValidateTransferRestricted() public {
         // Act
         resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
-        
-        // Assert 
+
+        // Assert
         assertFalse(resBool);
     }
-
 }
