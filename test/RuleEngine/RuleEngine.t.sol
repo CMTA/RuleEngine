@@ -133,10 +133,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 2);
     }
 
-    function testCanAddRuleZeroAddress() public{
-        // Arrange
-        vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        
+    function testCannotAddRuleZeroAddress() public{
         // Act
         vm.expectRevert("The rule can't be a zero address");
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -145,6 +142,23 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         // Assert
         resUint256 = ruleEngineMock.ruleLength(); 
         assertEq(resUint256, 1);
+    }
+
+    function testCanRemoveWithEmptyRules() public{
+        // Arrange
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.removeRule(ruleWhitelist);
+        // Arrange - Assert
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 0);
+        
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.removeRule(ruleWhitelist);
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 0);
     }
 
     function testCanRemoveNonExistantRule() public{
@@ -171,6 +185,22 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist1);
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength(); 
+        assertEq(resUint256, 1);
+    }
+
+     function testCanRemoveFirstRule() public{
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist1);
+        
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.removeRule(ruleWhitelist);
 
         // Assert
         resUint256 = ruleEngineMock.ruleLength(); 
