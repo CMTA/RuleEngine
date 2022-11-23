@@ -62,6 +62,26 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         CMTAT_CONTRACT.transfer(ADDRESS2, 21);
     }
 
+    function testCannotTransferWithoutFromAddressWhitelisted() public {
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS2);
+
+        vm.prank(ADDRESS1);
+        vm.expectRevert(bytes("CMTAT: transfer rejected by validation module"));
+        // Act
+        CMTAT_CONTRACT.transfer(ADDRESS2, 21);
+    }
+
+    function testCannotTransferWithoutToAddressWhitelisted() public {
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
+
+        vm.prank(ADDRESS1);
+        vm.expectRevert(bytes("CMTAT: transfer rejected by validation module"));
+        // Act
+        CMTAT_CONTRACT.transfer(ADDRESS2, 21);
+    }
+
     // allows ADDRESS1 to transfer tokens to ADDRESS2
     function testAllowTransfer() public {
         // Arrange
