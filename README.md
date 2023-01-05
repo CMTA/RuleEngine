@@ -18,7 +18,7 @@ To install the Foundry suite, please refer to the official instructions in the [
 
 You must first initialize the submodules, with
 
-```
+```bash
 forge install
 ```
 
@@ -26,7 +26,7 @@ See also the command's [documentation](https://book.getfoundry.sh/reference/forg
 
 Later you can update all the submodules with:
 
-```
+```bash
 forge update
 ```
 
@@ -35,23 +35,23 @@ See also the command's [documentation](https://book.getfoundry.sh/reference/forg
 
 ## Compilation
 The official documentation is available here : [website](https://book.getfoundry.sh/reference/forge/build-commands) 
-```
+```bash
  forge build --contracts src/RuleEngine.sol
 ```
-```
+```bash
  forge build --contracts src/RuleWhiteList.sol
 ```
 
 ## Testing
 You can run the tests with
 
-```
+```bash
 forge test
 ```
 
 To run a specific test, use
 
-```
+```bash
 forge test --match-contract <contract name> --match-test <function name>
 ```
 
@@ -59,12 +59,12 @@ See also the test framework's [official documentation](https://book.getfoundry.s
 
 ### Coverage
 * Perform a code coverage
-```
+```bash
 forge coverage --report lcov
 ```
 
 * Generate LCOV report
-```
+```bash
 forge coverage --report lcov
 ```
 
@@ -77,12 +77,12 @@ To run the script for deployment, you need to create a .env file. The value for 
 Warning : put your private key in a .env file is not the best secure way.
 
 * File .env
-```
+```bash
 PRIVATE_KEY=<YOUR_PRIVATE_KEY>
 CMTAT_ADDRESS=<CMTAT ADDDRESS
 ```
 * Command
-```
+```bash
 forge script script/CMTATWithRuleEngine.s.sol:MyScript --rpc-url=<YOUR_RPC_URL>  --broadcast --verify -vvv
 ```
 Value of YOUR_RPC_URL with a local instance of anvil : http://127.0.0.1:8545
@@ -92,7 +92,7 @@ With Foundry, you [can create a local testnet](https://book.getfoundry.sh/refere
 
 On Linux, using the default RPC URL, and Anvil's test private key, run:  
 
-```  
+```  bash
 export RPC_URL=http://127.0.0.1:8545`  
 export PRIVATE_KEY=<Local Private Key>
 forge create CMTAT --rpc-url=$RPC_URL --private-key=$PRIVATE_KEY
@@ -104,26 +104,26 @@ See also the command's [documentation](https://book.getfoundry.sh/reference/forg
 We use the following tools to ensure consistent coding style:
 
 [Prettier](https://github.com/prettier-solidity/prettier-plugin-solidity)
-```
+```bash
 npm run-script lint:sol:prettier 
 ```
 
 [Ethlint / Solium](https://github.com/duaraghav8/Ethlint)
 
-```
+```bash
 npm run-script lint:sol 
 npm run-script lint:sol:fix 
 npm run-script lint:sol:test 
 npm run-script lint:sol:test:fix
-```  
+```
 The related components can be installed with `npm install` (see [package.json](./package.json)). 
 
 ## UML
 We use [sol2uml](https://github.com/naddison36/sol2uml) to generate UML for smart contracts.
-```
+```bash
 npm run-script uml
 npm run-script uml:test
-```  
+```
 
 The related component can be installed with `npm install` (see [package.json](./package.json)). 
 
