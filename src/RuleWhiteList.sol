@@ -39,7 +39,9 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
                 whitelist[listWhitelistedAddress[i]] = true;
                 ++numAddressesWhitelisted;
             }
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -50,12 +52,14 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
     function removeAddressesFromTheWhitelist(
         address[] calldata listWhitelistedAddress
     ) public onlyRole(WHITELIST_ROLE) {
-        for (uint256 i = 0; i < listWhitelistedAddress.length;) {
+        for (uint256 i = 0; i < listWhitelistedAddress.length; ) {
             if (whitelist[listWhitelistedAddress[i]]) {
                 whitelist[listWhitelistedAddress[i]] = false;
                 --numAddressesWhitelisted;
             }
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
     }
 

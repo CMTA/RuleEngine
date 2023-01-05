@@ -19,15 +19,16 @@ contract MyScript is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // CMTAT
-        CMTAT CMTAT_CONTRACT = new CMTAT(trustedForwarder);
-        console.log("CMTAT CMTAT_CONTRACT : ", address(CMTAT_CONTRACT));
-        CMTAT_CONTRACT.initialize(
+        CMTAT CMTAT_CONTRACT = new CMTAT(
+            trustedForwarder,
+            false,
             OWNER,
             "CMTA Token",
             "CMTAT",
             "CMTAT_ISIN",
             "https://cmta.ch"
         );
+        console.log("CMTAT CMTAT_CONTRACT : ", address(CMTAT_CONTRACT));
         // whitelist
         RuleWhitelist ruleWhitelist = new RuleWhitelist();
         console.log("whitelist: ", address(ruleWhitelist));
