@@ -3,7 +3,6 @@ pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
-import "CMTAT/modules/PauseModule.sol";
 import "./HelperContract.sol";
 import "src/RuleEngine.sol";
 
@@ -29,14 +28,11 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         ruleWhitelist = new RuleWhitelist();
         // global arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT = new CMTAT(ZERO_ADDRESS);
-        CMTAT_CONTRACT.initialize(
-            DEFAULT_ADMIN_ADDRESS,
+        CMTAT_CONTRACT = new CMTAT(ZERO_ADDRESS, false, DEFAULT_ADMIN_ADDRESS,
             "CMTA Token",
             "CMTAT",
             "CMTAT_ISIN",
-            "https://cmta.ch"
-        );
+            "https://cmta.ch");
 
         // specific arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
