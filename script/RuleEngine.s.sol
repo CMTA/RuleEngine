@@ -6,7 +6,7 @@ pragma solidity ^0.8.17;
 import "forge-std/Script.sol";
 import "CMTAT/CMTAT.sol";
 import "src/RuleEngine.sol";
-
+import "CMTAT/modules/wrapper/optional/ValidationModule.sol";
 /**
 @title Deploy a RuleWhitelist and a RuleEngine. The CMTAT is considred already deployed
 */
@@ -25,7 +25,7 @@ contract MyScript is Script {
         RULE_ENGINE.addRule(ruleWhitelist);
         // Configure the new ruleEngine for CMTAT
         (bool success, ) = address(CMTAT_Address).call(
-            abi.encodeCall(CMTAT.setRuleEngine, RULE_ENGINE)
+            abi.encodeCall(ValidationModule.setRuleEngine, RULE_ENGINE)
         );
         require(success);
         vm.stopBroadcast();
