@@ -7,6 +7,7 @@ import "forge-std/Script.sol";
 import "CMTAT/CMTAT.sol";
 import "src/RuleEngine.sol";
 import "CMTAT/modules/wrapper/optional/ValidationModule.sol";
+
 /**
 @title Deploy a RuleWhitelist and a RuleEngine. The CMTAT is considred already deployed
 */

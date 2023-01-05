@@ -28,11 +28,15 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         ruleWhitelist = new RuleWhitelist();
         // global arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT = new CMTAT(ZERO_ADDRESS, false, DEFAULT_ADMIN_ADDRESS,
+        CMTAT_CONTRACT = new CMTAT(
+            ZERO_ADDRESS,
+            false,
+            DEFAULT_ADMIN_ADDRESS,
             "CMTA Token",
             "CMTAT",
             "CMTAT_ISIN",
-            "https://cmta.ch");
+            "https://cmta.ch"
+        );
 
         // specific arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);

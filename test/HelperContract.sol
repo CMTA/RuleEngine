@@ -25,8 +25,7 @@ abstract contract HelperContract {
         "0x0000000000000000000000000000000000000000000000000000000000000000";
     RuleWhitelist ruleWhitelist;
     CMTAT CMTAT_CONTRACT;
-    bytes32 public constant RULE_ENGINE_ROLE =
-        keccak256("RULE_ENGINE_ROLE");
-    
+    bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
+
     constructor() {}
 }

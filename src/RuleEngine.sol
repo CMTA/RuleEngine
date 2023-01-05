@@ -11,11 +11,10 @@ import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 @title Implementation of a ruleEngine defined by the CMTAT
 */
 contract RuleEngine is IRuleEngine, AccessControl {
-    bytes32 public constant RULE_ENGINE_ROLE =
-        keccak256("RULE_ENGINE_ROLE");
+    bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
     IRule[] internal _rules;
 
-   constructor() {
+    constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(RULE_ENGINE_ROLE, msg.sender);
     }
@@ -28,12 +27,14 @@ contract RuleEngine is IRuleEngine, AccessControl {
         IRule[] calldata rules_
     ) external override onlyRole(RULE_ENGINE_ROLE) {
         require(rules_.length != 0, "The array is empty");
-        for (uint256 i = 0; i < rules_.length;) {
+        for (uint256 i = 0; i < rules_.length; ) {
             require(
                 address(rules_[i]) != address(0x0),
                 "One of the rules is a zero address"
             );
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
         _rules = rules_;
     }
@@ -67,7 +68,7 @@ contract RuleEngine is IRuleEngine, AccessControl {
      *
      */
     function removeRule(IRule rule_) public onlyRole(RULE_ENGINE_ROLE) {
-        for (uint256 i = 0; i < _rules.length;) {
+        for (uint256 i = 0; i < _rules.length; ) {
             if (_rules[i] == rule_) {
                 if (i != _rules.length - 1) {
                     _rules[i] = _rules[_rules.length - 1];
@@ -75,7 +76,9 @@ contract RuleEngine is IRuleEngine, AccessControl {
                 _rules.pop();
                 break;
             }
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -96,7 +99,7 @@ contract RuleEngine is IRuleEngine, AccessControl {
         address _to,
         uint256 _amount
     ) public view override returns (uint8) {
-        for (uint256 i = 0; i < _rules.length;) {
+        for (uint256 i = 0; i < _rules.length; ) {
             uint8 restriction = _rules[i].detectTransferRestriction(
                 _from,
                 _to,
@@ -105,7 +108,9 @@ contract RuleEngine is IRuleEngine, AccessControl {
             if (restriction > 0) {
                 return restriction;
             }
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
         return 0;
     }
@@ -121,12 +126,14 @@ contract RuleEngine is IRuleEngine, AccessControl {
     function messageForTransferRestriction(
         uint8 _restrictionCode
     ) external view override returns (string memory) {
-        for (uint256 i = 0; i < _rules.length;) {
+        for (uint256 i = 0; i < _rules.length; ) {
             if (_rules[i].canReturnTransferRestrictionCode(_restrictionCode)) {
                 return
                     _rules[i].messageForTransferRestriction(_restrictionCode);
             }
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
         return "Unknown restriction code";
     }

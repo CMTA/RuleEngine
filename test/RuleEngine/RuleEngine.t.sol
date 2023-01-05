@@ -22,7 +22,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelist = new RuleWhitelist();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine();
-        
+
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
         // Arrange - Assert
