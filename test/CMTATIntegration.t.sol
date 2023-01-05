@@ -54,6 +54,7 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         CMTAT_CONTRACT.setRuleEngine(ruleEngineMock);
     }
 
+    /******* Transfer *******/
     function testCannotTransferWithoutAddressWhitelisted() public {
         // Arrange
         vm.prank(ADDRESS1);
@@ -62,8 +63,27 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         CMTAT_CONTRACT.transfer(ADDRESS2, 21);
     }
 
-    // allows ADDRESS1 to transfer tokens to ADDRESS2
-    function testAllowTransfer() public {
+    function testCannotTransferWithoutFromAddressWhitelisted() public {
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS2);
+
+        vm.prank(ADDRESS1);
+        vm.expectRevert(bytes("CMTAT: transfer rejected by validation module"));
+        // Act
+        CMTAT_CONTRACT.transfer(ADDRESS2, 21);
+    }
+
+    function testCannotTransferWithoutToAddressWhitelisted() public {
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
+        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
+
+        vm.prank(ADDRESS1);
+        vm.expectRevert(bytes("CMTAT: transfer rejected by validation module"));
+        // Act
+        CMTAT_CONTRACT.transfer(ADDRESS2, 21);
+    }
+
+    function testCanMakeATransfer() public {
         // Arrange
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
@@ -90,7 +110,8 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 33);
     }
 
-    function testCannotTranferIfFromIsNotWhitelisted() public {
+    /******* detectTransferRestriction & messageForTransferRestriction *******/
+    function testDetectAndMessageWithFromNotWhitelisted() public {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS2);
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
@@ -110,7 +131,7 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         assertEq(message1, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
     }
 
-    function testCannotTranferIfToIsNotWhitelisted() public {
+    function testDetectAndMessageWithToNotWhitelisted() public {
         // Arrange
         // We add the sender to the whitelist
         vm.prank(DEFAULT_ADMIN_ADDRESS);
@@ -134,7 +155,7 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         assertEq(message1, TEXT_ADDRESS_TO_NOT_WHITELISTED);
     }
 
-    function testCannotTranferIf_From_To_NOT_Whitelisted() public {
+    function testDetectAndMessageWithFromAndToNotWhitelisted() public {
         // Act
         uint8 res1 = CMTAT_CONTRACT.detectTransferRestriction(
             ADDRESS1,
@@ -153,7 +174,7 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
         assertEq(message1, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
     }
 
-    function testCanCheckTransferIsValid() public {
+    function testDetectAndMessageWithAValidTransfer() public {
         // Arrange
         // We add the sender and the recipient to the whitelist.
         address[] memory whitelist = new address[](2);
