@@ -17,7 +17,7 @@ contract MyScript is Script {
         address OWNER = vm.addr(deployerPrivateKey);
         address trustedForwarder = address(0x0);
         vm.startBroadcast(deployerPrivateKey);
-
+        uint256 flag = 5;
         // CMTAT
         CMTAT CMTAT_CONTRACT = new CMTAT(
             trustedForwarder,
@@ -26,7 +26,10 @@ contract MyScript is Script {
             "CMTA Token",
             "CMTAT",
             "CMTAT_ISIN",
-            "https://cmta.ch"
+            "https://cmta.ch",
+            IRuleEngine(address(0)), 
+            'CMTAT_info',
+            flag
         );
         console.log("CMTAT CMTAT_CONTRACT : ", address(CMTAT_CONTRACT));
         // whitelist

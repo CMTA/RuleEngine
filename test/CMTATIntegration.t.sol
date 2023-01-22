@@ -22,6 +22,8 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
     uint256 ADDRESS2_BALANCE_INIT = 32;
     uint256 ADDRESS3_BALANCE_INIT = 33;
 
+    uint256 FLAG = 5;
+
     // Arrange
     function setUp() public {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
@@ -35,7 +37,10 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
             "CMTA Token",
             "CMTAT",
             "CMTAT_ISIN",
-            "https://cmta.ch"
+            "https://cmta.ch",
+            IRuleEngine(address(0)), 
+            'CMTAT_info',
+            FLAG
         );
 
         // specific arrange
