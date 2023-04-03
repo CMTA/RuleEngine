@@ -134,12 +134,11 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
     ) public view override returns (uint8) {
         if (!whitelist[_from]) {
             return CODE_ADDRESS_FROM_NOT_WHITELISTED;
-        }
-        if (!whitelist[_to]) {
+        }else if (!whitelist[_to]) {
             return CODE_ADDRESS_TO_NOT_WHITELISTED;
+        }else{
+            return NO_ERROR;
         }
-
-        return NO_ERROR;
     }
 
     function canReturnTransferRestrictionCode(
