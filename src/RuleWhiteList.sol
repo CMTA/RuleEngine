@@ -144,13 +144,8 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
     function canReturnTransferRestrictionCode(
         uint8 _restrictionCode
     ) external pure override returns (bool) {
-        if (
-            _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED ||
-            _restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED
-        ) {
-            return true;
-        }
-        return false;
+        return _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED ||
+            _restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED;
     }
 
     function messageForTransferRestriction(
