@@ -295,4 +295,31 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
             assertEq(address(ruleWhitelistTab[i]), address(rules[i]));
         }
     }
+
+    function testCanGetRuleIndex() public {
+        // Arrange
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        RuleWhitelist ruleWhitelist2 = new RuleWhitelist();
+        IRule[] memory ruleWhitelistTab = new IRule[](2);
+        ruleWhitelistTab[0] = IRule(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRule(ruleWhitelist2);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
+        // Arrange - Assert
+        assertEq(resCallBool, true);
+
+        // Act
+        uint256 index1 = ruleEngineMock.getRuleIndex(ruleWhitelist1);
+        uint256 index2 = ruleEngineMock.getRuleIndex(ruleWhitelist2);
+        // Length of the list because ruleWhitelist is not in the list
+        uint256 index3 = ruleEngineMock.getRuleIndex(ruleWhitelist);
+
+        // Assert
+        assertEq(index1, 0);
+        assertEq(index2, 1);
+        assertEq(index3, ruleWhitelistTab.length);
+    }
+    
 }

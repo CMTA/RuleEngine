@@ -85,7 +85,7 @@ contract RuleEngine is IRuleEngine, AccessControl {
     @notice Get the index of a rule inside the list
     @return index if the rule is found, _rules.length otherwise
     */
-    function getRuleIndex(IRule rule_) public view returns (uint256 index) {
+    function getRuleIndex(IRule rule_) external view returns (uint256 index) {
         for (index = 0; index < _rules.length; ) {
             if (_rules[index] == rule_) {
                 return index;
