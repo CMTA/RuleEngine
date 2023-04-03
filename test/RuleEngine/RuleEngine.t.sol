@@ -152,31 +152,15 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 1);
     }
 
-    function testCanRemoveWithEmptyRules() public {
-        // Arrange
-        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRule(ruleWhitelist);
-        // Arrange - Assert
-        resUint256 = ruleEngineMock.ruleLength();
-        assertEq(resUint256, 0);
-
-        // Act
-        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRule(ruleWhitelist);
-
-        // Assert
-        resUint256 = ruleEngineMock.ruleLength();
-        assertEq(resUint256, 0);
-    }
-
-    function testCanRemoveNonExistantRule() public {
+    function testCannotRemoveNonExistantRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
 
         // Act
+        vm.expectRevert("The rule don't match");
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRule(ruleWhitelist1);
+        ruleEngineMock.removeRule(ruleWhitelist1, 0);
 
         // Assert
         resUint256 = ruleEngineMock.ruleLength();
@@ -192,7 +176,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRule(ruleWhitelist1);
+        ruleEngineMock.removeRule(ruleWhitelist1, 1);
 
         // Assert
         resUint256 = ruleEngineMock.ruleLength();
@@ -208,7 +192,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRule(ruleWhitelist);
+        ruleEngineMock.removeRule(ruleWhitelist, 0);
 
         // Assert
         resUint256 = ruleEngineMock.ruleLength();
@@ -228,7 +212,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRule(ruleWhitelist1);
+        ruleEngineMock.removeRule(ruleWhitelist1, 1);
 
         // Assert
         IRule[] memory _rules = ruleEngineMock.rules();

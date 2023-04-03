@@ -60,6 +60,8 @@ contract RuleEngine is IRuleEngine, AccessControl {
         _rules.push(rule_);
     }
 
+
+
     /**
      * @notice Remove a rule from the array of rules
      * @dev To reduce the array size, the last rule is moved to the location occupied
@@ -67,22 +69,31 @@ contract RuleEngine is IRuleEngine, AccessControl {
      *
      *
      */
-    function removeRule(IRule rule_) public onlyRole(RULE_ENGINE_ROLE) {
-        for (uint256 i = 0; i < _rules.length; ) {
-            if (_rules[i] == rule_) {
-                if (i != _rules.length - 1) {
-                    _rules[i] = _rules[_rules.length - 1];
-                }
-                _rules.pop();
-                break;
-            }
-            unchecked {
-                ++i;
-            }
+    function removeRule(IRule rule_, uint256 index) public onlyRole(RULE_ENGINE_ROLE) {
+        require(_rules[index] == rule_, "The rule don't match");
+        if (index != _rules.length - 1) {
+            _rules[index] = _rules[_rules.length - 1];
         }
+        _rules.pop();       
     }
 
     function ruleLength() external view override returns (uint256) {
+        return _rules.length;
+    }
+
+    /*
+    @notice Get the index of a rule inside the list
+    @return index if the rule is found, _rules.length otherwise
+    */
+    function getRuleIndex(IRule rule_) public view returns (uint256 index) {
+        for (index = 0; index < _rules.length; ) {
+            if (_rules[index] == rule_) {
+                return index;
+            }
+            unchecked {
+                ++index;
+            }
+        }
         return _rules.length;
     }
 

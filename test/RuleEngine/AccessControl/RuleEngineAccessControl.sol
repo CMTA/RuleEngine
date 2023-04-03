@@ -112,7 +112,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
             )
         );
         vm.expectRevert(bytes(message));
-        ruleEngineMock.removeRule(ruleWhitelist);
+        ruleEngineMock.removeRule(ruleWhitelist, 0);
 
         // Assert
         resUint256 = ruleEngineMock.ruleLength();
