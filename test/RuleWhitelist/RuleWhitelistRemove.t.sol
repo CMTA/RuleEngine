@@ -8,7 +8,7 @@ import "src/RuleEngine.sol";
 /**
 @title Tests the functions to remove addresses from the whitelist
 */
-contract RuleWhitelistRemoveTest is Test, HelperContract, RuleWhitelist {
+contract RuleWhitelistRemoveTest is Test, HelperContract {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
@@ -23,7 +23,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract, RuleWhitelist {
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist();
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS);
     }
 
     function testRemoveAddressFromTheWhitelist() public {

@@ -9,7 +9,7 @@ import "src/RuleWhiteList.sol";
 /**
 @title Tests on the kill function
 */
-contract RuleWhitelistKillTest is Test, HelperContract, RuleWhitelist {
+contract RuleWhitelistKillTest is Test, HelperContract {
     uint8 resUint8;
     uint256 resUint256;
     bool resBool;
@@ -20,7 +20,7 @@ contract RuleWhitelistKillTest is Test, HelperContract, RuleWhitelist {
     function setUp() public {
         // Arrange - create contracts
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleWhitelist = new RuleWhitelist();
+        ruleWhitelist = new RuleWhitelist(DEFAULT_ADMIN_ADDRESS);
 
         // Arrange - balance of the contract
         vm.deal(address(ruleWhitelist), BALANCE_ETHER);

@@ -14,9 +14,10 @@ contract RuleEngine is IRuleEngine, AccessControl {
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
     IRule[] internal _rules;
 
-    constructor() {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(RULE_ENGINE_ROLE, msg.sender);
+    constructor(address admin) {
+        require(admin != address(0), "Address 0 not allowed");
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(RULE_ENGINE_ROLE, admin);
     }
 
     /**

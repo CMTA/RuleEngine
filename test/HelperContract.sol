@@ -27,5 +27,19 @@ abstract contract HelperContract {
     CMTAT CMTAT_CONTRACT;
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
 
+    // RuleWhiteList message
+    string constant TEXT_CODE_NOT_FOUND = "Code not found";
+    string constant TEXT_ADDRESS_FROM_NOT_WHITELISTED =
+        "The sender is not in the whitelist";
+    string constant TEXT_ADDRESS_TO_NOT_WHITELISTED =
+        "The recipient is not in the whitelist";
+    // RuleWhiteList code list
+    uint8 constant CODE_ADDRESS_FROM_NOT_WHITELISTED = 20;
+    uint8 constant CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
+    uint8 constant NO_ERROR = 0;
+
+
+    // RuleWhiteList role
+    bytes32 public constant WHITELIST_ROLE = keccak256("WHITELIST_ROLE");
     constructor() {}
 }

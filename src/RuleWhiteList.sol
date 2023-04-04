@@ -22,9 +22,10 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
 
     mapping(address => bool) whitelist;
 
-    constructor() {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(WHITELIST_ROLE, msg.sender);
+    constructor(address admin) {
+        require(admin != address(0), "Address 0 not allowed");
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(WHITELIST_ROLE, admin);
     }
 
     /**

@@ -9,7 +9,7 @@ import "src/RuleEngine.sol";
 /**
 @title Tests on the kill function
 */
-contract RuleEngineKillTest is Test, HelperContract, RuleWhitelist {
+contract RuleEngineKillTest is Test, HelperContract {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
     uint256 resUint256;
@@ -20,9 +20,9 @@ contract RuleEngineKillTest is Test, HelperContract, RuleWhitelist {
 
     function setUp() public {
         // Arrange - create contracts
-        ruleWhitelist = new RuleWhitelist();
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine();
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
         // Arrange -  Assert

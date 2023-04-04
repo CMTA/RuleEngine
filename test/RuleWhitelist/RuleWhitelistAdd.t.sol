@@ -8,7 +8,7 @@ import "src/RuleEngine.sol";
 /**
 @title Tests the functions to add addresses to the whitelist
 */
-contract RuleWhitelistAddTest is Test, HelperContract, RuleWhitelist {
+contract RuleWhitelistAddTest is Test, HelperContract {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
@@ -22,7 +22,7 @@ contract RuleWhitelistAddTest is Test, HelperContract, RuleWhitelist {
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist();
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS);
     }
 
     function testAddAddressToTheWhitelist() public {

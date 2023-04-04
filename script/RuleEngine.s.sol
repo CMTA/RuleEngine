@@ -15,13 +15,14 @@ contract MyScript is Script {
     function run() external {
         // Get env variable
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address ADMIN = vm.addr(deployerPrivateKey);
         address CMTAT_Address = vm.envAddress("CMTAT_ADDRESS");
         vm.startBroadcast(deployerPrivateKey);
         //whitelist
-        RuleWhitelist ruleWhitelist = new RuleWhitelist();
+        RuleWhitelist ruleWhitelist = new RuleWhitelist(ADMIN );
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
-        RuleEngine RULE_ENGINE = new RuleEngine();
+        RuleEngine RULE_ENGINE = new RuleEngine(ADMIN );
         console.log("RuleEngine: ", address(RULE_ENGINE));
         RULE_ENGINE.addRule(ruleWhitelist);
         // Configure the new ruleEngine for CMTAT

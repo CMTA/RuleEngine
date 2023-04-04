@@ -9,7 +9,7 @@ import "src/RuleEngine.sol";
 /**
 @title Tests on the Access Control
 */
-contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
+contract RuleEngineAccessControlTest is Test, HelperContract{
     RuleEngine ruleEngineMock;
     uint8 resUint8;
     uint256 resUint256;
@@ -19,9 +19,9 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
 
     // Arrange
     function setUp() public {
-        ruleWhitelist = new RuleWhitelist();
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine();
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS);
         resUint256 = ruleEngineMock.ruleLength();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -34,9 +34,9 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
     function testCannnotAttackerSetRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist();
+        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS);
         IRule[] memory ruleWhitelistTab = new IRule[](2);
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
