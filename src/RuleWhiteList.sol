@@ -21,9 +21,9 @@ contract RuleWhitelist is IRule, AccessControl {
 
     // Code 
     // It is very important that each rule uses an unique code
-    uint8 constant CODE_ADDRESS_FROM_NOT_WHITELISTED = 20;
-    uint8 constant CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
-    uint8 constant NO_ERROR = 0;
+    uint8 constant public CODE_ADDRESS_FROM_NOT_WHITELISTED = 20;
+    uint8 constant public CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
+    uint8 constant public NO_ERROR = 0;
 
     mapping(address => bool) whitelist;
 
