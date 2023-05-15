@@ -16,6 +16,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
     bool resBool;
     string resString;
     uint8 CODE_NONEXISTENT = 255;
+    
 
     // Arrange
     function setUp() public {
@@ -41,6 +42,10 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit AddRule(ruleWhitelist1);
+        vm.expectEmit(true, false, false, false);
+        emit AddRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
@@ -157,6 +162,8 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit AddRule(ruleWhitelist1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist1);
 
@@ -243,6 +250,8 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleEngineMock.addRule(ruleWhitelist1);
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RemoveRule(ruleWhitelist1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist1);
 
@@ -259,6 +268,8 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleEngineMock.addRule(ruleWhitelist1);
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RemoveRule(ruleWhitelist);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist);
 
@@ -279,6 +290,8 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleEngineMock.addRule(ruleWhitelist2);
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RemoveRule(ruleWhitelist1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist1);
 

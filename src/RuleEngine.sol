@@ -14,7 +14,9 @@ contract RuleEngine is IRuleEngine, AccessControl {
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
     mapping(IRule => bool) ruleIsPresent;
     IRule[] internal _rules;
-
+    event AddRule(IRule indexed rule);
+    event RemoveRule(IRule indexed rule);
+    event ClearRules(IRule[] rulesRemoved);
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(RULE_ENGINE_ROLE, msg.sender);
@@ -35,6 +37,7 @@ contract RuleEngine is IRuleEngine, AccessControl {
             );
             require(!ruleIsPresent[rules_[i]], "The rule is already present");
             ruleIsPresent[rules_[i]] = true;
+            emit AddRule(rules_[i]);
             unchecked {
                 ++i;
             }
@@ -47,7 +50,9 @@ contract RuleEngine is IRuleEngine, AccessControl {
      *
      */
     function clearRules() public onlyRole(RULE_ENGINE_ROLE) {
+        emit ClearRules(_rules);
         _rules = new IRule[](0);
+
     }
 
     /**
@@ -63,6 +68,7 @@ contract RuleEngine is IRuleEngine, AccessControl {
         require(!ruleIsPresent[rule_], "The rule is already present");
         _rules.push(rule_);
         ruleIsPresent[rule_] = true;
+        emit AddRule(rule_);
     }
 
     /**
@@ -80,6 +86,7 @@ contract RuleEngine is IRuleEngine, AccessControl {
                 }
                 _rules.pop();
                 ruleIsPresent[rule_] = false;
+                emit RemoveRule(rule_);
                 break;
             }
             unchecked {
