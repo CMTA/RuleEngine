@@ -3,13 +3,12 @@
 pragma solidity 0.8.17;
 
 import "CMTAT/interfaces/IRule.sol";
-import "./CodeList.sol";
 import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 
 /**
 @title a whitelist manager
 */
-contract RuleWhitelist is IRule, CodeList, AccessControl {
+contract RuleWhitelist is IRule, AccessControl {
     bytes32 public constant WHITELIST_ROLE = keccak256("WHITELIST_ROLE");
     // Number of addresses in the whitelist at the moment
     uint256 private numAddressesWhitelisted;
@@ -19,6 +18,12 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
         "The sender is not in the whitelist";
     string constant TEXT_ADDRESS_TO_NOT_WHITELISTED =
         "The recipient is not in the whitelist";
+
+    // Code 
+    // It is very important that each rule uses an unique code
+    uint8 constant public CODE_ADDRESS_FROM_NOT_WHITELISTED = 20;
+    uint8 constant public CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
+    uint8 constant public NO_ERROR = 0;
 
     mapping(address => bool) whitelist;
 
