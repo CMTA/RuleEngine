@@ -78,10 +78,8 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
             !whitelist[_newWhitelistAddress],
             "Address is already in the whitelist"
         );
-        if (!whitelist[_newWhitelistAddress]) {
-            whitelist[_newWhitelistAddress] = true;
-            ++numAddressesWhitelisted;
-        }
+        whitelist[_newWhitelistAddress] = true;
+        ++numAddressesWhitelisted;
     }
 
     /**
@@ -96,10 +94,8 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
             whitelist[_removeWhitelistAddress],
             "Address is not in the whitelist"
         );
-        if (whitelist[_removeWhitelistAddress]) {
-            whitelist[_removeWhitelistAddress] = false;
-            --numAddressesWhitelisted;
-        }
+        whitelist[_removeWhitelistAddress] = false;
+        --numAddressesWhitelisted;
     }
 
     /**
