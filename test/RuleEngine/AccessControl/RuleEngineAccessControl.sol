@@ -119,22 +119,4 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 1);
     }
 
-    function testCannotAttackerKillTheContract() public {
-        // Act
-        vm.prank(ATTACKER);
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ATTACKER),
-                " is missing role ",
-                DEFAULT_ADMIN_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
-        ruleEngineMock.kill();
-
-        // Assert
-        resUint256 = ruleEngineMock.ruleLength();
-        assertEq(resUint256, 1);
-    }
 }

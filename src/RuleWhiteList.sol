@@ -166,13 +166,4 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
         }
     }
 
-    /**
-     * @notice Destroy the contract bytecode
-     * @dev Warning: this action is irreversible and very critical
-     * You can call this function only if the contract is not used by any ruleEngine.
-     * Otherwise, the calls from the RuleEngine will revert.
-     */
-    function kill() public onlyRole(DEFAULT_ADMIN_ROLE) {
-        selfdestruct(payable(msg.sender));
-    }
 }

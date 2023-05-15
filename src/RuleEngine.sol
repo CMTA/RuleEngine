@@ -137,13 +137,4 @@ contract RuleEngine is IRuleEngine, AccessControl {
         }
         return "Unknown restriction code";
     }
-
-    /**
-     * @notice Destroy the contract bytecode
-     * @dev Warning: this action is irreversible and very critical
-     *
-     */
-    function kill() public onlyRole(DEFAULT_ADMIN_ROLE) {
-        selfdestruct(payable(msg.sender));
-    }
 }
