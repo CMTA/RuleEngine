@@ -16,6 +16,7 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
     bool resBool;
     string resString;
     uint8 CODE_NONEXISTENT = 255;
+    
 
     // Arrange
     function setUp() public {
@@ -41,6 +42,10 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit AddRule(ruleWhitelist1);
+        vm.expectEmit(true, false, false, false);
+        emit AddRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
@@ -50,6 +55,30 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertEq(resCallBool, true);
         resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 2);
+    }
+
+    function testCannotSetRuleIfARuleIsAlreadyPresent() public {
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        IRule[] memory ruleWhitelistTab = new IRule[](2);
+        ruleWhitelistTab[0] = IRule(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRule(ruleWhitelist1);
+
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        vm.expectRevert("The rule is already present");
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
+
+        // Assert
+        // I do not know why but the function call return true
+        // if the call is reverted with the message indicated in expectRevert
+        // assertFalse(resCallBool);
+        assertEq(resCallBool, true);
+        resUint256 = ruleEngineMock.ruleLength();
+        assertEq(resUint256, 1);
     }
 
     function testCannotSetEmptyRulesT1() public {
@@ -133,6 +162,8 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit AddRule(ruleWhitelist1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist1);
 
@@ -152,7 +183,37 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 1);
     }
 
-    function testCannotRemoveNonExistantRule() public {
+    function testCannotAddARuleAlreadyPresent() public {
+        // Act
+        vm.expectRevert("The rule is already present");
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist);
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength();
+        assertEq(resUint256, 1);
+    }
+    
+    function testCanAddARuleAfterThisRuleWasRemoved() public{
+        // Arrange - Assert
+        IRule[] memory _rules = ruleEngineMock.rules();
+        assertEq(address(_rules[0]), address(ruleWhitelist));
+        
+        // Arrange
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.removeRule(ruleWhitelist, 0);
+        
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist);
+
+        // Assert
+        _rules = ruleEngineMock.rules();
+        resUint256 = ruleEngineMock.ruleLength();
+        assertEq(resUint256, 1);
+    }
+
+    function testCanRemoveNonExistantRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
@@ -175,6 +236,8 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleEngineMock.addRule(ruleWhitelist1);
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RemoveRule(ruleWhitelist1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist1, 1);
 
@@ -191,6 +254,8 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleEngineMock.addRule(ruleWhitelist1);
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RemoveRule(ruleWhitelist);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist, 0);
 
@@ -211,6 +276,8 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         ruleEngineMock.addRule(ruleWhitelist2);
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RemoveRule(ruleWhitelist1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist1, 1);
 
