@@ -57,6 +57,30 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 2);
     }
 
+    function testCannotSetRuleIfARuleIsAlreadyPresent() public {
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist();
+        IRule[] memory ruleWhitelistTab = new IRule[](2);
+        ruleWhitelistTab[0] = IRule(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRule(ruleWhitelist1);
+
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        vm.expectRevert("The rule is already present");
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+        );
+
+        // Assert
+        // I do not know why but the function call return true
+        // if the call is reverted with the message indicated in expectRevert
+        // assertFalse(resCallBool);
+        assertEq(resCallBool, true);
+        resUint256 = ruleEngineMock.ruleLength();
+        assertEq(resUint256, 1);
+    }
+
     function testCannotSetEmptyRulesT1() public {
         // Arrange
         IRule[] memory ruleWhitelistTab = new IRule[](0);
@@ -159,6 +183,17 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 1);
     }
 
+    function testCannotAddARuleAlreadyPresent() public {
+        // Act
+        vm.expectRevert("The rule is already present");
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist);
+
+        // Assert
+        resUint256 = ruleEngineMock.ruleLength();
+        assertEq(resUint256, 1);
+    }
+
     function testCanRemoveWithEmptyRules() public {
         // Arrange
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -174,6 +209,23 @@ contract RuleEngineTest is Test, HelperContract, RuleWhitelist {
         // Assert
         resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 0);
+    }
+
+    function testCanAddARuleAfterThisRuleWasRemoved() public{
+        // Arrange - Assert
+        IRule[] memory _rules = ruleEngineMock.rules();
+        assertEq(address(_rules[0]), address(ruleWhitelist));
+        
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.removeRule(ruleWhitelist);
+        
+        // Assert
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist);
+        _rules = ruleEngineMock.rules();
+        resUint256 = ruleEngineMock.ruleLength();
+        assertEq(resUint256, 1);
     }
 
     function testCanRemoveNonExistantRule() public {

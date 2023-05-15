@@ -12,6 +12,7 @@ import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 */
 contract RuleEngine is IRuleEngine, AccessControl {
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
+    mapping(IRule => bool) ruleIsPresent;
     IRule[] internal _rules;
     event AddRule(IRule indexed rule);
     event RemoveRule(IRule indexed rule);
@@ -34,6 +35,8 @@ contract RuleEngine is IRuleEngine, AccessControl {
                 address(rules_[i]) != address(0x0),
                 "One of the rules is a zero address"
             );
+            require(!ruleIsPresent[rules_[i]], "The rule is already present");
+            ruleIsPresent[rules_[i]] = true;
             emit AddRule(rules_[i]);
             unchecked {
                 ++i;
@@ -62,7 +65,9 @@ contract RuleEngine is IRuleEngine, AccessControl {
             address(rule_) != address(0x0),
             "The rule can't be a zero address"
         );
+        require(!ruleIsPresent[rule_], "The rule is already present");
         _rules.push(rule_);
+        ruleIsPresent[rule_] = true;
         emit AddRule(rule_);
     }
 
@@ -80,6 +85,7 @@ contract RuleEngine is IRuleEngine, AccessControl {
                     _rules[i] = _rules[_rules.length - 1];
                 }
                 _rules.pop();
+                ruleIsPresent[rule_] = false;
                 emit RemoveRule(rule_);
                 break;
             }
@@ -143,14 +149,5 @@ contract RuleEngine is IRuleEngine, AccessControl {
             }
         }
         return "Unknown restriction code";
-    }
-
-    /**
-     * @notice Destroy the contract bytecode
-     * @dev Warning: this action is irreversible and very critical
-     *
-     */
-    function kill() public onlyRole(DEFAULT_ADMIN_ROLE) {
-        selfdestruct(payable(msg.sender));
     }
 }
