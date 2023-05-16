@@ -24,7 +24,6 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
     // It is very important that each rule uses an unique code
     uint8 constant public CODE_ADDRESS_FROM_NOT_WHITELISTED = 20;
     uint8 constant public CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
-    uint8 constant public NO_ERROR = 0;
 
     mapping(address => bool) whitelist;
 
@@ -131,7 +130,7 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
         address _to,
         uint256 _amount
     ) public view override returns (bool isValid) {
-        return detectTransferRestriction(_from, _to, _amount) == NO_ERROR;
+        return detectTransferRestriction(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
     function detectTransferRestriction(
@@ -144,7 +143,7 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
         }else if (!whitelist[_to]) {
             return CODE_ADDRESS_TO_NOT_WHITELISTED;
         }else{
-            return NO_ERROR;
+            return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
         }
     }
 
