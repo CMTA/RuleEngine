@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.17;
 
-import "CMTAT/interfaces/IRule.sol";
+import "CMTAT/mocks/RuleEngine/interfaces/IRule.sol";
 import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "./modules//MetaTxModuleStandalone.sol";
 /**

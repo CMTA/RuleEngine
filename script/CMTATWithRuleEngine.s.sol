@@ -4,7 +4,7 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Script.sol";
-import "CMTAT/CMTAT.sol";
+import "CMTAT/CMTAT_STANDALONE.sol";
 import "src/RuleEngine.sol";
 
 /**
@@ -19,9 +19,8 @@ contract MyScript is Script {
         vm.startBroadcast(deployerPrivateKey);
         uint256 flag = 5;
         // CMTAT
-        CMTAT CMTAT_CONTRACT = new CMTAT(
+        CMTAT_STANDALONE CMTAT_CONTRACT = new CMTAT_STANDALONE(
             trustedForwarder,
-            false,
             ADMIN,
             "CMTA Token",
             "CMTAT",

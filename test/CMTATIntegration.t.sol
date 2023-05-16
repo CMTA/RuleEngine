@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "CMTAT/CMTAT.sol";
+import "CMTAT/CMTAT_STANDALONE.sol";
 import "./HelperContract.sol";
 import "src/RuleEngine.sol";
 
@@ -30,9 +30,8 @@ contract CMTATIntegration is Test, HelperContract {
         ruleWhitelist = new RuleWhitelist(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
         // global arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT = new CMTAT(
+        CMTAT_CONTRACT = new CMTAT_STANDALONE(
             ZERO_ADDRESS,
-            false,
             DEFAULT_ADMIN_ADDRESS,
             "CMTA Token",
             "CMTAT",
