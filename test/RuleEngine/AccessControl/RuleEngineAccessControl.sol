@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-pragma solidity 0.8.17;
+pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
@@ -112,29 +112,11 @@ contract RuleEngineAccessControlTest is Test, HelperContract{
             )
         );
         vm.expectRevert(bytes(message));
-        ruleEngineMock.removeRule(ruleWhitelist);
+        ruleEngineMock.removeRule(ruleWhitelist, 0);
 
         // Assert
         resUint256 = ruleEngineMock.ruleLength();
         assertEq(resUint256, 1);
     }
 
-    function testCannotAttackerKillTheContract() public {
-        // Act
-        vm.prank(ATTACKER);
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ATTACKER),
-                " is missing role ",
-                DEFAULT_ADMIN_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
-        ruleEngineMock.kill();
-
-        // Assert
-        resUint256 = ruleEngineMock.ruleLength();
-        assertEq(resUint256, 1);
-    }
 }

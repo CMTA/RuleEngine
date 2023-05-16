@@ -6,13 +6,8 @@ import "../../lib/openzeppelin-contracts/contracts/metatx/ERC2771Context.sol";
 
 /**
  * @dev Meta transaction (gasless) module.
- *
- * Useful for to provide UX where the user does not pay gas for token exchange
- * To follow OpenZeppelin, this contract does not implement the functions init & init_unchained.
- * ()
  */
 abstract contract MetaTxModuleStandalone is ERC2771Context {
-    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(
         address trustedForwarder
     ) ERC2771Context(trustedForwarder) {

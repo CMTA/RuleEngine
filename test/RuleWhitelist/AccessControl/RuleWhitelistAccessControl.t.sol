@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-pragma solidity 0.8.17;
+pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
@@ -159,18 +159,4 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
         assertEq(resUint256, 2);
     }
 
-    function testCannotAttackerKillTheContract() public {
-        // Act
-        vm.prank(ATTACKER);
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ATTACKER),
-                " is missing role ",
-                DEFAULT_ADMIN_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
-        ruleWhitelist.kill();
-    }
 }

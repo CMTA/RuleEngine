@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MPL-2.0
-pragma solidity 0.8.17;
+pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
@@ -41,5 +41,10 @@ abstract contract HelperContract {
 
     // RuleWhiteList role
     bytes32 public constant WHITELIST_ROLE = keccak256("WHITELIST_ROLE");
+
+    // RuleEngine event
+    event AddRule(IRule indexed rule);
+    event RemoveRule(IRule indexed rule);
+    event ClearRules(IRule[] rulesRemoved);
     constructor() {}
 }
