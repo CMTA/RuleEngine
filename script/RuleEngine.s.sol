@@ -4,7 +4,7 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Script.sol";
-import "CMTAT/CMTAT.sol";
+import "CMTAT/CMTAT_STANDALONE.sol";
 import "src/RuleEngine.sol";
 import "CMTAT/modules/wrapper/optional/ValidationModule.sol";
 

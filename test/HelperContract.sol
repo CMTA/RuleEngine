@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "CMTAT/CMTAT.sol";
+import "CMTAT/CMTAT_STANDALONE.sol";
 import "src/RuleWhiteList.sol";
 
 /**
@@ -24,7 +24,7 @@ abstract contract HelperContract {
     string constant DEFAULT_ADMIN_ROLE_HASH =
         "0x0000000000000000000000000000000000000000000000000000000000000000";
     RuleWhitelist ruleWhitelist;
-    CMTAT CMTAT_CONTRACT;
+    CMTAT_STANDALONE CMTAT_CONTRACT;
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
 
     // RuleWhiteList message

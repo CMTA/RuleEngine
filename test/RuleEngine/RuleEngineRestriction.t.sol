@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "CMTAT/CMTAT.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
@@ -26,7 +25,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
         // Arrange - Assert
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
 
         // Arrange

@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.17;
 
-import "CMTAT/interfaces/IRule.sol";
-import "CMTAT/interfaces/IRuleEngine.sol";
+import "CMTAT/mocks/RuleEngine/interfaces/IRule.sol";
+import "CMTAT/mocks/RuleEngine/interfaces/IRuleEngine.sol";
 import "./RuleWhiteList.sol";
 import "./modules/MetaTxModuleStandalone.sol";
 import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
@@ -93,7 +93,7 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
         emit RemoveRule(rule_);      
     }
 
-    function ruleLength() external view override returns (uint256) {
+    function rulesCount() external view override returns (uint256) {
         return _rules.length;
     }
 

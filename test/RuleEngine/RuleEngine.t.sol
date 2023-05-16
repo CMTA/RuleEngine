@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "CMTAT/CMTAT.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
@@ -27,7 +26,7 @@ contract RuleEngineTest is Test, HelperContract {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
         // Arrange - Assert
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -53,7 +52,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         // Assert
         assertEq(resCallBool, true);
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 2);
     }
 
@@ -77,7 +76,7 @@ contract RuleEngineTest is Test, HelperContract {
         // if the call is reverted with the message indicated in expectRevert
         // assertFalse(resCallBool);
         assertEq(resCallBool, true);
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -93,7 +92,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         // Assert
         assertFalse(resCallBool);
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
 
         // Assert2
@@ -118,7 +117,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         // Assert1
         assertFalse(resCallBool);
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
 
         // Assert2
@@ -144,7 +143,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         // Assert - Arrange
         assertEq(resCallBool, true);
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 2);
 
         // Act
@@ -152,7 +151,7 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngineMock.clearRules();
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 0);
     }
 
@@ -168,7 +167,7 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngineMock.addRule(ruleWhitelist1);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 2);
     }
 
@@ -179,7 +178,7 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngineMock.addRule(IRule(address(0x0)));
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -190,7 +189,7 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngineMock.addRule(ruleWhitelist);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
     
@@ -209,7 +208,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         // Assert
         _rules = ruleEngineMock.rules();
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -224,7 +223,7 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngineMock.removeRule(ruleWhitelist1, 0);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -242,7 +241,7 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngineMock.removeRule(ruleWhitelist1, 1);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -260,7 +259,7 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngineMock.removeRule(ruleWhitelist, 0);
 
         // Assert
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -286,13 +285,13 @@ contract RuleEngineTest is Test, HelperContract {
         assertEq(address(_rules[0]), address(ruleWhitelist));
         assertEq(address(_rules[1]), address(ruleWhitelist2));
 
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 2);
     }
 
     function testRuleLength() public {
         // Act
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
 
         // Assert
         assertEq(resUint256, 1);
@@ -312,7 +311,7 @@ contract RuleEngineTest is Test, HelperContract {
         assertEq(resCallBool, true);
 
         // Act
-        resUint256 = ruleEngineMock.ruleLength();
+        resUint256 = ruleEngineMock.rulesCount();
 
         // Assert
         assertEq(resUint256, 2);
