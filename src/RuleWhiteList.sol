@@ -3,13 +3,12 @@
 pragma solidity ^0.8.17;
 
 import "CMTAT/interfaces/IRule.sol";
-import "./CodeList.sol";
 import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 
 /**
 @title a whitelist manager
 */
-contract RuleWhitelist is IRule, CodeList, AccessControl {
+contract RuleWhitelist is IRule, AccessControl {
     bytes32 public constant WHITELIST_ROLE = keccak256("WHITELIST_ROLE");
     // Number of addresses in the whitelist at the moment
     uint256 private numAddressesWhitelisted;
@@ -19,6 +18,12 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
         "The sender is not in the whitelist";
     string constant TEXT_ADDRESS_TO_NOT_WHITELISTED =
         "The recipient is not in the whitelist";
+
+    // Code 
+    // It is very important that each rule uses an unique code
+    uint8 constant public CODE_ADDRESS_FROM_NOT_WHITELISTED = 20;
+    uint8 constant public CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
+    uint8 constant public NO_ERROR = 0;
 
     mapping(address => bool) whitelist;
 
@@ -34,15 +39,17 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
     function addAddressesToTheWhitelist(
         address[] calldata listWhitelistedAddress
     ) public onlyRole(WHITELIST_ROLE) {
+        uint256 numAddressesWhitelistedLocal = numAddressesWhitelisted;
         for (uint256 i = 0; i < listWhitelistedAddress.length; ) {
             if (!whitelist[listWhitelistedAddress[i]]) {
                 whitelist[listWhitelistedAddress[i]] = true;
-                ++numAddressesWhitelisted;
+                ++numAddressesWhitelistedLocal;
             }
             unchecked {
                 ++i;
             }
         }
+        numAddressesWhitelisted = numAddressesWhitelistedLocal;
     }
 
     /**
@@ -52,15 +59,17 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
     function removeAddressesFromTheWhitelist(
         address[] calldata listWhitelistedAddress
     ) public onlyRole(WHITELIST_ROLE) {
+        uint256 numAddressesWhitelistedLocal = numAddressesWhitelisted;
         for (uint256 i = 0; i < listWhitelistedAddress.length; ) {
             if (whitelist[listWhitelistedAddress[i]]) {
                 whitelist[listWhitelistedAddress[i]] = false;
-                --numAddressesWhitelisted;
+                --numAddressesWhitelistedLocal;
             }
             unchecked {
                 ++i;
             }
         }
+        numAddressesWhitelisted = numAddressesWhitelistedLocal;
     }
 
     /**
@@ -74,10 +83,8 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
             !whitelist[_newWhitelistAddress],
             "Address is already in the whitelist"
         );
-        if (!whitelist[_newWhitelistAddress]) {
-            whitelist[_newWhitelistAddress] = true;
-            ++numAddressesWhitelisted;
-        }
+        whitelist[_newWhitelistAddress] = true;
+        ++numAddressesWhitelisted;
     }
 
     /**
@@ -92,10 +99,8 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
             whitelist[_removeWhitelistAddress],
             "Address is not in the whitelist"
         );
-        if (whitelist[_removeWhitelistAddress]) {
-            whitelist[_removeWhitelistAddress] = false;
-            --numAddressesWhitelisted;
-        }
+        whitelist[_removeWhitelistAddress] = false;
+        --numAddressesWhitelisted;
     }
 
     /**
@@ -134,24 +139,18 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
     ) public view override returns (uint8) {
         if (!whitelist[_from]) {
             return CODE_ADDRESS_FROM_NOT_WHITELISTED;
-        }
-        if (!whitelist[_to]) {
+        }else if (!whitelist[_to]) {
             return CODE_ADDRESS_TO_NOT_WHITELISTED;
+        }else{
+            return NO_ERROR;
         }
-
-        return NO_ERROR;
     }
 
     function canReturnTransferRestrictionCode(
         uint8 _restrictionCode
     ) external pure override returns (bool) {
-        if (
-            _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED ||
-            _restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED
-        ) {
-            return true;
-        }
-        return false;
+        return _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED ||
+            _restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED;
     }
 
     function messageForTransferRestriction(
@@ -166,13 +165,4 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
         }
     }
 
-    /**
-     * @notice Destroy the contract bytecode
-     * @dev Warning: this action is irreversible and very critical
-     * You can call this function only if the contract is not used by any ruleEngine.
-     * Otherwise, the calls from the RuleEngine will revert.
-     */
-    function kill() public onlyRole(DEFAULT_ADMIN_ROLE) {
-        selfdestruct(payable(msg.sender));
-    }
 }

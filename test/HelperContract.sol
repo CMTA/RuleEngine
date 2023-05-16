@@ -27,5 +27,9 @@ abstract contract HelperContract {
     CMTAT CMTAT_CONTRACT;
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
 
+    // RuleEngine event
+    event AddRule(IRule indexed rule);
+    event RemoveRule(IRule indexed rule);
+    event ClearRules(IRule[] rulesRemoved);
     constructor() {}
 }

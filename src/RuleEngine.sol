@@ -12,8 +12,11 @@ import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 */
 contract RuleEngine is IRuleEngine, AccessControl {
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
+    mapping(IRule => bool) ruleIsPresent;
     IRule[] internal _rules;
-
+    event AddRule(IRule indexed rule);
+    event RemoveRule(IRule indexed rule);
+    event ClearRules(IRule[] rulesRemoved);
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(RULE_ENGINE_ROLE, msg.sender);
@@ -32,6 +35,9 @@ contract RuleEngine is IRuleEngine, AccessControl {
                 address(rules_[i]) != address(0x0),
                 "One of the rules is a zero address"
             );
+            require(!ruleIsPresent[rules_[i]], "The rule is already present");
+            ruleIsPresent[rules_[i]] = true;
+            emit AddRule(rules_[i]);
             unchecked {
                 ++i;
             }
@@ -44,7 +50,9 @@ contract RuleEngine is IRuleEngine, AccessControl {
      *
      */
     function clearRules() public onlyRole(RULE_ENGINE_ROLE) {
+        emit ClearRules(_rules);
         _rules = new IRule[](0);
+
     }
 
     /**
@@ -57,8 +65,13 @@ contract RuleEngine is IRuleEngine, AccessControl {
             address(rule_) != address(0x0),
             "The rule can't be a zero address"
         );
+        require(!ruleIsPresent[rule_], "The rule is already present");
         _rules.push(rule_);
+        ruleIsPresent[rule_] = true;
+        emit AddRule(rule_);
     }
+
+
 
     /**
      * @notice Remove a rule from the array of rules
@@ -67,22 +80,33 @@ contract RuleEngine is IRuleEngine, AccessControl {
      *
      *
      */
-    function removeRule(IRule rule_) public onlyRole(RULE_ENGINE_ROLE) {
-        for (uint256 i = 0; i < _rules.length; ) {
-            if (_rules[i] == rule_) {
-                if (i != _rules.length - 1) {
-                    _rules[i] = _rules[_rules.length - 1];
-                }
-                _rules.pop();
-                break;
-            }
-            unchecked {
-                ++i;
-            }
+    function removeRule(IRule rule_, uint256 index) public onlyRole(RULE_ENGINE_ROLE) {
+        require(_rules[index] == rule_, "The rule don't match");
+        if (index != _rules.length - 1) {
+            _rules[index] = _rules[_rules.length - 1];
         }
+        _rules.pop(); 
+        ruleIsPresent[rule_] = false;
+        emit RemoveRule(rule_);      
     }
 
     function ruleLength() external view override returns (uint256) {
+        return _rules.length;
+    }
+
+    /*
+    @notice Get the index of a rule inside the list
+    @return index if the rule is found, _rules.length otherwise
+    */
+    function getRuleIndex(IRule rule_) external view returns (uint256 index) {
+        for (index = 0; index < _rules.length; ) {
+            if (_rules[index] == rule_) {
+                return index;
+            }
+            unchecked {
+                ++index;
+            }
+        }
         return _rules.length;
     }
 
@@ -136,14 +160,5 @@ contract RuleEngine is IRuleEngine, AccessControl {
             }
         }
         return "Unknown restriction code";
-    }
-
-    /**
-     * @notice Destroy the contract bytecode
-     * @dev Warning: this action is irreversible and very critical
-     *
-     */
-    function kill() public onlyRole(DEFAULT_ADMIN_ROLE) {
-        selfdestruct(payable(msg.sender));
     }
 }
