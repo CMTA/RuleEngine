@@ -19,10 +19,10 @@ contract MyScript is Script {
         address CMTAT_Address = vm.envAddress("CMTAT_ADDRESS");
         vm.startBroadcast(deployerPrivateKey);
         //whitelist
-        RuleWhitelist ruleWhitelist = new RuleWhitelist(ADMIN );
+        RuleWhitelist ruleWhitelist = new RuleWhitelist(ADMIN, address(0));
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
-        RuleEngine RULE_ENGINE = new RuleEngine(ADMIN );
+        RuleEngine RULE_ENGINE = new RuleEngine(ADMIN, address(0) );
         console.log("RuleEngine: ", address(RULE_ENGINE));
         RULE_ENGINE.addRule(ruleWhitelist);
         // Configure the new ruleEngine for CMTAT

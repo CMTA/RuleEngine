@@ -33,10 +33,10 @@ contract MyScript is Script {
         );
         console.log("CMTAT CMTAT_CONTRACT : ", address(CMTAT_CONTRACT));
         // whitelist
-        RuleWhitelist ruleWhitelist = new RuleWhitelist(ADMIN);
+        RuleWhitelist ruleWhitelist = new RuleWhitelist(ADMIN, trustedForwarder);
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
-        RuleEngine RULE_ENGINE = new RuleEngine(ADMIN);
+        RuleEngine RULE_ENGINE = new RuleEngine(ADMIN, trustedForwarder);
         console.log("RuleEngine : ", address(RULE_ENGINE));
         RULE_ENGINE.addRule(ruleWhitelist);
         CMTAT_CONTRACT.setRuleEngine(RULE_ENGINE);

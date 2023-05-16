@@ -20,9 +20,9 @@ contract RuleEngineKillTest is Test, HelperContract {
 
     function setUp() public {
         // Arrange - create contracts
-        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS);
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
         // Arrange -  Assert

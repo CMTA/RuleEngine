@@ -5,11 +5,11 @@ pragma solidity 0.8.17;
 import "CMTAT/interfaces/IRule.sol";
 import "./CodeList.sol";
 import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-
+import "./modules//MetaTxModule.sol";
 /**
 @title a whitelist manager
 */
-contract RuleWhitelist is IRule, CodeList, AccessControl {
+contract RuleWhitelist is IRule, CodeList, AccessControl, MetaTxModuleStandalone {
     bytes32 public constant WHITELIST_ROLE = keccak256("WHITELIST_ROLE");
     // Number of addresses in the whitelist at the moment
     uint256 private numAddressesWhitelisted;
@@ -22,7 +22,7 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
 
     mapping(address => bool) whitelist;
 
-    constructor(address admin) {
+    constructor(address admin, address forwarderIrrevocable) MetaTxModuleStandalone(forwarderIrrevocable) {
         require(admin != address(0), "Address 0 not allowed");
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(WHITELIST_ROLE, admin);
@@ -175,5 +175,29 @@ contract RuleWhitelist is IRule, CodeList, AccessControl {
      */
     function kill() public onlyRole(DEFAULT_ADMIN_ROLE) {
         selfdestruct(payable(msg.sender));
+    }
+
+        /** 
+    @dev This surcharge is not necessary if you do not use the MetaTxModule
+    */
+    function _msgSender()
+        internal
+        view
+        override(MetaTxModuleStandalone, Context)
+        returns (address sender)
+    {
+        return MetaTxModuleStandalone._msgSender();
+    }
+
+    /** 
+    @dev This surcharge is not necessary if you do not use the MetaTxModule
+    */
+    function _msgData()
+        internal
+        view
+        override(MetaTxModuleStandalone, Context)
+        returns (bytes calldata)
+    {
+        return MetaTxModuleStandalone._msgData();
     }
 }

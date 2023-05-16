@@ -20,7 +20,7 @@ contract RuleWhitelistKillTest is Test, HelperContract {
     function setUp() public {
         // Arrange - create contracts
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(DEFAULT_ADMIN_ADDRESS);
+        ruleWhitelist = new RuleWhitelist(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
 
         // Arrange - balance of the contract
         vm.deal(address(ruleWhitelist), BALANCE_ETHER);
