@@ -9,7 +9,7 @@ import "src/RuleEngine.sol";
 /**
 @title Integration test with the CMTAT
 */
-contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
+contract CMTATIntegration is Test, HelperContract {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
@@ -27,7 +27,7 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
     // Arrange
     function setUp() public {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleWhitelist = new RuleWhitelist();
+        ruleWhitelist = new RuleWhitelist(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
         // global arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT = new CMTAT(
@@ -45,7 +45,7 @@ contract CMTATIntegration is Test, HelperContract, RuleWhitelist {
 
         // specific arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleEngineMock = new RuleEngine();
+        ruleEngineMock = new RuleEngine(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
         vm.prank(DEFAULT_ADMIN_ADDRESS);

@@ -3,12 +3,13 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
+import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "src/RuleEngine.sol";
 
 /**
 @title Tests on the provided functions by OpenZeppelin
 */
-contract RuleWhitelistAccessControlOZ is Test, HelperContract, RuleWhitelist {
+contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
@@ -22,7 +23,7 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, RuleWhitelist {
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist();
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
     }
 
     function testCanGrantRoleAsAdmin() public {

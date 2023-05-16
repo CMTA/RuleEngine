@@ -5,21 +5,24 @@ pragma solidity ^0.8.17;
 import "CMTAT/interfaces/IRule.sol";
 import "CMTAT/interfaces/IRuleEngine.sol";
 import "./RuleWhiteList.sol";
+import "./modules/MetaTxModuleStandalone.sol";
 import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 
 /**
 @title Implementation of a ruleEngine defined by the CMTAT
 */
-contract RuleEngine is IRuleEngine, AccessControl {
+contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
     mapping(IRule => bool) ruleIsPresent;
     IRule[] internal _rules;
     event AddRule(IRule indexed rule);
     event RemoveRule(IRule indexed rule);
     event ClearRules(IRule[] rulesRemoved);
-    constructor() {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(RULE_ENGINE_ROLE, msg.sender);
+
+    constructor(address admin, address forwarderIrrevocable) MetaTxModuleStandalone(forwarderIrrevocable) {
+        require(admin != address(0), "Address 0 not allowed");
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(RULE_ENGINE_ROLE, admin);
     }
 
     /**
@@ -160,5 +163,29 @@ contract RuleEngine is IRuleEngine, AccessControl {
             }
         }
         return "Unknown restriction code";
+    }
+
+    /** 
+    @dev This surcharge is not necessary if you do not use the MetaTxModule
+    */
+    function _msgSender()
+        internal
+        view
+        override(MetaTxModuleStandalone, Context)
+        returns (address sender)
+    {
+        return MetaTxModuleStandalone._msgSender();
+    }
+
+    /** 
+    @dev This surcharge is not necessary if you do not use the MetaTxModule
+    */
+    function _msgData()
+        internal
+        view
+        override(MetaTxModuleStandalone, Context)
+        returns (bytes calldata)
+    {
+        return MetaTxModuleStandalone._msgData();
     }
 }

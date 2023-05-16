@@ -8,7 +8,7 @@ import "src/RuleEngine.sol";
 /**
 @title General functions of the RuleWhitelist
 */
-contract RuleWhitelistTest is Test, HelperContract, RuleWhitelist {
+contract RuleWhitelistTest is Test, HelperContract{
     uint256 resUint256;
     uint8 resUint8;
     bool resBool;
@@ -19,7 +19,7 @@ contract RuleWhitelistTest is Test, HelperContract, RuleWhitelist {
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist();
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
     }
 
     function testReturnFalseIfAddressNotWhitelisted() public {
@@ -154,7 +154,7 @@ contract RuleWhitelistTest is Test, HelperContract, RuleWhitelist {
 
     function testTransferDetectedAsInvalid() public {
         // Act
-        resBool = validateTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleWhitelist.validateTransfer(ADDRESS1, ADDRESS2, 20);
         // Assert
         assertFalse(resBool);
     }

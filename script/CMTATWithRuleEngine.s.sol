@@ -14,7 +14,7 @@ contract MyScript is Script {
     function run() external {
         // Get env variable
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address OWNER = vm.addr(deployerPrivateKey);
+        address ADMIN = vm.addr(deployerPrivateKey);
         address trustedForwarder = address(0x0);
         vm.startBroadcast(deployerPrivateKey);
         uint256 flag = 5;
@@ -22,7 +22,7 @@ contract MyScript is Script {
         CMTAT CMTAT_CONTRACT = new CMTAT(
             trustedForwarder,
             false,
-            OWNER,
+            ADMIN,
             "CMTA Token",
             "CMTAT",
             "CMTAT_ISIN",
@@ -33,10 +33,10 @@ contract MyScript is Script {
         );
         console.log("CMTAT CMTAT_CONTRACT : ", address(CMTAT_CONTRACT));
         // whitelist
-        RuleWhitelist ruleWhitelist = new RuleWhitelist();
+        RuleWhitelist ruleWhitelist = new RuleWhitelist(ADMIN, trustedForwarder);
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
-        RuleEngine RULE_ENGINE = new RuleEngine();
+        RuleEngine RULE_ENGINE = new RuleEngine(ADMIN, trustedForwarder);
         console.log("RuleEngine : ", address(RULE_ENGINE));
         RULE_ENGINE.addRule(ruleWhitelist);
         CMTAT_CONTRACT.setRuleEngine(RULE_ENGINE);

@@ -9,7 +9,7 @@ import "src/RuleEngine.sol";
 /**
 @title tests concerning the restrictions and validation for the transfers
 */
-contract RuleEngineRestrictionTest is Test, HelperContract, RuleWhitelist {
+contract RuleEngineRestrictionTest is Test, HelperContract {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
     uint256 resUint256;
@@ -20,9 +20,9 @@ contract RuleEngineRestrictionTest is Test, HelperContract, RuleWhitelist {
 
     // Arrange
     function setUp() public {
-        ruleWhitelist = new RuleWhitelist();
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine();
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
         // Arrange - Assert
@@ -30,7 +30,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract, RuleWhitelist {
         assertEq(resUint256, 1);
 
         // Arrange
-        ruleWhitelist1 = new RuleWhitelist();
+        ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         IRule[] memory ruleWhitelistTab = new IRule[](1);
         ruleWhitelistTab[0] = ruleWhitelist1;
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -44,7 +44,9 @@ contract RuleEngineRestrictionTest is Test, HelperContract, RuleWhitelist {
 
     function testCanDetectTransferRestrictionOK() public {
         // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS2);
 
         // Act
@@ -72,6 +74,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract, RuleWhitelist {
 
     function testCanDetectTransferRestrictionWithTo() public {
         // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
 
         // Act
@@ -119,7 +122,9 @@ contract RuleEngineRestrictionTest is Test, HelperContract, RuleWhitelist {
 
     function testValidateTransferOK() public {
         // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist1.addAddressToTheWhitelist(ADDRESS2);
 
         // Act

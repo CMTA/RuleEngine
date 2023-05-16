@@ -3,13 +3,14 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT.sol";
+import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
 @title Tests on the provided functions by OpenZeppelin
 */
-contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
+contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
     uint256 resUint256;
@@ -19,9 +20,9 @@ contract RuleEngineAccessControlTest is Test, HelperContract, RuleWhitelist {
 
     // Arrange
     function setUp() public {
-        ruleWhitelist = new RuleWhitelist();
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine();
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS);
         resUint256 = ruleEngineMock.ruleLength();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
