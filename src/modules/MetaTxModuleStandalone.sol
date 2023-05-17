@@ -8,9 +8,7 @@ import "../../lib/openzeppelin-contracts/contracts/metatx/ERC2771Context.sol";
  * @dev Meta transaction (gasless) module.
  */
 abstract contract MetaTxModuleStandalone is ERC2771Context {
-    constructor(
-        address trustedForwarder
-    ) ERC2771Context(trustedForwarder) {
+    constructor(address trustedForwarder) ERC2771Context(trustedForwarder) {
         // Nothing to do
     }
 
@@ -33,5 +31,4 @@ abstract contract MetaTxModuleStandalone is ERC2771Context {
     {
         return ERC2771Context._msgData();
     }
-
 }

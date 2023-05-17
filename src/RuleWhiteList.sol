@@ -5,6 +5,7 @@ pragma solidity ^0.8.17;
 import "CMTAT/mocks/RuleEngine/interfaces/IRule.sol";
 import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "./modules//MetaTxModuleStandalone.sol";
+
 /**
 @title a whitelist manager
 */
@@ -20,14 +21,17 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
     string constant TEXT_ADDRESS_TO_NOT_WHITELISTED =
         "The recipient is not in the whitelist";
 
-    // Code 
+    // Code
     // It is very important that each rule uses an unique code
-    uint8 constant public CODE_ADDRESS_FROM_NOT_WHITELISTED = 20;
-    uint8 constant public CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
+    uint8 public constant CODE_ADDRESS_FROM_NOT_WHITELISTED = 20;
+    uint8 public constant CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
 
     mapping(address => bool) whitelist;
 
-    constructor(address admin, address forwarderIrrevocable) MetaTxModuleStandalone(forwarderIrrevocable) {
+    constructor(
+        address admin,
+        address forwarderIrrevocable
+    ) MetaTxModuleStandalone(forwarderIrrevocable) {
         require(admin != address(0), "Address 0 not allowed");
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(WHITELIST_ROLE, admin);
@@ -130,7 +134,9 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
         address _to,
         uint256 _amount
     ) public view override returns (bool isValid) {
-        return detectTransferRestriction(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+        return
+            detectTransferRestriction(_from, _to, _amount) ==
+            uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
     function detectTransferRestriction(
@@ -140,9 +146,9 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
     ) public view override returns (uint8) {
         if (!whitelist[_from]) {
             return CODE_ADDRESS_FROM_NOT_WHITELISTED;
-        }else if (!whitelist[_to]) {
+        } else if (!whitelist[_to]) {
             return CODE_ADDRESS_TO_NOT_WHITELISTED;
-        }else{
+        } else {
             return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
         }
     }
@@ -150,7 +156,8 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
     function canReturnTransferRestrictionCode(
         uint8 _restrictionCode
     ) external pure override returns (bool) {
-        return _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED ||
+        return
+            _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED ||
             _restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED;
     }
 

@@ -26,13 +26,16 @@ contract MyScript is Script {
             "CMTAT",
             "CMTAT_ISIN",
             "https://cmta.ch",
-            IRuleEngine(address(0)), 
-            'CMTAT_info',
+            IRuleEngine(address(0)),
+            "CMTAT_info",
             flag
         );
         console.log("CMTAT CMTAT_CONTRACT : ", address(CMTAT_CONTRACT));
         // whitelist
-        RuleWhitelist ruleWhitelist = new RuleWhitelist(ADMIN, trustedForwarder);
+        RuleWhitelist ruleWhitelist = new RuleWhitelist(
+            ADMIN,
+            trustedForwarder
+        );
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
         RuleEngine RULE_ENGINE = new RuleEngine(ADMIN, trustedForwarder);
