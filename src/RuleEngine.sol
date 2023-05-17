@@ -19,7 +19,10 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
     event RemoveRule(IRule indexed rule);
     event ClearRules(IRule[] rulesRemoved);
 
-    constructor(address admin, address forwarderIrrevocable) MetaTxModuleStandalone(forwarderIrrevocable) {
+    constructor(
+        address admin,
+        address forwarderIrrevocable
+    ) MetaTxModuleStandalone(forwarderIrrevocable) {
         require(admin != address(0), "Address 0 not allowed");
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(RULE_ENGINE_ROLE, admin);
@@ -55,7 +58,6 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
     function clearRules() public onlyRole(RULE_ENGINE_ROLE) {
         emit ClearRules(_rules);
         _rules = new IRule[](0);
-
     }
 
     /**
@@ -74,8 +76,6 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
         emit AddRule(rule_);
     }
 
-
-
     /**
      * @notice Remove a rule from the array of rules
      * @dev To reduce the array size, the last rule is moved to the location occupied
@@ -83,14 +83,17 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
      *
      *
      */
-    function removeRule(IRule rule_, uint256 index) public onlyRole(RULE_ENGINE_ROLE) {
+    function removeRule(
+        IRule rule_,
+        uint256 index
+    ) public onlyRole(RULE_ENGINE_ROLE) {
         require(_rules[index] == rule_, "The rule don't match");
         if (index != _rules.length - 1) {
             _rules[index] = _rules[_rules.length - 1];
         }
-        _rules.pop(); 
+        _rules.pop();
         ruleIsPresent[rule_] = false;
-        emit RemoveRule(rule_);      
+        emit RemoveRule(rule_);
     }
 
     function rulesCount() external view override returns (uint256) {
