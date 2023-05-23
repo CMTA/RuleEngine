@@ -16,11 +16,11 @@ The first audit was performed by ABDK on the version [1.0.1](https://github.com/
 
 The release 1.1 contains the different fixes and improvements related to this audit.
 
-The temporary report is available in the file [Taurus. Audit 3.3. Collected Issues.ods](doc/audits/Taurus. Audit 3.3. Collected Issues.ods) 
+The temporary report is available in [Taurus. Audit 3.3. Collected Issues.ods](doc/audits/Taurus. Audit 3.3. Collected Issues.ods) 
 
 ### Tools
 
-You will find the report performed with [Slither](https://github.com/crytic/slither) in the file [slither-report.md](doc/audits/tools/slither-report.md) 
+You will find the report performed with [Slither](https://github.com/crytic/slither) in [slither-report.md](doc/audits/tools/slither-report.md) 
 
 ## Documentation
 
@@ -67,7 +67,7 @@ See also the command's [documentation](https://book.getfoundry.sh/reference/forg
 
 
 ## Compilation
-The official documentation is available here : [website](https://book.getfoundry.sh/reference/forge/build-commands) 
+The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/build-commands) 
 ```
  forge build --contracts src/RuleEngine.sol
 ```
@@ -104,7 +104,7 @@ forge coverage --report lcov
 See [Solidity Coverage in VS Code with Foundry](https://mirror.xyz/devanon.eth/RrDvKPnlD-pmpuW7hQeR5wWdVjklrpOgPCOA-PJkWFU)
 
 ## Deployment
-The official documentation is available here : [website](https://book.getfoundry.sh/reference/forge/deploy-commands) 
+The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/deploy-commands) 
 ### Script
 To run the script for deployment, you need to create a .env file. The value for CMTAT.ADDRESS is require only to use the script **RuleEngine.s.sol**
 Warning : put your private key in a .env file is not the best secure way.

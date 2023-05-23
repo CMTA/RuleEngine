@@ -2,7 +2,7 @@
 
 Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
-## 1.0.2 - 20230522
+## 1.0.2 - 20230523
 
 The release 1.0.2 contains mainly the different fixes and improvements related to the audit performed on the version 1.0.1.
 
