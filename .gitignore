@@ -7,3 +7,6 @@ out/
 cache/
 .~lock.test.odt#
 nethereum-gen.settings
+#hardhat
+artifacts/
+cache_hardhat/

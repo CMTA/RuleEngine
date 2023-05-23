@@ -127,7 +127,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         assertEq(resString, TEXT_CODE_NOT_FOUND);
     }
 
-    function testvalidateTransfer() public {
+    function testValidateTransfer() public {
         // Arrange
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;

@@ -226,6 +226,8 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngineMock.removeRule(ruleWhitelist, 0);
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit AddRule(ruleWhitelist);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
 

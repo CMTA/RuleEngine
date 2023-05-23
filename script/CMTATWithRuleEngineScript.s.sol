@@ -6,11 +6,11 @@ pragma solidity ^0.8.17;
 import "forge-std/Script.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
 import "src/RuleEngine.sol";
-
+import "src/RuleWhitelist.sol";
 /**
 @title Deploy a CMTAT, a RuleWhitelist and a RuleEngine
 */
-contract MyScript is Script {
+contract CMTATWithRuleEngineScript is Script {
     function run() external {
         // Get env variable
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
