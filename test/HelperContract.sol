@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
-import "src/RuleWhiteList.sol";
+import "src/RuleWhitelist.sol";
 
 /**
 @title Constants used by the tests
@@ -38,7 +38,6 @@ abstract contract HelperContract {
     uint8 constant CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
     uint8 constant NO_ERROR = 0;
 
-
     // RuleWhiteList role
     bytes32 public constant WHITELIST_ROLE = keccak256("WHITELIST_ROLE");
 
@@ -46,5 +45,6 @@ abstract contract HelperContract {
     event AddRule(IRule indexed rule);
     event RemoveRule(IRule indexed rule);
     event ClearRules(IRule[] rulesRemoved);
+
     constructor() {}
 }

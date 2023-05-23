@@ -6,12 +6,45 @@ This repository includes the RuleEngine contract for the [CMTAT](https://github.
 
 The CMTAT contracts and the OpenZeppelin library are included as a submodule of the present repository.
 
+## Audit
+
+The contracts have been audited by [ABDKConsulting](https://www.abdk.consulting/), a globally recognized firm specialized in smart contracts' security.
+
+#### First Audit - March 2022
+
+The first audit was performed by ABDK on the version [1.0.1](https://github.com/CMTA/RuleEngine/releases/tag/1.0.1).
+
+The release 1.1 contains the different fixes and improvements related to this audit.
+
+The temporary report is available in [Taurus. Audit 3.3. Collected Issues.ods](doc/audits/Taurus. Audit 3.3. Collected Issues.ods) 
+
+### Tools
+
+You will find the report performed with [Slither](https://github.com/crytic/slither) in [slither-report.md](doc/audits/tools/slither-report.md) 
+
+## Documentation
+
+Here a summary of the main documentation
+
+| Document                            | Link/Files                                           |
+| ----------------------------------- | ---------------------------------------------------- |
+| Solidity API Documentation (docgen) | [doc/solidityAPI](./doc/solidityAPI)                 |
+| Technical documentation             | [doc/technical.md](./doc/technical.md)               |
+| Toolchain                           | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md)               |
+| Functionalities                     | [doc/functionalities.pdf](./doc/functionalities.pdf) |
+| Surya report                        | [doc/surya](./doc/surya)                             |
+| Test                                | [doc/test/test.pdf](./doc/test/test.pdf)             |
+
+
+
 ## Usage
 
 *Explain how it works.*
 
 
 ## Toolchain installation
+The contracts are developed and tested with [Foundry](https://book.getfoundry.sh), a smart contract development toolchain.
+
 To install the Foundry suite, please refer to the official instructions in the [Foundry book](https://book.getfoundry.sh/getting-started/installation).
 
 ## Initialization
@@ -34,7 +67,7 @@ See also the command's [documentation](https://book.getfoundry.sh/reference/forg
 
 
 ## Compilation
-The official documentation is available here : [website](https://book.getfoundry.sh/reference/forge/build-commands) 
+The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/build-commands) 
 ```
  forge build --contracts src/RuleEngine.sol
 ```
@@ -60,7 +93,7 @@ See also the test framework's [official documentation](https://book.getfoundry.s
 ### Coverage
 * Perform a code coverage
 ```
-forge coverage --report lcov
+forge coverage
 ```
 
 * Generate LCOV report
@@ -71,7 +104,7 @@ forge coverage --report lcov
 See [Solidity Coverage in VS Code with Foundry](https://mirror.xyz/devanon.eth/RrDvKPnlD-pmpuW7hQeR5wWdVjklrpOgPCOA-PJkWFU)
 
 ## Deployment
-The official documentation is available here : [website](https://book.getfoundry.sh/reference/forge/deploy-commands) 
+The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/deploy-commands) 
 ### Script
 To run the script for deployment, you need to create a .env file. The value for CMTAT.ADDRESS is require only to use the script **RuleEngine.s.sol**
 Warning : put your private key in a .env file is not the best secure way.
@@ -82,48 +115,34 @@ PRIVATE_KEY=<YOUR_PRIVATE_KEY>
 CMTAT_ADDRESS=<CMTAT ADDDRESS
 ```
 * Command
+
+CMTAT with RuleEngine
+
+```bash
+forge script script/CMTATWithRuleEngineScript.s.sol:CMTATWithRuleEngineScript --rpc-url=$RPC_URL  --broadcast --verify -vvv
 ```
-forge script script/CMTATWithRuleEngine.s.sol:MyScript --rpc-url=<YOUR_RPC_URL>  --broadcast --verify -vvv
+Value of YOUR_RPC_URL with a local instance of anvil : [http://127.0.0.1:8545](http://127.0.0.1:8545)
+
+Only RuleEngine with a Whitelist contract
+
+```bash
+forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  --broadcast --verify -vvv
 ```
-Value of YOUR_RPC_URL with a local instance of anvil : http://127.0.0.1:8545
 
 ### Local
 With Foundry, you [can create a local testnet](https://book.getfoundry.sh/reference/anvil/) node for deploying and testing smart contracts, based on the [Anvil](https://anvil.works/) framework. 
 
 On Linux, using the default RPC URL, and Anvil's test private key, run:  
 
-```  
-export RPC_URL=http://127.0.0.1:8545`  
+Example - Deploy the CMTAT, standalone version
+
+```  bash
+export RPC_URL=http://127.0.0.1:8545
 export PRIVATE_KEY=<Local Private Key>
-forge create CMTAT --rpc-url=$RPC_URL --private-key=$PRIVATE_KEY
+forge create CMTAT_BASE --rpc-url=$RPC_URL --private-key=$PRIVATE_KEY --constructor-args 0x0000000000000000000000000000000000000000,ADMIN,"CMTA Token","CMTAT","CMTAT_ISIN","https://cmta.ch",0x0000000000000000000000000000000000000000,"CMTAT_info",5
 ```
 
 See also the command's [documentation](https://book.getfoundry.sh/reference/forge/deploy-command).
 
-## Code style guidelines
-We use the following tools to ensure consistent coding style:
 
-[Prettier](https://github.com/prettier-solidity/prettier-plugin-solidity)
-```
-npm run-script lint:sol:prettier 
-```
-
-[Ethlint / Solium](https://github.com/duaraghav8/Ethlint)
-
-```
-npm run-script lint:sol 
-npm run-script lint:sol:fix 
-npm run-script lint:sol:test 
-npm run-script lint:sol:test:fix
-```
-The related components can be installed with `npm install` (see [package.json](./package.json)). 
-
-## UML
-We use [sol2uml](https://github.com/naddison36/sol2uml) to generate UML for smart contracts.
-```
-npm run-script uml
-npm run-script uml:test
-```
-
-The related component can be installed with `npm install` (see [package.json](./package.json)). 
 

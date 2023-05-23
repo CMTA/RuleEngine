@@ -23,7 +23,10 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        ruleWhitelist = new RuleWhitelist(
+            WHITELIST_OPERATOR_ADDRESS,
+            ZERO_ADDRESS
+        );
     }
 
     function testRemoveAddressFromTheWhitelist() public {
