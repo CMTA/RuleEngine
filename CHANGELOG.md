@@ -2,7 +2,12 @@
 
 Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
-## 1.0.2 - 20230523
+## 1.0.2 - 10120609
+
+- Upgrade the library CMTAT to the vesion [v2.3.0](https://github.com/CMTA/CMTAT/releases/tag/v2.3.0)
+- Set the number of runs for the optimizer to 200 for Hardhat and Foundry, see [https://docs.soliditylang.org/en/v0.8.17/using-the-compiler.html#optimizer-options](https://docs.soliditylang.org/en/v0.8.17/using-the-compiler.html#optimizer-options)
+
+## 1.0.2-rc.0 - 20230523
 
 The release 1.0.2 contains mainly the different fixes and improvements related to the audit performed on the version 1.0.1.
 
@@ -14,7 +19,7 @@ The release 1.0.2 contains mainly the different fixes and improvements related t
 
 **General modifications**
 
-- Upgrade the library CMTAT to the latest version [2.3-Beta](https://github.com/CMTA/CMTAT/releases/tag/2.3-Beta) ([pull/28](https://github.com/CMTA/RuleEngine/pull/28))
+- Upgrade the library CMTAT to the latest version [2.3.0-rc.0](https://github.com/CMTA/CMTAT/releases/tag/2.3-Beta) ([pull/28](https://github.com/CMTA/RuleEngine/pull/28))
   - In RuleEngine, `ruleLength` is changed to `rulesCount()`
 - Add the gasless suport / MetaTx module ([pull/27](https://github.com/CMTA/RuleEngine/pull/27))
 - RuleWhitelist: update RuleWhitelist to use code from IEIP1404Wrapper ([pull/29](https://github.com/CMTA/RuleEngine/pull/29))
