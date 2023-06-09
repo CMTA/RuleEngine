@@ -1,2 +1,1 @@
 CMTAT/=lib/CMTAT/contracts/
-openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/
