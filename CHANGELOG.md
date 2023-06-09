@@ -2,7 +2,7 @@
 
 Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
-## 1.0.2 - 10120609
+## v1.0.2 - 10120609
 
 - Upgrade the library CMTAT to the vesion [v2.3.0](https://github.com/CMTA/CMTAT/releases/tag/v2.3.0)
 - Set the number of runs for the optimizer to 200 for Hardhat and Foundry, see [https://docs.soliditylang.org/en/v0.8.17/using-the-compiler.html#optimizer-options](https://docs.soliditylang.org/en/v0.8.17/using-the-compiler.html#optimizer-options)
