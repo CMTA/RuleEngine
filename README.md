@@ -16,7 +16,7 @@ The first audit was performed by ABDK on the version [1.0.1](https://github.com/
 
 The release 1.1 contains the different fixes and improvements related to this audit.
 
-The temporary report is available in [Taurus. Audit 3.3. Collected Issues.ods](doc/audits/Taurus. Audit 3.3. Collected Issues.ods) 
+The temporary report is available in [Taurus. Audit 3.3.CollectedIssues.ods](doc/audits/Taurus.Audit3.3.CollectedIssues.ods) 
 
 ### Tools
 
