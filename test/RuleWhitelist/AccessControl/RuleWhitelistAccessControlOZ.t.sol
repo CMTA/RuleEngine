@@ -62,17 +62,10 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
         // Arrange - Assert
         bool res1 = ruleWhitelist.hasRole(WHITELIST_ROLE, ADDRESS1);
         assertFalse(res1);
-
+ 
         // Act
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ADDRESS2),
-                " is missing role ",
-                DEFAULT_ADMIN_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE)); 
         vm.prank(ADDRESS2);
         ruleWhitelist.grantRole(WHITELIST_ROLE, ADDRESS1);
         // Assert
@@ -94,15 +87,8 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
 
         // Act
         vm.prank(ADDRESS2);
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ADDRESS2),
-                " is missing role ",
-                DEFAULT_ADMIN_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE));  
         ruleWhitelist.revokeRole(WHITELIST_ROLE, ADDRESS1);
 
         // Assert

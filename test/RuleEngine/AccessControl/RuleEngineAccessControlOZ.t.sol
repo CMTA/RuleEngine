@@ -80,17 +80,10 @@ contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
         assertFalse(res1);
 
         // Act
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ADDRESS2),
-                " is missing role ",
-                DEFAULT_ADMIN_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE));  
         vm.prank(ADDRESS2);
-        ruleEngineMock.grantRole(RULE_ENGINE_ROLE, ADDRESS1);
+        ruleEngineMock.grantRole(RULE_ENGINE_ROLE, ADDRESS2);
         // Assert
         bool res2 = ruleEngineMock.hasRole(RULE_ENGINE_ROLE, ADDRESS1);
         assertFalse(res2);
@@ -110,15 +103,8 @@ contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
 
         // Act
         vm.prank(ADDRESS2);
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ADDRESS2),
-                " is missing role ",
-                DEFAULT_ADMIN_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE));  
         ruleEngineMock.revokeRole(RULE_ENGINE_ROLE, ADDRESS1);
 
         // Assert

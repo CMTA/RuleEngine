@@ -26,7 +26,6 @@ abstract contract HelperContract {
     RuleWhitelist ruleWhitelist;
     CMTAT_STANDALONE CMTAT_CONTRACT;
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
-
     // RuleWhiteList message
     string constant TEXT_CODE_NOT_FOUND = "Code not found";
     string constant TEXT_ADDRESS_FROM_NOT_WHITELISTED =
@@ -57,6 +56,8 @@ abstract contract HelperContract {
     error RuleWhitelist_AdminWithAddressZeroNotAllowed();
     error RuleWhitelist_AddressAlreadyWhitelisted();
     error RuleWhitelist_AddressNotPresent();
+
+
 
     constructor() {}
 }
