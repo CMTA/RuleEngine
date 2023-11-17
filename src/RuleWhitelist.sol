@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
