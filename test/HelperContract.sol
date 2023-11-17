@@ -46,5 +46,17 @@ abstract contract HelperContract {
     event RemoveRule(IRule indexed rule);
     event ClearRules(IRule[] rulesRemoved);
 
+    // Custom error RuleEngine
+    error RuleEngine_RuleAddressZeroNotAllowed();
+    error RuleEngine_RuleAlreadyExists();
+    error RuleEngine_RuleDoNotMatch();
+    error RuleEngine_AdminWithAddressZeroNotAllowed();
+    error RuleEngine_ArrayIsEmpty();
+
+    // custom errors RuleWhitelist
+    error RuleWhitelist_AdminWithAddressZeroNotAllowed();
+    error RuleWhitelist_AddressAlreadyWhitelisted();
+    error RuleWhitelist_AddressNotPresent();
+
     constructor() {}
 }

@@ -43,4 +43,18 @@ contract RuleWhitelistTest is Test, HelperContract {
         resBool = ruleWhitelist.isTrustedForwarder(address(forwarder));
         assertEq(resBool, true);
     }
+
+    function testCannotDeployContractifAdminAddressIsZero() public {
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        MinimalForwarderMock forwarder = new MinimalForwarderMock(
+        );
+        forwarder.initialize();
+        vm.expectRevert(RuleWhitelist_AdminWithAddressZeroNotAllowed.selector);
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        ruleWhitelist = new RuleWhitelist(
+            address(0),
+            address(forwarder)
+        );
+    }
 }

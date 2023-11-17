@@ -125,7 +125,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         assertEq(resBool, true);
         /// Arrange
-        vm.expectRevert(bytes("Address is already in the whitelist"));
+        vm.expectRevert(RuleWhitelist_AddressAlreadyWhitelisted.selector);
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);

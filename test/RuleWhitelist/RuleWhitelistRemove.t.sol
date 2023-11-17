@@ -90,7 +90,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         // Arrange
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         assertFalse(resBool);
-        vm.expectRevert(bytes("Address is not in the whitelist"));
+        vm.expectRevert(RuleWhitelist_AddressNotPresent.selector);
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);

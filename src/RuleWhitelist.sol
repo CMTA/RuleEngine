@@ -11,6 +11,10 @@ import "./modules/MetaTxModuleStandalone.sol";
 */
 
 contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
+    // custom errors
+    error RuleWhitelist_AdminWithAddressZeroNotAllowed();
+    error RuleWhitelist_AddressAlreadyWhitelisted();
+    error RuleWhitelist_AddressNotPresent();
     bytes32 public constant WHITELIST_ROLE = keccak256("WHITELIST_ROLE");
     // Number of addresses in the whitelist at the moment
     uint256 private numAddressesWhitelisted;
@@ -36,7 +40,9 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
         address admin,
         address forwarderIrrevocable
     ) MetaTxModuleStandalone(forwarderIrrevocable) {
-        require(admin != address(0), "Address 0 not allowed");
+        if(admin == address(0)){
+            revert RuleWhitelist_AdminWithAddressZeroNotAllowed();
+        }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(WHITELIST_ROLE, admin);
     }
@@ -92,10 +98,10 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
     function addAddressToTheWhitelist(
         address _newWhitelistAddress
     ) public onlyRole(WHITELIST_ROLE) {
-        require(
-            !whitelist[_newWhitelistAddress],
-            "Address is already in the whitelist"
-        );
+        if(whitelist[_newWhitelistAddress])
+        {
+            revert RuleWhitelist_AddressAlreadyWhitelisted();
+        }
         whitelist[_newWhitelistAddress] = true;
         ++numAddressesWhitelisted;
     }
@@ -109,10 +115,9 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
     function removeAddressFromTheWhitelist(
         address _removeWhitelistAddress
     ) public onlyRole(WHITELIST_ROLE) {
-        require(
-            whitelist[_removeWhitelistAddress],
-            "Address is not in the whitelist"
-        );
+        if(!whitelist[_removeWhitelistAddress]){
+            revert RuleWhitelist_AddressNotPresent();
+        }
         whitelist[_removeWhitelistAddress] = false;
         --numAddressesWhitelisted;
     }

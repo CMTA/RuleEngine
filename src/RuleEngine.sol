@@ -11,6 +11,11 @@ import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 @title Implementation of a ruleEngine defined by the CMTAT
 */
 contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
+    error RuleEngine_RuleAddressZeroNotAllowed();
+    error RuleEngine_RuleAlreadyExists();
+    error RuleEngine_RuleDoNotMatch();
+    error RuleEngine_AdminWithAddressZeroNotAllowed();
+    error RuleEngine_ArrayIsEmpty();
     /// @dev Role to manage the ruleEngine
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
     /// @dev Indicate if a rule already exists
@@ -32,7 +37,10 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
         address admin,
         address forwarderIrrevocable
     ) MetaTxModuleStandalone(forwarderIrrevocable) {
-        require(admin != address(0), "Address 0 not allowed");
+        if(admin == address(0))
+        {
+            revert RuleEngine_AdminWithAddressZeroNotAllowed();
+        }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(RULE_ENGINE_ROLE, admin);
     }
@@ -45,13 +53,16 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
     function setRules(
         IRule[] calldata rules_
     ) external override onlyRole(RULE_ENGINE_ROLE) {
-        require(rules_.length != 0, "The array is empty");
+        if(rules_.length == 0){
+            revert RuleEngine_ArrayIsEmpty();
+        }
         for (uint256 i = 0; i < rules_.length; ) {
-            require(
-                address(rules_[i]) != address(0x0),
-                "One of the rules is a zero address"
-            );
-            require(!_ruleIsPresent[rules_[i]], "The rule is already present");
+            if( address(rules_[i]) == address(0x0)){
+                revert  RuleEngine_RuleAddressZeroNotAllowed();
+            }
+            if(_ruleIsPresent[rules_[i]]){
+                revert RuleEngine_RuleAlreadyExists();
+            }
             _ruleIsPresent[rules_[i]] = true;
             emit AddRule(rules_[i]);
             unchecked {
@@ -76,11 +87,14 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
      *
      */
     function addRule(IRule rule_) public onlyRole(RULE_ENGINE_ROLE) {
-        require(
-            address(rule_) != address(0x0),
-            "The rule can't be a zero address"
-        );
-        require(!_ruleIsPresent[rule_], "The rule is already present");
+        if( address(rule_) == address(0x0))
+        {
+            revert RuleEngine_RuleAddressZeroNotAllowed();
+        }
+        if( _ruleIsPresent[rule_])
+        {
+            revert RuleEngine_RuleAlreadyExists();
+        }
         _rules.push(rule_);
         _ruleIsPresent[rule_] = true;
         emit AddRule(rule_);
@@ -100,7 +114,10 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
         IRule rule_,
         uint256 index
     ) public onlyRole(RULE_ENGINE_ROLE) {
-        require(_rules[index] == rule_, "The rule don't match");
+        if(_rules[index] != rule_)
+        {
+            revert RuleEngine_RuleDoNotMatch();
+        }
         if (index != _rules.length - 1) {
             _rules[index] = _rules[_rules.length - 1];
         }

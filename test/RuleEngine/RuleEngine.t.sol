@@ -80,7 +80,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        vm.expectRevert("The rule is already present");
+        vm.expectRevert(RuleEngine_RuleAlreadyExists.selector);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
         );
@@ -196,7 +196,7 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testCannotAddRuleZeroAddress() public {
         // Act
-        vm.expectRevert("The rule can't be a zero address");
+        vm.expectRevert(RuleEngine_RuleAddressZeroNotAllowed.selector);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(IRule(address(0x0)));
 
@@ -207,7 +207,7 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testCannotAddARuleAlreadyPresent() public {
         // Act
-        vm.expectRevert("The rule is already present");
+        vm.expectRevert(RuleEngine_RuleAlreadyExists.selector);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
 
@@ -246,7 +246,7 @@ contract RuleEngineTest is Test, HelperContract {
         );
 
         // Act
-        vm.expectRevert("The rule don't match");
+        vm.expectRevert(RuleEngine_RuleDoNotMatch.selector);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist1, 0);
 

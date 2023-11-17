@@ -41,4 +41,18 @@ contract RuleEngineTest is Test, HelperContract {
         resBool = ruleEngineMock.isTrustedForwarder(address(forwarder));
         assertEq(resBool, true);
     }
+
+    function testCannotDeployContractifAdminAddressIsZero() public {
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        MinimalForwarderMock forwarder = new MinimalForwarderMock(
+        );
+        forwarder.initialize();
+        vm.expectRevert(RuleEngine_AdminWithAddressZeroNotAllowed.selector);
+        // Act
+        ruleEngineMock = new RuleEngine(
+            address(0x0),
+            address(forwarder)
+        );
+    }
 }
