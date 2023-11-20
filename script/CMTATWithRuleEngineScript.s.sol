@@ -18,12 +18,16 @@ contract CMTATWithRuleEngineScript is Script {
         address trustedForwarder = address(0x0);
         vm.startBroadcast(deployerPrivateKey);
         uint256 flag = 5;
+        uint48 initialDelay = 0;
+        uint8 decimals = 0;
         // CMTAT
         CMTAT_STANDALONE CMTAT_CONTRACT = new CMTAT_STANDALONE(
             trustedForwarder,
             ADMIN,
+            initialDelay,
             "CMTA Token",
             "CMTAT",
+            decimals,
             "CMTAT_ISIN",
             "https://cmta.ch",
             IRuleEngine(address(0)),

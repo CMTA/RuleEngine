@@ -29,12 +29,16 @@ contract CMTATIntegration is Test, HelperContract {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelist = new RuleWhitelist(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
         // global arrange
+        uint48 initialDelay = 0;
+        uint8 decimals = 0;
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT = new CMTAT_STANDALONE(
             ZERO_ADDRESS,
             DEFAULT_ADMIN_ADDRESS,
+            initialDelay,
             "CMTA Token",
             "CMTAT",
+            decimals,
             "CMTAT_ISIN",
             "https://cmta.ch",
             IRuleEngine(address(0)),
@@ -62,29 +66,36 @@ contract CMTATIntegration is Test, HelperContract {
     function testCannotTransferWithoutAddressWhitelisted() public {
         // Arrange
         vm.prank(ADDRESS1);
-        vm.expectRevert(bytes("CMTAT: transfer rejected by validation module"));
+        vm.expectRevert(
+        abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ADDRESS1, ADDRESS2, 21));   
         // Act
         CMTAT_CONTRACT.transfer(ADDRESS2, 21);
     }
 
     function testCannotTransferWithoutFromAddressWhitelisted() public {
+        // Arrange
+        uint256 amount = 21;
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS2);
 
         vm.prank(ADDRESS1);
-        vm.expectRevert(bytes("CMTAT: transfer rejected by validation module"));
+        vm.expectRevert(
+        abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ADDRESS1, ADDRESS2, amount));   
         // Act
-        CMTAT_CONTRACT.transfer(ADDRESS2, 21);
+        CMTAT_CONTRACT.transfer(ADDRESS2, amount);
     }
 
     function testCannotTransferWithoutToAddressWhitelisted() public {
+        // Arrange
+        uint256 amount = 21;
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
 
         vm.prank(ADDRESS1);
-        vm.expectRevert(bytes("CMTAT: transfer rejected by validation module"));
+        vm.expectRevert(
+        abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ADDRESS1, ADDRESS2, amount));   
         // Act
-        CMTAT_CONTRACT.transfer(ADDRESS2, 21);
+        CMTAT_CONTRACT.transfer(ADDRESS2, amount);
     }
 
     function testCanMakeATransfer() public {

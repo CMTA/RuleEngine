@@ -27,7 +27,7 @@ contract RuleEngineTest is Test, HelperContract {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         MinimalForwarderMock forwarder = new MinimalForwarderMock(
         );
-        forwarder.initialize();
+        forwarder.initialize(ERC2771ForwarderDomain);
 
         // Act
         ruleEngineMock = new RuleEngine(
@@ -47,7 +47,7 @@ contract RuleEngineTest is Test, HelperContract {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         MinimalForwarderMock forwarder = new MinimalForwarderMock(
         );
-        forwarder.initialize();
+        forwarder.initialize(ERC2771ForwarderDomain);
         vm.expectRevert(RuleEngine_AdminWithAddressZeroNotAllowed.selector);
         // Act
         ruleEngineMock = new RuleEngine(

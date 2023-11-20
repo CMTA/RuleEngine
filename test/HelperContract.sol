@@ -40,6 +40,9 @@ abstract contract HelperContract {
     // RuleWhiteList role
     bytes32 public constant WHITELIST_ROLE = keccak256("WHITELIST_ROLE");
 
+    // Forwarder
+    string ERC2771ForwarderDomain = 'ERC2771ForwarderDomain';
+
     // RuleEngine event
     event AddRule(IRule indexed rule);
     event RemoveRule(IRule indexed rule);

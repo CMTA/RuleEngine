@@ -30,7 +30,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         MinimalForwarderMock forwarder = new MinimalForwarderMock(
         );
-        forwarder.initialize();
+        forwarder.initialize(ERC2771ForwarderDomain);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist = new RuleWhitelist(
             WHITELIST_OPERATOR_ADDRESS,
@@ -49,7 +49,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         MinimalForwarderMock forwarder = new MinimalForwarderMock(
         );
-        forwarder.initialize();
+        forwarder.initialize(ERC2771ForwarderDomain);
         vm.expectRevert(RuleWhitelist_AdminWithAddressZeroNotAllowed.selector);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist = new RuleWhitelist(
