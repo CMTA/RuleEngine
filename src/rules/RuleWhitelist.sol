@@ -2,36 +2,19 @@
 
 pragma solidity ^0.8.20;
 
-import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-import "../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
-import "./modules/MetaTxModuleStandalone.sol";
-
+import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
+import "./../modules/MetaTxModuleStandalone.sol";
+import "./abstract/RuleWhitelistInvariantStorage.sol";
 /**
 @title a whitelist manager
 */
 
-contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
-    // custom errors
-    error RuleWhitelist_AdminWithAddressZeroNotAllowed();
-    error RuleWhitelist_AddressAlreadyWhitelisted();
-    error RuleWhitelist_AddressNotPresent();
-    bytes32 public constant WHITELIST_ROLE = keccak256("WHITELIST_ROLE");
+contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone, RuleWhitelistInvariantStorage {
+     mapping(address => bool) whitelist;
     // Number of addresses in the whitelist at the moment
     uint256 private numAddressesWhitelisted;
-
-    string constant TEXT_CODE_NOT_FOUND = "Code not found";
-    string constant TEXT_ADDRESS_FROM_NOT_WHITELISTED =
-        "The sender is not in the whitelist";
-    string constant TEXT_ADDRESS_TO_NOT_WHITELISTED =
-        "The recipient is not in the whitelist";
-
-    // Code
-    // It is very important that each rule uses an unique code
-    uint8 public constant CODE_ADDRESS_FROM_NOT_WHITELISTED = 20;
-    uint8 public constant CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
-
-    mapping(address => bool) whitelist;
-
+    
     /**
     * @param admin Address of the contract (Access Control)
     * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
