@@ -6,7 +6,7 @@ pragma solidity ^0.8.17;
 import "forge-std/Script.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
 import "src/RuleEngine.sol";
-import "src/RuleWhitelist.sol";
+import "src/rules/RuleWhitelist.sol";
 /**
 @title Deploy a CMTAT, a RuleWhitelist and a RuleEngine
 */
@@ -18,12 +18,16 @@ contract CMTATWithRuleEngineScript is Script {
         address trustedForwarder = address(0x0);
         vm.startBroadcast(deployerPrivateKey);
         uint256 flag = 5;
+        uint48 initialDelay = 0;
+        uint8 decimals = 0;
         // CMTAT
         CMTAT_STANDALONE CMTAT_CONTRACT = new CMTAT_STANDALONE(
             trustedForwarder,
             ADMIN,
+            initialDelay,
             "CMTA Token",
             "CMTAT",
+            decimals,
             "CMTAT_ISIN",
             "https://cmta.ch",
             IRuleEngine(address(0)),

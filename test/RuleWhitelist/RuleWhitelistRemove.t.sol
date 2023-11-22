@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
@@ -90,7 +90,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         // Arrange
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         assertFalse(resBool);
-        vm.expectRevert(bytes("Address is not in the whitelist"));
+        vm.expectRevert(RuleWhitelist_AddressNotPresent.selector);
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
@@ -126,7 +126,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         address[] memory whitelistRemove = new address[](3);
         whitelistRemove[0] = ADDRESS1;
         whitelistRemove[1] = ADDRESS2;
-        // Target Address - Not Prsent in the whitelist
+        // Target Address - Not Present in the whitelist
         whitelistRemove[2] = ADDRESS3;
 
         // Act

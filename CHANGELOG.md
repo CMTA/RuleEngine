@@ -2,7 +2,14 @@
 
 Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
-## v1.0.2 - 10120609
+## v1.0.3 - 20231122
+
+- Upgrade the library CMTAT to the version [v2.3.1](https://github.com/CMTA/CMTAT/releases/tag/v2.3.1)
+- Use custom errors instead of revert message (gas optimization)
+- Add the rule `SanctionList`
+- Upgrade OpenZeppelin to the version [v5.0.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.0)
+
+## v1.0.2 - 20230609
 
 - Upgrade the library CMTAT to the vesion [v2.3.0](https://github.com/CMTA/CMTAT/releases/tag/v2.3.0)
 - Set the number of runs for the optimizer to 200 for Hardhat and Foundry, see [https://docs.soliditylang.org/en/v0.8.17/using-the-compiler.html#optimizer-options](https://docs.soliditylang.org/en/v0.8.17/using-the-compiler.html#optimizer-options)

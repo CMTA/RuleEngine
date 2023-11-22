@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
@@ -18,11 +18,6 @@ contract RuleWhitelistTest is Test, HelperContract {
 
     // Arrange
     function setUp() public {
-        vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
     }
 
     function testRightDeployment() public {
@@ -30,7 +25,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         MinimalForwarderMock forwarder = new MinimalForwarderMock(
         );
-        forwarder.initialize();
+        forwarder.initialize(ERC2771ForwarderDomain);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist = new RuleWhitelist(
             WHITELIST_OPERATOR_ADDRESS,
@@ -42,5 +37,19 @@ contract RuleWhitelistTest is Test, HelperContract {
         assertEq(resBool, true);
         resBool = ruleWhitelist.isTrustedForwarder(address(forwarder));
         assertEq(resBool, true);
+    }
+
+    function testCannotDeployContractIfAdminAddressIsZero() public {
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        MinimalForwarderMock forwarder = new MinimalForwarderMock(
+        );
+        forwarder.initialize(ERC2771ForwarderDomain);
+        vm.expectRevert(RuleWhitelist_AdminWithAddressZeroNotAllowed.selector);
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        ruleWhitelist = new RuleWhitelist(
+            address(0),
+            address(forwarder)
+        );
     }
 }

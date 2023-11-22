@@ -1,54 +1,14 @@
-# RuleWhitelist - Solidity API
+# RuleWhitelist
 
 [TOC]
 
 
-
-## Constants / Variables
-
-### WHITELIST_ROLE
-
-```solidity
-bytes32 WHITELIST_ROLE
-```
-
-### TEXT_CODE_NOT_FOUND
-
-```solidity
-string TEXT_CODE_NOT_FOUND
-```
-
-### TEXT_ADDRESS_FROM_NOT_WHITELISTED
-
-```solidity
-string TEXT_ADDRESS_FROM_NOT_WHITELISTED
-```
-
-### TEXT_ADDRESS_TO_NOT_WHITELISTED
-
-```solidity
-string TEXT_ADDRESS_TO_NOT_WHITELISTED
-```
-
-### CODE_ADDRESS_FROM_NOT_WHITELISTED
-
-```solidity
-uint8 CODE_ADDRESS_FROM_NOT_WHITELISTED
-```
-
-### CODE_ADDRESS_TO_NOT_WHITELISTED
-
-```solidity
-uint8 CODE_ADDRESS_TO_NOT_WHITELISTED
-```
 
 ### whitelist
 
 ```solidity
 mapping(address => bool) whitelist
 ```
-
-## Functions
 
 ### constructor
 
@@ -58,14 +18,12 @@ constructor(address admin, address forwarderIrrevocable) public
 
 #### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| admin | address | Address of the contract (Access Control) |
+| Name                 | Type    | Description                                                |
+| -------------------- | ------- | ---------------------------------------------------------- |
+| admin                | address | Address of the contract (Access Control)                   |
 | forwarderIrrevocable | address | Address of the forwarder, required for the gasless support |
 
-### Public / External
-
-#### addAddressesToTheWhitelist
+### addAddressesToTheWhitelist
 
 ```solidity
 function addAddressesToTheWhitelist(address[] listWhitelistedAddress) public
@@ -74,13 +32,13 @@ function addAddressesToTheWhitelist(address[] listWhitelistedAddress) public
 Add addresses to the whitelist
 If one of addresses already exist, there is no change for this address. The transaction remains valid (no revert).
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
+| Name                   | Type      | Description                              |
+| ---------------------- | --------- | ---------------------------------------- |
 | listWhitelistedAddress | address[] | an array with the addresses to whitelist |
 
-#### removeAddressesFromTheWhitelist
+### removeAddressesFromTheWhitelist
 
 ```solidity
 function removeAddressesFromTheWhitelist(address[] listWhitelistedAddress) public
@@ -90,13 +48,13 @@ Remove addresses from the whitelist
 If the address does not exist in the whitelist, there is no change for this address. 
 The transaction remains valid (no revert).
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
+| Name                   | Type      | Description                           |
+| ---------------------- | --------- | ------------------------------------- |
 | listWhitelistedAddress | address[] | an array with the addresses to remove |
 
-#### addAddressToTheWhitelist
+### addAddressToTheWhitelist
 
 ```solidity
 function addAddressToTheWhitelist(address _newWhitelistAddress) public
@@ -105,13 +63,13 @@ function addAddressToTheWhitelist(address _newWhitelistAddress) public
 Add one address to the whitelist
 If the address already exists, the transaction is reverted to save gas.
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
+| Name                 | Type    | Description              |
+| -------------------- | ------- | ------------------------ |
 | _newWhitelistAddress | address | The address to whitelist |
 
-#### removeAddressFromTheWhitelist
+### removeAddressFromTheWhitelist
 
 ```solidity
 function removeAddressFromTheWhitelist(address _removeWhitelistAddress) public
@@ -120,13 +78,13 @@ function removeAddressFromTheWhitelist(address _removeWhitelistAddress) public
 Remove one address from the whitelist
 If the address does not exist in the whitelist, the transaction is reverted to save gas.
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
+| Name                    | Type    | Description           |
+| ----------------------- | ------- | --------------------- |
 | _removeWhitelistAddress | address | The address to remove |
 
-#### numberWhitelistedAddress
+### numberWhitelistedAddress
 
 ```solidity
 function numberWhitelistedAddress() external view returns (uint256)
@@ -134,13 +92,13 @@ function numberWhitelistedAddress() external view returns (uint256)
 
 Get the number of whitelisted addresses
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | Number of whitelisted addresses |
+| Name | Type    | Description                     |
+| ---- | ------- | ------------------------------- |
+| [0]  | uint256 | Number of whitelisted addresses |
 
-#### addressIsWhitelisted
+### addressIsWhitelisted
 
 ```solidity
 function addressIsWhitelisted(address _targetAddress) external view returns (bool)
@@ -148,19 +106,19 @@ function addressIsWhitelisted(address _targetAddress) external view returns (boo
 
 Know if an address is whitelisted or not
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
+| Name           | Type    | Description           |
+| -------------- | ------- | --------------------- |
 | _targetAddress | address | The concerned address |
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | bool | True if the address is whitelisted, false otherwise |
+| Name | Type | Description                                         |
+| ---- | ---- | --------------------------------------------------- |
+| [0]  | bool | True if the address is whitelisted, false otherwise |
 
-#### validateTransfer
+### validateTransfer
 
 ```solidity
 function validateTransfer(address _from, address _to, uint256 _amount) public view returns (bool isValid)
@@ -168,21 +126,21 @@ function validateTransfer(address _from, address _to, uint256 _amount) public vi
 
 Validate a transfer
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| _from | address | the origin address |
-| _to | address | the destination address |
-| _amount | uint256 | to transfer |
+| Name    | Type    | Description             |
+| ------- | ------- | ----------------------- |
+| _from   | address | the origin address      |
+| _to     | address | the destination address |
+| _amount | uint256 | to transfer             |
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
+| Name    | Type | Description                                       |
+| ------- | ---- | ------------------------------------------------- |
 | isValid | bool | => true if the transfer is valid, false otherwise |
 
-#### detectTransferRestriction
+### detectTransferRestriction
 
 ```solidity
 function detectTransferRestriction(address _from, address _to, uint256) public view returns (uint8)
@@ -190,21 +148,21 @@ function detectTransferRestriction(address _from, address _to, uint256) public v
 
 Check if an addres is in the whitelist or not
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| _from | address | the origin address |
-| _to | address | the destination address |
-|  | uint256 |  |
+| Name  | Type    | Description             |
+| ----- | ------- | ----------------------- |
+| _from | address | the origin address      |
+| _to   | address | the destination address |
+|       | uint256 |                         |
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint8 | The restricion code or REJECTED_CODE_BASE.TRANSFER_OK |
+| Name | Type  | Description                                           |
+| ---- | ----- | ----------------------------------------------------- |
+| [0]  | uint8 | The restricion code or REJECTED_CODE_BASE.TRANSFER_OK |
 
-#### canReturnTransferRestrictionCode
+### canReturnTransferRestrictionCode
 
 ```solidity
 function canReturnTransferRestrictionCode(uint8 _restrictionCode) external pure returns (bool)
@@ -212,19 +170,19 @@ function canReturnTransferRestrictionCode(uint8 _restrictionCode) external pure 
 
 To know if the restriction code is valid for this rule or not.
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
+| Name             | Type  | Description                 |
+| ---------------- | ----- | --------------------------- |
 | _restrictionCode | uint8 | The target restriction code |
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | bool | true if the restriction code is known, false otherwise |
+| Name | Type | Description                                            |
+| ---- | ---- | ------------------------------------------------------ |
+| [0]  | bool | true if the restriction code is known, false otherwise |
 
-#### messageForTransferRestriction
+### messageForTransferRestriction
 
 ```solidity
 function messageForTransferRestriction(uint8 _restrictionCode) external pure returns (string)
@@ -232,21 +190,19 @@ function messageForTransferRestriction(uint8 _restrictionCode) external pure ret
 
 Return the corresponding message
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
+| Name             | Type  | Description                 |
+| ---------------- | ----- | --------------------------- |
 | _restrictionCode | uint8 | The target restriction code |
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | string | true if the transfer is valid, false otherwise |
+| Name | Type   | Description                                    |
+| ---- | ------ | ---------------------------------------------- |
+| [0]  | string | true if the transfer is valid, false otherwise |
 
-#### Internal
-
-#### _msgSender
+### _msgSender
 
 ```solidity
 function _msgSender() internal view returns (address sender)
@@ -254,33 +210,10 @@ function _msgSender() internal view returns (address sender)
 
 _This surcharge is not necessary if you do not use the MetaTxModule_
 
-#### _msgData
+### _msgData
 
 ```solidity
 function _msgData() internal view returns (bytes)
 ```
 
 _This surcharge is not necessary if you do not use the MetaTxModule_
-
-## MetaTxModuleStandalone
-
-_Meta transaction (gasless) module._
-
-### constructor
-
-```solidity
-constructor(address trustedForwarder) internal
-```
-
-#### _msgSender
-
-```solidity
-function _msgSender() internal view virtual returns (address sender)
-```
-
-#### _msgData
-
-```solidity
-function _msgData() internal view virtual returns (bytes)
-```
-
