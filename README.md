@@ -40,7 +40,7 @@ Here a summary of the main documentation
 | Document                            | Link/Files                                             |
 | ----------------------------------- | ------------------------------------------------------ |
 | Solidity API Documentation (docgen) | [doc/solidityAPI](./doc/solidityAPI)                   |
-| Technical documentation             | [doc/technical.md](./doc/technical.md)                 |
+| Technical documentation             | [doc/technical](./doc/technical)                       |
 | Toolchain                           | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md)                 |
 | Functionalities                     | [doc/functionalities.pdf](./doc/functionalities.pdf)   |
 | Surya report                        | [doc/surya](./doc/surya)                               |

@@ -6,49 +6,9 @@
 
 ### UML
 
-![uml](./schema/classDiagram1.0.3.svg)
-
-## Graph
-
-### RuleEngine
-
-![surya_graph_RuleEngine](./schema/surya/surya_graph_RuleEngine.png)
-
-### Whitelist
-
-![surya_graph_Whitelist](./schema/surya/surya_graph_Whitelist.png)
-
-### SanctionList
-
-![surya_graph_Whitelist](./schema/surya/surya_graph_SanctionList.png)
-
-## Access Control
-
-### Admin
-
-### Whitelist 
-
-The default admin is the address put in argument(`admin`) inside the constructor. It is set in the constructor when the contract is deployed.
-
-### RuleEngine
-
-The default admin is the address put in argument(`admin`) inside the constructor. It is set in the constructor when the contract is deployed.
-
-### Schema
-
-Here a schema of the Access Control.
-
-**RuleEngine**
-![alt text](./accessControl/access-control-RuleEngine.png)
-
-**RuleWhitelist**
-![alt text](./accessControl/access-control-RuleWhitelist.png)
+![uml](../schema/classDiagram1.0.3.svg)
 
 
-
-**RuleSanctionList**
-
-![alt text](./accessControl/access-control-RuleSanctionList.drawio.png)
 
 ## Functionality
 
@@ -84,52 +44,6 @@ The RuleEngine, the Whitelist and SanctionList contracts support client-side gas
 At deployment, the parameter  `forwarder` inside the contract constructor has to be set  with the defined address of the forwarder. Please note that the forwarder can not be changed after deployment.
 
 Please see the OpenGSN [documentation](https://docs.opengsn.org/contracts/#receiving-a-relayed-call) for more details on what is done to support GSN in the contract.
-
-## RuleEngine
-
-### Duplicate rules
-
-**setRules**
-
-If one rule is already present, the function is reverted
-
-**addRule** 
-
-If one rule is already present, the function is reverted
-
-### Null address
-
-**setRules**
-
-The function is reverted if one rule is the zero address
-
-**addRule** 
-
-The function is reverted if one rule is the zero address
-
-## Whitelist
-
-### Null address
-It is possible to add the null address (0x0) to the whitelist. It is a requirement from the CMTAT to be able to mint tokens.
-
-It is not a security problem because OpenZeppelin doesn't authorize the transfer of tokens to the zero address.
-
-### Duplicate address
-
-**addAddress**
-If the address already exists, the transaction is reverted to save gas.
-**addAddresses**
-If one of addresses already exist, there is no change for this address. The transaction remains valid (no revert).
-
-### NonExistent Address
-**removeAddress**
-If the address does not exist in the whitelist, the transaction is reverted to save gas.
-**removeAddresses**
-If the address does not exist in the whitelist, there is no change for this address. The transaction remains valid (no revert).
-
-## SanctionList
-
-No special remarks
 
 ## Other
 
