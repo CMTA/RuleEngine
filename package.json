@@ -10,7 +10,7 @@
     "uml": "npx sol2uml class src",
     "uml:test": "npx sol2uml class test",
     "surya:report": "npx surya mdreport surya_report_ruleEngine.md src/RuleEngine.sol && npx surya mdreport surya_report_ruleWhitelist.md src/RuleWhitelist.sol",
-    "surya:graph": "npx surya graph  src/RuleWhitelist.sol | dot -Tpng > surya_graph_Whitelist.png && npx surya graph  src/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png",
+    "surya:graph": "npx surya graph  src/rules/RuleWhitelist.sol | dot -Tpng > surya_graph_Whitelist.png && npx surya graph  src/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png && npx surya graph  src/rules/RuleSanctionList.sol | dot -Tpng > surya_graph_SanctionList.png",
     "docgen": "npx hardhat docgen"
   
   },

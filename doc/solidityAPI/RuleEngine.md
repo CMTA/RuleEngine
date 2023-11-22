@@ -1,10 +1,38 @@
-# RuleEngine - Solidity API
+# RuleEngine
 
 [TOC]
 
 
 
-## Constants/Variables
+### RuleEngine_RuleAddressZeroNotAllowed
+
+```solidity
+error RuleEngine_RuleAddressZeroNotAllowed()
+```
+
+### RuleEngine_RuleAlreadyExists
+
+```solidity
+error RuleEngine_RuleAlreadyExists()
+```
+
+### RuleEngine_RuleDoNotMatch
+
+```solidity
+error RuleEngine_RuleDoNotMatch()
+```
+
+### RuleEngine_AdminWithAddressZeroNotAllowed
+
+```solidity
+error RuleEngine_AdminWithAddressZeroNotAllowed()
+```
+
+### RuleEngine_ArrayIsEmpty
+
+```solidity
+error RuleEngine_ArrayIsEmpty()
+```
 
 ### RULE_ENGINE_ROLE
 
@@ -12,9 +40,9 @@
 bytes32 RULE_ENGINE_ROLE
 ```
 
-*Role to manage the ruleEngine*
+_Role to manage the ruleEngine_
 
-### ruleIsPresent
+### _ruleIsPresent
 
 ```solidity
 mapping(contract IRule => bool) _ruleIsPresent
@@ -28,9 +56,7 @@ _Indicate if a rule already exists_
 contract IRule[] _rules
 ```
 
-*Array of rules*
-
-## Events
+_Array of rules_
 
 ### AddRule
 
@@ -56,8 +82,6 @@ event ClearRules(contract IRule[] rulesRemoved)
 
 Generate when all the rules are cleared
 
-## Functions
-
 ### constructor
 
 ```solidity
@@ -71,9 +95,7 @@ constructor(address admin, address forwarderIrrevocable) public
 | admin                | address | Address of the contract (Access Control)                   |
 | forwarderIrrevocable | address | Address of the forwarder, required for the gasless support |
 
-### Public/external
-
-#### setRules
+### setRules
 
 ```solidity
 function setRules(contract IRule[] rules_) external
@@ -82,7 +104,7 @@ function setRules(contract IRule[] rules_) external
 Set all the rules, will overwrite all the previous rules. \n
 Revert if one rule is a zero address or if the rule is already present
 
-#### clearRules
+### clearRules
 
 ```solidity
 function clearRules() public
@@ -90,7 +112,7 @@ function clearRules() public
 
 Clear all the rules of the array of rules
 
-#### addRule
+### addRule
 
 ```solidity
 function addRule(contract IRule rule_) public
@@ -99,7 +121,7 @@ function addRule(contract IRule rule_) public
 Add a rule to the array of rules
 Revert if one rule is a zero address or if the rule is already present
 
-#### removeRule
+### removeRule
 
 ```solidity
 function removeRule(contract IRule rule_, uint256 index) public
@@ -111,26 +133,26 @@ Revert if the rule found at the specified index does not match the rule in argum
 _To reduce the array size, the last rule is moved to the location occupied
 by the rule to remove_
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| rule_ | contract IRule | address of the target rule |
-| index | uint256 | the position inside the array of rule |
+| Name  | Type           | Description                           |
+| ----- | -------------- | ------------------------------------- |
+| rule_ | contract IRule | address of the target rule            |
+| index | uint256        | the position inside the array of rule |
 
-#### rulesCount
+### rulesCount
 
 ```solidity
 function rulesCount() external view returns (uint256)
 ```
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The number of rules inside the array |
+| Name | Type    | Description                          |
+| ---- | ------- | ------------------------------------ |
+| [0]  | uint256 | The number of rules inside the array |
 
-#### getRuleIndex
+### getRuleIndex
 
 ```solidity
 function getRuleIndex(contract IRule rule_) external view returns (uint256 index)
@@ -138,13 +160,13 @@ function getRuleIndex(contract IRule rule_) external view returns (uint256 index
 
 Get the index of a rule inside the list
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
+| Name  | Type    | Description                                   |
+| ----- | ------- | --------------------------------------------- |
 | index | uint256 | if the rule is found, _rules.length otherwise |
 
-#### rule
+### rule
 
 ```solidity
 function rule(uint256 ruleId) external view returns (contract IRule)
@@ -152,19 +174,19 @@ function rule(uint256 ruleId) external view returns (contract IRule)
 
 Get the rule at the position specified by ruleId
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
+| Name   | Type    | Description       |
+| ------ | ------- | ----------------- |
 | ruleId | uint256 | index of the rule |
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | contract IRule | a rule address |
+| Name | Type           | Description    |
+| ---- | -------------- | -------------- |
+| [0]  | contract IRule | a rule address |
 
-#### rules
+### rules
 
 ```solidity
 function rules() external view returns (contract IRule[])
@@ -172,13 +194,13 @@ function rules() external view returns (contract IRule[])
 
 Get all the rules
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | contract IRule[] | An array of rules |
+| Name | Type             | Description       |
+| ---- | ---------------- | ----------------- |
+| [0]  | contract IRule[] | An array of rules |
 
-#### detectTransferRestriction
+### detectTransferRestriction
 
 ```solidity
 function detectTransferRestriction(address _from, address _to, uint256 _amount) public view returns (uint8)
@@ -186,21 +208,21 @@ function detectTransferRestriction(address _from, address _to, uint256 _amount) 
 
 Go through all the rule to know if a restriction exists on the transfer
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| _from | address | the origin address |
-| _to | address | the destination address |
-| _amount | uint256 | to transfer |
+| Name    | Type    | Description             |
+| ------- | ------- | ----------------------- |
+| _from   | address | the origin address      |
+| _to     | address | the destination address |
+| _amount | uint256 | to transfer             |
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint8 | The restricion code or REJECTED_CODE_BASE.TRANSFER_OK |
+| Name | Type  | Description                                           |
+| ---- | ----- | ----------------------------------------------------- |
+| [0]  | uint8 | The restricion code or REJECTED_CODE_BASE.TRANSFER_OK |
 
-#### validateTransfer
+### validateTransfer
 
 ```solidity
 function validateTransfer(address _from, address _to, uint256 _amount) public view returns (bool)
@@ -208,21 +230,21 @@ function validateTransfer(address _from, address _to, uint256 _amount) public vi
 
 Validate a transfer
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| _from | address | the origin address |
-| _to | address | the destination address |
-| _amount | uint256 | to transfer |
+| Name    | Type    | Description             |
+| ------- | ------- | ----------------------- |
+| _from   | address | the origin address      |
+| _to     | address | the destination address |
+| _amount | uint256 | to transfer             |
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | bool | True if the transfer is valid, false otherwise |
+| Name | Type | Description                                    |
+| ---- | ---- | ---------------------------------------------- |
+| [0]  | bool | True if the transfer is valid, false otherwise |
 
-#### messageForTransferRestriction
+### messageForTransferRestriction
 
 ```solidity
 function messageForTransferRestriction(uint8 _restrictionCode) external view returns (string)
@@ -230,32 +252,32 @@ function messageForTransferRestriction(uint8 _restrictionCode) external view ret
 
 Return the message corresponding to the code
 
-##### Parameters
+#### Parameters
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
+| Name             | Type  | Description                 |
+| ---------------- | ----- | --------------------------- |
 | _restrictionCode | uint8 | The target restriction code |
 
-##### Return Values
+#### Return Values
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | string | True if the transfer is valid, false otherwise |
+| Name | Type   | Description                                    |
+| ---- | ------ | ---------------------------------------------- |
+| [0]  | string | True if the transfer is valid, false otherwise |
 
-### Internal
-
-#### _msgSender
+### _msgSender
 
 ```solidity
 function _msgSender() internal view returns (address sender)
 ```
 
-_This surcharge is not necessary if you do not use the MetaTxModule_.
+_This surcharge is not necessary if you do not use the MetaTxModule_
 
-#### _msgData
+### _msgData
 
 ```solidity
 function _msgData() internal view returns (bytes)
 ```
 
-_This surcharge is not necessary if you do not use the MetaTxModule.
+_This surcharge is not necessary if you do not use the MetaTxModule_
+
+## 

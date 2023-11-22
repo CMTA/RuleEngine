@@ -1,33 +1,20 @@
 // SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
-import "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-import "../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
-import "./modules/MetaTxModuleStandalone.sol";
-
+import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
+import "./../modules/MetaTxModuleStandalone.sol";
+import "./abstract/RuleWhitelistInvariantStorage.sol";
 /**
 @title a whitelist manager
 */
 
-contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
-    bytes32 public constant WHITELIST_ROLE = keccak256("WHITELIST_ROLE");
+contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone, RuleWhitelistInvariantStorage {
+     mapping(address => bool) whitelist;
     // Number of addresses in the whitelist at the moment
     uint256 private numAddressesWhitelisted;
-
-    string constant TEXT_CODE_NOT_FOUND = "Code not found";
-    string constant TEXT_ADDRESS_FROM_NOT_WHITELISTED =
-        "The sender is not in the whitelist";
-    string constant TEXT_ADDRESS_TO_NOT_WHITELISTED =
-        "The recipient is not in the whitelist";
-
-    // Code
-    // It is very important that each rule uses an unique code
-    uint8 public constant CODE_ADDRESS_FROM_NOT_WHITELISTED = 20;
-    uint8 public constant CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
-
-    mapping(address => bool) whitelist;
-
+    
     /**
     * @param admin Address of the contract (Access Control)
     * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
@@ -36,7 +23,9 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
         address admin,
         address forwarderIrrevocable
     ) MetaTxModuleStandalone(forwarderIrrevocable) {
-        require(admin != address(0), "Address 0 not allowed");
+        if(admin == address(0)){
+            revert RuleWhitelist_AdminWithAddressZeroNotAllowed();
+        }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(WHITELIST_ROLE, admin);
     }
@@ -92,10 +81,10 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
     function addAddressToTheWhitelist(
         address _newWhitelistAddress
     ) public onlyRole(WHITELIST_ROLE) {
-        require(
-            !whitelist[_newWhitelistAddress],
-            "Address is already in the whitelist"
-        );
+        if(whitelist[_newWhitelistAddress])
+        {
+            revert RuleWhitelist_AddressAlreadyWhitelisted();
+        }
         whitelist[_newWhitelistAddress] = true;
         ++numAddressesWhitelisted;
     }
@@ -109,10 +98,9 @@ contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone {
     function removeAddressFromTheWhitelist(
         address _removeWhitelistAddress
     ) public onlyRole(WHITELIST_ROLE) {
-        require(
-            whitelist[_removeWhitelistAddress],
-            "Address is not in the whitelist"
-        );
+        if(!whitelist[_removeWhitelistAddress]){
+            revert RuleWhitelist_AddressNotPresent();
+        }
         whitelist[_removeWhitelistAddress] = false;
         --numAddressesWhitelisted;
     }

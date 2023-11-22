@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
@@ -9,6 +9,8 @@ import "src/RuleEngine.sol";
 @title Tests on the Access Control
 */
 contract RuleWhitelistAccessControl is Test, HelperContract {
+    // Custom error openZeppelin
+    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "No restriction";
@@ -29,16 +31,8 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
     }
 
     function testCannotAttackerAddAddressToTheWhitelist() public {
-        // Act
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ATTACKER),
-                " is missing role ",
-                WHITELIST_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, WHITELIST_ROLE));  
         vm.prank(ATTACKER);
         ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
 
@@ -58,15 +52,8 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
         whitelist[1] = ADDRESS2;
 
         // Act
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ATTACKER),
-                " is missing role ",
-                WHITELIST_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, WHITELIST_ROLE));  
         vm.prank(ATTACKER);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
@@ -97,15 +84,8 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
         assertEq(resBool, true);
 
         // Act
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ATTACKER),
-                " is missing role ",
-                WHITELIST_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, WHITELIST_ROLE));  
         vm.prank(ATTACKER);
         ruleWhitelist.removeAddressFromTheWhitelist(ADDRESS1);
 
@@ -136,15 +116,8 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
         assertEq(resBool, true);
 
         // Act
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ATTACKER),
-                " is missing role ",
-                WHITELIST_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, WHITELIST_ROLE));  
         vm.prank(ATTACKER);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(

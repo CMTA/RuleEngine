@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
@@ -9,6 +9,8 @@ import "src/RuleEngine.sol";
 @title Tests on the Access Control
 */
 contract RuleEngineAccessControlTest is Test, HelperContract {
+    // Custom error openZeppelin
+    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
     RuleEngine ruleEngineMock;
     uint8 resUint8;
     uint256 resUint256;
@@ -36,7 +38,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         assertEq(resUint256, 1);
     }
 
-    function testCannnotAttackerSetRules() public {
+    function testCannotAttackerSetRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
@@ -54,15 +56,8 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
 
         // Act
         vm.prank(ATTACKER);
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ATTACKER),
-                " is missing role ",
-                RULE_ENGINE_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
         (bool success, ) = address(ruleEngineMock).call(
             abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
         );
@@ -76,15 +71,8 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
     function testCannnotAttackerClearRules() public {
         // Act
         vm.prank(ATTACKER);
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ATTACKER),
-                " is missing role ",
-                RULE_ENGINE_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
         ruleEngineMock.clearRules();
 
         // Assert
@@ -95,15 +83,8 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
     function testCannotAttackerAddRule() public {
         // Act
         vm.prank(ATTACKER);
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ATTACKER),
-                " is missing role ",
-                RULE_ENGINE_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
         ruleEngineMock.addRule(ruleWhitelist);
 
         // Assert
@@ -114,15 +95,8 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
     function testCannotAttackerRemoveRule() public {
         // Act
         vm.prank(ATTACKER);
-        string memory message = string(
-            abi.encodePacked(
-                "AccessControl: account ",
-                vm.toString(ATTACKER),
-                " is missing role ",
-                RULE_ENGINE_ROLE_HASH
-            )
-        );
-        vm.expectRevert(bytes(message));
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
         ruleEngineMock.removeRule(ruleWhitelist, 0);
 
         // Assert
