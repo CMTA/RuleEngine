@@ -125,6 +125,9 @@ See [Solidity Coverage in VS Code with Foundry](https://mirror.xyz/devanon.eth/R
 ## Deployment
 The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/deploy-commands) 
 ### Script
+
+> This documentation has been written for the version v1.0.2
+
 To run the script for deployment, you need to create a .env file. The value for CMTAT.ADDRESS is require only to use the script **RuleEngine.s.sol**
 Warning : put your private key in a .env file is not the best secure way.
 
@@ -149,6 +152,9 @@ forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  
 ```
 
 ### Local
+
+> This documentation has been written for the version v1.0.2
+
 With Foundry, you [can create a local testnet](https://book.getfoundry.sh/reference/anvil/) node for deploying and testing smart contracts, based on the [Anvil](https://anvil.works/) framework. 
 
 On Linux, using the default RPC URL, and Anvil's test private key, run:  
@@ -162,22 +168,3 @@ forge create CMTAT_BASE --rpc-url=$RPC_URL --private-key=$PRIVATE_KEY --construc
 ```
 
 See also the command's [documentation](https://book.getfoundry.sh/reference/forge/deploy-command).
-
-
-
-## Documentation
-
-**Slither**
-
-```bash
- slither .  --checklist --filter-paths "lib|test|" > slither-report.md
-```
-
-
-
-**sol2uml**
-
-```bash
-npx sol2uml src
-```
-
