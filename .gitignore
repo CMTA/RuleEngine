@@ -10,3 +10,6 @@ nethereum-gen.settings
 #hardhat
 artifacts/
 cache_hardhat/
+#drawio
+*.bkp
+*.dtmp
