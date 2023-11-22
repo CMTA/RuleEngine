@@ -4,9 +4,9 @@ Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
 ## v1.0.3 - 20231122
 
-- Upgrade the library CMTAT to the vesion [v2.3.1](https://github.com/CMTA/CMTAT/releases/tag/v2.3.1)
+- Upgrade the library CMTAT to the version [v2.3.1](https://github.com/CMTA/CMTAT/releases/tag/v2.3.1)
 - Use custom errors instead of revert message (gas optimization)
-- Add the rule SanctionList
+- Add the rule `SanctionList`
 - Upgrade OpenZeppelin to the version [v5.0.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.0)
 
 ## v1.0.2 - 20230609
