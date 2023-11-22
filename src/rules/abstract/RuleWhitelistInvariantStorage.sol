@@ -20,6 +20,6 @@ abstract contract RuleWhitelistInvariantStorage is RuleCommonInvariantStorage {
 
     // Code
     // It is very important that each rule uses an unique code
-    uint8 public constant CODE_ADDRESS_FROM_NOT_WHITELISTED = 20;
-    uint8 public constant CODE_ADDRESS_TO_NOT_WHITELISTED = 30;
+    uint8 public constant CODE_ADDRESS_FROM_NOT_WHITELISTED = 21;
+    uint8 public constant CODE_ADDRESS_TO_NOT_WHITELISTED = 22;
 }

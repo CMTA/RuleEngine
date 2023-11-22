@@ -18,11 +18,6 @@ contract RuleWhitelistTest is Test, HelperContract {
 
     // Arrange
     function setUp() public {
-        vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
     }
 
     function testRightDeployment() public {
@@ -44,7 +39,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         assertEq(resBool, true);
     }
 
-    function testCannotDeployContractifAdminAddressIsZero() public {
+    function testCannotDeployContractIfAdminAddressIsZero() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         MinimalForwarderMock forwarder = new MinimalForwarderMock(

@@ -126,7 +126,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         address[] memory whitelistRemove = new address[](3);
         whitelistRemove[0] = ADDRESS1;
         whitelistRemove[1] = ADDRESS2;
-        // Target Address - Not Prsent in the whitelist
+        // Target Address - Not Present in the whitelist
         whitelistRemove[2] = ADDRESS3;
 
         // Act

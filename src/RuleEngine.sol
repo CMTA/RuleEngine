@@ -138,7 +138,8 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
     * @return index if the rule is found, _rules.length otherwise
     */
     function getRuleIndex(IRule rule_) external view returns (uint256 index) {
-        for (index = 0; index < _rules.length; ) {
+        uint256 rulesLength = _rules.length;
+        for (index = 0; index < rulesLength; ) {
             if (_rules[index] == rule_) {
                 return index;
             }
@@ -178,7 +179,8 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
         address _to,
         uint256 _amount
     ) public view override returns (uint8) {
-        for (uint256 i = 0; i < _rules.length; ) {
+        uint256 rulesLength = _rules.length;
+        for (uint256 i = 0; i < rulesLength; ) {
             uint8 restriction = _rules[i].detectTransferRestriction(
                 _from,
                 _to,
@@ -217,7 +219,8 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
     function messageForTransferRestriction(
         uint8 _restrictionCode
     ) external view override returns (string memory) {
-        for (uint256 i = 0; i < _rules.length; ) {
+        uint256 rulesLength = _rules.length;
+        for (uint256 i = 0; i < rulesLength; ) {
             if (_rules[i].canReturnTransferRestrictionCode(_restrictionCode)) {
                 return
                     _rules[i].messageForTransferRestriction(_restrictionCode);

@@ -1,8 +1,10 @@
+> To use the ruleEngine and the different rules, we recommend the latest audited version, from the [Releases](https://github.com/CMTA/CMTAT/releases) page. Currently, it is the version [v1.0.2](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2)
+
 # RuleEngine
 
 This repository includes the RuleEngine contract for the [CMTAT](https://github.com/CMTA/CMTAT) token. 
-- The CMTAT version used is the version [v2.3.0](https://github.com/CMTA/CMTAT/releases/tag/v2.3.0)
-- The OpenZeppelin version used is the version [4.8.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v4.8.1)
+- The CMTAT version used is the version [v2.3.1](https://github.com/CMTA/CMTAT/releases/tag/v2.3.1)
+- The OpenZeppelin version used is the version [v5.0.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.0)
 
 The CMTAT contracts and the OpenZeppelin library are included as a submodule of the present repository.
 
@@ -12,28 +14,37 @@ The contracts have been audited by [ABDKConsulting](https://www.abdk.consulting/
 
 #### First Audit - March 2022
 
+Fixed version : [v1.0.2](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2)
+
 The first audit was performed by ABDK on the version [1.0.1](https://github.com/CMTA/RuleEngine/releases/tag/1.0.1).
 
-The release 1.1 contains the different fixes and improvements related to this audit.
+The release [v1.0.2](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2) contains the different fixes and improvements related to this audit.
 
 The temporary report is available in [Taurus. Audit 3.3.CollectedIssues.ods](doc/audits/Taurus.Audit3.3.CollectedIssues.ods) 
 
+The final report is available in [ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf](https://github.com/CMTA/CMTAT/blob/master/doc/audits/ABDK_CMTA_CMTATRuleEngine_v_1_0/ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf).
+
 ### Tools
 
-You will find the report performed with [Slither](https://github.com/crytic/slither) in [slither-report.md](doc/audits/tools/slither-report.md) 
+You will find the report performed with [Slither](https://github.com/crytic/slither) in
+
+| Version | File                                                         |
+| ------- | ------------------------------------------------------------ |
+| v1.0.2  | [v1.0.2-slither-report.md](./doc/audits/tools/v1.0.2-slither-report.md) |
+| v1.0.3  | [v1.0.3-slither-report.md](./doc/audits/tools/v1.0.3-slither-report.md) |
 
 ## Documentation
 
 Here a summary of the main documentation
 
-| Document                            | Link/Files                                           |
-| ----------------------------------- | ---------------------------------------------------- |
-| Solidity API Documentation (docgen) | [doc/solidityAPI](./doc/solidityAPI)                 |
-| Technical documentation             | [doc/technical.md](./doc/technical.md)               |
-| Toolchain                           | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md)               |
-| Functionalities                     | [doc/functionalities.pdf](./doc/functionalities.pdf) |
-| Surya report                        | [doc/surya](./doc/surya)                             |
-| Test                                | [doc/test/test.pdf](./doc/test/test.pdf)             |
+| Document                            | Link/Files                                             |
+| ----------------------------------- | ------------------------------------------------------ |
+| Solidity API Documentation (docgen) | [doc/solidityAPI](./doc/solidityAPI)                   |
+| Technical documentation             | [doc/technical.md](./doc/technical.md)                 |
+| Toolchain                           | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md)                 |
+| Functionalities                     | [doc/functionalities.pdf](./doc/functionalities.pdf)   |
+| Surya report                        | [doc/surya](./doc/surya)                               |
+| Test (v1.0.2)                       | [doc/test/v1.0.2/test.pdf](./doc/test/v1.0.2/test.pdf) |
 
 
 
@@ -66,7 +77,9 @@ forge update
 See also the command's [documentation](https://book.getfoundry.sh/reference/forge/forge-update).
 
 
+
 ## Compilation
+
 The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/build-commands) 
 ```
  forge build --contracts src/RuleEngine.sol
@@ -101,7 +114,13 @@ forge coverage
 forge coverage --report lcov
 ```
 
-See [Solidity Coverage in VS Code with Foundry](https://mirror.xyz/devanon.eth/RrDvKPnlD-pmpuW7hQeR5wWdVjklrpOgPCOA-PJkWFU)
+- Generate `index.html`
+
+```bash
+forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage
+```
+
+See [Solidity Coverage in VS Code with Foundry](https://mirror.xyz/devanon.eth/RrDvKPnlD-pmpuW7hQeR5wWdVjklrpOgPCOA-PJkWFU) & [Foundry forge coverage](https://www.rareskills.io/post/foundry-forge-coverage)
 
 ## Deployment
 The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/deploy-commands) 
@@ -145,4 +164,20 @@ forge create CMTAT_BASE --rpc-url=$RPC_URL --private-key=$PRIVATE_KEY --construc
 See also the command's [documentation](https://book.getfoundry.sh/reference/forge/deploy-command).
 
 
+
+## Documentation
+
+**Slither**
+
+```bash
+ slither .  --checklist --filter-paths "lib|test|" > slither-report.md
+```
+
+
+
+**sol2uml**
+
+```bash
+npx sol2uml src
+```
 

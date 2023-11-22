@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 import "./RuleCommonInvariantStorage.sol";
 abstract contract RuleSanctionlistInvariantStorage is RuleCommonInvariantStorage {
     // custom errors
-    error RuleSanctionsList_AdminWithAddressZeroNotAllowed();
+    error RuleSanctionList_AdminWithAddressZeroNotAllowed();
     error RuleSanctionList_AddressAlreadyWhitelisted();
     
     // Role
@@ -20,6 +20,6 @@ abstract contract RuleSanctionlistInvariantStorage is RuleCommonInvariantStorage
 
     // Code
     // It is very important that each rule uses an unique code
-    uint8 public constant CODE_ADDRESS_FROM_IS_SANCTIONED = 40;
-    uint8 public constant CODE_ADDRESS_TO_IS_SANCTIONED = 50;
+    uint8 public constant CODE_ADDRESS_FROM_IS_SANCTIONED = 31;
+    uint8 public constant CODE_ADDRESS_TO_IS_SANCTIONED = 32;
 }  

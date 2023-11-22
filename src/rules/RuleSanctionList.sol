@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: MPL-2.0
+/** 
+
+This code is not audited !!!
+
+*/
+
 
 pragma solidity ^0.8.20;
 import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
@@ -21,18 +27,18 @@ contract RuleSanctionList is IRule, AccessControl, MetaTxModuleStandalone,  Rule
         address forwarderIrrevocable
     ) MetaTxModuleStandalone(forwarderIrrevocable) {
         if(admin == address(0)){
-            revert RuleSanctionsList_AdminWithAddressZeroNotAllowed();
+            revert RuleSanctionList_AdminWithAddressZeroNotAllowed();
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(SANCTIONLIST_ROLE, admin);
     }
 
     /**
-     * @notice Set all the rules, will overwrite all the previous rules. \n
-     * Revert if one rule is a zero address or if the rule is already present
-     *
+     * @notice Set the oracle contract
+     * @param sanctionContractOracle_ address of your oracle contract
+     * @dev zero address is authorized to authorize all transfers
      */
-    function setOracle(
+    function setSanctionListOracle(
        address sanctionContractOracle_
     ) public onlyRole(SANCTIONLIST_ROLE) {
         sanctionsList = SanctionsList(sanctionContractOracle_);
@@ -106,7 +112,7 @@ contract RuleSanctionList is IRule, AccessControl, MetaTxModuleStandalone,  Rule
         }
     }
 
-        /** 
+    /** 
     * @dev This surcharge is not necessary if you do not use the MetaTxModule
     */
     function _msgSender()
