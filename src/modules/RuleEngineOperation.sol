@@ -11,12 +11,6 @@ import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRuleOperation.sol
 abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngineOperation {
     /// @dev Array of rules
     address[] internal _rulesOperation;
-    /// @notice Generate when a rule is added
-    event AddRule(address indexed rule);
-    /// @notice Generate when a rule is removed
-    event RemoveRule(address indexed rule);
-    /// @notice Generate when all the rules are cleared
-    event ClearRules(address[] rulesRemoved);
 
     /**
      * @notice Set all the rules, will overwrite all the previous rules. \n
@@ -60,7 +54,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      *
      */
     function addRuleOperation(address rule_) public onlyRole(RULE_ENGINE_ROLE) {
-       RuleInternal.addRule( _rulesOperation);
+       RuleInternal.addRule( _rulesOperation, rule_);
         emit AddRule(rule_);
     }
 
@@ -78,7 +72,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
         address rule_,
         uint256 index
     ) public onlyRole(RULE_ENGINE_ROLE) {
-        RuleInternal.removeRule(_rulesOperation); 
+        RuleInternal.removeRule(_rulesOperation, rule_, index); 
         emit RemoveRule(rule_);
     }
 
@@ -120,95 +114,22 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
     * @param _from the origin address
     * @param _to the destination address
     * @param _amount to transfer
-    * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
     **/
-    function operateOnTransfer(
+    function _operateOnTransfer(
         address _from,
         address _to,
         uint256 _amount
-    ) internal returns (uint8) {
+    ) internal {
         uint256 rulesLength = _rulesOperation.length;
         for (uint256 i = 0; i < rulesLength; ) {
-            uint8 restriction = IRuleOperation(_rulesOperation[i]).operateOnTransfer(
+            IRuleOperation(_rulesOperation[i]).operateOnTransfer(
                 _from,
                 _to,
                 _amount
             );
-            if (restriction > 0) {
-                return restriction;
-            }
             unchecked {
                 ++i;
             }
         }
-        //return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-        return uint8(0);
-    }
-
-        /** 
-    * @notice Go through all the rule to know if a restriction exists on the transfer
-    * @param _from the origin address
-    * @param _to the destination address
-    * @param _amount to transfer
-    * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
-    **/
-    function detectTransferRestrictionRuleOperation(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) public view override returns (uint8) {
-        uint256 rulesLength = _rulesOperation.length;
-        for (uint256 i = 0; i < rulesLength; ) {
-            uint8 restriction = IRule(_rulesOperation[i]).detectTransferRestriction(
-                _from,
-                _to,
-                _amount
-            );
-            if (restriction > 0) {
-                return restriction;
-            }
-            unchecked {
-                ++i;
-            }
-        }
-        //return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-        return uint8(0);
-    }
-
-    /** 
-    * @notice Validate a transfer
-    * @param _from the origin address
-    * @param _to the destination address
-    * @param _amount to transfer
-    * @return True if the transfer is valid, false otherwise
-    **/
-    function validateTransferRuleOperation(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) public view override returns (bool) {
-        //return detectTransferRestrictionRuleOperation(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-        return detectTransferRestrictionRuleOperation(_from, _to, _amount) == uint8(0);
-    }
-
-    /** 
-    * @notice Return the message corresponding to the code
-    * @param _restrictionCode The target restriction code
-    * @return True if the transfer is valid, false otherwise
-    **/
-    function messageForTransferRestrictionRuleOperation(
-        uint8 _restrictionCode
-    ) external view override returns (string memory) {
-        uint256 rulesLength = _rulesOperation.length;
-        for (uint256 i = 0; i < rulesLength; ) {
-            if (IRule(_rulesOperation[i]).canReturnTransferRestrictionCode(_restrictionCode)) {
-                return
-                    IRule(_rulesOperation[i]).messageForTransferRestriction(_restrictionCode);
-            }
-            unchecked {
-                ++i;
-            }
-        }
-        return "Unknown restriction code";
     }
 }

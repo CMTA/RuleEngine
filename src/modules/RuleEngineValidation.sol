@@ -3,19 +3,15 @@
 pragma solidity ^0.8.20;
 
 import "./RuleInternal.sol";
-import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
+
+import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRuleEngineValidation.sol";
+import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRuleValidation.sol";
 /**
 @title Implementation of a ruleEngine defined by the CMTAT
 */
-contract RuleEngineValidation is AccessControl, RuleInternal {
+abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngineValidation {
     /// @dev Array of rules
     address[] internal _rules;
-    /// @notice Generate when a rule is added
-    event AddRule(address indexed rule);
-    /// @notice Generate when a rule is removed
-    event RemoveRule(address indexed rule);
-    /// @notice Generate when all the rules are cleared
-    event ClearRules(address[] rulesRemoved);
 
 
     /**
@@ -23,7 +19,7 @@ contract RuleEngineValidation is AccessControl, RuleInternal {
      * Revert if one rule is a zero address or if the rule is already present
      *
      */
-    function setRules(
+    function setRulesValidation(
         address[] calldata rules_
     ) external override onlyRole(RULE_ENGINE_ROLE) {
         if(rules_.length == 0){
@@ -49,7 +45,7 @@ contract RuleEngineValidation is AccessControl, RuleInternal {
      * @notice Clear all the rules of the array of rules
      *
      */
-    function clearRules() public onlyRole(RULE_ENGINE_ROLE) {
+    function clearRulesValidation() public onlyRole(RULE_ENGINE_ROLE) {
         emit ClearRules(_rules);
         _rules = new address[](0);
     }
@@ -59,7 +55,7 @@ contract RuleEngineValidation is AccessControl, RuleInternal {
      * Revert if one rule is a zero address or if the rule is already present
      *
      */
-    function addRule(address rule_) public onlyRole(RULE_ENGINE_ROLE) {
+    function addRuleValidation(address rule_) public onlyRole(RULE_ENGINE_ROLE) {
         if( address(rule_) == address(0x0))
         {
             revert RuleEngine_RuleAddressZeroNotAllowed();
@@ -83,18 +79,18 @@ contract RuleEngineValidation is AccessControl, RuleInternal {
      *
      *
      */
-    function removeRule(
+    function removeRuleValidation(
         address rule_,
         uint256 index
     ) public onlyRole(RULE_ENGINE_ROLE) {
-        RuleInternal.removeRule(_rules, rule_); 
+        RuleInternal.removeRule(_rules, rule_, index); 
         emit RemoveRule(rule_);
     }
 
     /**
     * @return The number of rules inside the array
     */
-    function rulesCount() external view override returns (uint256) {
+    function rulesCountValidation() external view override returns (uint256) {
         return _rules.length;
     }
 
@@ -102,7 +98,7 @@ contract RuleEngineValidation is AccessControl, RuleInternal {
     * @notice Get the index of a rule inside the list
     * @return index if the rule is found, _rules.length otherwise
     */
-    function getRuleIndex(address rule_) external view returns (uint256 index) {
+    function getRuleIndexValidation(address rule_) external view returns (uint256 index) {
         return RuleInternal.getRuleIndex(_rules, rule_);
     }
 
@@ -111,7 +107,7 @@ contract RuleEngineValidation is AccessControl, RuleInternal {
     * @param ruleId index of the rule
     * @return a rule address
     */
-    function rule(uint256 ruleId) external view override returns (address) {
+    function ruleValidation(uint256 ruleId) external view override returns (address) {
         return _rules[ruleId];
     }
 
@@ -119,7 +115,7 @@ contract RuleEngineValidation is AccessControl, RuleInternal {
     * @notice Get all the rules
     * @return An array of rules
     */
-    function rules() external view override returns (address[] memory) {
+    function rulesValidation() external view override returns (address[] memory) {
         return _rules;
     }
 
@@ -137,7 +133,7 @@ contract RuleEngineValidation is AccessControl, RuleInternal {
     ) public view override returns (uint8) {
         uint256 rulesLength = _rules.length;
         for (uint256 i = 0; i < rulesLength; ) {
-            uint8 restriction = IRule(_rules[i]).detectTransferRestriction(
+            uint8 restriction = IRuleValidation(_rules[i]).detectTransferRestriction(
                 _from,
                 _to,
                 _amount
@@ -179,9 +175,9 @@ contract RuleEngineValidation is AccessControl, RuleInternal {
     ) external view override returns (string memory) {
         uint256 rulesLength = _rules.length;
         for (uint256 i = 0; i < rulesLength; ) {
-            if (IRule(_rules[i]).canReturnTransferRestrictionCode(_restrictionCode)) {
+            if (IRuleValidation(_rules[i]).canReturnTransferRestrictionCode(_restrictionCode)) {
                 return
-                    IRule(_rules[i]).messageForTransferRestriction(_restrictionCode);
+                    IRuleValidation(_rules[i]).messageForTransferRestriction(_restrictionCode);
             }
             unchecked {
                 ++i;

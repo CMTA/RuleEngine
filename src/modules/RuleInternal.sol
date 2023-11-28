@@ -6,12 +6,20 @@ import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 /**
 @title Implementation of a ruleEngine defined by the CMTAT
 */
-contract RuleInternal{
+abstract contract RuleInternal {
     error RuleEngine_RuleAddressZeroNotAllowed();
     error RuleEngine_RuleAlreadyExists();
     error RuleEngine_RuleDoNotMatch();
     error RuleEngine_AdminWithAddressZeroNotAllowed();
     error RuleEngine_ArrayIsEmpty();
+
+    /// @notice Generate when a rule is added
+    event AddRule(address indexed rule);
+    /// @notice Generate when a rule is removed
+    event RemoveRule(address indexed rule);
+    /// @notice Generate when all the rules are cleared
+    event ClearRules(address[] rulesRemoved);
+
 
     /// @dev Role to manage the ruleEngine
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
@@ -25,7 +33,7 @@ contract RuleInternal{
      *
      */
     /*function setRules(
-        IRule[] memory _rules, IRule[] calldata rules_
+        address[] memory _rules, address[] calldata rules_
     ) internal {
         if(rules_.length == 0){
             revert RuleEngine_ArrayIsEmpty();
