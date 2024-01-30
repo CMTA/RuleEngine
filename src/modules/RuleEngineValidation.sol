@@ -4,8 +4,8 @@ pragma solidity ^0.8.20;
 
 import "./RuleInternal.sol";
 
-import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRuleEngineValidation.sol";
-import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRuleValidation.sol";
+import "../interfaces/IRuleEngineValidation.sol";
+import "../interfaces/IRuleValidation.sol";
 /**
 @title Implementation of a ruleEngine defined by the CMTAT
 */
@@ -145,8 +145,10 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
                 ++i;
             }
         }
-        //return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-        return uint8(0);
+        //
+        
+        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+        //return uint8(0);
     }
 
     /** 
@@ -161,8 +163,8 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
         address _to,
         uint256 _amount
     ) public view override returns (bool) {
-        //return detectTransferRestriction(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-        return detectTransferRestriction(_from, _to, _amount) == uint8(0);
+        return detectTransferRestriction(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+        //return detectTransferRestriction(_from, _to, _amount) == uint8(0);
     }
 
     /** 

@@ -3,8 +3,8 @@
 pragma solidity ^0.8.20;
 
 import "./RuleInternal.sol";
-import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRuleEngineOperation.sol";
-import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRuleOperation.sol";
+import "../interfaces/IRuleEngineOperation.sol";
+import "../interfaces/IRuleOperation.sol";
 /**
 @title Implementation of a ruleEngine defined by the CMTAT
 */

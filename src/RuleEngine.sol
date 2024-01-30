@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-import "CMTAT/interfaces/draft-IERC1404/IRuleEngineCMTAT.sol";
+import "CMTAT/interfaces/engine/IRuleEngine.sol";
 import "./modules/MetaTxModuleStandalone.sol";
 import "./modules/RuleEngineOperation.sol";
 import "./modules/RuleEngineValidation.sol";
@@ -12,7 +12,7 @@ import "./modules/MetaTxModuleStandalone.sol";
 /**
 @title Implementation of a ruleEngine defined by the CMTAT
 */
-contract RuleEngine is IRuleEngineCMTAT, RuleEngineOperation, RuleEngineValidation, MetaTxModuleStandalone {
+contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, MetaTxModuleStandalone {
     error RuleEngine_TransferInvalid();
     /**
     * @param admin Address of the contract (Access Control)
@@ -32,14 +32,16 @@ contract RuleEngine is IRuleEngineCMTAT, RuleEngineOperation, RuleEngineValidati
 
    
 
-    function operateOnTransfer(address from, address to, uint256 amount) external override  {
+
+    function operateOnTransfer(address from, address to, uint256 amount) external override returns (bool isValid)  {
         // Validate the transfer
-        if(!validateTransfer(from, to, amount)){
-            revert RuleEngine_TransferInvalid();
+        if(!RuleEngineValidation.validateTransfer(from, to, amount)){
+            return false; 
         }
         // Apply operation on RuleEngine
+        // must revert in case of error, no return value
         RuleEngineOperation._operateOnTransfer(from, to, amount);
-
+        return true;
     }
 
     /** 
