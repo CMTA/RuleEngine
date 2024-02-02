@@ -5,6 +5,7 @@ pragma solidity ^0.8.20;
 import "./RuleInternal.sol";
 import "../interfaces/IRuleEngineOperation.sol";
 import "../interfaces/IRuleOperation.sol";
+import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 /**
 @title Implementation of a ruleEngine defined by the CMTAT
 */
@@ -19,7 +20,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      */
     function setRulesOperation(
         address[] calldata rules_
-    ) external onlyRole(RULE_ENGINE_ROLE) {
+    ) public onlyRole(RULE_ENGINE_ROLE) {
         if(rules_.length == 0){
             revert RuleEngine_ArrayIsEmpty();
         }
@@ -69,11 +70,11 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      *
      */
     function removeRuleOperation(
-        address rule_,
+        IRuleOperation rule_,
         uint256 index
     ) public onlyRole(RULE_ENGINE_ROLE) {
-        RuleInternal.removeRule(_rulesOperation, rule_, index); 
-        emit RemoveRule(rule_);
+        RuleInternal.removeRule(_rulesOperation, address(rule_), index); 
+        emit RemoveRule(address(rule_));
     }
 
     /**
@@ -88,7 +89,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
     * @return index if the rule is found, _rulesOperation.length otherwise
     */
     function getRuleOperationIndex(address rule_) external view returns (uint256 index) {
-        return RuleInternal.getRuleIndex(address[] (_rulesOperation), rule_);
+        return RuleInternal.getRuleIndex(_rulesOperation, rule_);
     }
 
     /**

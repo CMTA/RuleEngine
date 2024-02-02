@@ -8,6 +8,26 @@ This repository includes the RuleEngine contract for the [CMTAT](https://github.
 
 The CMTAT contracts and the OpenZeppelin library are included as a submodule of the present repository.
 
+
+
+## Schema
+
+![Engine-RuleEngine.drawio](./doc/schema/Engine-RuleEngine.drawio.png)
+
+
+
+## Available Rules
+
+The following rules are available:
+
+| Rule                                               | Type           | Description                                                  | Doc                                                        |
+| -------------------------------------------------- | -------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| [RuleWhitelist](src/rules/RuleWhitelist.sol)       | RuleValidation | This rule can be used to restrict transfers from/to only addresses inside a whitelist. | [RuleWhitelist.md](./doc/technical/RuleWhitelist.md)       |
+| [RuleSanctionList](src/rules/RuleSanctionList.sol) | RuleValidation | The purpose of this contract is to use the oracle contract from Chainalysis to forbid transfer from/to an address  included in a sanctions designation (US, EU, or UN). | [RuleSanctionList.md](./doc/technical/RuleSanctionList.md) |
+|                                                    |                |                                                              |                                                            |
+
+
+
 ## Audit
 
 The contracts have been audited by [ABDKConsulting](https://www.abdk.consulting/), a globally recognized firm specialized in smart contracts' security.

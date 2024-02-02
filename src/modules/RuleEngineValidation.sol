@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.20;
 
+import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "./RuleInternal.sol";
-
 import "../interfaces/IRuleEngineValidation.sol";
 import "../interfaces/IRuleValidation.sol";
 /**
@@ -17,11 +17,12 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
     /**
      * @notice Set all the rules, will overwrite all the previous rules. \n
      * Revert if one rule is a zero address or if the rule is already present
+     * @dev take address[] instead of IRuleEngineValidation[] since it is not possible to cast IRuleEngineValidation[] -> address[]
      *
      */
     function setRulesValidation(
         address[] calldata rules_
-    ) external override onlyRole(RULE_ENGINE_ROLE) {
+    ) public override onlyRole(RULE_ENGINE_ROLE) {
         if(rules_.length == 0){
             revert RuleEngine_ArrayIsEmpty();
         }
@@ -55,18 +56,18 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
      * Revert if one rule is a zero address or if the rule is already present
      *
      */
-    function addRuleValidation(address rule_) public onlyRole(RULE_ENGINE_ROLE) {
+    function addRuleValidation(IRuleValidation rule_) public onlyRole(RULE_ENGINE_ROLE) {
         if( address(rule_) == address(0x0))
         {
             revert RuleEngine_RuleAddressZeroNotAllowed();
         }
-        if( _ruleIsPresent[rule_])
+        if( _ruleIsPresent[address(rule_)])
         {
             revert RuleEngine_RuleAlreadyExists();
         }
-        _rules.push(rule_);
-        _ruleIsPresent[rule_] = true;
-        emit AddRule(rule_);
+        _rules.push(address(rule_));
+        _ruleIsPresent[address(rule_)] = true;
+        emit AddRule(address(rule_));
     }
 
     /**
@@ -80,11 +81,11 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
      *
      */
     function removeRuleValidation(
-        address rule_,
+        IRuleValidation rule_,
         uint256 index
     ) public onlyRole(RULE_ENGINE_ROLE) {
-        RuleInternal.removeRule(_rules, rule_, index); 
-        emit RemoveRule(rule_);
+        RuleInternal.removeRule(_rules, address(rule_), index); 
+        emit RemoveRule(address(rule_));
     }
 
     /**
@@ -98,8 +99,8 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
     * @notice Get the index of a rule inside the list
     * @return index if the rule is found, _rules.length otherwise
     */
-    function getRuleIndexValidation(address rule_) external view returns (uint256 index) {
-        return RuleInternal.getRuleIndex(_rules, rule_);
+    function getRuleIndexValidation(IRuleValidation rule_) external view returns (uint256 index) {
+        return RuleInternal.getRuleIndex(_rules, address(rule_));
     }
 
     /**

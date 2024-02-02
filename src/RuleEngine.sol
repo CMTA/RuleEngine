@@ -10,7 +10,7 @@ import "./modules/MetaTxModuleStandalone.sol";
 
 
 /**
-@title Implementation of a ruleEngine defined by the CMTAT
+@title Implementation of a ruleEngine as defined by the CMTAT
 */
 contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, MetaTxModuleStandalone {
     error RuleEngine_TransferInvalid();
