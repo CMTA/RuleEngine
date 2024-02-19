@@ -21,22 +21,10 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
     function setRulesOperation(
         address[] calldata rules_
     ) public onlyRole(RULE_ENGINE_ROLE) {
-        if(rules_.length == 0){
-            revert RuleEngine_ArrayIsEmpty();
+        if(rules_.length > 0){
+             clearRulesOperation();
         }
-        for (uint256 i = 0; i < rules_.length; ) {
-            if( address(rules_[i]) == address(0x0)){
-                revert  RuleEngine_RuleAddressZeroNotAllowed();
-            }
-            if(_ruleIsPresent[rules_[i]]){
-                revert RuleEngine_RuleAlreadyExists();
-            }
-            _ruleIsPresent[rules_[i]] = true;
-            emit AddRule(rules_[i]);
-            unchecked {
-                ++i;
-            }
-        }
+        _setRules(rules_);
         _rulesOperation = rules_;
     }
 
@@ -45,8 +33,30 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      *
      */
     function clearRulesOperation() public onlyRole(RULE_ENGINE_ROLE) {
+        uint256 rulesLength = _rulesOperation.length;
+        for(uint256 i = 0; i < rulesLength; ++i){
+            _removeRuleOperation(_rulesOperation[i], i);
+        }
         emit ClearRules(_rulesOperation);
-        _rulesOperation  = new address[](0);
+        // No longer useful
+        //_rulesOperation  = new address[](0);
+    }
+
+    /**
+     * @notice Clear all the rules of the array of rules
+     *
+     */
+    function _clearRulesOperation() internal {
+        uint256 index;
+        // we remove the last element first since it is more optimized.
+        for(uint256 i = _rulesOperation.length; i > 0; --i){
+             unchecked {
+                // don't underflow since i > 0
+                index = i - 1;
+             }
+            _removeRuleOperation(_rulesOperation[index], index);
+        }
+        emit ClearRules(_rulesOperation);
     }
 
     /**
@@ -54,9 +64,9 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      * Revert if one rule is a zero address or if the rule is already present
      *
      */
-    function addRuleOperation(address rule_) public onlyRole(RULE_ENGINE_ROLE) {
-       RuleInternal.addRule( _rulesOperation, rule_);
-        emit AddRule(rule_);
+    function addRuleOperation(IRuleOperation rule_) public onlyRole(RULE_ENGINE_ROLE) {
+       RuleInternal._addRule( _rulesOperation, address(rule_));
+        emit AddRule(address(rule_));
     }
 
     /**
@@ -73,7 +83,24 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
         IRuleOperation rule_,
         uint256 index
     ) public onlyRole(RULE_ENGINE_ROLE) {
-        RuleInternal.removeRule(_rulesOperation, address(rule_), index); 
+        _removeRuleOperation(address(rule_), index);
+    }
+
+        /**
+     * @notice Remove a rule from the array of rules
+     * Revert if the rule found at the specified index does not match the rule in argument
+     * @param rule_ address of the target rule
+     * @param index the position inside the array of rule
+     * @dev To reduce the array size, the last rule is moved to the location occupied
+     * by the rule to remove
+     *
+     *
+     */
+    function _removeRuleOperation(
+        address rule_,
+        uint256 index
+    ) internal {
+        RuleInternal._removeRule(_rulesOperation, rule_, index); 
         emit RemoveRule(address(rule_));
     }
 

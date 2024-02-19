@@ -11,7 +11,7 @@ import "../interfaces/IRuleValidation.sol";
 */
 abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngineValidation {
     /// @dev Array of rules
-    address[] internal _rules;
+    address[] internal _rulesValidation;
 
 
     /**
@@ -23,23 +23,11 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
     function setRulesValidation(
         address[] calldata rules_
     ) public override onlyRole(RULE_ENGINE_ROLE) {
-        if(rules_.length == 0){
-            revert RuleEngine_ArrayIsEmpty();
+        if(rules_.length > 0){
+            _clearRulesValidation();
         }
-        for (uint256 i = 0; i < rules_.length; ) {
-            if( address(rules_[i]) == address(0x0)){
-                revert  RuleEngine_RuleAddressZeroNotAllowed();
-            }
-            if(_ruleIsPresent[rules_[i]]){
-                revert RuleEngine_RuleAlreadyExists();
-            }
-            _ruleIsPresent[rules_[i]] = true;
-            emit AddRule(rules_[i]);
-            unchecked {
-                ++i;
-            }
-        }
-        _rules = rules_;
+        _setRules(rules_);
+        _rulesValidation = rules_;
     }
 
     /**
@@ -47,8 +35,24 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
      *
      */
     function clearRulesValidation() public onlyRole(RULE_ENGINE_ROLE) {
-        emit ClearRules(_rules);
-        _rules = new address[](0);
+        _clearRulesValidation();
+    }
+
+        /**
+     * @notice Clear all the rules of the array of rules
+     *
+     */
+    function _clearRulesValidation() internal {
+        uint256 index;
+        // we remove the last element first since it is more optimized.
+        for(uint256 i = _rulesValidation.length; i > 0; --i){
+             unchecked {
+                // don't underflow since i > 0
+                index = i - 1;
+             }
+            _removeRuleValidation(_rulesValidation[index], index);
+        }
+        emit ClearRules(_rulesValidation);
     }
 
     /**
@@ -57,16 +61,7 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
      *
      */
     function addRuleValidation(IRuleValidation rule_) public onlyRole(RULE_ENGINE_ROLE) {
-        if( address(rule_) == address(0x0))
-        {
-            revert RuleEngine_RuleAddressZeroNotAllowed();
-        }
-        if( _ruleIsPresent[address(rule_)])
-        {
-            revert RuleEngine_RuleAlreadyExists();
-        }
-        _rules.push(address(rule_));
-        _ruleIsPresent[address(rule_)] = true;
+        RuleInternal._addRule( _rulesValidation, address(rule_));
         emit AddRule(address(rule_));
     }
 
@@ -84,7 +79,24 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
         IRuleValidation rule_,
         uint256 index
     ) public onlyRole(RULE_ENGINE_ROLE) {
-        RuleInternal.removeRule(_rules, address(rule_), index); 
+        _removeRuleValidation(address(rule_), index); 
+    }
+
+    /**
+     * @notice Remove a rule from the array of rules
+     * Revert if the rule found at the specified index does not match the rule in argument
+     * @param rule_ address of the target rule
+     * @param index the position inside the array of rule
+     * @dev To reduce the array size, the last rule is moved to the location occupied
+     * by the rule to remove
+     *
+     *
+     */
+    function _removeRuleValidation(
+        address rule_,
+        uint256 index
+    ) internal {
+        RuleInternal._removeRule(_rulesValidation, rule_, index); 
         emit RemoveRule(address(rule_));
     }
 
@@ -92,15 +104,15 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
     * @return The number of rules inside the array
     */
     function rulesCountValidation() external view override returns (uint256) {
-        return _rules.length;
+        return _rulesValidation.length;
     }
 
     /**
     * @notice Get the index of a rule inside the list
-    * @return index if the rule is found, _rules.length otherwise
+    * @return index if the rule is found, _rulesValidation.length otherwise
     */
     function getRuleIndexValidation(IRuleValidation rule_) external view returns (uint256 index) {
-        return RuleInternal.getRuleIndex(_rules, address(rule_));
+        return RuleInternal.getRuleIndex(_rulesValidation, address(rule_));
     }
 
     /**
@@ -109,7 +121,7 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
     * @return a rule address
     */
     function ruleValidation(uint256 ruleId) external view override returns (address) {
-        return _rules[ruleId];
+        return _rulesValidation[ruleId];
     }
 
     /**
@@ -117,7 +129,7 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
     * @return An array of rules
     */
     function rulesValidation() external view override returns (address[] memory) {
-        return _rules;
+        return _rulesValidation;
     }
 
     /** 
@@ -132,9 +144,9 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
         address _to,
         uint256 _amount
     ) public view override returns (uint8) {
-        uint256 rulesLength = _rules.length;
+        uint256 rulesLength = _rulesValidation.length;
         for (uint256 i = 0; i < rulesLength; ) {
-            uint8 restriction = IRuleValidation(_rules[i]).detectTransferRestriction(
+            uint8 restriction = IRuleValidation(_rulesValidation[i]).detectTransferRestriction(
                 _from,
                 _to,
                 _amount
@@ -176,11 +188,11 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
     function messageForTransferRestriction(
         uint8 _restrictionCode
     ) external view override returns (string memory) {
-        uint256 rulesLength = _rules.length;
+        uint256 rulesLength = _rulesValidation.length;
         for (uint256 i = 0; i < rulesLength; ) {
-            if (IRuleValidation(_rules[i]).canReturnTransferRestrictionCode(_restrictionCode)) {
+            if (IRuleValidation(_rulesValidation[i]).canReturnTransferRestrictionCode(_restrictionCode)) {
                 return
-                    IRuleValidation(_rules[i]).messageForTransferRestriction(_restrictionCode);
+                    IRuleValidation(_rulesValidation[i]).messageForTransferRestriction(_restrictionCode);
             }
             unchecked {
                 ++i;

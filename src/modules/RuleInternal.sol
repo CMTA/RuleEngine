@@ -39,6 +39,33 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
         _rules = rules_;
     }*/
 
+
+        /**
+     * @notice Set all the rules, will overwrite all the previous rules. \n
+     * Revert if one rule is a zero address or if the rule is already present
+     *
+     */
+    function _setRules(
+        address[] calldata rules_
+    ) internal {
+        if(rules_.length == 0){
+            revert RuleEngine_ArrayIsEmpty();
+        }
+        for (uint256 i = 0; i < rules_.length; ) {
+            if( address(rules_[i]) == address(0x0)){
+                revert  RuleEngine_RuleAddressZeroNotAllowed();
+            }
+            if(_ruleIsPresent[rules_[i]]){
+                revert RuleEngine_RuleAlreadyExists();
+            }
+            _ruleIsPresent[rules_[i]] = true;
+            emit AddRule(rules_[i]);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     /**
      * @notice Clear all the rules of the array of rules
      *
@@ -53,7 +80,7 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
      * Revert if one rule is a zero address or if the rule is already present
      *
      */
-    function addRule(address[] storage _rules, address rule_) internal  {
+    function _addRule(address[] storage _rules, address rule_) internal  {
         if( address(rule_) == address(0x0))
         {
             revert RuleEngine_RuleAddressZeroNotAllowed();
@@ -77,7 +104,7 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
      *
      *
      */
-    function removeRule(
+    function _removeRule(
         address[] storage _rules,
         address rule_,
         uint256 index
@@ -91,7 +118,7 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
         }
         _rules.pop();
         _ruleIsPresent[rule_] = false;
-        //emit RemoveRule(rule_);
+        emit RemoveRule(rule_);
     }
 
     /**

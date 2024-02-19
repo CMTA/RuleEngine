@@ -159,7 +159,7 @@ contract RuleEngineTest is Test, HelperContract {
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
         );
-
+        ruleEngineMock.rulesValidation();
         // Assert - Arrange
         assertEq(resCallBool, true);
         resUint256 = ruleEngineMock.rulesCountValidation();
@@ -172,6 +172,56 @@ contract RuleEngineTest is Test, HelperContract {
         // Assert
         resUint256 = ruleEngineMock.rulesCountValidation();
         assertEq(resUint256, 0);
+    }
+
+    function testCanClearRulesAndAddAgain() public {
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
+            WHITELIST_OPERATOR_ADDRESS,
+            ZERO_ADDRESS
+        );
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
+            WHITELIST_OPERATOR_ADDRESS,
+            ZERO_ADDRESS
+        );
+        address[] memory ruleWhitelistTab = new address[](2);
+        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
+        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+        );
+
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.clearRulesValidation();
+
+        // Assert
+        resUint256 = ruleEngineMock.rulesCountValidation();
+        assertEq(resUint256, 0);
+
+        // Can set again the previous rules
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        (resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+        );
+        assertEq(resCallBool, true);
+        // Arrange before assert
+
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.clearRulesValidation();
+        resUint256 = ruleEngineMock.rulesCountValidation();
+        assertEq(resUint256, 0);
+
+        // Can add previous rule again
+        vm.expectEmit(true, false, false, false);
+        emit AddRule(address(ruleWhitelist1));
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRuleValidation(ruleWhitelist1);
     }
 
     function testCanAddRule() public {
