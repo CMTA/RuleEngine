@@ -29,16 +29,16 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
             RULE_ENGINE_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist);
+        ruleEngineMock.addRule(ruleWhitelist);
         // Arrange - Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
-    function testCannotAttackerSetRulesValidation() public {
+    function testCannotAttackerSetRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
@@ -50,21 +50,21 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(ruleWhitelist1);
-        ruleWhitelistTab[1] = address(ruleWhitelist2);
+        IRule[] memory ruleWhitelistTab = new IRule[](2);
+        ruleWhitelistTab[0] = IRule(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRule(ruleWhitelist2);
 
         // Act
         vm.prank(ATTACKER);
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
         (bool success, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
         );
 
         // Assert
         assertEq(success, true);
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -73,10 +73,10 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         vm.prank(ATTACKER);
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
-        ruleEngineMock.clearRulesValidation();
+        ruleEngineMock.clearRules();
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -85,10 +85,10 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         vm.prank(ATTACKER);
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
-        ruleEngineMock.addRuleValidation(ruleWhitelist);
+        ruleEngineMock.addRule(ruleWhitelist);
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -97,10 +97,10 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         vm.prank(ATTACKER);
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
-        ruleEngineMock.removeRuleValidation(ruleWhitelist, 0);
+        ruleEngineMock.removeRule(ruleWhitelist, 0);
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 }

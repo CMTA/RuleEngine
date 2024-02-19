@@ -28,12 +28,12 @@ contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
             RULE_ENGINE_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist);
+        ruleEngineMock.addRule(ruleWhitelist);
         // Arrange - Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 

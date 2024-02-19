@@ -29,9 +29,9 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
             ZERO_ADDRESS
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist);
+        ruleEngineMock.addRule(ruleWhitelist);
         // Arrange - Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
 
         // Arrange
@@ -39,11 +39,11 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](1);
-        ruleWhitelistTab[0] = address(ruleWhitelist1);
+        IRule[] memory ruleWhitelistTab = new IRule[](1);
+        ruleWhitelistTab[0] = ruleWhitelist1;
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool success, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
         );
 
         // Arrange - Assert
@@ -109,7 +109,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
     function testMessageForTransferRestrictionNoRule() public {
         // Arrange
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.clearRulesValidation();
+        ruleEngineMock.clearRules();
 
         // Act
         resString = ruleEngineMock.messageForTransferRestriction(50);

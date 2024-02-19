@@ -29,12 +29,13 @@ contract CMTATIntegration is Test, HelperContract {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelist = new RuleWhitelist(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
         // global arrange
+        uint48 initialDelay = 0;
         uint8 decimals = 0;
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT = new CMTAT_STANDALONE(
             ZERO_ADDRESS,
             DEFAULT_ADMIN_ADDRESS,
-            IAuthorizationEngine(address(0)),
+            initialDelay,
             "CMTA Token",
             "CMTAT",
             decimals,
@@ -49,7 +50,7 @@ contract CMTATIntegration is Test, HelperContract {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleEngineMock = new RuleEngine(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist);
+        ruleEngineMock.addRule(ruleWhitelist);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT.mint(ADDRESS1, ADDRESS1_BALANCE_INIT);
         vm.prank(DEFAULT_ADMIN_ADDRESS);

@@ -4,16 +4,12 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
 import "src/rules/RuleWhitelist.sol";
-import "src/modules/RuleEngineInvariantStorage.sol";
 import "src/rules/abstract/RuleWhitelistInvariantStorage.sol";
 import "src/rules/abstract/RuleSanctionListInvariantStorage.sol";
-import "src/rules/abstract/RuleSanctionListInvariantStorage.sol";
-import "src/interfaces/IRuleValidation.sol";
-import "src/interfaces/IRuleOperation.sol";
 /**
 @title Constants used by the tests
 */
-abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionlistInvariantStorage, RuleEngineInvariantStorage  {
+abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionlistInvariantStorage  {
     // EOA to perform tests
     address constant ZERO_ADDRESS = address(0);
     address constant DEFAULT_ADMIN_ADDRESS = address(1);
@@ -36,7 +32,7 @@ abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionli
     RuleWhitelist ruleWhitelist;
     CMTAT_STANDALONE CMTAT_CONTRACT;
 
-    //bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
+    bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
 
     uint8 constant NO_ERROR = 0;
 
@@ -44,17 +40,16 @@ abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionli
     string ERC2771ForwarderDomain = 'ERC2771ForwarderDomain';
 
     // RuleEngine event
-     /*
-    event AddRule( indexed rule);
+    event AddRule(IRule indexed rule);
     event RemoveRule(IRule indexed rule);
     event ClearRules(IRule[] rulesRemoved);
 
     // Custom error RuleEngine
-   error RuleEngine_RuleAddressZeroNotAllowed();
+    error RuleEngine_RuleAddressZeroNotAllowed();
     error RuleEngine_RuleAlreadyExists();
     error RuleEngine_RuleDoNotMatch();
     error RuleEngine_AdminWithAddressZeroNotAllowed();
-    error RuleEngine_ArrayIsEmpty();*/
+    error RuleEngine_ArrayIsEmpty();
 
 
     constructor() {}

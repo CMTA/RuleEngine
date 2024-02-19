@@ -3,14 +3,15 @@
 pragma solidity ^0.8.20;
 
 import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
+import "../interfaces/IRuleEngineValidation.sol";
+import "../interfaces/IRuleValidation.sol";
 import "./../modules/MetaTxModuleStandalone.sol";
 import "./abstract/RuleWhitelistInvariantStorage.sol";
 /**
 @title a whitelist manager
 */
 
-contract RuleWhitelist is IRule, AccessControl, MetaTxModuleStandalone, RuleWhitelistInvariantStorage {
+contract RuleWhitelist is IRuleValidation, AccessControl, MetaTxModuleStandalone, RuleWhitelistInvariantStorage {
      mapping(address => bool) whitelist;
     // Number of addresses in the whitelist at the moment
     uint256 private numAddressesWhitelisted;

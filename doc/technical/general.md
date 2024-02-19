@@ -6,7 +6,7 @@
 
 ### UML
 
-![uml](../schema/classDiagram1.0.3.svg)
+![uml](../schema/classDiagram.svg)
 
 
 
