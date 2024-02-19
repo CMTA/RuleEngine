@@ -6,7 +6,7 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 import "CMTAT/mocks/MinimalForwarderMock.sol";
 /**
-@title General functions of the RuleWhitelist
+* @title General functions of the RuleWhitelist
 */
 contract RuleWhitelistTest is Test, HelperContract {
     uint256 resUint256;

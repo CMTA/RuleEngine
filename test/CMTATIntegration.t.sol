@@ -7,7 +7,7 @@ import "./HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-@title Integration test with the CMTAT
+* @title Integration test with the CMTAT
 */
 contract CMTATIntegration is Test, HelperContract {
     // Defined in CMTAT.sol

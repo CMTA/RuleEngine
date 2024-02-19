@@ -7,7 +7,7 @@ import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "src/RuleEngine.sol";
 
 /**
-@title Tests on the provided functions by OpenZeppelin
+* @title Tests on the provided functions by OpenZeppelin
 */
 contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
     // Defined in CMTAT.sol

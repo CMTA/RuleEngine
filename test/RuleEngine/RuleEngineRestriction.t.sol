@@ -6,7 +6,7 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-@title tests concerning the restrictions and validation for the transfers
+* @title tests concerning the restrictions and validation for the transfers
 */
 contract RuleEngineRestrictionTest is Test, HelperContract {
     RuleEngine ruleEngineMock;

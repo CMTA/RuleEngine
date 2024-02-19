@@ -10,7 +10,7 @@ import "./modules/MetaTxModuleStandalone.sol";
 
 
 /**
-@title Implementation of a ruleEngine as defined by the CMTAT
+* @title Implementation of a ruleEngine as defined by the CMTAT
 */
 contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, MetaTxModuleStandalone {
     error RuleEngine_TransferInvalid();
@@ -30,9 +30,9 @@ contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, M
         _grantRole(RULE_ENGINE_ROLE, admin);
     }
 
-   
-
-
+    /*
+    * @todo: add access control
+    */
     function operateOnTransfer(address from, address to, uint256 amount) external override returns (bool isValid)  {
         // Validate the transfer
         if(!RuleEngineValidation.validateTransfer(from, to, amount)){

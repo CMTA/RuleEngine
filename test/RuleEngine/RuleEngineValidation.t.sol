@@ -6,7 +6,7 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-@title General functions of the RuleEngine
+* @title General functions of the RuleEngine
 */
 contract RuleEngineTest is Test, HelperContract {
     RuleEngine ruleEngineMock;

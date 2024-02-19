@@ -7,9 +7,9 @@ This code is not audited !!!
 
 
 pragma solidity ^0.8.20;
-import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-import "../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
-import "../modules/MetaTxModuleStandalone.sol";
+import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "../../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
+import "../../modules/MetaTxModuleStandalone.sol";
 import "./abstract/RuleSanctionListInvariantStorage.sol";
 interface SanctionsList {
     function isSanctioned(address addr) external view returns (bool);

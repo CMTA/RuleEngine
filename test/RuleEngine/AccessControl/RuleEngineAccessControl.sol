@@ -6,7 +6,7 @@ import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-@title Tests on the Access Control
+* @title Tests on the Access Control
 */
 contract RuleEngineAccessControlTest is Test, HelperContract {
     // Custom error openZeppelin

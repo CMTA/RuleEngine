@@ -3,15 +3,20 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
-import "src/rules/RuleWhitelist.sol";
+
 import "src/modules/RuleEngineInvariantStorage.sol";
-import "src/rules/abstract/RuleWhitelistInvariantStorage.sol";
-import "src/rules/abstract/RuleSanctionListInvariantStorage.sol";
-import "src/rules/abstract/RuleSanctionListInvariantStorage.sol";
+// RuleSanctionList
+import "src/rules/validation/RuleSanctionList.sol";
+// RuleWhitelist
+import "src/rules/validation/RuleWhitelist.sol";
+import "src/rules/validation/abstract/RuleWhitelistInvariantStorage.sol";
+import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
+import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
+// Rule interface
 import "src/interfaces/IRuleValidation.sol";
 import "src/interfaces/IRuleOperation.sol";
 /**
-@title Constants used by the tests
+* @title Constants used by the tests
 */
 abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionlistInvariantStorage, RuleEngineInvariantStorage  {
     // EOA to perform tests

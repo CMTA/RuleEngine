@@ -6,7 +6,7 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-@title Tests the functions to remove addresses from the whitelist
+* @title Tests the functions to remove addresses from the whitelist
 */
 contract RuleWhitelistRemoveTest is Test, HelperContract {
     // Defined in CMTAT.sol
