@@ -16,8 +16,9 @@ abstract contract RuleVinkulierungInvariantStorage  {
         STATUS status;
     }
 
-        // Role
+    // Role
     bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
+    bytes32 public constant RULE_VINKULIERUNG_OPERATOR_ROLE = keccak256("RULE_VINKULIERUNG_OPERATOR_ROLE");
 
 
     // error

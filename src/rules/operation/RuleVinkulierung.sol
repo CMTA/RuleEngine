@@ -86,7 +86,7 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
 
     function createTransferRequestWithApproval(
         address to, uint256 value
-    ) public {
+    ) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
         // WAIT => Will overwrite
         // APPROVED => will overwrite previous status with a new delay
         // DENIED => will overwrite
@@ -157,7 +157,7 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
 
     function approveTransferRequest(
         address from, address to, uint256 value, bool isApproved_
-    ) public {
+    ) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE) {
         bytes32 key =  keccak256(abi.encode(from, to, value));
         // status
         if(transferRequests[key].status != STATUS.WAIT){
@@ -180,7 +180,7 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
 
     function approveTransferRequestWithId(
         uint256 requestId_, bool isApproved_
-    ) public {
+    ) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
         if(requestId_ + 1 >  requestId) {
             revert RuleVinkulierung_InvalidId();
         }
