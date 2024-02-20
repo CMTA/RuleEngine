@@ -26,6 +26,8 @@ abstract contract RuleVinkulierungInvariantStorage  {
     error RuleVinkulierung_Wrong_Status();
     error RuleVinkulierung_timeExceeded();
     error RuleVinkulierung_TransferDenied();
+    error RuleVinkulierung_InvalidId();
+
 
     // Event
     event transferProcessed(bytes32 indexed key, address indexed from, address indexed  to, uint256 value);

@@ -147,17 +147,21 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
         address _from,
         address _to,
         uint256 _amount
-    ) internal {
+    ) internal returns (bool isValid){
         uint256 rulesLength = _rulesOperation.length;
         for (uint256 i = 0; i < rulesLength; ) {
-            IRuleOperation(_rulesOperation[i]).operateOnTransfer(
+            bool result = IRuleOperation(_rulesOperation[i]).operateOnTransfer(
                 _from,
                 _to,
                 _amount
             );
+            if(!result){
+                return false;
+            }
             unchecked {
                 ++i;
             }
         }
+        return true;
     }
 }

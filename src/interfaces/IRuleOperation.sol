@@ -13,5 +13,5 @@ interface IRuleOperation {
         address _from,
         address _to,
         uint256 _amount
-    ) external;
+    ) external returns (bool isValid);
 }

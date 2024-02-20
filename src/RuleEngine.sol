@@ -39,9 +39,7 @@ contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, M
             return false; 
         }
         // Apply operation on RuleEngine
-        // must revert in case of error, no return value
-        RuleEngineOperation._operateOnTransfer(from, to, amount);
-        return true;
+        return RuleEngineOperation._operateOnTransfer(from, to, amount);
     }
 
     /** 

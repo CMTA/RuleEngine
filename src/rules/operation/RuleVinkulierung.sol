@@ -12,6 +12,12 @@ import "./abstract/RuleVinkulierungInvariantStorage.sol";
 */
 
 contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalone, RuleVinkulierungInvariantStorage {
+
+    /**
+    Improvement:
+    - Update timeLimit
+    - Open/remove require askin
+    */
    
     // Time variable
     uint256 timeLimitToApprove = 7 days;
@@ -41,7 +47,7 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
         _grantRole(RULE_ENGINE_ROLE, ruleEngineContract);
     }
 
-    function askTransferApproval(
+    function createTransferRequest(
         address to, uint256 value
     ) public {
         // WAIT => Will set a new delay to approve
@@ -78,7 +84,7 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
         emit transferWaiting(key, from, to, value);
     }
 
-    function createTransferApproval(
+    function createTransferRequestWithApproval(
         address to, uint256 value
     ) public {
         // WAIT => Will overwrite
@@ -97,11 +103,9 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
                 maxTime : block.timestamp + timeLimitToTransfer,
                 status:STATUS.APPROVED
              });
-              transferRequests[key] = newTransferApproval;
-              IdToKey[requestId] = key;
-              ++requestId;
-               
-            
+            transferRequests[key] = newTransferApproval;
+            IdToKey[requestId] = key;
+            ++requestId;
             transferRequests[key] = newTransferApproval;
         } else {
             // Overwrite previous approval
@@ -118,7 +122,7 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
         return transferRequests[key];
     }
 
-        /**
+    /**
      * @notice get Trade by status
      * @param  _targetStatus The status of the transactions you want to retrieve
      * @return array with corresponding transactions
@@ -151,24 +155,54 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
         return requests;
     }
 
-    function approveTransfer(
-        address from, address to, uint256 value
+    function approveTransferRequest(
+        address from, address to, uint256 value, bool isApproved_
     ) public {
         bytes32 key =  keccak256(abi.encode(from, to, value));
         // status
         if(transferRequests[key].status != STATUS.WAIT){
             revert RuleVinkulierung_Wrong_Status();
         }
-        // Time
-        if(transferRequests[key].askTime > timeLimitToApprove){
-            revert RuleVinkulierung_timeExceeded();
+        if(isApproved_){
+             // Time
+            if(transferRequests[key].askTime > timeLimitToApprove){
+                revert RuleVinkulierung_timeExceeded();
+            }
+            // Set status
+            transferRequests[key].status = STATUS.APPROVED;
+            // Set max time
+            transferRequests[key].maxTime = block.timestamp + timeLimitToTransfer;
+            emit transferApproved(key, from, to, value);
+        } else {
+             transferRequests[key].status = STATUS.DENIED;
         }
-        // Set status
-        transferRequests[key].status = STATUS.APPROVED;
-        // Set max time
-        transferRequests[key].maxTime = block.timestamp + timeLimitToTransfer;
+    }
 
-        emit transferApproved(key, from, to, value);
+    function approveTransferRequestWithId(
+        uint256 requestId_, bool isApproved_
+    ) public {
+        if(requestId_ + 1 >  requestId) {
+            revert RuleVinkulierung_InvalidId();
+        }
+        TransferRequest memory transferRequest = transferRequests[IdToKey[requestId_]];
+        if(isApproved_){
+            // status
+            if(transferRequest.status != STATUS.WAIT){
+                revert RuleVinkulierung_Wrong_Status();
+            }
+            // Time
+            if(transferRequest.askTime > timeLimitToApprove){
+                revert RuleVinkulierung_timeExceeded();
+            }
+            // Set status
+            transferRequests[transferRequest.key].status = STATUS.APPROVED;
+            // Set max time
+            transferRequests[transferRequest.key].maxTime = block.timestamp + timeLimitToTransfer;
+
+            emit transferApproved(transferRequest.key, transferRequest.from, transferRequest.to, transferRequest.value);
+        } else{
+            transferRequests[transferRequest.key].status = STATUS.DENIED;
+        }
     }
 
 
@@ -180,11 +214,11 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
         address _from,
         address _to,
         uint256 _amount
-    ) public override onlyRole(RULE_ENGINE_ROLE){
+    ) public override onlyRole(RULE_ENGINE_ROLE) returns(bool isValid){
         bytes32 key = keccak256(abi.encode(_from, _to, _amount));
         if(transferRequests[key].status == STATUS.APPROVED && transferRequests[key].maxTime <= block.timestamp){
             // we archive the demand
-            //transferRequestsArchive.push(transferRequests[key]);
+            // transferRequestsArchive.push(transferRequests[key]);
             // Reset to zero
             transferRequests[key].maxTime = 0;
             transferRequests[key].askTime = 0;
@@ -192,9 +226,9 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
             transferRequests[key].status = STATUS.EXECUTED;
             // Emit event
             emit transferProcessed(key, _from, _to, _amount);
-            //return true;
+            return true;
         } else {
-            //return false;
+            return false;
         }
     }
 
