@@ -20,8 +20,8 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
     */
    
     // Time variable
-    uint256 timeLimitToApprove = 7 days;
-    uint256 timeLimitToTransfer = 30 days;
+    uint256 internal timeLimitToApprove = 7 days;
+    uint256 internal timeLimitToTransfer = 30 days;
 
     mapping(bytes32 => TransferRequest) transferRequests;
 
@@ -45,6 +45,14 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(RULE_ENGINE_ROLE, ruleEngineContract);
+    }
+
+    function updateTimeLimitForApproval(uint256 newTimeLimit) public{
+        timeLimitToTransfer = newTimeLimit;
+    }
+
+    function updateTimeLimitToTransfer(uint256 newTimeLimitToTransfer) public{
+        timeLimitToApprove = newTimeLimitToTransfer;
     }
 
     function createTransferRequest(
