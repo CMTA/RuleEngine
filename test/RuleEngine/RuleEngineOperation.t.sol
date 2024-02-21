@@ -4,11 +4,11 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
-
+//ADmin, forwarder irrect /RuleEngine
 /**
 * @title General functions of the RuleEngine
 */
-contract RuleEngineTest is Test, HelperContract {
+contract RuleEngineOperationTest is Test, HelperContract {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
     uint256 resUint256;
@@ -18,70 +18,75 @@ contract RuleEngineTest is Test, HelperContract {
 
     // Arrange
     function setUp() public {
-        ruleWhitelist = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine(
             RULE_ENGINE_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
+        ruleVinkulierung = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
+        );
+
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist);
+        ruleEngineMock.addRuleOperation(ruleVinkulierung);
         // Arrange - Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
     }
 
-    function testCansetRulesValidation() public {
+    function testCansetRulesOperation() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        address[] memory RuleVinkulierungTab = new address[](2);
+        RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
+        RuleVinkulierungTab[1] = address(IRuleOperation(RuleVinkulierung2));
         // Act
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleWhitelist1));
+        emit AddRule(address(RuleVinkulierung1));
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleWhitelist2));
+        emit AddRule(address(RuleVinkulierung2));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesOperation, RuleVinkulierungTab)
         );
 
         // Assert
         assertEq(resCallBool, true);
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 2);
     }
 
     function testCannotSetRuleIfARuleIsAlreadyPresent() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(ruleWhitelist1);
-        ruleWhitelistTab[1] = address(ruleWhitelist1);
+        address[] memory RuleVinkulierungTab = new address[](2);
+        RuleVinkulierungTab[0] = address(RuleVinkulierung1);
+        RuleVinkulierungTab[1] = address(RuleVinkulierung1);
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         vm.expectRevert(RuleEngine_RuleAlreadyExists.selector);
         (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesOperation, RuleVinkulierungTab)
         );
 
         // Assert
@@ -89,157 +94,162 @@ contract RuleEngineTest is Test, HelperContract {
         // if the call is reverted with the message indicated in expectRevert
         // assertFalse(resCallBool);
         assertEq(resCallBool, true);
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
     }
 
     function testCannotSetEmptyRulesT1() public {
         // Arrange
-        address[] memory ruleWhitelistTab = new address[](0);
+        address[] memory RuleVinkulierungTab = new address[](0);
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesOperation, RuleVinkulierungTab)
         );
 
         // Assert
         assertFalse(resCallBool);
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
 
         // Assert2
-        // The call has not to throw an error.
+        // No rule => transfer valid
         resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
-        assertFalse(resBool);
+        assertTrue(resBool);
     }
 
     function testCannotSetEmptyRulesT2() public {
         // Arrange
-        address[] memory ruleWhitelistTab = new address[](2);
+        address[] memory RuleVinkulierungTab = new address[](2);
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         vm.expectRevert("The array is empty2");
 
         (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesOperation, RuleVinkulierungTab)
         );
 
         resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert1
         assertFalse(resCallBool);
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
 
         // Assert2
-        // The call has not to throw an error.
+        // No rule => transfer valid
         resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
-        assertFalse(resBool);
+        assertTrue(resBool);
     }
 
     function testCanClearRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        address[] memory RuleVinkulierungTab = new address[](2);
+        RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
+        RuleVinkulierungTab[1] = address(IRuleOperation(RuleVinkulierung2));
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesOperation, RuleVinkulierungTab)
         );
-        ruleEngineMock.rulesValidation();
+        ruleEngineMock.rulesOperation();
         // Assert - Arrange
         assertEq(resCallBool, true);
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 2);
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.clearRulesValidation();
+        ruleEngineMock.clearRulesOperation();
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 0);
     }
 
     function testCanClearRulesAndAddAgain() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        address[] memory RuleVinkulierungTab = new address[](2);
+        RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
+        RuleVinkulierungTab[1] = address(IRuleOperation(RuleVinkulierung2));
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesOperation, RuleVinkulierungTab)
         );
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.clearRulesValidation();
+        ruleEngineMock.clearRulesOperation();
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 0);
 
         // Can set again the previous rules
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesOperation, RuleVinkulierungTab)
         );
         assertEq(resCallBool, true);
         // Arrange before assert
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.clearRulesValidation();
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        ruleEngineMock.clearRulesOperation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 0);
 
         // Can add previous rule again
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleWhitelist1));
+        emit AddRule(address(RuleVinkulierung1));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist1);
+        ruleEngineMock.addRuleOperation(RuleVinkulierung1);
     }
 
     function testCanAddRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleWhitelist1));
+        emit AddRule(address(RuleVinkulierung1));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist1);
+        ruleEngineMock.addRuleOperation(RuleVinkulierung1);
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 2);
     }
 
@@ -247,10 +257,10 @@ contract RuleEngineTest is Test, HelperContract {
         // Act
         vm.expectRevert(RuleEngine_RuleAddressZeroNotAllowed.selector);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(IRuleValidation(address(0x0)));
+        ruleEngineMock.addRuleOperation(IRuleOperation(address(0x0)));
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
     }
 
@@ -258,155 +268,165 @@ contract RuleEngineTest is Test, HelperContract {
         // Act
         vm.expectRevert(RuleEngine_RuleAlreadyExists.selector);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist);
+        ruleEngineMock.addRuleOperation(ruleVinkulierung);
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
     }
 
     function testCanAddARuleAfterThisRuleWasRemoved() public {
         // Arrange - Assert
-        address[] memory _rules = ruleEngineMock.rulesValidation();
-        assertEq(address(_rules[0]), address(ruleWhitelist));
+        address[] memory _rules = ruleEngineMock.rulesOperation();
+        assertEq(address(_rules[0]), address(ruleVinkulierung));
 
         // Arrange
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleValidation(ruleWhitelist, 0);
+        ruleEngineMock.removeRuleOperation(ruleVinkulierung, 0);
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleWhitelist));
+        emit AddRule(address(ruleVinkulierung));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist);
+        ruleEngineMock.addRuleOperation(ruleVinkulierung);
 
         // Assert
-        _rules = ruleEngineMock.rulesValidation();
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        _rules = ruleEngineMock.rulesOperation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
     }
 
     function testCanRemoveNonExistantRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
 
         // Act
         vm.expectRevert(RuleEngine_RuleDoNotMatch.selector);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleValidation(ruleWhitelist1, 0);
+        ruleEngineMock.removeRuleOperation(RuleVinkulierung1, 0);
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
     }
 
     function testCanRemoveLatestRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist1);
+        ruleEngineMock.addRuleOperation(RuleVinkulierung1);
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RemoveRule(address(ruleWhitelist1));
+        emit RemoveRule(address(RuleVinkulierung1));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleValidation(ruleWhitelist1, 1);
+        ruleEngineMock.removeRuleOperation(RuleVinkulierung1, 1);
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
     }
 
     function testCanRemoveFirstRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist1);
+        ruleEngineMock.addRuleOperation(RuleVinkulierung1);
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RemoveRule(address(ruleWhitelist));
+        emit RemoveRule(address(ruleVinkulierung));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleValidation(ruleWhitelist, 0);
+        ruleEngineMock.removeRuleOperation(ruleVinkulierung, 0);
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
     }
 
-    function testCanRemoveRuleValidation() public {
+    function testCanRemoveRuleOperation() public {
         // Arrange
+        // First rule
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist1);
+        ruleEngineMock.addRuleOperation(RuleVinkulierung1);
+        // Second rule
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist2);
+        ruleEngineMock.addRuleOperation(RuleVinkulierung2);
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RemoveRule(address(ruleWhitelist1));
+        emit RemoveRule(address(RuleVinkulierung1));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleValidation(ruleWhitelist1, 1);
+        ruleEngineMock.removeRuleOperation(RuleVinkulierung1, 1);
 
         // Assert
-        address[] memory _rules = ruleEngineMock.rulesValidation();
-        assertEq(address(_rules[0]), address(ruleWhitelist));
-        assertEq(address(_rules[1]), address(ruleWhitelist2));
+        address[] memory _rules = ruleEngineMock.rulesOperation();
+        // RuleVinkulierung1 has been removed
+        assertEq(address(_rules[0]), address(ruleVinkulierung));
+        assertEq(address(_rules[1]), address(RuleVinkulierung2));
 
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 2);
     }
 
     function testRuleLength() public {
         // Act
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
 
         // Assert
         assertEq(resUint256, 1);
 
         // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        address[] memory RuleVinkulierungTab = new address[](2);
+        RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
+        RuleVinkulierungTab[1] = address(IRuleOperation(RuleVinkulierung2));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesOperation, RuleVinkulierungTab)
         );
 
         // Arrange - Assert
         assertEq(resCallBool, true);
 
         // Act
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCountOperation();
 
         // Assert
         assertEq(resUint256, 2);
@@ -414,90 +434,96 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testGetRule() public {
         // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        address[] memory RuleVinkulierungTab = new address[](2);
+        RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
+        RuleVinkulierungTab[1] = address(IRuleOperation(RuleVinkulierung2));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesOperation, RuleVinkulierungTab)
         );
         // Arrange - Assert
         assertEq(resCallBool, true);
 
         // Act
-        address rule = ruleEngineMock.ruleValidation(0);
+        address rule = ruleEngineMock.ruleOperation(0);
 
         // Assert
-        assertEq(address(rule), address(ruleWhitelist1));
+        assertEq(address(rule), address(RuleVinkulierung1));
     }
 
     function testGetRules() public {
         // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        address[] memory RuleVinkulierungTab = new address[](2);
+        RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
+        RuleVinkulierungTab[1] = address(IRuleOperation(RuleVinkulierung2));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesOperation, RuleVinkulierungTab)
         );
         // Arrange - Assert
         assertEq(resCallBool, true);
 
         // Act
-        address[] memory rules = ruleEngineMock.rulesValidation();
+        address[] memory rules = ruleEngineMock.rulesOperation();
 
         // Assert
-        assertEq(ruleWhitelistTab.length, rules.length);
+        assertEq(RuleVinkulierungTab.length, rules.length);
         for (uint256 i = 0; i < rules.length; ++i) {
-            assertEq(address(ruleWhitelistTab[i]), address(rules[i]));
+            assertEq(address(RuleVinkulierungTab[i]), address(rules[i]));
         }
     }
 
     function testCanGetRuleIndex() public {
         // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
+        RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
+            VINKULIERUNG_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            ruleEngineMock
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        address[] memory RuleVinkulierungTab = new address[](2);
+        RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
+        RuleVinkulierungTab[1] = address(IRuleOperation(RuleVinkulierung2));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesOperation, RuleVinkulierungTab)
         );
         // Arrange - Assert
         assertEq(resCallBool, true);
 
         // Act
-        uint256 index1 = ruleEngineMock.getRuleIndexValidation(ruleWhitelist1);
-        uint256 index2 = ruleEngineMock.getRuleIndexValidation(ruleWhitelist2);
-        // Length of the list because ruleWhitelist is not in the list
-        uint256 index3 = ruleEngineMock.getRuleIndexValidation(ruleWhitelist);
+        uint256 index1 = ruleEngineMock.getRuleIndexOperation(RuleVinkulierung1);
+        uint256 index2 = ruleEngineMock.getRuleIndexOperation(RuleVinkulierung2);
+        // Length of the list because RuleVinkulierung is not in the list
+        uint256 index3 = ruleEngineMock.getRuleIndexOperation(ruleVinkulierung);
 
         // Assert
         assertEq(index1, 0);
         assertEq(index2, 1);
-        assertEq(index3, ruleWhitelistTab.length);
+        assertEq(index3, RuleVinkulierungTab.length);
     }
 }

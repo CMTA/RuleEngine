@@ -6,7 +6,7 @@ import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "../../interfaces/IRuleOperation.sol";
 import "./../../modules/MetaTxModuleStandalone.sol";
 import "./abstract/RuleVinkulierungInvariantStorage.sol";
-
+import "CMTAT/interfaces/engine/IRuleEngine.sol";
 /**
 @title a whitelist manager
 */
@@ -38,21 +38,24 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
     constructor(
         address admin,
         address forwarderIrrevocable,
-        address ruleEngineContract
+        IRuleEngine ruleEngineContract
     ) MetaTxModuleStandalone(forwarderIrrevocable) {
         if(admin == address(0)){
             revert RuleVinkulierung_AdminWithAddressZeroNotAllowed();
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(RULE_ENGINE_ROLE, ruleEngineContract);
+        if(address(ruleEngineContract) != address(0x0)){
+            _grantRole(RULE_ENGINE_ROLE, address(ruleEngineContract));
+        }
+        
     }
 
     function updateTimeLimitForApproval(uint256 newTimeLimit) public{
-        timeLimitToTransfer = newTimeLimit;
+        timeLimitToApprove = newTimeLimit;
     }
 
     function updateTimeLimitToTransfer(uint256 newTimeLimitToTransfer) public{
-        timeLimitToApprove = newTimeLimitToTransfer;
+        timeLimitToTransfer  = newTimeLimitToTransfer;
     }
 
     function createTransferRequest(

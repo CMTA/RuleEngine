@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
 
 import "src/modules/RuleEngineInvariantStorage.sol";
+// RuleVinkulierung
+import "src/rules/operation/RuleVinkulierung.sol";
 // RuleSanctionList
 import "src/rules/validation/RuleSanctionList.sol";
 // RuleWhitelist
@@ -25,6 +27,7 @@ abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionli
     address constant WHITELIST_OPERATOR_ADDRESS = address(2);
     address constant RULE_ENGINE_OPERATOR_ADDRESS = address(3);
     address constant SANCTIONLIST_OPERATOR_ADDRESS = address(8);
+    address constant VINKULIERUNG_OPERATOR_ADDRESS = address(9);
     address constant ATTACKER = address(4);
     address constant ADDRESS1 = address(5);
     address constant ADDRESS2 = address(6);
@@ -39,6 +42,7 @@ abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionli
     
     // contract
     RuleWhitelist ruleWhitelist;
+    RuleVinkulierung ruleVinkulierung;
     CMTAT_STANDALONE CMTAT_CONTRACT;
 
     //bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");

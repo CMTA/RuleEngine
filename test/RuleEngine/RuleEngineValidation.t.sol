@@ -8,7 +8,7 @@ import "src/RuleEngine.sol";
 /**
 * @title General functions of the RuleEngine
 */
-contract RuleEngineTest is Test, HelperContract {
+contract RuleEngineValidationTest is Test, HelperContract {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
     uint256 resUint256;
@@ -109,7 +109,7 @@ contract RuleEngineTest is Test, HelperContract {
         assertEq(resUint256, 1);
 
         // Assert2
-        // The call has not to throw an error.
+        // false because the ruleWhitelist is still present
         resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
         assertFalse(resBool);
     }
@@ -134,7 +134,7 @@ contract RuleEngineTest is Test, HelperContract {
         assertEq(resUint256, 1);
 
         // Assert2
-        // The call has not to throw an error.
+        // false because the ruleWhitelist is still present
         resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
         assertFalse(resBool);
     }
@@ -348,6 +348,7 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testCanRemoveRuleValidation() public {
         // Arrange
+        // First rule
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
             WHITELIST_OPERATOR_ADDRESS,
@@ -355,6 +356,7 @@ contract RuleEngineTest is Test, HelperContract {
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleValidation(ruleWhitelist1);
+        // Second rule
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
             WHITELIST_OPERATOR_ADDRESS,
@@ -371,6 +373,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         // Assert
         address[] memory _rules = ruleEngineMock.rulesValidation();
+        // ruleWhitelist1 has been removed
         assertEq(address(_rules[0]), address(ruleWhitelist));
         assertEq(address(_rules[1]), address(ruleWhitelist2));
 
