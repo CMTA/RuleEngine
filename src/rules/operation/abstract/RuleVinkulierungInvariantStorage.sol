@@ -17,7 +17,7 @@ abstract contract RuleVinkulierungInvariantStorage  {
     }
 
     // Role
-    bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
+    bytes32 public constant RULE_ENGINE_CONTRACT_ROLE = keccak256("RULE_ENGINE_CONTRACT_ROLE");
     bytes32 public constant RULE_VINKULIERUNG_OPERATOR_ROLE = keccak256("RULE_VINKULIERUNG_OPERATOR_ROLE");
 
 
@@ -31,8 +31,8 @@ abstract contract RuleVinkulierungInvariantStorage  {
 
 
     // Event
-    event transferProcessed(bytes32 indexed key, address indexed from, address indexed  to, uint256 value);
-    event transferWaiting(bytes32 indexed key, address indexed  from,address  indexed  to, uint256 value);
-    event transferApproved(bytes32 indexed key, address indexed from, address indexed  to, uint256 value);
-    event transferDenied(bytes32 indexed key, address indexed from, address indexed to, uint256 value);
+    event transferProcessed(bytes32 indexed key, address indexed from, address indexed  to, uint256 value, uint256 id);
+    event transferWaiting(bytes32 indexed key, address indexed  from, address  indexed  to, uint256 value, uint256 id);
+    event transferApproved(bytes32 indexed key, address indexed from, address indexed  to, uint256 value, uint256 id );
+    event transferDenied(bytes32 indexed key, address indexed from, address indexed to, uint256 value, uint256 id);
 }  

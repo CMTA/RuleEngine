@@ -158,10 +158,8 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
                 ++i;
             }
         }
-        //
         
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-        //return uint8(0);
     }
 
     /** 
@@ -177,7 +175,6 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
         uint256 _amount
     ) public view override returns (bool) {
         return detectTransferRestriction(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-        //return detectTransferRestriction(_from, _to, _amount) == uint8(0);
     }
 
     /** 

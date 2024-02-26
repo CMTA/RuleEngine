@@ -4,14 +4,18 @@ pragma solidity ^0.8.20;
 
 import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "../../interfaces/IRuleOperation.sol";
-import "./../../modules/MetaTxModuleStandalone.sol";
+import "./../../modules/MetaTxModuleStandalone.sol"; 
 import "./abstract/RuleVinkulierungInvariantStorage.sol";
+import "./abstract/RuleVinkulierungOperator.sol";
 import "CMTAT/interfaces/engine/IRuleEngine.sol";
+
+// Emit id with the event
+// Denied => Approve
 /**
 @title a whitelist manager
 */
 
-contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalone, RuleVinkulierungInvariantStorage {
+contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkulierungOperator {
 
     /**
     Improvement:
@@ -19,17 +23,6 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
     - Open/remove require askin
     */
    
-    // Time variable
-    uint256 internal timeLimitToApprove = 7 days;
-    uint256 internal timeLimitToTransfer = 30 days;
-
-    mapping(bytes32 => TransferRequest) transferRequests;
-
-    // Getter
-    uint256 requestId;
-    mapping(uint256 => bytes32) IdToKey;
-
-
     
     /**
     * @param admin Address of the contract (Access Control)
@@ -44,18 +37,10 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
             revert RuleVinkulierung_AdminWithAddressZeroNotAllowed();
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(RULE_VINKULIERUNG_OPERATOR_ROLE, admin);
         if(address(ruleEngineContract) != address(0x0)){
-            _grantRole(RULE_ENGINE_ROLE, address(ruleEngineContract));
+            _grantRole(RULE_ENGINE_CONTRACT_ROLE, address(ruleEngineContract));
         }
-        
-    }
-
-    function updateTimeLimitForApproval(uint256 newTimeLimit) public{
-        timeLimitToApprove = newTimeLimit;
-    }
-
-    function updateTimeLimitToTransfer(uint256 newTimeLimitToTransfer) public{
-        timeLimitToTransfer  = newTimeLimitToTransfer;
     }
 
     function createTransferRequest(
@@ -69,10 +54,11 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
         if(transferRequests[key].status == STATUS.DENIED){
            revert RuleVinkulierung_TransferDenied();
         }
+        uint256 requestIdLocal = requestId;
         if(transferRequests[key].status == STATUS.NONE){
              TransferRequest memory newTransferApproval = TransferRequest({
                 key:key,
-                id: requestId,
+                id: requestIdLocal,
                 from: from,
                 to:to,
                 value:value,
@@ -82,51 +68,18 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
              }
             );
             transferRequests[key] = newTransferApproval;
-            IdToKey[requestId] = key;
+            IdToKey[requestIdLocal] = key;
+            emit transferWaiting(key, from, to, value, requestId);
             ++requestId;
         } else {
             // Overwrite previous approval
-            transferRequests[key].from = from;
-            transferRequests[key].to = to;
-            transferRequests[key].value = value;
             transferRequests[key].askTime = block.timestamp;
             transferRequests[key].status = STATUS.WAIT;
+            emit transferWaiting(key, from, to, value, transferRequests[key].id);
         }
-        emit transferWaiting(key, from, to, value);
+      
     }
 
-    function createTransferRequestWithApproval(
-        address to, uint256 value
-    ) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
-        // WAIT => Will overwrite
-        // APPROVED => will overwrite previous status with a new delay
-        // DENIED => will overwrite
-       address from = _msgSender();
-       bytes32 key =  keccak256(abi.encode(from, to, value));
-            if(transferRequests[key].status == STATUS.NONE){
-             TransferRequest memory newTransferApproval = TransferRequest({
-                key: key,
-                id: requestId,
-                from: from,
-                to: to,
-                value: value,
-                askTime:0,
-                maxTime : block.timestamp + timeLimitToTransfer,
-                status:STATUS.APPROVED
-             });
-            transferRequests[key] = newTransferApproval;
-            IdToKey[requestId] = key;
-            ++requestId;
-            transferRequests[key] = newTransferApproval;
-        } else {
-            // Overwrite previous approval
-            transferRequests[key].from = from;
-            transferRequests[key].to = to;
-            transferRequests[key].value = value;
-            transferRequests[key].maxTime = block.timestamp + timeLimitToTransfer;
-            transferRequests[key].status = STATUS.APPROVED;
-        }
-    }
 
     function getRequestTrade(address from, address to, uint256 value) public view returns (TransferRequest memory) {
         bytes32 key = keccak256(abi.encode(from, to, value));
@@ -166,57 +119,6 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
         return requests;
     }
 
-    function approveTransferRequest(
-        address from, address to, uint256 value, bool isApproved_
-    ) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE) {
-        bytes32 key =  keccak256(abi.encode(from, to, value));
-        // status
-        if(transferRequests[key].status != STATUS.WAIT){
-            revert RuleVinkulierung_Wrong_Status();
-        }
-        if(isApproved_){
-             // Time
-            if(transferRequests[key].askTime > timeLimitToApprove){
-                revert RuleVinkulierung_timeExceeded();
-            }
-            // Set status
-            transferRequests[key].status = STATUS.APPROVED;
-            // Set max time
-            transferRequests[key].maxTime = block.timestamp + timeLimitToTransfer;
-            emit transferApproved(key, from, to, value);
-        } else {
-             transferRequests[key].status = STATUS.DENIED;
-        }
-    }
-
-    function approveTransferRequestWithId(
-        uint256 requestId_, bool isApproved_
-    ) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
-        if(requestId_ + 1 >  requestId) {
-            revert RuleVinkulierung_InvalidId();
-        }
-        TransferRequest memory transferRequest = transferRequests[IdToKey[requestId_]];
-        if(isApproved_){
-            // status
-            if(transferRequest.status != STATUS.WAIT){
-                revert RuleVinkulierung_Wrong_Status();
-            }
-            // Time
-            if(transferRequest.askTime > timeLimitToApprove){
-                revert RuleVinkulierung_timeExceeded();
-            }
-            // Set status
-            transferRequests[transferRequest.key].status = STATUS.APPROVED;
-            // Set max time
-            transferRequests[transferRequest.key].maxTime = block.timestamp + timeLimitToTransfer;
-
-            emit transferApproved(transferRequest.key, transferRequest.from, transferRequest.to, transferRequest.value);
-        } else{
-            transferRequests[transferRequest.key].status = STATUS.DENIED;
-        }
-    }
-
-
     /**
      * @dev Returns true if the transfer is valid, and false otherwise.
      * Add access control with the RuleEngine
@@ -225,7 +127,7 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
         address _from,
         address _to,
         uint256 _amount
-    ) public override onlyRole(RULE_ENGINE_ROLE) returns(bool isValid){
+    ) public override onlyRole(RULE_ENGINE_CONTRACT_ROLE) returns(bool isValid){
         bytes32 key = keccak256(abi.encode(_from, _to, _amount));
         if(transferRequests[key].status == STATUS.APPROVED && transferRequests[key].maxTime <= block.timestamp){
             // we archive the demand
@@ -236,7 +138,7 @@ contract RuleVinkulierung is IRuleOperation, AccessControl, MetaTxModuleStandalo
             // Change status
             transferRequests[key].status = STATUS.EXECUTED;
             // Emit event
-            emit transferProcessed(key, _from, _to, _amount);
+            emit transferProcessed(key, _from, _to, transferRequests[key].id, _amount);
             return true;
         } else {
             return false;

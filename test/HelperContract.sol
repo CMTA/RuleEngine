@@ -6,6 +6,7 @@ import "CMTAT/CMTAT_STANDALONE.sol";
 
 import "src/modules/RuleEngineInvariantStorage.sol";
 // RuleVinkulierung
+import "src/rules/operation/abstract/RuleVinkulierungInvariantStorage.sol";
 import "src/rules/operation/RuleVinkulierung.sol";
 // RuleSanctionList
 import "src/rules/validation/RuleSanctionList.sol";
@@ -20,7 +21,7 @@ import "src/interfaces/IRuleOperation.sol";
 /**
 * @title Constants used by the tests
 */
-abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionlistInvariantStorage, RuleEngineInvariantStorage  {
+abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionlistInvariantStorage, RuleEngineInvariantStorage, RuleVinkulierungInvariantStorage  {
     // EOA to perform tests
     address constant ZERO_ADDRESS = address(0);
     address constant DEFAULT_ADMIN_ADDRESS = address(1);
