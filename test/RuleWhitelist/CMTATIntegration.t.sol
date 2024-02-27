@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
-import "./HelperContract.sol";
+import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**

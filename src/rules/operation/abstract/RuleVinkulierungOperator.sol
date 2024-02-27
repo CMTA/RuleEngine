@@ -40,7 +40,6 @@ abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInv
         timeLimitToTransfer  = newTimeLimitToTransfer;
     }
 
-
     function createTransferRequestWithApproval(
         address from, address to, uint256 value
     ) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
@@ -71,13 +70,31 @@ abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInv
         }
     }
 
-
     function approveTransferRequest(
         address from, address to, uint256 value, bool isApproved_
     ) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE) {
         bytes32 key =  keccak256(abi.encode(from, to, value));
         TransferRequest memory transferRequest = transferRequests[key];
         _approveRequest(transferRequest, isApproved_);
+    }
+
+    function approveTransferRequestWithId(
+        uint256 requestId_, bool isApproved_
+    ) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
+        if(requestId_ + 1 >  requestId) {
+            revert RuleVinkulierung_InvalidId();
+        }
+        TransferRequest memory transferRequest = transferRequests[IdToKey[requestId_]];
+        _approveRequest(transferRequest, isApproved_);
+    }
+
+    function resetRequestStatus(
+        uint256 requestId_
+    ) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
+        if(requestId_ + 1 >  requestId) {
+            revert RuleVinkulierung_InvalidId();
+        }
+        transferRequests[IdToKey[requestId_]].status = STATUS.NONE;
     }
 
     function _approveRequest(TransferRequest memory transferRequest , bool isApproved_) internal{
@@ -100,15 +117,5 @@ abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInv
             emit transferDenied(transferRequest.key, transferRequest.from, transferRequest.to, transferRequest.value,  transferRequests[transferRequest.key].id );
         }
 
-    }
-
-    function approveTransferRequestWithId(
-        uint256 requestId_, bool isApproved_
-    ) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
-        if(requestId_ + 1 >  requestId) {
-            revert RuleVinkulierung_InvalidId();
-        }
-        TransferRequest memory transferRequest = transferRequests[IdToKey[requestId_]];
-        _approveRequest(transferRequest, isApproved_);
     }
 }

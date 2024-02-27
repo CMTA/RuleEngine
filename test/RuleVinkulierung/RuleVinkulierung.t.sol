@@ -27,7 +27,9 @@ contract RuleVinkulierungTest is Test, HelperContract {
         ruleVinkulierung = new RuleVinkulierung(
             DEFAULT_ADMIN_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleVinkulierung.grantRole(RULE_VINKULIERUNG_OPERATOR_ROLE, VINKULIERUNG_OPERATOR_ADDRESS);
@@ -145,7 +147,6 @@ contract RuleVinkulierungTest is Test, HelperContract {
         vm.prank(ADDRESS1);
         uint256 value = 10;
         // Act
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, value));
         ruleVinkulierung.createTransferRequest(ADDRESS2, value);
         
         // Timeout

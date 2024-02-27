@@ -26,7 +26,9 @@ contract RuleEngineOperationTest is Test, HelperContract {
         ruleVinkulierung = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
 
 
@@ -43,13 +45,17 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -76,7 +82,9 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(RuleVinkulierung1);
@@ -150,13 +158,17 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -187,13 +199,17 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -239,7 +255,9 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
 
         // Act
@@ -302,7 +320,9 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
 
         // Act
@@ -321,7 +341,9 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleOperation(RuleVinkulierung1);
@@ -343,7 +365,9 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleOperation(RuleVinkulierung1);
@@ -366,7 +390,9 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleOperation(RuleVinkulierung1);
@@ -375,7 +401,9 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleOperation(RuleVinkulierung2);
@@ -407,12 +435,16 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -437,12 +469,16 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -466,12 +502,16 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -498,12 +538,16 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock
+            ruleEngineMock,
+            true,
+            true
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));

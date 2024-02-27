@@ -22,7 +22,8 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
     - Update timeLimit
     - Open/remove require askin
     */
-   
+   bool authorizedBurnWithoutApproval;
+   bool authorizedMintWithoutApproval;
     
     /**
     * @param admin Address of the contract (Access Control)
@@ -31,7 +32,9 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
     constructor(
         address admin,
         address forwarderIrrevocable,
-        IRuleEngine ruleEngineContract
+        IRuleEngine ruleEngineContract,
+        bool authorizedBurnWithoutApproval_,
+        bool authorizedMintWithoutApproval_
     ) MetaTxModuleStandalone(forwarderIrrevocable) {
         if(admin == address(0)){
             revert RuleVinkulierung_AdminWithAddressZeroNotAllowed();
@@ -41,6 +44,8 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
         if(address(ruleEngineContract) != address(0x0)){
             _grantRole(RULE_ENGINE_CONTRACT_ROLE, address(ruleEngineContract));
         }
+        authorizedBurnWithoutApproval = authorizedBurnWithoutApproval_;
+        authorizedMintWithoutApproval = authorizedMintWithoutApproval_;
     }
 
     function createTransferRequest(
@@ -128,8 +133,15 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
         address _to,
         uint256 _amount
     ) public override onlyRole(RULE_ENGINE_CONTRACT_ROLE) returns(bool isValid){
+        // Mint & Burn
+        if(
+            (_from == address(0) && authorizedMintWithoutApproval)
+            ||  (_to == address(0) && authorizedBurnWithoutApproval)
+        ){
+            return true;
+        }
         bytes32 key = keccak256(abi.encode(_from, _to, _amount));
-        if(transferRequests[key].status == STATUS.APPROVED && transferRequests[key].maxTime <= block.timestamp){
+        if(transferRequests[key].status == STATUS.APPROVED && transferRequests[key].maxTime >= block.timestamp){
             // we archive the demand
             // transferRequestsArchive.push(transferRequests[key]);
             // Reset to zero
