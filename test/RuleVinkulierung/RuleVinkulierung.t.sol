@@ -16,6 +16,8 @@ contract RuleVinkulierungTest is Test, HelperContract {
     bool resCallBool;
     string resString;
     uint8 CODE_NONEXISTENT = 255;
+    uint256 defaultValue = 10;
+    bytes32 defaultKey = keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));
 
     // Arrange
     function setUp() public {
@@ -29,20 +31,24 @@ contract RuleVinkulierungTest is Test, HelperContract {
             ZERO_ADDRESS,
             ruleEngineMock,
             true,
-            true
+            true,                       
+            DEFAULT_TIME_LIMIT_TO_APPROVE,
+            DEFAULT_TIME_LIMIT_TO_TRANSFER
         );
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleVinkulierung.grantRole(RULE_VINKULIERUNG_OPERATOR_ROLE, VINKULIERUNG_OPERATOR_ADDRESS);
     }
 
-    function testCanCreateTransferRequest() public {
+    function _createTransferRequest() internal{
         vm.prank(ADDRESS1);
-        uint256 value = 10;
         // Act
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, value));
         vm.expectEmit(true, true, true, true);
-        emit transferWaiting(key, ADDRESS1, ADDRESS2, value, 0);
-        ruleVinkulierung.createTransferRequest(ADDRESS2, value);
+        emit transferWaiting(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleVinkulierung.createTransferRequest(ADDRESS2, defaultValue);
+    }
+
+    function testCanCreateTransferRequest() public {
+        _createTransferRequest();
     }
 
     function testCanCreateTransferRequestWithApproval() public {
@@ -57,106 +63,105 @@ contract RuleVinkulierungTest is Test, HelperContract {
 
     function testCanApproveRequestCreatedByHolder() public {
         // Arrange
-        vm.prank(ADDRESS1);
-        uint256 value = 10;
-        // Act
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, value));
-        ruleVinkulierung.createTransferRequest(ADDRESS2, value);
+        _createTransferRequest();
         
         // Act
         vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        emit transferApproved(key, ADDRESS1, ADDRESS2, value, 0);
-        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, value, true);
+        emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
     }
 
     function testCanCreateAndApproveRequestCreatedByHolderAgain() public {
         // Arrange
         // First request
-        vm.prank(ADDRESS1);
-        uint256 value = 10;
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, value));
-        ruleVinkulierung.createTransferRequest(ADDRESS2, value);
+        _createTransferRequest();
         
         // First approval
         vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        emit transferApproved(key, ADDRESS1, ADDRESS2, value, 0);
-        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, value, true);
+        emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
 
         // Second request
         vm.prank(ADDRESS1);
-        ruleVinkulierung.createTransferRequest(ADDRESS2, value);
+        ruleVinkulierung.createTransferRequest(ADDRESS2, defaultValue);
 
         // Second approval
         vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        emit transferApproved(key, ADDRESS1, ADDRESS2, value, 0);
-        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, value, true);
+        emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
     }
 
     function testCanApproveRequestCreatedByHolderWithId() public {
         // Arrange
-        vm.prank(ADDRESS1);
-        uint256 value = 10;
-        // Act
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, value));
-        ruleVinkulierung.createTransferRequest(ADDRESS2, value);
+        _createTransferRequest();
         
         // Act
         vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        emit transferApproved(key, ADDRESS1, ADDRESS2, value, 0);
+        emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
         ruleVinkulierung.approveTransferRequestWithId( 0, true);
     }
 
 
     function testCanDeniedRequestCreatedByHolderWithId() public {
         // Arrange
-        vm.prank(ADDRESS1);
-        uint256 value = 10;
-        // Act
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, value));
-        ruleVinkulierung.createTransferRequest(ADDRESS2, value);
+        _createTransferRequest();
         
         // Act
         vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        emit transferDenied(key, ADDRESS1, ADDRESS2, value, 0);
+        emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
         ruleVinkulierung.approveTransferRequestWithId( 0, false);
     }
 
 
     function testCanDeniedRequestCreatedByHolder() public {
         // Arrange
-        vm.prank(ADDRESS1);
-        uint256 value = 10;
-        // Act
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, value));
-        ruleVinkulierung.createTransferRequest(ADDRESS2, value);
+        _createTransferRequest();
         
         // Act
         vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        emit transferDenied(key, ADDRESS1, ADDRESS2, value, 0);
-        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, value, false);
+        emit transferDenied(defaultKey, ADDRESS1, ADDRESS2,  defaultValue, 0);
+        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, false);
+    }
+
+    function testCanResetADeniedRequestCreatedByHolder() public {
+        // Arrange
+        _createTransferRequest();
+
+        vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, false);
+
+        // Act
+        vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferReset(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleVinkulierung.resetRequestStatus(0);
+
+        // Assert
+        vm.prank(ADDRESS1);
+        // Act
+        vm.expectEmit(true, true, true, true);
+        emit transferWaiting(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleVinkulierung.createTransferRequest(ADDRESS2, defaultValue);
     }
 
     function testCannotApproveRequestIfTimeExceeded() public {
         // Arrange
-        vm.prank(ADDRESS1);
-        uint256 value = 10;
-        // Act
-        ruleVinkulierung.createTransferRequest(ADDRESS2, value);
+        _createTransferRequest();
         
         // Timeout
         // 7 days *24*60*60 = 604800 seconds
         vm.warp(block.timestamp + 604801);
         // Act
         vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
-        //vm.expectEmit(true, true, true, true);
-        //emit transferDenied(key, ADDRESS1, ADDRESS2, value, 0);
         vm.expectRevert(RuleVinkulierung_timeExceeded.selector);
-        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, value, true);
+        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
     }
 }

@@ -41,6 +41,8 @@ abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionli
     string constant DEFAULT_ADMIN_ROLE_HASH =
         "0x0000000000000000000000000000000000000000000000000000000000000000";
     
+    uint256 DEFAULT_TIME_LIMIT_TO_APPROVE = 7 days;              
+    uint256 DEFAULT_TIME_LIMIT_TO_TRANSFER = 7 days;
     // contract
     RuleWhitelist ruleWhitelist;
     RuleVinkulierung ruleVinkulierung;

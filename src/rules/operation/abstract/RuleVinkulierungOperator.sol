@@ -10,20 +10,17 @@ import "CMTAT/interfaces/engine/IRuleEngine.sol";
 // Emit id with the event
 // Denied => Approve
 /**
-@title a whitelist manager
+@title a RuleVinkulierung manager
 */
 
 abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInvariantStorage {
-
-    /**
-    Improvement:
-    - Update timeLimit
-    - Open/remove require askin
-    */
-   
     // Time variable
     uint256 internal timeLimitToApprove = 7 days;
     uint256 internal timeLimitToTransfer = 30 days;
+
+    // Mint and Burn
+   bool internal authorizedBurnWithoutApproval;
+   bool internal authorizedMintWithoutApproval;
 
     mapping(bytes32 => TransferRequest) transferRequests;
 
@@ -31,7 +28,14 @@ abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInv
     uint256 requestId;
     mapping(uint256 => bytes32) IdToKey;
 
+    function updateAuthorizationMintWithoutApproval(bool mintNewStatus) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
+         authorizedMintWithoutApproval = mintNewStatus;
+    }
 
+    function updateAuthorizationBurnWithoutApproval(bool burnNewStatus) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
+         authorizedBurnWithoutApproval = burnNewStatus;
+    }
+    
     function updateTimeLimitForApproval(uint256 newTimeLimit) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
         timeLimitToApprove = newTimeLimit;
     }
@@ -47,7 +51,8 @@ abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInv
         // APPROVED => will overwrite previous status with a new delay
         // DENIED => will overwrite
        bytes32 key =  keccak256(abi.encode(from, to, value));
-            if(transferRequests[key].status == STATUS.NONE){
+        // Status NONE not enough because reset is possible
+        if(_checkRequestStatus(key)){
              TransferRequest memory newTransferApproval = TransferRequest({
                 key: key,
                 id: requestId,
@@ -94,7 +99,13 @@ abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInv
         if(requestId_ + 1 >  requestId) {
             revert RuleVinkulierung_InvalidId();
         }
-        transferRequests[IdToKey[requestId_]].status = STATUS.NONE;
+        bytes32 key = IdToKey[requestId_];
+        transferRequests[key].status = STATUS.NONE;
+        emit transferReset(key,  transferRequests[key].from,  transferRequests[key].to,  transferRequests[key].value,   transferRequests[key].id );
+    }
+
+    function _checkRequestStatus(bytes32 key) internal view returns(bool) {
+        return (transferRequests[key].status == STATUS.NONE) && (transferRequests[key].key == 0x0);
     }
 
     function _approveRequest(TransferRequest memory transferRequest , bool isApproved_) internal{

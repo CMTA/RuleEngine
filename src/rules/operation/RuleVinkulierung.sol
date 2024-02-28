@@ -22,8 +22,7 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
     - Update timeLimit
     - Open/remove require askin
     */
-   bool authorizedBurnWithoutApproval;
-   bool authorizedMintWithoutApproval;
+
     
     /**
     * @param admin Address of the contract (Access Control)
@@ -34,7 +33,9 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
         address forwarderIrrevocable,
         IRuleEngine ruleEngineContract,
         bool authorizedBurnWithoutApproval_,
-        bool authorizedMintWithoutApproval_
+        bool authorizedMintWithoutApproval_,
+        uint256 timeLimitToApprove_,
+        uint256 timeLimitToTransfer_
     ) MetaTxModuleStandalone(forwarderIrrevocable) {
         if(admin == address(0)){
             revert RuleVinkulierung_AdminWithAddressZeroNotAllowed();
@@ -46,6 +47,12 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
         }
         authorizedBurnWithoutApproval = authorizedBurnWithoutApproval_;
         authorizedMintWithoutApproval = authorizedMintWithoutApproval_;
+        if(timeLimitToApprove_ == 0){
+            timeLimitToApprove = type(uint64).max;
+        }
+        if(timeLimitToTransfer_ == 0){
+            timeLimitToTransfer = type(uint64).max;
+        }
     }
 
     function createTransferRequest(
@@ -60,7 +67,8 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
            revert RuleVinkulierung_TransferDenied();
         }
         uint256 requestIdLocal = requestId;
-        if(transferRequests[key].status == STATUS.NONE){
+        // Status NONE not enough because reset is possible
+        if(_checkRequestStatus(key)){
              TransferRequest memory newTransferApproval = TransferRequest({
                 key:key,
                 id: requestIdLocal,
@@ -142,8 +150,6 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
         }
         bytes32 key = keccak256(abi.encode(_from, _to, _amount));
         if(transferRequests[key].status == STATUS.APPROVED && transferRequests[key].maxTime >= block.timestamp){
-            // we archive the demand
-            // transferRequestsArchive.push(transferRequests[key]);
             // Reset to zero
             transferRequests[key].maxTime = 0;
             transferRequests[key].askTime = 0;

@@ -56,7 +56,9 @@ contract CMTATIntegrationVinkulierung is Test, HelperContract {
             ZERO_ADDRESS,
             ruleEngineMock,
             true,
-            true
+            true,                       
+            DEFAULT_TIME_LIMIT_TO_APPROVE,
+            DEFAULT_TIME_LIMIT_TO_TRANSFER
         );
          // specific arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);

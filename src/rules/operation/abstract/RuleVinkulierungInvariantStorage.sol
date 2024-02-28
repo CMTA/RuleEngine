@@ -35,4 +35,5 @@ abstract contract RuleVinkulierungInvariantStorage  {
     event transferWaiting(bytes32 indexed key, address indexed  from, address  indexed  to, uint256 value, uint256 id);
     event transferApproved(bytes32 indexed key, address indexed from, address indexed  to, uint256 value, uint256 id );
     event transferDenied(bytes32 indexed key, address indexed from, address indexed to, uint256 value, uint256 id);
+    event transferReset(bytes32 indexed key, address indexed from, address indexed to, uint256 value, uint256 id);
 }  

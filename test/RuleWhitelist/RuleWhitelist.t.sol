@@ -25,6 +25,27 @@ contract RuleWhitelistTest is Test, HelperContract {
         );
     }
 
+    function _addAddressesToTheWhitelist() internal {  
+        address[] memory whitelist = new address[](2);
+        whitelist[0] = ADDRESS1;
+        whitelist[1] = ADDRESS2;
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        (resCallBool, ) = address(ruleWhitelist).call(
+            abi.encodeWithSignature(
+                "addAddressesToTheWhitelist(address[])",
+                whitelist
+            )
+        );
+        // Assert
+        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        assertEq(resUint256, 2);
+        assertEq(resCallBool, true);
+        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        assertEq(resBool, true);
+        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
+        assertEq(resBool, true);
+    }
+
     function testReturnFalseIfAddressNotWhitelisted() public {
         // Act
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
@@ -60,17 +81,7 @@ contract RuleWhitelistTest is Test, HelperContract {
 
     function testAddressesIsIndicatedAsWhitelisted() public {
         // Arrange
-        address[] memory whitelist = new address[](2);
-        whitelist[0] = ADDRESS1;
-        whitelist[1] = ADDRESS2;
-        vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheWhitelist(address[])",
-                whitelist
-            )
-        );
-        assertEq(resCallBool, true);
+        _addAddressesToTheWhitelist();
         // Act
         resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
         // Assert
@@ -129,23 +140,7 @@ contract RuleWhitelistTest is Test, HelperContract {
 
     function testValidateTransfer() public {
         // Arrange
-        address[] memory whitelist = new address[](2);
-        whitelist[0] = ADDRESS1;
-        whitelist[1] = ADDRESS2;
-        vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheWhitelist(address[])",
-                whitelist
-            )
-        );
-        assertEq(resCallBool, true);
-        // Arrange - Assert
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
-        assertEq(resBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
-        assertEq(resBool, true);
-
+        _addAddressesToTheWhitelist();
         // Act
         // ADDRESS1 -> ADDRESS2
         resBool = ruleWhitelist.validateTransfer(ADDRESS1, ADDRESS2, 20);
