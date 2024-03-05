@@ -10,9 +10,13 @@ import "src/rules/operation/abstract/RuleVinkulierungInvariantStorage.sol";
 import "src/rules/operation/RuleVinkulierung.sol";
 // RuleSanctionList
 import "src/rules/validation/RuleSanctionList.sol";
+// RUleBlackList
+import "src/rules/validation/RuleBlacklist.sol";
 // RuleWhitelist
 import "src/rules/validation/RuleWhitelist.sol";
-import "src/rules/validation/abstract/RuleWhitelistInvariantStorage.sol";
+import "src/rules/validation/abstract/RuleAddressList/RuleWhitelistInvariantStorage.sol";
+import "src/rules/validation/abstract/RuleAddressList/RuleAddressListInvariantStorage.sol";
+
 import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
 import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
 // Rule interface
@@ -21,7 +25,7 @@ import "src/interfaces/IRuleOperation.sol";
 /**
 * @title Constants used by the tests
 */
-abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionlistInvariantStorage, RuleEngineInvariantStorage, RuleVinkulierungInvariantStorage  {
+abstract contract HelperContract is RuleWhitelistInvariantStorage, RuleBlacklistInvariantStorage, RuleAddressListInvariantStorage, RuleSanctionlistInvariantStorage, RuleEngineInvariantStorage, RuleVinkulierungInvariantStorage  {
     // EOA to perform tests
     address constant ZERO_ADDRESS = address(0);
     address constant DEFAULT_ADMIN_ADDRESS = address(1);
@@ -44,6 +48,7 @@ abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionli
     uint256 DEFAULT_TIME_LIMIT_TO_APPROVE = 7 days;              
     uint256 DEFAULT_TIME_LIMIT_TO_TRANSFER = 7 days;
     // contract
+    RuleBlacklist ruleBlacklist;
     RuleWhitelist ruleWhitelist;
     RuleVinkulierung ruleVinkulierung;
     CMTAT_STANDALONE CMTAT_CONTRACT;
@@ -55,19 +60,7 @@ abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionli
     // Forwarder
     string ERC2771ForwarderDomain = 'ERC2771ForwarderDomain';
 
-    // RuleEngine event
-     /*
-    event AddRule( indexed rule);
-    event RemoveRule(IRule indexed rule);
-    event ClearRules(IRule[] rulesRemoved);
-
-    // Custom error RuleEngine
-   error RuleEngine_RuleAddressZeroNotAllowed();
-    error RuleEngine_RuleAlreadyExists();
-    error RuleEngine_RuleDoNotMatch();
-    error RuleEngine_AdminWithAddressZeroNotAllowed();
-    error RuleEngine_ArrayIsEmpty();*/
-
-
+    error Rulelist_AddressAlreadylisted();
+    error Rulelist_AddressNotPresent();
     constructor() {}
 }

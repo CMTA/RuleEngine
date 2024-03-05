@@ -33,66 +33,66 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, false, true);
-        emit RoleGranted(WHITELIST_ROLE, ADDRESS1, WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.grantRole(WHITELIST_ROLE, ADDRESS1);
+        emit RoleGranted(ADDRESS_LIST_ROLE, ADDRESS1, WHITELIST_OPERATOR_ADDRESS);
+        ruleWhitelist.grantRole(ADDRESS_LIST_ROLE, ADDRESS1);
         // Assert
-        bool res1 = ruleWhitelist.hasRole(WHITELIST_ROLE, ADDRESS1);
+        bool res1 = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, ADDRESS1);
         assertEq(res1, true);
     }
 
     function testRevokeRoleAsAdmin() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.grantRole(WHITELIST_ROLE, ADDRESS1);
+        ruleWhitelist.grantRole(ADDRESS_LIST_ROLE, ADDRESS1);
         // Arrange - Assert
-        bool res1 = ruleWhitelist.hasRole(WHITELIST_ROLE, ADDRESS1);
+        bool res1 = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, ADDRESS1);
         assertEq(res1, true);
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, false, true);
-        emit RoleRevoked(WHITELIST_ROLE, ADDRESS1, WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.revokeRole(WHITELIST_ROLE, ADDRESS1);
+        emit RoleRevoked(ADDRESS_LIST_ROLE, ADDRESS1, WHITELIST_OPERATOR_ADDRESS);
+        ruleWhitelist.revokeRole(ADDRESS_LIST_ROLE, ADDRESS1);
         // Assert
-        bool res2 = ruleWhitelist.hasRole(WHITELIST_ROLE, ADDRESS1);
+        bool res2 = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, ADDRESS1);
         assertFalse(res2);
     }
 
     function testCannotGrantFromNonAdmin() public {
         // Arrange - Assert
-        bool res1 = ruleWhitelist.hasRole(WHITELIST_ROLE, ADDRESS1);
+        bool res1 = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, ADDRESS1);
         assertFalse(res1);
  
         // Act
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE)); 
         vm.prank(ADDRESS2);
-        ruleWhitelist.grantRole(WHITELIST_ROLE, ADDRESS1);
+        ruleWhitelist.grantRole(ADDRESS_LIST_ROLE, ADDRESS1);
         // Assert
-        bool res2 = ruleWhitelist.hasRole(WHITELIST_ROLE, ADDRESS1);
+        bool res2 = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, ADDRESS1);
         assertFalse(res2);
     }
 
     function testCannotRevokeFromNonAdmin() public {
         // Arrange - Assert
-        bool res1 = ruleWhitelist.hasRole(WHITELIST_ROLE, ADDRESS1);
+        bool res1 = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, ADDRESS1);
         assertFalse(res1);
 
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.grantRole(WHITELIST_ROLE, ADDRESS1);
+        ruleWhitelist.grantRole(ADDRESS_LIST_ROLE, ADDRESS1);
         // Arrange - Assert
-        bool res2 = ruleWhitelist.hasRole(WHITELIST_ROLE, ADDRESS1);
+        bool res2 = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, ADDRESS1);
         assertEq(res2, true);
 
         // Act
         vm.prank(ADDRESS2);
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE));  
-        ruleWhitelist.revokeRole(WHITELIST_ROLE, ADDRESS1);
+        ruleWhitelist.revokeRole(ADDRESS_LIST_ROLE, ADDRESS1);
 
         // Assert
-        bool res3 = ruleWhitelist.hasRole(WHITELIST_ROLE, ADDRESS1);
+        bool res3 = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, ADDRESS1);
         assertEq(res3, true);
     }
 }

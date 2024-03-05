@@ -33,7 +33,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         );
 
         // assert
-        resBool = ruleWhitelist.hasRole(WHITELIST_ROLE, WHITELIST_OPERATOR_ADDRESS);
+        resBool = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, WHITELIST_OPERATOR_ADDRESS);
         assertEq(resBool, true);
         resBool = ruleWhitelist.isTrustedForwarder(address(forwarder));
         assertEq(resBool, true);
@@ -45,7 +45,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         MinimalForwarderMock forwarder = new MinimalForwarderMock(
         );
         forwarder.initialize(ERC2771ForwarderDomain);
-        vm.expectRevert(RuleWhitelist_AdminWithAddressZeroNotAllowed.selector);
+        vm.expectRevert(RuleAddressList_AdminWithAddressZeroNotAllowed.selector);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist = new RuleWhitelist(
             address(0),

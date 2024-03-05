@@ -12,18 +12,16 @@ import "CMTAT/interfaces/engine/IRuleEngine.sol";
 // Emit id with the event
 // Denied => Approve
 /**
-@title a whitelist manager
+* @title a whitelist manager
 */
 
 contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkulierungOperator {
-
     /**
-    Improvement:
-    - Update timeLimit
-    - Open/remove require askin
+    * Improvement:
+    * - Update timeLimit
+    * - Open/remove require askin
     */
 
-    
     /**
     * @param admin Address of the contract (Access Control)
     * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
@@ -32,10 +30,7 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
         address admin,
         address forwarderIrrevocable,
         IRuleEngine ruleEngineContract,
-        bool authorizedBurnWithoutApproval_,
-        bool authorizedMintWithoutApproval_,
-        uint256 timeLimitToApprove_,
-        uint256 timeLimitToTransfer_
+        OPTION memory options_
     ) MetaTxModuleStandalone(forwarderIrrevocable) {
         if(admin == address(0)){
             revert RuleVinkulierung_AdminWithAddressZeroNotAllowed();
@@ -45,14 +40,13 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
         if(address(ruleEngineContract) != address(0x0)){
             _grantRole(RULE_ENGINE_CONTRACT_ROLE, address(ruleEngineContract));
         }
-        authorizedBurnWithoutApproval = authorizedBurnWithoutApproval_;
-        authorizedMintWithoutApproval = authorizedMintWithoutApproval_;
-        if(timeLimitToApprove_ == 0){
-            timeLimitToApprove = type(uint64).max;
+        if(options_.timeLimit.timeLimitToApprove == 0){
+            options_.timeLimit.timeLimitToApprove = type(uint64).max;
         }
-        if(timeLimitToTransfer_ == 0){
-            timeLimitToTransfer = type(uint64).max;
+        if(options_.timeLimit.timeLimitToTransfer == 0){
+            options_.timeLimit.timeLimitToTransfer = type(uint64).max;
         }
+        options = options_;
     }
 
     function createTransferRequest(
@@ -90,7 +84,6 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
             transferRequests[key].status = STATUS.WAIT;
             emit transferWaiting(key, from, to, value, transferRequests[key].id);
         }
-      
     }
 
 
@@ -132,6 +125,8 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
         return requests;
     }
 
+
+
     /**
      * @dev Returns true if the transfer is valid, and false otherwise.
      * Add access control with the RuleEngine
@@ -143,20 +138,18 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
     ) public override onlyRole(RULE_ENGINE_CONTRACT_ROLE) returns(bool isValid){
         // Mint & Burn
         if(
-            (_from == address(0) && authorizedMintWithoutApproval)
-            ||  (_to == address(0) && authorizedBurnWithoutApproval)
+            (_from == address(0) && options.issuance.authorizedMintWithoutApproval)
+            ||  (_to == address(0) && options.issuance.authorizedBurnWithoutApproval)
         ){
             return true;
         }
         bytes32 key = keccak256(abi.encode(_from, _to, _amount));
-        if(transferRequests[key].status == STATUS.APPROVED && transferRequests[key].maxTime >= block.timestamp){
-            // Reset to zero
-            transferRequests[key].maxTime = 0;
-            transferRequests[key].askTime = 0;
-            // Change status
-            transferRequests[key].status = STATUS.EXECUTED;
-            // Emit event
-            emit transferProcessed(key, _from, _to, transferRequests[key].id, _amount);
+        bool automaticApprovalCondition = options.automaticApproval.isActivate && ((transferRequests[key].askTime + options.automaticApproval.timeLimitBeforeAutomaticApproval ) >= block.timestamp);
+        bool transferApproved = (transferRequests[key].status == STATUS.APPROVED) 
+            && (transferRequests[key].maxTime >= block.timestamp);
+        if(automaticApprovalCondition || transferApproved)
+        {
+            _updateProcessedTransfer(key);
             return true;
         } else {
             return false;

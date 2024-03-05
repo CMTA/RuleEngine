@@ -27,6 +27,31 @@ contract RuleVinkulierungAccessControl is Test, HelperContract {
 
     // Arrange
     function setUp() public {
+        TIME_LIMIT memory timeLimit_ =TIME_LIMIT({
+            timeLimitToApprove: 7 days,
+            timeLimitToTransfer: 30 days
+        });
+        
+       AUTOMATIC_APPROVAL memory automaticApproval_ = AUTOMATIC_APPROVAL({
+            isActivate: false,
+            timeLimitBeforeAutomaticApproval: 0
+        });
+
+        ISSUANCE memory issuanceOption_ = ISSUANCE({
+            authorizedMintWithoutApproval:false,
+            authorizedBurnWithoutApproval:false
+        });
+        AUTOMATIC_TRANSFER memory automaticTransfer_ = AUTOMATIC_TRANSFER({
+            isActivate:false,
+            cmtat: IERC20(address(0))
+        });
+        
+        OPTION memory options = OPTION({
+            issuance:issuanceOption_,
+            timeLimit: timeLimit_,
+            automaticApproval: automaticApproval_,
+            automaticTransfer:automaticTransfer_
+        });
         ruleEngineMock = new RuleEngine(
             RULE_ENGINE_OPERATOR_ADDRESS,
             ZERO_ADDRESS
@@ -35,11 +60,8 @@ contract RuleVinkulierungAccessControl is Test, HelperContract {
         ruleVinkulierung = new RuleVinkulierung(
             DEFAULT_ADMIN_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            ruleEngineMock,                   
+            options
         );
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleVinkulierung.grantRole(RULE_VINKULIERUNG_OPERATOR_ROLE, VINKULIERUNG_OPERATOR_ADDRESS);
@@ -53,6 +75,7 @@ contract RuleVinkulierungAccessControl is Test, HelperContract {
         ruleVinkulierung.createTransferRequest(ADDRESS2, defaultValue);
     }
 
+
     function testCannotAttackerApproveARequestCreatedByTokenHolder() public {
         _createTransferRequest();
         
@@ -62,7 +85,7 @@ contract RuleVinkulierungAccessControl is Test, HelperContract {
         ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
     }
 
-        function testCannotAttackerApproveWithIdARequestCreatedByTokenHolder() public {
+    function testCannotAttackerApproveWithIdARequestCreatedByTokenHolder() public {
         _createTransferRequest();
         
         vm.expectRevert(
@@ -87,17 +110,48 @@ contract RuleVinkulierungAccessControl is Test, HelperContract {
         ruleVinkulierung.createTransferRequestWithApproval(ADDRESS1, ADDRESS2, defaultValue);
     }
 
-    function testCannotAttackerUpdateTimeLimitToTransfer() public {
+    /******** OPTIONS CONFIGURATION *********/
+    function testCannotAttackerSetTimeLimit() public {
+        TIME_LIMIT memory timeLimit_ = TIME_LIMIT({
+            timeLimitToApprove: 7 days,
+            timeLimitToTransfer: 200 days
+        });
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_VINKULIERUNG_OPERATOR_ROLE));  
         vm.prank(ATTACKER);
-        ruleVinkulierung.updateTimeLimitToTransfer(200);
+        ruleVinkulierung.setTimeLimit(timeLimit_);
     }
 
-    function testCannotAttackerTimeLimitForApproval() public {
+    function testCannotAttackerSetAutomaticTransfer() public {
+        AUTOMATIC_TRANSFER memory automaticTransfer_ = AUTOMATIC_TRANSFER({
+            isActivate:false,
+            cmtat: IERC20(address(0))
+        });
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_VINKULIERUNG_OPERATOR_ROLE));  
         vm.prank(ATTACKER);
-        ruleVinkulierung.updateTimeLimitForApproval(200);
+        ruleVinkulierung.setAutomaticTransfer(automaticTransfer_);
+    }
+
+    function testCannotAttackerSetIssuanceOptions() public {
+        ISSUANCE memory issuanceOption_ = ISSUANCE({
+            authorizedMintWithoutApproval:false,
+            authorizedBurnWithoutApproval:false
+        });
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_VINKULIERUNG_OPERATOR_ROLE));  
+        vm.prank(ATTACKER);
+        ruleVinkulierung.setIssuanceOptions(issuanceOption_);
+    }
+
+    function testCannotAttackerSetAuomaticApproval() public {
+       AUTOMATIC_APPROVAL memory automaticApproval_ = AUTOMATIC_APPROVAL({
+            isActivate: false,
+            timeLimitBeforeAutomaticApproval: 0
+        });
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_VINKULIERUNG_OPERATOR_ROLE));  
+        vm.prank(ATTACKER);
+        ruleVinkulierung.setAutomaticApproval(automaticApproval_);
     }
 }

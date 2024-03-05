@@ -1,9 +1,35 @@
 // SPDX-License-Identifier: MPL-2.0
 
 pragma solidity ^0.8.20;
-
+import "../../../../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 abstract contract RuleVinkulierungInvariantStorage  {
+    struct AUTOMATIC_TRANSFER {
+        bool isActivate;
+        IERC20 cmtat;
+    }
+    struct ISSUANCE {
+        bool  authorizedMintWithoutApproval;
+        bool  authorizedBurnWithoutApproval;
+    }
+
+    struct TIME_LIMIT {
+        uint256 timeLimitToApprove;
+        uint256 timeLimitToTransfer;
+    }
+
+    struct AUTOMATIC_APPROVAL {
+        bool isActivate;
+        uint256 timeLimitBeforeAutomaticApproval;
+    }
+
+    struct OPTION {
+        ISSUANCE issuance;
+        TIME_LIMIT timeLimit;
+        AUTOMATIC_APPROVAL automaticApproval;
+        AUTOMATIC_TRANSFER automaticTransfer;
+    }
+    
     enum STATUS { NONE, WAIT, APPROVED,  DENIED, EXECUTED, CANCELLED }
     struct TransferRequest {
         bytes32 key;

@@ -53,9 +53,9 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
     function testCanDetectTransferRestrictionOK() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
+        ruleWhitelist1.addAddressToTheList(ADDRESS1);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS2);
+        ruleWhitelist1.addAddressToTheList(ADDRESS2);
 
         // Act
         resUint8 = ruleEngineMock.detectTransferRestriction(
@@ -83,7 +83,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
     function testCanDetectTransferRestrictionWithTo() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
+        ruleWhitelist1.addAddressToTheList(ADDRESS1);
 
         // Act
         resUint8 = ruleEngineMock.detectTransferRestriction(
@@ -131,9 +131,9 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
     function testValidateTransferOK() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS1);
+        ruleWhitelist1.addAddressToTheList(ADDRESS1);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist1.addAddressToTheWhitelist(ADDRESS2);
+        ruleWhitelist1.addAddressToTheList(ADDRESS2);
 
         // Act
         resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);

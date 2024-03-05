@@ -24,8 +24,36 @@ contract CMTATIntegrationVinkulierung is Test, HelperContract {
 
     uint256 FLAG = 5;
 
+    uint256 defaultValue = 10;
+    bytes32 defaultKey = keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));
+
+
     // Arrange
     function setUp() public {
+        TIME_LIMIT memory timeLimit_ = TIME_LIMIT({
+            timeLimitToApprove: 7 days,
+            timeLimitToTransfer: 30 days
+        });
+        ISSUANCE memory issuanceOption_ = ISSUANCE({
+            authorizedMintWithoutApproval:true,
+            authorizedBurnWithoutApproval:true
+        });
+
+        AUTOMATIC_APPROVAL memory automaticApproval_ = AUTOMATIC_APPROVAL({
+            isActivate: false,
+            timeLimitBeforeAutomaticApproval: 0
+        });
+
+        AUTOMATIC_TRANSFER memory automaticTransfer_ = AUTOMATIC_TRANSFER({
+            isActivate:false,
+            cmtat: IERC20(address(0))
+        });
+        OPTION memory options = OPTION({
+            issuance:issuanceOption_,
+            timeLimit: timeLimit_,
+            automaticApproval: automaticApproval_,
+            automaticTransfer:automaticTransfer_
+        });
  
         // global arrange
         uint8 decimals = 0;
@@ -54,11 +82,8 @@ contract CMTATIntegrationVinkulierung is Test, HelperContract {
         ruleVinkulierung = new RuleVinkulierung(
             DEFAULT_ADMIN_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            ruleEngineMock,                    
+            options
         );
          // specific arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
@@ -81,6 +106,14 @@ contract CMTATIntegrationVinkulierung is Test, HelperContract {
         CMTAT_CONTRACT.setRuleEngine(ruleEngineMock);
     }
 
+    function _createTransferRequest() internal{
+        vm.prank(ADDRESS1);
+        // Act
+        vm.expectEmit(true, true, true, true);
+        emit transferWaiting(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleVinkulierung.createTransferRequest(ADDRESS2, defaultValue);
+    }
+
     /******* Transfer *******/
     function testCannotTransferWithoutApproval() public {
         // Arrange
@@ -94,26 +127,27 @@ contract CMTATIntegrationVinkulierung is Test, HelperContract {
     function testCanMakeATransferIfApproved() public {
         // Arrange
         vm.prank(ADDRESS1);
-        uint256 value = 10;
         // Act
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, value));
-        ruleVinkulierung.createTransferRequest(ADDRESS2, value);
+        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2,defaultValue));
+        ruleVinkulierung.createTransferRequest(ADDRESS2,defaultValue);
         
         // Act
         vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        emit transferApproved(key, ADDRESS1, ADDRESS2, value, 0);
-        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, value, true);
+        emit transferApproved(key, ADDRESS1, ADDRESS2,defaultValue, 0);
+        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, true);
 
         // Act
+        vm.expectEmit(true, true, true, true);
+        emit transferProcessed(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
         vm.prank(ADDRESS1);
-        CMTAT_CONTRACT.transfer(ADDRESS2, value);
+        CMTAT_CONTRACT.transfer(ADDRESS2,defaultValue);
 
         // Assert
         resUint256 = CMTAT_CONTRACT.balanceOf(ADDRESS1);
-        assertEq(resUint256, ADDRESS1_BALANCE_INIT - value);
+        assertEq(resUint256, ADDRESS1_BALANCE_INIT -defaultValue);
         resUint256 = CMTAT_CONTRACT.balanceOf(ADDRESS2);
-        assertEq(resUint256, ADDRESS2_BALANCE_INIT + value);
+        assertEq(resUint256, ADDRESS2_BALANCE_INIT +defaultValue);
         resUint256 = CMTAT_CONTRACT.balanceOf(ADDRESS3);
         assertEq(resUint256, 33);
     }
@@ -121,44 +155,42 @@ contract CMTATIntegrationVinkulierung is Test, HelperContract {
     function testCannotMakeATransferIfDelayExceeded() public {
         // Arrange
         vm.prank(ADDRESS1);
-        uint256 value = 10;
         // Act
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, value));
-        ruleVinkulierung.createTransferRequest(ADDRESS2, value);
+        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2,defaultValue));
+        ruleVinkulierung.createTransferRequest(ADDRESS2,defaultValue);
         
         // Act
         vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        emit transferApproved(key, ADDRESS1, ADDRESS2, value, 0);
-        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, value, true);
+        emit transferApproved(key, ADDRESS1, ADDRESS2,defaultValue, 0);
+        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, true);
 
         // +30 days and one second
         vm.warp(block.timestamp + 2592001);
         // Act
          vm.expectRevert(
-        abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ADDRESS1, ADDRESS2, value));   
+        abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ADDRESS1, ADDRESS2,defaultValue));   
         vm.prank(ADDRESS1);
-        CMTAT_CONTRACT.transfer(ADDRESS2, value);
+        CMTAT_CONTRACT.transfer(ADDRESS2,defaultValue);
     }
 
     function testCannotMakeATransferIfDelayJustInTime() public {
         // Arrange
         vm.prank(ADDRESS1);
-        uint256 value = 10;
         // Act
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, value));
-        ruleVinkulierung.createTransferRequest(ADDRESS2, value);
+        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2,defaultValue));
+        ruleVinkulierung.createTransferRequest(ADDRESS2,defaultValue);
         
         // Act
         vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        emit transferApproved(key, ADDRESS1, ADDRESS2, value, 0);
-        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, value, true);
+        emit transferApproved(key, ADDRESS1, ADDRESS2,defaultValue, 0);
+        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, true);
         // 30 days
         vm.warp(block.timestamp + 2592000);
         // Act
         vm.prank(ADDRESS1);
-        CMTAT_CONTRACT.transfer(ADDRESS2, value);
+        CMTAT_CONTRACT.transfer(ADDRESS2,defaultValue);
     }
 
     function testCanMintWithoutApproval() public {
@@ -172,13 +204,76 @@ contract CMTATIntegrationVinkulierung is Test, HelperContract {
     }
 
     function testCanBurnWithoutApproval() public {
-        uint256 value = 3;
         // Act
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT.burn(ADDRESS1, value, "test");
+        CMTAT_CONTRACT.burn(ADDRESS1,defaultValue, "test");
 
         // Assert
         resUint256 = CMTAT_CONTRACT.balanceOf(ADDRESS1);
-        assertEq(resUint256, ADDRESS1_BALANCE_INIT - value);
+        assertEq(resUint256, ADDRESS1_BALANCE_INIT - defaultValue);
+    }
+
+    function testAutomaticTransferIfOptionsSet() public {
+       AUTOMATIC_TRANSFER memory automaticTransferTest = AUTOMATIC_TRANSFER({
+            isActivate:true,
+            cmtat: CMTAT_CONTRACT
+        });
+        vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
+        ruleVinkulierung.setAutomaticTransfer(automaticTransferTest);
+        
+        // Aproval
+        vm.prank(ADDRESS1);
+        CMTAT_CONTRACT.approve(address(ruleVinkulierung), defaultValue);
+
+        // Arrange
+        _createTransferRequest();
+        
+        // Act
+        vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferApproved(defaultKey, ADDRESS1, ADDRESS2,defaultValue, 0);
+        vm.expectEmit(true, true, true, true);
+        emit transferProcessed(defaultKey, ADDRESS1, ADDRESS2,defaultValue, 0);
+        ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, true);
+    }
+
+    function testCanTransferIfAutomaticApprovalSetAndTimeExceeds() public {
+        AUTOMATIC_APPROVAL memory automaticApproval_ = AUTOMATIC_APPROVAL({
+            isActivate: true,
+            timeLimitBeforeAutomaticApproval: 90 days
+        });
+        vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
+        ruleVinkulierung.setAutomaticApproval(automaticApproval_);
+        
+        // Arrange
+        _createTransferRequest();
+        
+
+        vm.warp(block.timestamp + 90 days);
+        // Act
+        vm.prank(ADDRESS1);
+        vm.expectEmit(true, true, true, true);
+        emit transferProcessed(defaultKey, ADDRESS1, ADDRESS2,defaultValue, 0);
+        CMTAT_CONTRACT.transfer(ADDRESS2,defaultValue);
+    }
+
+    function testCannotTransferIfAutomaticApprovalSetAndTimeNotExceeds() public {
+        AUTOMATIC_APPROVAL memory automaticApproval_ = AUTOMATIC_APPROVAL({
+            isActivate: true,
+            timeLimitBeforeAutomaticApproval: 90 days
+        });
+        vm.prank(VINKULIERUNG_OPERATOR_ADDRESS);
+        ruleVinkulierung.setAutomaticApproval(automaticApproval_);
+        
+        // Arrange
+        _createTransferRequest();
+        
+
+        vm.warp(block.timestamp + 92 days);
+        // Act
+        vm.prank(ADDRESS1);
+        vm.expectRevert(
+        abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ADDRESS1, ADDRESS2, defaultValue));   
+        CMTAT_CONTRACT.transfer(ADDRESS2,defaultValue);
     }
 }

@@ -16,6 +16,29 @@ contract RuleEngineOperationTest is Test, HelperContract {
     string resString;
     uint8 CODE_NONEXISTENT = 255;
 
+    TIME_LIMIT timeLimit_ = TIME_LIMIT({
+            timeLimitToApprove:  DEFAULT_TIME_LIMIT_TO_APPROVE,
+            timeLimitToTransfer:   DEFAULT_TIME_LIMIT_TO_TRANSFER
+        });
+   ISSUANCE  issuanceOption_ = ISSUANCE({
+            authorizedMintWithoutApproval:false,
+            authorizedBurnWithoutApproval:false
+        });
+
+    AUTOMATIC_APPROVAL automaticApproval_ = AUTOMATIC_APPROVAL({
+            isActivate: false,
+            timeLimitBeforeAutomaticApproval: 0
+        });
+    AUTOMATIC_TRANSFER  automaticTransfer_ = AUTOMATIC_TRANSFER({
+            isActivate:false,
+            cmtat: IERC20(address(0))
+        });
+    OPTION options = OPTION({
+            issuance:issuanceOption_,
+            timeLimit: timeLimit_,
+            automaticApproval: automaticApproval_,
+            automaticTransfer:automaticTransfer_
+        });
 
 
     // Arrange
@@ -28,11 +51,8 @@ contract RuleEngineOperationTest is Test, HelperContract {
         ruleVinkulierung = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock,
-            true,
-            true,            
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            ruleEngineMock,          
+            options
         );
 
 
@@ -49,21 +69,15 @@ contract RuleEngineOperationTest is Test, HelperContract {
         RuleVinkulierung RuleVinkulierung1 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock,
-            true,
-            true,            
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            ruleEngineMock,          
+            options
         );
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -91,10 +105,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(RuleVinkulierung1);
@@ -169,20 +180,14 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -214,20 +219,14 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -274,10 +273,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
 
         // Act
@@ -341,10 +337,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
 
         // Act
@@ -364,10 +357,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleOperation(RuleVinkulierung1);
@@ -390,10 +380,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleOperation(RuleVinkulierung1);
@@ -417,10 +404,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleOperation(RuleVinkulierung1);
@@ -430,10 +414,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleOperation(RuleVinkulierung2);
@@ -466,19 +447,13 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -504,19 +479,13 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -541,19 +510,13 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));
@@ -581,19 +544,14 @@ contract RuleEngineOperationTest is Test, HelperContract {
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
         );
         RuleVinkulierung RuleVinkulierung2 = new RuleVinkulierung(
             VINKULIERUNG_OPERATOR_ADDRESS,
             ZERO_ADDRESS,
             ruleEngineMock,
-            true,
-            true,                       
-            DEFAULT_TIME_LIMIT_TO_APPROVE,
-            DEFAULT_TIME_LIMIT_TO_TRANSFER
+            options
+
         );
         address[] memory RuleVinkulierungTab = new address[](2);
         RuleVinkulierungTab[0] = address(IRuleOperation(RuleVinkulierung1));

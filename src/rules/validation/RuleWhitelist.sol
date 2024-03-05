@@ -2,19 +2,16 @@
 
 pragma solidity ^0.8.20;
 
-import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "../../interfaces/IRuleEngineValidation.sol";
 import "../../interfaces/IRuleValidation.sol";
-import "./../../modules/MetaTxModuleStandalone.sol";
-import "./abstract/RuleWhitelistInvariantStorage.sol";
+import "./abstract/RuleAddressList/RuleWhitelistInvariantStorage.sol";
+import "./abstract/RuleAddressList/RuleAddressList.sol";
 /**
 @title a whitelist manager
 */
 
-contract RuleWhitelist is IRuleValidation, AccessControl, MetaTxModuleStandalone, RuleWhitelistInvariantStorage {
-     mapping(address => bool) whitelist;
-    // Number of addresses in the whitelist at the moment
-    uint256 private numAddressesWhitelisted;
+contract RuleWhitelist is IRuleValidation, RuleAddressList, RuleWhitelistInvariantStorage {
+   
     
     /**
     * @param admin Address of the contract (Access Control)
@@ -23,108 +20,7 @@ contract RuleWhitelist is IRuleValidation, AccessControl, MetaTxModuleStandalone
     constructor(
         address admin,
         address forwarderIrrevocable
-    ) MetaTxModuleStandalone(forwarderIrrevocable) {
-        if(admin == address(0)){
-            revert RuleWhitelist_AdminWithAddressZeroNotAllowed();
-        }
-        _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(WHITELIST_ROLE, admin);
-    }
-
-    /**
-     * @notice Add addresses to the whitelist
-     * If one of addresses already exist, there is no change for this address. The transaction remains valid (no revert).
-     * @param listWhitelistedAddress an array with the addresses to whitelist
-     */
-    function addAddressesToTheWhitelist(
-        address[] calldata listWhitelistedAddress
-    ) public onlyRole(WHITELIST_ROLE) {
-        uint256 numAddressesWhitelistedLocal = numAddressesWhitelisted;
-        for (uint256 i = 0; i < listWhitelistedAddress.length; ) {
-            if (!whitelist[listWhitelistedAddress[i]]) {
-                whitelist[listWhitelistedAddress[i]] = true;
-                ++numAddressesWhitelistedLocal;
-            }
-            unchecked {
-                ++i;
-            }
-        }
-        numAddressesWhitelisted = numAddressesWhitelistedLocal;
-    }
-
-    /**
-     * @notice Remove addresses from the whitelist
-     * If the address does not exist in the whitelist, there is no change for this address. 
-     * The transaction remains valid (no revert).
-     * @param listWhitelistedAddress an array with the addresses to remove
-     */
-    function removeAddressesFromTheWhitelist(
-        address[] calldata listWhitelistedAddress
-    ) public onlyRole(WHITELIST_ROLE) {
-        uint256 numAddressesWhitelistedLocal = numAddressesWhitelisted;
-        for (uint256 i = 0; i < listWhitelistedAddress.length; ) {
-            if (whitelist[listWhitelistedAddress[i]]) {
-                whitelist[listWhitelistedAddress[i]] = false;
-                --numAddressesWhitelistedLocal;
-            }
-            unchecked {
-                ++i;
-            }
-        }
-        numAddressesWhitelisted = numAddressesWhitelistedLocal;
-    }
-
-    /**
-     * @notice Add one address to the whitelist
-     * If the address already exists, the transaction is reverted to save gas.
-     * @param _newWhitelistAddress The address to whitelist
-     */
-    function addAddressToTheWhitelist(
-        address _newWhitelistAddress
-    ) public onlyRole(WHITELIST_ROLE) {
-        if(whitelist[_newWhitelistAddress])
-        {
-            revert RuleWhitelist_AddressAlreadyWhitelisted();
-        }
-        whitelist[_newWhitelistAddress] = true;
-        ++numAddressesWhitelisted;
-    }
-
-    /**
-     * @notice Remove one address from the whitelist
-     * If the address does not exist in the whitelist, the transaction is reverted to save gas.
-     * @param _removeWhitelistAddress The address to remove
-     *
-     */
-    function removeAddressFromTheWhitelist(
-        address _removeWhitelistAddress
-    ) public onlyRole(WHITELIST_ROLE) {
-        if(!whitelist[_removeWhitelistAddress]){
-            revert RuleWhitelist_AddressNotPresent();
-        }
-        whitelist[_removeWhitelistAddress] = false;
-        --numAddressesWhitelisted;
-    }
-
-    /**
-     * @notice Get the number of whitelisted addresses
-     * @return Number of whitelisted addresses
-     *
-     */
-    function numberWhitelistedAddress() external view returns (uint256) {
-        return numAddressesWhitelisted;
-    }
-
-    /**
-     * @notice Know if an address is whitelisted or not
-     * @param _targetAddress The concerned address
-     * @return True if the address is whitelisted, false otherwise
-     *
-     */
-    function addressIsWhitelisted(
-        address _targetAddress
-    ) external view returns (bool) {
-        return whitelist[_targetAddress];
+    )  RuleAddressList(admin, forwarderIrrevocable) {
     }
 
     /** 
@@ -155,9 +51,9 @@ contract RuleWhitelist is IRuleValidation, AccessControl, MetaTxModuleStandalone
         address _to,
         uint256 /*_amount */
     ) public view override returns (uint8) {
-        if (!whitelist[_from]) {
+        if (!addressIsListed(_from)) {
             return CODE_ADDRESS_FROM_NOT_WHITELISTED;
-        } else if (!whitelist[_to]) {
+        } else if (! addressIsListed(_to)) {
             return CODE_ADDRESS_TO_NOT_WHITELISTED;
         } else {
             return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
@@ -192,29 +88,5 @@ contract RuleWhitelist is IRuleValidation, AccessControl, MetaTxModuleStandalone
         } else {
             return TEXT_CODE_NOT_FOUND;
         }
-    }
-
-    /** 
-    * @dev This surcharge is not necessary if you do not use the MetaTxModule
-    */
-    function _msgSender()
-        internal
-        view
-        override(MetaTxModuleStandalone, Context)
-        returns (address sender)
-    {
-        return MetaTxModuleStandalone._msgSender();
-    }
-
-    /** 
-    * @dev This surcharge is not necessary if you do not use the MetaTxModule
-    */
-    function _msgData()
-        internal
-        view
-        override(MetaTxModuleStandalone, Context)
-        returns (bytes calldata)
-    {
-        return MetaTxModuleStandalone._msgData();
     }
 }

@@ -15,12 +15,10 @@ import "CMTAT/interfaces/engine/IRuleEngine.sol";
 
 abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInvariantStorage {
     // Time variable
-    uint256 internal timeLimitToApprove = 7 days;
-    uint256 internal timeLimitToTransfer = 30 days;
+    //uint256 internal timeLimitToApprove = 7 days;
+    // uint256 internal timeLimitToTransfer = 30 days;
 
-    // Mint and Burn
-   bool internal authorizedBurnWithoutApproval;
-   bool internal authorizedMintWithoutApproval;
+    OPTION internal options;
 
     mapping(bytes32 => TransferRequest) transferRequests;
 
@@ -28,21 +26,31 @@ abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInv
     uint256 requestId;
     mapping(uint256 => bytes32) IdToKey;
 
-    function updateAuthorizationMintWithoutApproval(bool mintNewStatus) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
-         authorizedMintWithoutApproval = mintNewStatus;
+    function setIssuanceOptions(ISSUANCE calldata issuance_) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
+        options.issuance.authorizedBurnWithoutApproval = issuance_.authorizedBurnWithoutApproval;
+        options.issuance.authorizedMintWithoutApproval = issuance_.authorizedMintWithoutApproval;
     }
 
-    function updateAuthorizationBurnWithoutApproval(bool burnNewStatus) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
-         authorizedBurnWithoutApproval = burnNewStatus;
-    }
-    
-    function updateTimeLimitForApproval(uint256 newTimeLimit) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
-        timeLimitToApprove = newTimeLimit;
+    function setAutomaticTransfer(AUTOMATIC_TRANSFER calldata automaticTransfer_) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
+         if(automaticTransfer_.isActivate !=  options.automaticTransfer.isActivate){
+            options.automaticTransfer.isActivate = automaticTransfer_.isActivate;
+         }
+         // No need to put the cmtat to zero to deactivate automaticTransfer
+         if(address(automaticTransfer_.cmtat) != address(options.automaticTransfer.cmtat)){
+            options.automaticTransfer.cmtat = automaticTransfer_.cmtat;
+         }
     }
 
-    function updateTimeLimitToTransfer(uint256 newTimeLimitToTransfer) public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
-        timeLimitToTransfer  = newTimeLimitToTransfer;
+    function setTimeLimit(TIME_LIMIT memory timeLimit_)  public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
+         options.timeLimit.timeLimitToApprove = timeLimit_.timeLimitToApprove;
+         options.timeLimit.timeLimitToTransfer = timeLimit_.timeLimitToTransfer;
     }
+
+    function setAutomaticApproval(AUTOMATIC_APPROVAL memory automaticApproval_)  public onlyRole(RULE_VINKULIERUNG_OPERATOR_ROLE){
+         options.automaticApproval.isActivate = automaticApproval_.isActivate;
+         options.automaticApproval.timeLimitBeforeAutomaticApproval = automaticApproval_.timeLimitBeforeAutomaticApproval;
+    }
+
 
     function createTransferRequestWithApproval(
         address from, address to, uint256 value
@@ -60,7 +68,7 @@ abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInv
                 to: to,
                 value: value,
                 askTime:0,
-                maxTime : block.timestamp + timeLimitToTransfer,
+                maxTime : block.timestamp +  options.timeLimit.timeLimitToTransfer,
                 status:STATUS.APPROVED
              });
             transferRequests[key] = newTransferApproval;
@@ -69,7 +77,7 @@ abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInv
             ++requestId;
         } else {
             // Overwrite previous approval
-            transferRequests[key].maxTime = block.timestamp + timeLimitToTransfer;
+            transferRequests[key].maxTime = block.timestamp +  options.timeLimit.timeLimitToTransfer;
             transferRequests[key].status = STATUS.APPROVED;
             emit transferWaiting(key, from, to, value, transferRequests[key].id);
         }
@@ -114,19 +122,37 @@ abstract contract RuleVinkulierungOperator is AccessControl, RuleVinkulierungInv
             revert RuleVinkulierung_Wrong_Status();
         }
         if(isApproved_){
-             // Time
-            if(block.timestamp > (transferRequest.askTime + timeLimitToApprove)){
+            // Time
+            if(block.timestamp > (transferRequest.askTime +  options.timeLimit.timeLimitToApprove)){
                 revert RuleVinkulierung_timeExceeded();
             }
             // Set status
             transferRequests[transferRequest.key].status = STATUS.APPROVED;
             // Set max time
-            transferRequests[transferRequest.key].maxTime = block.timestamp + timeLimitToTransfer;
+            transferRequests[transferRequest.key].maxTime = block.timestamp +  options.timeLimit.timeLimitToTransfer;
             emit transferApproved(transferRequest.key, transferRequest.from, transferRequest.to, transferRequest.value,  transferRequests[transferRequest.key].id );
+            if(options.automaticTransfer.isActivate && address(options.automaticTransfer.cmtat) != address(0)){
+                // Transfer with approval
+                // External call
+                if(options.automaticTransfer.cmtat.allowance(transferRequest.from, address(this)) >= transferRequest.value){
+                     //_updateProcessedTransfer(transferRequest.key);
+                     // Will call the ruleEngine and the rule again...
+                    options.automaticTransfer.cmtat.transferFrom(transferRequest.from, transferRequest.to, transferRequest.value);
+                } 
+            }
         } else {
             transferRequests[transferRequest.key].status = STATUS.DENIED;
             emit transferDenied(transferRequest.key, transferRequest.from, transferRequest.to, transferRequest.value,  transferRequests[transferRequest.key].id );
         }
+    }
 
+    function _updateProcessedTransfer(bytes32 key) internal {
+            // Reset to zero
+            transferRequests[key].maxTime = 0;
+            transferRequests[key].askTime = 0;
+            // Change status
+            transferRequests[key].status = STATUS.EXECUTED;
+            // Emit event
+            emit transferProcessed(key, transferRequests[key].from, transferRequests[key].to,  transferRequests[key].value, transferRequests[key].id);
     }
 }

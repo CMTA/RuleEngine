@@ -29,48 +29,48 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         );
     }
 
-    function _addAddressesToTheWhitelist() internal {  
+    function _addAddressesToTheList() internal {  
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
-                "addAddressesToTheWhitelist(address[])",
+                "addAddressesToTheList(address[])",
                 whitelist
             )
         );
         // Assert
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 2);
         assertEq(resCallBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertEq(resBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS2);
         assertEq(resBool, true);
     }
 
-    function testRemoveAddressFromTheWhitelist() public {
+    function testremoveAddressFromTheList() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
+        ruleWhitelist.addAddressToTheList(ADDRESS1);
 
         // Arrange - Assert
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertEq(resBool, true);
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.removeAddressFromTheWhitelist(ADDRESS1);
+        ruleWhitelist.removeAddressFromTheList(ADDRESS1);
 
         // Assert
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertFalse(resBool);
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 0);
     }
 
-    function testRemoveAddressesFromTheWhitelist() public {
+    function testremoveAddressesFromTheList() public {
         // Arrange
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
@@ -78,54 +78,54 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
-                "addAddressesToTheWhitelist(address[])",
+                "addAddressesToTheList(address[])",
                 whitelist
             )
         );
         assertEq(resCallBool, true);
         // Arrange - Assert
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertEq(resBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS2);
         assertEq(resBool, true);
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
-                "removeAddressesFromTheWhitelist(address[])",
+                "removeAddressesFromTheList(address[])",
                 whitelist
             )
         );
         // Assert
         assertEq(resCallBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertFalse(resBool);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS2);
         assertFalse(resBool);
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 0);
     }
 
     function testRemoveAddressNotPresentFromTheWhitelist() public {
         // Arrange
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertFalse(resBool);
-        vm.expectRevert(RuleWhitelist_AddressNotPresent.selector);
+        vm.expectRevert(Rulelist_AddressNotPresent.selector);
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.removeAddressFromTheWhitelist(ADDRESS1);
+        ruleWhitelist.removeAddressFromTheList(ADDRESS1);
 
         // Assert
         // no change
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertFalse(resBool);
     }
 
     function testRemoveAddressesNotPresentFromTheWhitelist() public {
         // Arrange
-        _addAddressesToTheWhitelist();
+        _addAddressesToTheList();
         // Arrange
         address[] memory whitelistRemove = new address[](3);
         whitelistRemove[0] = ADDRESS1;
@@ -137,17 +137,17 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
-                "removeAddressesFromTheWhitelist(address[])",
+                "removeAddressesFromTheList(address[])",
                 whitelistRemove
             )
         );
         // Assert
         assertEq(resCallBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertFalse(resBool);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS2);
         assertFalse(resBool);
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 0);
     }
 }
