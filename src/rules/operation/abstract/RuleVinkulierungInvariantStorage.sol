@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 pragma solidity ^0.8.20;
-import "../../../../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import "OZ/token/ERC20/IERC20.sol";
 
 abstract contract RuleVinkulierungInvariantStorage  {
     struct AUTOMATIC_TRANSFER {

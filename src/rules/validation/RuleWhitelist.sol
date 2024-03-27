@@ -11,8 +11,6 @@ import "./abstract/RuleAddressList/RuleAddressList.sol";
 */
 
 contract RuleWhitelist is IRuleValidation, RuleAddressList, RuleWhitelistInvariantStorage {
-   
-    
     /**
     * @param admin Address of the contract (Access Control)
     * @param forwarderIrrevocable Address of the forwarder, required for the gasless support

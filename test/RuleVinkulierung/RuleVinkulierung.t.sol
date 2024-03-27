@@ -67,6 +67,19 @@ contract RuleVinkulierungTest is Test, HelperContract {
         vm.expectEmit(true, true, true, true);
         emit transferWaiting(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
         ruleVinkulierung.createTransferRequest(ADDRESS2, defaultValue);
+
+        // Assert
+        TransferRequest memory transferRequest = ruleVinkulierung.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        assertEq(transferRequest.key, defaultKey);
+        assertEq(transferRequest.id, 0);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, defaultValue);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.WAIT));
+
+        TransferRequest[] memory transferRequests = ruleVinkulierung.getRequestByStatus(STATUS.WAIT);
+        assertEq(transferRequests[0].key , defaultKey);
+        assertEq(transferRequests.length , 1);
     }
 
     function testCanCreateTransferRequest() public {
@@ -130,6 +143,15 @@ contract RuleVinkulierungTest is Test, HelperContract {
         vm.expectEmit(true, true, true, true);
         emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
         ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
+
+        // Assert
+        TransferRequest memory transferRequest = ruleVinkulierung.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        assertEq(transferRequest.key, defaultKey);
+        assertEq(transferRequest.id, 0);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, defaultValue);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.APPROVED));
     }
 
     /****** ID *******/
@@ -142,6 +164,16 @@ contract RuleVinkulierungTest is Test, HelperContract {
         vm.expectEmit(true, true, true, true);
         emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
         ruleVinkulierung.approveTransferRequestWithId( 0, true);
+
+
+        // Assert
+        TransferRequest memory transferRequest = ruleVinkulierung.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        assertEq(transferRequest.key, defaultKey);
+        assertEq(transferRequest.id, 0);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, defaultValue);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.APPROVED));
     }
 
     function testCannotApproveOrDeniedRequestCreatedByHolderWithWrongId() public {
@@ -169,6 +201,15 @@ contract RuleVinkulierungTest is Test, HelperContract {
         vm.expectEmit(true, true, true, true);
         emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
         ruleVinkulierung.approveTransferRequestWithId( 0, false);
+
+        // Assert
+        TransferRequest memory transferRequest = ruleVinkulierung.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        assertEq(transferRequest.key, defaultKey);
+        assertEq(transferRequest.id, 0);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, defaultValue);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.DENIED));
     }
 
     /***** with key ******/
@@ -181,6 +222,19 @@ contract RuleVinkulierungTest is Test, HelperContract {
         vm.expectEmit(true, true, true, true);
         emit transferDenied(defaultKey, ADDRESS1, ADDRESS2,  defaultValue, 0);
         ruleVinkulierung.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, false);
+
+        // Assert
+        TransferRequest memory transferRequest = ruleVinkulierung.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        assertEq(transferRequest.key, defaultKey);
+        assertEq(transferRequest.id, 0);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, defaultValue);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.DENIED));
+
+        TransferRequest[] memory transferRequests = ruleVinkulierung.getRequestByStatus(STATUS.DENIED);
+        assertEq(transferRequests[0].key , defaultKey);
+        assertEq(transferRequests.length , 1);
     }
 
     function testCannotHolderCreateRequestIfDenied() public {
@@ -214,11 +268,29 @@ contract RuleVinkulierungTest is Test, HelperContract {
         ruleVinkulierung.resetRequestStatus(0);
 
         // Assert
+        TransferRequest memory transferRequest = ruleVinkulierung.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        assertEq(transferRequest.key, defaultKey);
+        assertEq(transferRequest.id, 0);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, defaultValue);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.NONE));
+
+        // Assert
         vm.prank(ADDRESS1);
         // Act
         vm.expectEmit(true, true, true, true);
         emit transferWaiting(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
         ruleVinkulierung.createTransferRequest(ADDRESS2, defaultValue);
+
+        // Assert
+        transferRequest = ruleVinkulierung.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        assertEq(transferRequest.key, defaultKey);
+        assertEq(transferRequest.id, 0);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, defaultValue);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.WAIT));
     }
 
     function testCannotApproveRequestIfTimeExceeded() public {

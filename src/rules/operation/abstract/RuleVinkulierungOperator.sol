@@ -2,8 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-import "../../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-//import "../../../interfaces/IRuleOperation.sol";
+import "OZ/access/AccessControl.sol";
 import "./RuleVinkulierungInvariantStorage.sol";
 import "CMTAT/interfaces/engine/IRuleEngine.sol";
 

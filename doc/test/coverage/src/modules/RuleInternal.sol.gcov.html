@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2024-03-05 16:06:39</td>
+            <td class="headerValue">2024-03-27 15:35:27</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">4</td>
@@ -119,20 +119,20 @@
 <a name="48"><span class="lineNum">      48 </span>                :            :     function _setRules(</a>
 <a name="49"><span class="lineNum">      49 </span>                :            :         address[] calldata rules_</a>
 <a name="50"><span class="lineNum">      50 </span>                :            :     ) internal {</a>
-<a name="51"><span class="lineNum">      51 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 20 times"> + </span>]:<span class="lineCov">         22 :         if(rules_.length == 0){</span></a>
-<a name="52"><span class="lineNum">      52 </span>                :<span class="lineCov">          2 :             revert RuleEngine_ArrayIsEmpty();</span></a>
+<a name="51"><span class="lineNum">      51 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 28 times"> + </span>]:<span class="lineCov">         60 :         if(rules_.length == 0){</span></a>
+<a name="52"><span class="lineNum">      52 </span>                :<span class="lineCov">          4 :             revert RuleEngine_ArrayIsEmpty();</span></a>
 <a name="53"><span class="lineNum">      53 </span>                :            :         }</a>
-<a name="54"><span class="lineNum">      54 </span>                :<span class="lineCov">         20 :         for (uint256 i = 0; i &lt; rules_.length; ) {</span></a>
-<a name="55"><span class="lineNum">      55 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 36 times"> + </span>]:<span class="lineCov">         38 :             if( address(rules_[i]) == address(0x0)){</span></a>
-<a name="56"><span class="lineNum">      56 </span>                :<span class="lineCov">          2 :                 revert  RuleEngine_RuleAddressZeroNotAllowed();</span></a>
+<a name="54"><span class="lineNum">      54 </span>                :<span class="lineCov">        126 :         for (uint256 i = 0; i &lt; rules_.length; ) {</span></a>
+<a name="55"><span class="lineNum">      55 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 44 times"> + </span>]:<span class="lineCov">        184 :             if( address(rules_[i]) == address(0x0)){</span></a>
+<a name="56"><span class="lineNum">      56 </span>                :<span class="lineCov">          4 :                 revert  RuleEngine_RuleAddressZeroNotAllowed();</span></a>
 <a name="57"><span class="lineNum">      57 </span>                :            :             }</a>
-<a name="58"><span class="lineNum">      58 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 34 times"> + </span>]:<span class="lineCov">         36 :             if(_ruleIsPresent[rules_[i]]){</span></a>
-<a name="59"><span class="lineNum">      59 </span>                :<span class="lineCov">          2 :                 revert RuleEngine_RuleAlreadyExists();</span></a>
+<a name="58"><span class="lineNum">      58 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 42 times"> + </span>]:<span class="lineCov">         44 :             if(_ruleIsPresent[rules_[i]]){</span></a>
+<a name="59"><span class="lineNum">      59 </span>                :<span class="lineCov">          4 :                 revert RuleEngine_RuleAlreadyExists();</span></a>
 <a name="60"><span class="lineNum">      60 </span>                :            :             }</a>
-<a name="61"><span class="lineNum">      61 </span>                :<span class="lineCov">         34 :             _ruleIsPresent[rules_[i]] = true;</span></a>
-<a name="62"><span class="lineNum">      62 </span>                :<span class="lineCov">         34 :             emit AddRule(rules_[i]);</span></a>
+<a name="61"><span class="lineNum">      61 </span>                :<span class="lineCov">         84 :             _ruleIsPresent[rules_[i]] = true;</span></a>
+<a name="62"><span class="lineNum">      62 </span>                :<span class="lineCov">         84 :             emit AddRule(rules_[i]);</span></a>
 <a name="63"><span class="lineNum">      63 </span>                :            :             unchecked {</a>
-<a name="64"><span class="lineNum">      64 </span>                :<span class="lineCov">         34 :                 ++i;</span></a>
+<a name="64"><span class="lineNum">      64 </span>                :<span class="lineCov">         84 :                 ++i;</span></a>
 <a name="65"><span class="lineNum">      65 </span>                :            :             }</a>
 <a name="66"><span class="lineNum">      66 </span>                :            :         }</a>
 <a name="67"><span class="lineNum">      67 </span>                :            :     }</a>
@@ -152,16 +152,16 @@
 <a name="81"><span class="lineNum">      81 </span>                :            :      *</a>
 <a name="82"><span class="lineNum">      82 </span>                :            :      */</a>
 <a name="83"><span class="lineNum">      83 </span>                :            :     function _addRule(address[] storage _rules, address rule_) internal  {</a>
-<a name="84"><span class="lineNum">      84 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 16 times"> + </span>]:<span class="lineCov">         18 :         if( address(rule_) == address(0x0))</span></a>
+<a name="84"><span class="lineNum">      84 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 96 times"> + </span>]:<span class="lineCov">        392 :         if( address(rule_) == address(0x0))</span></a>
 <a name="85"><span class="lineNum">      85 </span>                :            :         {</a>
-<a name="86"><span class="lineNum">      86 </span>                :<span class="lineCov">          2 :             revert RuleEngine_RuleAddressZeroNotAllowed();</span></a>
+<a name="86"><span class="lineNum">      86 </span>                :<span class="lineCov">          4 :             revert RuleEngine_RuleAddressZeroNotAllowed();</span></a>
 <a name="87"><span class="lineNum">      87 </span>                :            :         }</a>
-<a name="88"><span class="lineNum">      88 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 14 times"> + </span>]:<span class="lineCov">         16 :         if( _ruleIsPresent[rule_])</span></a>
+<a name="88"><span class="lineNum">      88 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 94 times"> + </span>]:<span class="lineCov">         96 :         if( _ruleIsPresent[rule_])</span></a>
 <a name="89"><span class="lineNum">      89 </span>                :            :         {</a>
-<a name="90"><span class="lineNum">      90 </span>                :<span class="lineCov">          2 :             revert RuleEngine_RuleAlreadyExists();</span></a>
+<a name="90"><span class="lineNum">      90 </span>                :<span class="lineCov">          4 :             revert RuleEngine_RuleAlreadyExists();</span></a>
 <a name="91"><span class="lineNum">      91 </span>                :            :         }</a>
-<a name="92"><span class="lineNum">      92 </span>                :<span class="lineCov">         14 :         _rules.push(rule_);</span></a>
-<a name="93"><span class="lineNum">      93 </span>                :<span class="lineCov">         14 :         _ruleIsPresent[rule_] = true;</span></a>
+<a name="92"><span class="lineNum">      92 </span>                :<span class="lineCov">        188 :         _rules.push(rule_);</span></a>
+<a name="93"><span class="lineNum">      93 </span>                :<span class="lineCov">        188 :         _ruleIsPresent[rule_] = true;</span></a>
 <a name="94"><span class="lineNum">      94 </span>                :            :         //emit AddRule(rule_);</a>
 <a name="95"><span class="lineNum">      95 </span>                :            :     }</a>
 <a name="96"><span class="lineNum">      96 </span>                :            : </a>
@@ -180,16 +180,16 @@
 <a name="109"><span class="lineNum">     109 </span>                :            :         address rule_,</a>
 <a name="110"><span class="lineNum">     110 </span>                :            :         uint256 index</a>
 <a name="111"><span class="lineNum">     111 </span>                :            :     ) internal {</a>
-<a name="112"><span class="lineNum">     112 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 39 times"> + </span>]:<span class="lineCov">         41 :         if(_rules[index] != rule_)</span></a>
+<a name="112"><span class="lineNum">     112 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 47 times"> + </span>]:<span class="lineCov">         98 :         if(_rules[index] != rule_)</span></a>
 <a name="113"><span class="lineNum">     113 </span>                :            :         {</a>
-<a name="114"><span class="lineNum">     114 </span>                :<span class="lineCov">          2 :             revert RuleEngine_RuleDoNotMatch();</span></a>
+<a name="114"><span class="lineNum">     114 </span>                :<span class="lineCov">          4 :             revert RuleEngine_RuleDoNotMatch();</span></a>
 <a name="115"><span class="lineNum">     115 </span>                :            :         }</a>
-<a name="116"><span class="lineNum">     116 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchCov" title="Branch 1 was taken 4 times"> + </span>]:<span class="lineCov">         39 :         if (index != _rules.length - 1) {</span></a>
-<a name="117"><span class="lineNum">     117 </span>                :<span class="lineCov">          4 :             _rules[index] = _rules[_rules.length - 1];</span></a>
+<a name="116"><span class="lineNum">     116 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchCov" title="Branch 1 was taken 4 times"> + </span>]:<span class="lineCov">        141 :         if (index != _rules.length - 1) {</span></a>
+<a name="117"><span class="lineNum">     117 </span>                :<span class="lineCov">          8 :             _rules[index] = _rules[_rules.length - 1];</span></a>
 <a name="118"><span class="lineNum">     118 </span>                :            :         }</a>
-<a name="119"><span class="lineNum">     119 </span>                :<span class="lineCov">         39 :         _rules.pop();</span></a>
-<a name="120"><span class="lineNum">     120 </span>                :<span class="lineCov">         39 :         _ruleIsPresent[rule_] = false;</span></a>
-<a name="121"><span class="lineNum">     121 </span>                :<span class="lineCov">         39 :         emit RemoveRule(rule_);</span></a>
+<a name="119"><span class="lineNum">     119 </span>                :<span class="lineCov">         94 :         _rules.pop();</span></a>
+<a name="120"><span class="lineNum">     120 </span>                :<span class="lineCov">         94 :         _ruleIsPresent[rule_] = false;</span></a>
+<a name="121"><span class="lineNum">     121 </span>                :<span class="lineCov">         94 :         emit RemoveRule(rule_);</span></a>
 <a name="122"><span class="lineNum">     122 </span>                :            :     }</a>
 <a name="123"><span class="lineNum">     123 </span>                :            : </a>
 <a name="124"><span class="lineNum">     124 </span>                :            :     /**</a>
@@ -197,16 +197,16 @@
 <a name="126"><span class="lineNum">     126 </span>                :            :     * @return index if the rule is found, _rules.length otherwise</a>
 <a name="127"><span class="lineNum">     127 </span>                :            :     */</a>
 <a name="128"><span class="lineNum">     128 </span>                :            :     function getRuleIndex(address[] storage _rules, address rule_) internal view returns (uint256 index) {</a>
-<a name="129"><span class="lineNum">     129 </span>                :<span class="lineCov">          6 :         uint256 rulesLength = _rules.length;</span></a>
-<a name="130"><span class="lineNum">     130 </span>                :<span class="lineCov">          6 :         for (index = 0; index &lt; rulesLength; ) {</span></a>
-<a name="131"><span class="lineNum">     131 </span>        [<span class="branchCov" title="Branch 0 was taken 4 times"> + </span><span class="branchCov" title="Branch 1 was taken 6 times"> + </span>]:<span class="lineCov">         10 :             if (_rules[index] == rule_) {</span></a>
-<a name="132"><span class="lineNum">     132 </span>                :<span class="lineCov">          4 :                 return index;</span></a>
+<a name="129"><span class="lineNum">     129 </span>                :<span class="lineCov">         12 :         uint256 rulesLength = _rules.length;</span></a>
+<a name="130"><span class="lineNum">     130 </span>                :<span class="lineCov">         24 :         for (index = 0; index &lt; rulesLength; ) {</span></a>
+<a name="131"><span class="lineNum">     131 </span>        [<span class="branchCov" title="Branch 0 was taken 4 times"> + </span><span class="branchCov" title="Branch 1 was taken 6 times"> + </span>]:<span class="lineCov">         20 :             if (_rules[index] == rule_) {</span></a>
+<a name="132"><span class="lineNum">     132 </span>                :<span class="lineCov">          8 :                 return index;</span></a>
 <a name="133"><span class="lineNum">     133 </span>                :            :             }</a>
 <a name="134"><span class="lineNum">     134 </span>                :            :             unchecked {</a>
-<a name="135"><span class="lineNum">     135 </span>                :<span class="lineCov">          6 :                 ++index;</span></a>
+<a name="135"><span class="lineNum">     135 </span>                :<span class="lineCov">         12 :                 ++index;</span></a>
 <a name="136"><span class="lineNum">     136 </span>                :            :             }</a>
 <a name="137"><span class="lineNum">     137 </span>                :            :         }</a>
-<a name="138"><span class="lineNum">     138 </span>                :<span class="lineCov">          2 :         return _rules.length;</span></a>
+<a name="138"><span class="lineNum">     138 </span>                :<span class="lineCov">          4 :         return _rules.length;</span></a>
 <a name="139"><span class="lineNum">     139 </span>                :            :     }</a>
 <a name="140"><span class="lineNum">     140 </span>                :            : </a>
 <a name="141"><span class="lineNum">     141 </span>                :            : </a>

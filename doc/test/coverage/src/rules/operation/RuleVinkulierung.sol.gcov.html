@@ -31,27 +31,27 @@
             <td class="headerValue">lcov.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">24</td>
+            <td class="headerCovTableEntry">40</td>
             <td class="headerCovTableEntry">41</td>
-            <td class="headerCovTableEntryLo">58.5 %</td>
+            <td class="headerCovTableEntryHi">97.6 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2024-03-05 16:06:39</td>
+            <td class="headerValue">2024-03-27 15:35:27</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntry">3</td>
             <td class="headerCovTableEntry">6</td>
-            <td class="headerCovTableEntryLo">50.0 %</td>
+            <td class="headerCovTableEntry">7</td>
+            <td class="headerCovTableEntryMed">85.7 %</td>
           </tr>
           <tr>
             <td></td>
             <td></td>
             <td></td>
             <td class="headerItem">Branches:</td>
-            <td class="headerCovTableEntry">7</td>
+            <td class="headerCovTableEntry">10</td>
             <td class="headerCovTableEntry">12</td>
-            <td class="headerCovTableEntryLo">58.3 %</td>
+            <td class="headerCovTableEntryMed">83.3 %</td>
           </tr>
           <tr><td><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
         </table>
@@ -73,7 +73,7 @@
 <a name="2"><span class="lineNum">       2 </span>                :            : </a>
 <a name="3"><span class="lineNum">       3 </span>                :            : pragma solidity ^0.8.20;</a>
 <a name="4"><span class="lineNum">       4 </span>                :            : </a>
-<a name="5"><span class="lineNum">       5 </span>                :            : import &quot;../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol&quot;;</a>
+<a name="5"><span class="lineNum">       5 </span>                :            : import &quot;OZ/access/AccessControl.sol&quot;;</a>
 <a name="6"><span class="lineNum">       6 </span>                :            : import &quot;../../interfaces/IRuleOperation.sol&quot;;</a>
 <a name="7"><span class="lineNum">       7 </span>                :            : import &quot;./../../modules/MetaTxModuleStandalone.sol&quot;; </a>
 <a name="8"><span class="lineNum">       8 </span>                :            : import &quot;./abstract/RuleVinkulierungInvariantStorage.sol&quot;;</a>
@@ -126,15 +126,15 @@
 <a name="55"><span class="lineNum">      55 </span>                :            :         // WAIT =&gt; Will set a new delay to approve</a>
 <a name="56"><span class="lineNum">      56 </span>                :            :         // APPROVED =&gt; will overwrite previous status</a>
 <a name="57"><span class="lineNum">      57 </span>                :            :         // DENIED =&gt; KO</a>
-<a name="58"><span class="lineNum">      58 </span>                :<span class="lineCov">         22 :         address from = _msgSender();</span></a>
-<a name="59"><span class="lineNum">      59 </span>                :<span class="lineCov">         22 :         bytes32 key = keccak256(abi.encode(from, to, value));</span></a>
-<a name="60"><span class="lineNum">      60 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 21 times"> + </span>]:<span class="lineCov">         22 :         if(transferRequests[key].status == STATUS.DENIED){</span></a>
-<a name="61"><span class="lineNum">      61 </span>                :<span class="lineCov">          1 :            revert RuleVinkulierung_TransferDenied();</span></a>
+<a name="58"><span class="lineNum">      58 </span>                :<span class="lineCov">         66 :         address from = _msgSender();</span></a>
+<a name="59"><span class="lineNum">      59 </span>                :<span class="lineCov">         66 :         bytes32 key = keccak256(abi.encode(from, to, value));</span></a>
+<a name="60"><span class="lineNum">      60 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 21 times"> + </span>]:<span class="lineCov">         44 :         if(transferRequests[key].status == STATUS.DENIED){</span></a>
+<a name="61"><span class="lineNum">      61 </span>                :<span class="lineCov">          2 :            revert RuleVinkulierung_TransferDenied();</span></a>
 <a name="62"><span class="lineNum">      62 </span>                :            :         }</a>
-<a name="63"><span class="lineNum">      63 </span>                :<span class="lineCov">         21 :         uint256 requestIdLocal = requestId;</span></a>
+<a name="63"><span class="lineNum">      63 </span>                :<span class="lineCov">         42 :         uint256 requestIdLocal = requestId;</span></a>
 <a name="64"><span class="lineNum">      64 </span>                :            :         // Status NONE not enough because reset is possible</a>
-<a name="65"><span class="lineNum">      65 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchCov" title="Branch 1 was taken 19 times"> + </span>]:<span class="lineCov">         21 :         if(_checkRequestStatus(key)){</span></a>
-<a name="66"><span class="lineNum">      66 </span>                :<span class="lineCov">         19 :              TransferRequest memory newTransferApproval = TransferRequest({</span></a>
+<a name="65"><span class="lineNum">      65 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchCov" title="Branch 1 was taken 19 times"> + </span>]:<span class="lineCov">         42 :         if(_checkRequestStatus(key)){</span></a>
+<a name="66"><span class="lineNum">      66 </span>                :<span class="lineCov">         57 :              TransferRequest memory newTransferApproval = TransferRequest({</span></a>
 <a name="67"><span class="lineNum">      67 </span>                :            :                 key:key,</a>
 <a name="68"><span class="lineNum">      68 </span>                :            :                 id: requestIdLocal,</a>
 <a name="69"><span class="lineNum">      69 </span>                :            :                 from: from,</a>
@@ -145,22 +145,22 @@
 <a name="74"><span class="lineNum">      74 </span>                :            :                 status: STATUS.WAIT</a>
 <a name="75"><span class="lineNum">      75 </span>                :            :              }</a>
 <a name="76"><span class="lineNum">      76 </span>                :            :             );</a>
-<a name="77"><span class="lineNum">      77 </span>                :<span class="lineCov">         19 :             transferRequests[key] = newTransferApproval;</span></a>
-<a name="78"><span class="lineNum">      78 </span>                :<span class="lineCov">         19 :             IdToKey[requestIdLocal] = key;</span></a>
-<a name="79"><span class="lineNum">      79 </span>                :<span class="lineCov">         19 :             emit transferWaiting(key, from, to, value, requestId);</span></a>
-<a name="80"><span class="lineNum">      80 </span>                :<span class="lineCov">         19 :             ++requestId;</span></a>
+<a name="77"><span class="lineNum">      77 </span>                :<span class="lineCov">         38 :             transferRequests[key] = newTransferApproval;</span></a>
+<a name="78"><span class="lineNum">      78 </span>                :<span class="lineCov">         38 :             IdToKey[requestIdLocal] = key;</span></a>
+<a name="79"><span class="lineNum">      79 </span>                :<span class="lineCov">         38 :             emit transferWaiting(key, from, to, value, requestId);</span></a>
+<a name="80"><span class="lineNum">      80 </span>                :<span class="lineCov">         38 :             ++requestId;</span></a>
 <a name="81"><span class="lineNum">      81 </span>                :            :         } else {</a>
 <a name="82"><span class="lineNum">      82 </span>                :            :             // Overwrite previous approval</a>
-<a name="83"><span class="lineNum">      83 </span>                :<span class="lineCov">          2 :             transferRequests[key].askTime = block.timestamp;</span></a>
-<a name="84"><span class="lineNum">      84 </span>                :<span class="lineCov">          2 :             transferRequests[key].status = STATUS.WAIT;</span></a>
-<a name="85"><span class="lineNum">      85 </span>                :<span class="lineCov">          2 :             emit transferWaiting(key, from, to, value, transferRequests[key].id);</span></a>
+<a name="83"><span class="lineNum">      83 </span>                :<span class="lineCov">          4 :             transferRequests[key].askTime = block.timestamp;</span></a>
+<a name="84"><span class="lineNum">      84 </span>                :<span class="lineCov">          4 :             transferRequests[key].status = STATUS.WAIT;</span></a>
+<a name="85"><span class="lineNum">      85 </span>                :<span class="lineCov">          4 :             emit transferWaiting(key, from, to, value, transferRequests[key].id);</span></a>
 <a name="86"><span class="lineNum">      86 </span>                :            :         }</a>
 <a name="87"><span class="lineNum">      87 </span>                :            :     }</a>
 <a name="88"><span class="lineNum">      88 </span>                :            : </a>
 <a name="89"><span class="lineNum">      89 </span>                :            : </a>
 <a name="90"><span class="lineNum">      90 </span>                :            :     function getRequestTrade(address from, address to, uint256 value) public view returns (TransferRequest memory) {</a>
-<a name="91"><span class="lineNum">      91 </span>                :<span class="lineNoCov">          0 :         bytes32 key = keccak256(abi.encode(from, to, value));</span></a>
-<a name="92"><span class="lineNum">      92 </span>                :<span class="lineNoCov">          0 :         return transferRequests[key];</span></a>
+<a name="91"><span class="lineNum">      91 </span>                :<span class="lineCov">         48 :         bytes32 key = keccak256(abi.encode(from, to, value));</span></a>
+<a name="92"><span class="lineNum">      92 </span>                :<span class="lineCov">         32 :         return transferRequests[key];</span></a>
 <a name="93"><span class="lineNum">      93 </span>                :            :     }</a>
 <a name="94"><span class="lineNum">      94 </span>                :            : </a>
 <a name="95"><span class="lineNum">      95 </span>                :            :     /**</a>
@@ -169,31 +169,31 @@
 <a name="98"><span class="lineNum">      98 </span>                :            :      * @return array with corresponding transactions</a>
 <a name="99"><span class="lineNum">      99 </span>                :            :      */</a>
 <a name="100"><span class="lineNum">     100 </span>                :            :     function getRequestByStatus(STATUS _targetStatus) public view returns (TransferRequest[] memory) {</a>
-<a name="101"><span class="lineNum">     101 </span>                :<span class="lineNoCov">          0 :         uint totalRequestCount = requestId;</span></a>
-<a name="102"><span class="lineNum">     102 </span>                :<span class="lineNoCov">          0 :         uint requestCount = 0;</span></a>
-<a name="103"><span class="lineNum">     103 </span>                :<span class="lineNoCov">          0 :         uint currentIndex = 0;</span></a>
+<a name="101"><span class="lineNum">     101 </span>                :<span class="lineCov">         22 :         uint totalRequestCount = requestId;</span></a>
+<a name="102"><span class="lineNum">     102 </span>                :<span class="lineCov">         22 :         uint requestCount = 0;</span></a>
+<a name="103"><span class="lineNum">     103 </span>                :<span class="lineCov">         22 :         uint currentIndex = 0;</span></a>
 <a name="104"><span class="lineNum">     104 </span>                :            : </a>
 <a name="105"><span class="lineNum">     105 </span>                :            :         // We count the number of requests matching the criteria</a>
-<a name="106"><span class="lineNum">     106 </span>                :<span class="lineNoCov">          0 :         for (uint i = 0; i &lt; totalRequestCount; i++) {</span></a>
-<a name="107"><span class="lineNum">     107 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :             if (transferRequests[IdToKey[i + 1]].status == _targetStatus) {</span></a>
-<a name="108"><span class="lineNum">     108 </span>                :<span class="lineNoCov">          0 :                 requestCount += 1;</span></a>
+<a name="106"><span class="lineNum">     106 </span>                :<span class="lineCov">         55 :         for (uint i = 0; i &lt; totalRequestCount; ++i) {</span></a>
+<a name="107"><span class="lineNum">     107 </span>        [<span class="branchCov" title="Branch 0 was taken 11 times"> + </span><span class="branchCov" title="Branch 1 was taken 11 times"> + </span>]:<span class="lineCov">         22 :             if (transferRequests[IdToKey[i]].status == _targetStatus) {</span></a>
+<a name="108"><span class="lineNum">     108 </span>                :<span class="lineCov">         22 :                 requestCount += 1;</span></a>
 <a name="109"><span class="lineNum">     109 </span>                :            :             }</a>
 <a name="110"><span class="lineNum">     110 </span>                :            :         }</a>
 <a name="111"><span class="lineNum">     111 </span>                :            : </a>
 <a name="112"><span class="lineNum">     112 </span>                :            :         // We reserve the memory to store the trade</a>
-<a name="113"><span class="lineNum">     113 </span>                :<span class="lineNoCov">          0 :         TransferRequest[] memory requests = new TransferRequest[](requestCount);</span></a>
+<a name="113"><span class="lineNum">     113 </span>                :<span class="lineCov">         33 :         TransferRequest[] memory requests = new TransferRequest[](requestCount);</span></a>
 <a name="114"><span class="lineNum">     114 </span>                :            : </a>
 <a name="115"><span class="lineNum">     115 </span>                :            :         // We create an array with the list of trade</a>
-<a name="116"><span class="lineNum">     116 </span>                :<span class="lineNoCov">          0 :         for (uint i = 0; i &lt; totalRequestCount; i++) {</span></a>
-<a name="117"><span class="lineNum">     117 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :             if (transferRequests[IdToKey[i + 1]].status == _targetStatus) {</span></a>
-<a name="118"><span class="lineNum">     118 </span>                :<span class="lineNoCov">          0 :                 uint currentId = i + 1;</span></a>
-<a name="119"><span class="lineNum">     119 </span>                :<span class="lineNoCov">          0 :                 TransferRequest memory currentRequest = transferRequests[IdToKey[currentId]];</span></a>
-<a name="120"><span class="lineNum">     120 </span>                :<span class="lineNoCov">          0 :                 requests[currentIndex] = currentRequest;</span></a>
-<a name="121"><span class="lineNum">     121 </span>                :<span class="lineNoCov">          0 :                 currentIndex += 1;</span></a>
+<a name="116"><span class="lineNum">     116 </span>                :<span class="lineCov">         55 :         for (uint i = 0; i &lt; totalRequestCount; ++i) {</span></a>
+<a name="117"><span class="lineNum">     117 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchCov" title="Branch 1 was taken 11 times"> + </span>]:<span class="lineCov">         22 :             if (transferRequests[IdToKey[i]].status == _targetStatus) {</span></a>
+<a name="118"><span class="lineNum">     118 </span>                :            :                 //uint currentId = i + 1;</a>
+<a name="119"><span class="lineNum">     119 </span>                :<span class="lineCov">         22 :                 TransferRequest memory currentRequest = transferRequests[IdToKey[i]];</span></a>
+<a name="120"><span class="lineNum">     120 </span>                :<span class="lineCov">         22 :                 requests[currentIndex] = currentRequest;</span></a>
+<a name="121"><span class="lineNum">     121 </span>                :<span class="lineCov">         22 :                 currentIndex += 1;</span></a>
 <a name="122"><span class="lineNum">     122 </span>                :            :             }</a>
 <a name="123"><span class="lineNum">     123 </span>                :            :         }</a>
 <a name="124"><span class="lineNum">     124 </span>                :            : </a>
-<a name="125"><span class="lineNum">     125 </span>                :<span class="lineNoCov">          0 :         return requests;</span></a>
+<a name="125"><span class="lineNum">     125 </span>                :<span class="lineCov">         22 :         return requests;</span></a>
 <a name="126"><span class="lineNum">     126 </span>                :            :     }</a>
 <a name="127"><span class="lineNum">     127 </span>                :            : </a>
 <a name="128"><span class="lineNum">     128 </span>                :            : </a>
@@ -209,21 +209,21 @@
 <a name="138"><span class="lineNum">     138 </span>                :            :     ) public override onlyRole(RULE_ENGINE_CONTRACT_ROLE) returns(bool isValid){</a>
 <a name="139"><span class="lineNum">     139 </span>                :            :         // Mint &amp; Burn</a>
 <a name="140"><span class="lineNum">     140 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 7 times"> + </span>]:            :         if(</a>
-<a name="141"><span class="lineNum">     141 </span>                :<span class="lineCov">          9 :             (_from == address(0) &amp;&amp; options.issuance.authorizedMintWithoutApproval)</span></a>
+<a name="141"><span class="lineNum">     141 </span>                :<span class="lineCov">         18 :             (_from == address(0) &amp;&amp; options.issuance.authorizedMintWithoutApproval)</span></a>
 <a name="142"><span class="lineNum">     142 </span>                :            :             ||  (_to == address(0) &amp;&amp; options.issuance.authorizedBurnWithoutApproval)</a>
 <a name="143"><span class="lineNum">     143 </span>                :            :         ){</a>
-<a name="144"><span class="lineNum">     144 </span>                :<span class="lineCov">          2 :             return true;</span></a>
+<a name="144"><span class="lineNum">     144 </span>                :<span class="lineCov">          4 :             return true;</span></a>
 <a name="145"><span class="lineNum">     145 </span>                :            :         }</a>
-<a name="146"><span class="lineNum">     146 </span>                :<span class="lineCov">          7 :         bytes32 key = keccak256(abi.encode(_from, _to, _amount));</span></a>
-<a name="147"><span class="lineNum">     147 </span>                :<span class="lineCov">          7 :         bool automaticApprovalCondition = options.automaticApproval.isActivate &amp;&amp; ((transferRequests[key].askTime + options.automaticApproval.timeLimitBeforeAutomaticApproval ) &gt;= block.timestamp);</span></a>
-<a name="148"><span class="lineNum">     148 </span>                :<span class="lineCov">          7 :         bool transferApproved = (transferRequests[key].status == STATUS.APPROVED) </span></a>
+<a name="146"><span class="lineNum">     146 </span>                :<span class="lineCov">         21 :         bytes32 key = keccak256(abi.encode(_from, _to, _amount));</span></a>
+<a name="147"><span class="lineNum">     147 </span>                :<span class="lineCov">         21 :         bool automaticApprovalCondition = options.automaticApproval.isActivate &amp;&amp; ((transferRequests[key].askTime + options.automaticApproval.timeLimitBeforeAutomaticApproval ) &gt;= block.timestamp);</span></a>
+<a name="148"><span class="lineNum">     148 </span>                :<span class="lineCov">         21 :         bool transferApproved = (transferRequests[key].status == STATUS.APPROVED) </span></a>
 <a name="149"><span class="lineNum">     149 </span>                :            :             &amp;&amp; (transferRequests[key].maxTime &gt;= block.timestamp);</a>
-<a name="150"><span class="lineNum">     150 </span>        [<span class="branchCov" title="Branch 0 was taken 4 times"> + </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">          7 :         if(automaticApprovalCondition || transferApproved)</span></a>
+<a name="150"><span class="lineNum">     150 </span>        [<span class="branchCov" title="Branch 0 was taken 4 times"> + </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">         14 :         if(automaticApprovalCondition || transferApproved)</span></a>
 <a name="151"><span class="lineNum">     151 </span>                :            :         {</a>
-<a name="152"><span class="lineNum">     152 </span>                :<span class="lineCov">          4 :             _updateProcessedTransfer(key);</span></a>
-<a name="153"><span class="lineNum">     153 </span>                :<span class="lineCov">          4 :             return true;</span></a>
+<a name="152"><span class="lineNum">     152 </span>                :<span class="lineCov">          8 :             _updateProcessedTransfer(key);</span></a>
+<a name="153"><span class="lineNum">     153 </span>                :<span class="lineCov">          8 :             return true;</span></a>
 <a name="154"><span class="lineNum">     154 </span>                :            :         } else {</a>
-<a name="155"><span class="lineNum">     155 </span>                :<span class="lineCov">          3 :             return false;</span></a>
+<a name="155"><span class="lineNum">     155 </span>                :<span class="lineCov">          6 :             return false;</span></a>
 <a name="156"><span class="lineNum">     156 </span>                :            :         }</a>
 <a name="157"><span class="lineNum">     157 </span>                :            :     }</a>
 <a name="158"><span class="lineNum">     158 </span>                :            : </a>
@@ -233,10 +233,10 @@
 <a name="162"><span class="lineNum">     162 </span>                :            :     function _msgSender()</a>
 <a name="163"><span class="lineNum">     163 </span>                :            :         internal</a>
 <a name="164"><span class="lineNum">     164 </span>                :            :         view</a>
-<a name="165"><span class="lineNum">     165 </span>                :            :         override(MetaTxModuleStandalone, Context)</a>
+<a name="165"><span class="lineNum">     165 </span>                :            :         override(ERC2771Context, Context)</a>
 <a name="166"><span class="lineNum">     166 </span>                :            :         returns (address sender)</a>
 <a name="167"><span class="lineNum">     167 </span>                :            :     {</a>
-<a name="168"><span class="lineNum">     168 </span>                :<span class="lineCov">         61 :         return MetaTxModuleStandalone._msgSender();</span></a>
+<a name="168"><span class="lineNum">     168 </span>                :<span class="lineCov">        357 :         return ERC2771Context._msgSender();</span></a>
 <a name="169"><span class="lineNum">     169 </span>                :            :     }</a>
 <a name="170"><span class="lineNum">     170 </span>                :            : </a>
 <a name="171"><span class="lineNum">     171 </span>                :            :     /** </a>
@@ -245,12 +245,19 @@
 <a name="174"><span class="lineNum">     174 </span>                :            :     function _msgData()</a>
 <a name="175"><span class="lineNum">     175 </span>                :            :         internal</a>
 <a name="176"><span class="lineNum">     176 </span>                :            :         view</a>
-<a name="177"><span class="lineNum">     177 </span>                :            :         override(MetaTxModuleStandalone, Context)</a>
+<a name="177"><span class="lineNum">     177 </span>                :            :         override(ERC2771Context, Context)</a>
 <a name="178"><span class="lineNum">     178 </span>                :            :         returns (bytes calldata)</a>
 <a name="179"><span class="lineNum">     179 </span>                :            :     {</a>
-<a name="180"><span class="lineNum">     180 </span>                :<span class="lineNoCov">          0 :         return MetaTxModuleStandalone._msgData();</span></a>
+<a name="180"><span class="lineNum">     180 </span>                :<span class="lineNoCov">          0 :         return ERC2771Context._msgData();</span></a>
 <a name="181"><span class="lineNum">     181 </span>                :            :     }</a>
-<a name="182"><span class="lineNum">     182 </span>                :            : }</a>
+<a name="182"><span class="lineNum">     182 </span>                :            : </a>
+<a name="183"><span class="lineNum">     183 </span>                :            :     /** </a>
+<a name="184"><span class="lineNum">     184 </span>                :            :     * @dev This surcharge is not necessary if you do not use the MetaTxModule</a>
+<a name="185"><span class="lineNum">     185 </span>                :            :     */</a>
+<a name="186"><span class="lineNum">     186 </span>                :            :     function _contextSuffixLength() internal view override(ERC2771Context, Context) returns (uint256) {</a>
+<a name="187"><span class="lineNum">     187 </span>                :<span class="lineCov">        357 :         return ERC2771Context._contextSuffixLength();</span></a>
+<a name="188"><span class="lineNum">     188 </span>                :            :     }</a>
+<a name="189"><span class="lineNum">     189 </span>                :            : }</a>
 </pre>
       </td>
     </tr>

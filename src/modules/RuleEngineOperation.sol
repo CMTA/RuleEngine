@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 import "./RuleInternal.sol";
 import "../interfaces/IRuleEngineOperation.sol";
 import "../interfaces/IRuleOperation.sol";
-import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "OZ/access/AccessControl.sol";
 /**
 @title Implementation of a ruleEngine defined by the CMTAT
 */

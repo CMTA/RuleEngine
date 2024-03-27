@@ -7,7 +7,7 @@ import "../../interfaces/IRuleValidation.sol";
 import "./abstract/RuleAddressList/RuleBlacklistInvariantStorage.sol";
 import "./abstract/RuleAddressList/RuleAddressList.sol";
 /**
-@title a blacklist manager
+* @title a blacklist manager 
 */
 
 contract RuleBlacklist is IRuleValidation, RuleAddressList, RuleBlacklistInvariantStorage {

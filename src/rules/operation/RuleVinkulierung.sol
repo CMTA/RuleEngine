@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "OZ/access/AccessControl.sol";
 import "../../interfaces/IRuleOperation.sol";
 import "./../../modules/MetaTxModuleStandalone.sol"; 
 import "./abstract/RuleVinkulierungInvariantStorage.sol";
@@ -103,8 +103,8 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
         uint currentIndex = 0;
 
         // We count the number of requests matching the criteria
-        for (uint i = 0; i < totalRequestCount; i++) {
-            if (transferRequests[IdToKey[i + 1]].status == _targetStatus) {
+        for (uint i = 0; i < totalRequestCount; ++i) {
+            if (transferRequests[IdToKey[i]].status == _targetStatus) {
                 requestCount += 1;
             }
         }
@@ -113,10 +113,10 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
         TransferRequest[] memory requests = new TransferRequest[](requestCount);
 
         // We create an array with the list of trade
-        for (uint i = 0; i < totalRequestCount; i++) {
-            if (transferRequests[IdToKey[i + 1]].status == _targetStatus) {
-                uint currentId = i + 1;
-                TransferRequest memory currentRequest = transferRequests[IdToKey[currentId]];
+        for (uint i = 0; i < totalRequestCount; ++i) {
+            if (transferRequests[IdToKey[i]].status == _targetStatus) {
+                //uint currentId = i + 1;
+                TransferRequest memory currentRequest = transferRequests[IdToKey[i]];
                 requests[currentIndex] = currentRequest;
                 currentIndex += 1;
             }
@@ -162,10 +162,10 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
     function _msgSender()
         internal
         view
-        override(MetaTxModuleStandalone, Context)
+        override(ERC2771Context, Context)
         returns (address sender)
     {
-        return MetaTxModuleStandalone._msgSender();
+        return ERC2771Context._msgSender();
     }
 
     /** 
@@ -174,9 +174,16 @@ contract RuleVinkulierung is IRuleOperation, MetaTxModuleStandalone, RuleVinkuli
     function _msgData()
         internal
         view
-        override(MetaTxModuleStandalone, Context)
+        override(ERC2771Context, Context)
         returns (bytes calldata)
     {
-        return MetaTxModuleStandalone._msgData();
+        return ERC2771Context._msgData();
+    }
+
+    /** 
+    * @dev This surcharge is not necessary if you do not use the MetaTxModule
+    */
+    function _contextSuffixLength() internal view override(ERC2771Context, Context) returns (uint256) {
+        return ERC2771Context._contextSuffixLength();
     }
 }

@@ -1,14 +1,11 @@
 // SPDX-License-Identifier: MPL-2.0
 /** 
-
-This code is not audited !!!
-
+* This code is not audited !!!
 */
 
-
 pragma solidity ^0.8.20;
-import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-import "../../../lib/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
+import "OZ/access/AccessControl.sol";
+import "CMTAT/mocks/RuleEngine/interfaces/IRule.sol";
 import "../../modules/MetaTxModuleStandalone.sol";
 import "./abstract/RuleSanctionListInvariantStorage.sol";
 interface SanctionsList {
@@ -118,10 +115,10 @@ contract RuleSanctionList is IRule, AccessControl, MetaTxModuleStandalone,  Rule
     function _msgSender()
         internal
         view
-        override(MetaTxModuleStandalone, Context)
+        override(ERC2771Context, Context)
         returns (address sender)
     {
-        return MetaTxModuleStandalone._msgSender();
+        return ERC2771Context._msgSender();
     }
 
     /** 
@@ -130,9 +127,16 @@ contract RuleSanctionList is IRule, AccessControl, MetaTxModuleStandalone,  Rule
     function _msgData()
         internal
         view
-        override(MetaTxModuleStandalone, Context)
+        override(ERC2771Context, Context)
         returns (bytes calldata)
     {
-        return MetaTxModuleStandalone._msgData();
+        return ERC2771Context._msgData();
+    }
+
+    /** 
+    * @dev This surcharge is not necessary if you do not use the MetaTxModule
+    */
+    function _contextSuffixLength() internal view override(ERC2771Context, Context) returns (uint256) {
+        return ERC2771Context._contextSuffixLength();
     }
 }

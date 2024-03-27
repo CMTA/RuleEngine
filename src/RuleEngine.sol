@@ -6,7 +6,6 @@ import "CMTAT/interfaces/engine/IRuleEngine.sol";
 import "./modules/MetaTxModuleStandalone.sol";
 import "./modules/RuleEngineOperation.sol";
 import "./modules/RuleEngineValidation.sol";
-import "./modules/MetaTxModuleStandalone.sol";
 
 
 /**
@@ -48,10 +47,10 @@ contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, M
     function _msgSender()
         internal
         view
-        override(MetaTxModuleStandalone, Context)
+        override(ERC2771Context, Context)
         returns (address sender)
     {
-        return MetaTxModuleStandalone._msgSender();
+        return ERC2771Context._msgSender();
     }
 
     /** 
@@ -60,9 +59,16 @@ contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, M
     function _msgData()
         internal
         view
-        override(MetaTxModuleStandalone, Context)
+        override(ERC2771Context, Context)
         returns (bytes calldata)
     {
-        return MetaTxModuleStandalone._msgData();
+        return ERC2771Context._msgData();
+    }
+
+    /** 
+    * @dev This surcharge is not necessary if you do not use the MetaTxModule
+    */
+    function _contextSuffixLength() internal view override(ERC2771Context, Context) returns (uint256) {
+        return ERC2771Context._contextSuffixLength();
     }
 }
