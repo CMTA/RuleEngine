@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "OZ/access/AccessControl.sol";
 import "./RuleInternal.sol";
 import "../interfaces/IRuleEngineValidation.sol";
 import "../interfaces/IRuleValidation.sol";
@@ -158,10 +158,8 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
                 ++i;
             }
         }
-        //
         
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-        //return uint8(0);
     }
 
     /** 
@@ -177,7 +175,6 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
         uint256 _amount
     ) public view override returns (bool) {
         return detectTransferRestriction(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-        //return detectTransferRestriction(_from, _to, _amount) == uint8(0);
     }
 
     /** 

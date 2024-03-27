@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.0;
 
-//import "CMTAT/interfaces/draft-IERC1404/IRuleEngine.sol";
-
 interface IRuleOperation {
 
     /**
@@ -13,5 +11,5 @@ interface IRuleOperation {
         address _from,
         address _to,
         uint256 _amount
-    ) external;
+    ) external returns (bool isValid);
 }

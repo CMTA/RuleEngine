@@ -7,7 +7,7 @@ import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-@title Tests on the provided functions by OpenZeppelin
+* @title Tests on the provided functions by OpenZeppelin
 */
 contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
     RuleEngine ruleEngineMock;

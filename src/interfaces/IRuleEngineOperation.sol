@@ -12,7 +12,7 @@ interface IRuleEngineOperation{
     /**
      * @dev return the number of rules
      */
-    function rulesOperationCount() external view returns (uint256);
+    function rulesCountOperation() external view returns (uint256);
 
     /**
      * @dev return the rule at the index specified by ruleId

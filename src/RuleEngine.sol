@@ -6,11 +6,10 @@ import "CMTAT/interfaces/engine/IRuleEngine.sol";
 import "./modules/MetaTxModuleStandalone.sol";
 import "./modules/RuleEngineOperation.sol";
 import "./modules/RuleEngineValidation.sol";
-import "./modules/MetaTxModuleStandalone.sol";
 
 
 /**
-@title Implementation of a ruleEngine as defined by the CMTAT
+* @title Implementation of a ruleEngine as defined by the CMTAT
 */
 contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, MetaTxModuleStandalone {
     error RuleEngine_TransferInvalid();
@@ -30,18 +29,16 @@ contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, M
         _grantRole(RULE_ENGINE_ROLE, admin);
     }
 
-   
-
-
+    /*
+    * @todo: add access control
+    */
     function operateOnTransfer(address from, address to, uint256 amount) external override returns (bool isValid)  {
         // Validate the transfer
         if(!RuleEngineValidation.validateTransfer(from, to, amount)){
             return false; 
         }
         // Apply operation on RuleEngine
-        // must revert in case of error, no return value
-        RuleEngineOperation._operateOnTransfer(from, to, amount);
-        return true;
+        return RuleEngineOperation._operateOnTransfer(from, to, amount);
     }
 
     /** 
@@ -50,10 +47,10 @@ contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, M
     function _msgSender()
         internal
         view
-        override(MetaTxModuleStandalone, Context)
+        override(ERC2771Context, Context)
         returns (address sender)
     {
-        return MetaTxModuleStandalone._msgSender();
+        return ERC2771Context._msgSender();
     }
 
     /** 
@@ -62,9 +59,16 @@ contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, M
     function _msgData()
         internal
         view
-        override(MetaTxModuleStandalone, Context)
+        override(ERC2771Context, Context)
         returns (bytes calldata)
     {
-        return MetaTxModuleStandalone._msgData();
+        return ERC2771Context._msgData();
+    }
+
+    /** 
+    * @dev This surcharge is not necessary if you do not use the MetaTxModule
+    */
+    function _contextSuffixLength() internal view override(ERC2771Context, Context) returns (uint256) {
+        return ERC2771Context._contextSuffixLength();
     }
 }

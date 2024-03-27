@@ -4,10 +4,9 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
-import "src/rules/RuleSanctionList.sol";
 import "../utils/SanctionListOracle.sol";
 /**
-@title General functions of the ruleSanctionList
+* @title General functions of the ruleSanctionList
 */
 contract RuleSanctionlistTest is Test, HelperContract {
     uint256 resUint256;
