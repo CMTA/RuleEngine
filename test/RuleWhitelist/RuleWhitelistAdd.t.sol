@@ -6,7 +6,7 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-@title Tests the functions to add addresses to the whitelist
+* @title Tests the functions to add addresses to the whitelist
 */
 contract RuleWhitelistAddTest is Test, HelperContract {
     // Defined in CMTAT.sol
@@ -28,64 +28,69 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         );
     }
 
-    function testAddAddressToTheWhitelist() public {
-        // Act
-        vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
-
-        // Assert
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
-        assertEq(resBool, true);
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
-        assertEq(resUint256, 1);
-    }
-
-    function testAddAddressesToTheWhitelist() public {
-        // Arrange
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
-        assertEq(resUint256, 0);
+    function _addAddressesToTheList() internal {  
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
-
-        // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
-                "addAddressesToTheWhitelist(address[])",
+                "addAddressesToTheList(address[])",
                 whitelist
             )
         );
+        // Assert
+        resUint256 = ruleWhitelist.numberListedAddress();
+        assertEq(resUint256, 2);
+        assertEq(resCallBool, true);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
+        assertEq(resBool, true);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS2);
+        assertEq(resBool, true);
+    }
+
+    function testaddAddressToTheList() public {
+        // Act
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        ruleWhitelist.addAddressToTheList(ADDRESS1);
 
         // Assert
-        assertEq(resCallBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertEq(resBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
-        assertEq(resBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS3);
+        resUint256 = ruleWhitelist.numberListedAddress();
+        assertEq(resUint256, 1);
+    }
+
+    function testaddAddressesToTheList() public {
+        // Arrange
+        resUint256 = ruleWhitelist.numberListedAddress();
+        assertEq(resUint256, 0);
+        // Act
+        _addAddressesToTheList();
+        // Assert
+        resBool = ruleWhitelist.addressIsListed(ADDRESS3);
         assertFalse(resBool);
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 2);
     }
 
     function testCanAddAddressZeroToTheWhitelist() public {
         // Arrange - Assert
-        resBool = ruleWhitelist.addressIsWhitelisted(address(0x0));
+        resBool = ruleWhitelist.addressIsListed(address(0x0));
         assertEq(resBool, false);
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.addAddressToTheWhitelist(address(0x0));
+        ruleWhitelist.addAddressToTheList(address(0x0));
 
         // Assert
-        resBool = ruleWhitelist.addressIsWhitelisted(address(0x0));
+        resBool = ruleWhitelist.addressIsListed(address(0x0));
         assertEq(resBool, true);
     }
 
     function testCanAddAddressesZeroToTheWhitelist() public {
         // Arrange
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 0);
         address[] memory whitelist = new address[](3);
         whitelist[0] = ADDRESS1;
@@ -97,7 +102,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
-                "addAddressesToTheWhitelist(address[])",
+                "addAddressesToTheList(address[])",
                 whitelist
             )
         );
@@ -105,55 +110,43 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         // Assert - Main
         // Seem that call returns true even if the function is reverted
         // TODO : check the return value of call
-        resBool = ruleWhitelist.addressIsWhitelisted(address(0x0));
+        resBool = ruleWhitelist.addressIsListed(address(0x0));
         assertEq(resBool, true);
 
         // Assert - Secondary
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertEq(resBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS2);
         assertEq(resBool, true);
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 3);
     }
 
     function testAddAddressTwiceToTheWhitelist() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
+        ruleWhitelist.addAddressToTheList(ADDRESS1);
         // Arrange - Assert
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertEq(resBool, true);
         /// Arrange
-        vm.expectRevert(RuleWhitelist_AddressAlreadyWhitelisted.selector);
+        vm.expectRevert(Rulelist_AddressAlreadylisted.selector);
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.addAddressToTheWhitelist(ADDRESS1);
+        ruleWhitelist.addAddressToTheList(ADDRESS1);
         // no change
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertEq(resBool, true);
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 1);
     }
 
     function testAddAddressesTwiceToTheWhitelist() public {
         // Arrange
         // Arrange - first addition
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 0);
-        address[] memory whitelist = new address[](2);
-        whitelist[0] = ADDRESS1;
-        whitelist[1] = ADDRESS2;
-        vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheWhitelist(address[])",
-                whitelist
-            )
-        );
-        // Arrange - Assert
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
-        assertEq(resUint256, 2);
+        _addAddressesToTheList();
         // Arrange - second addition
         address[] memory whitelistDuplicate = new address[](3);
         // Duplicate address
@@ -165,21 +158,21 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
-                "addAddressesToTheWhitelist(address[])",
+                "addAddressesToTheList(address[])",
                 whitelistDuplicate
             )
         );
         // Assert
         // no change
         assertEq(resCallBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS1);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertEq(resBool, true);
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS2);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS2);
         assertEq(resBool, true);
         // ADDRESS3 is whitelisted
-        resBool = ruleWhitelist.addressIsWhitelisted(ADDRESS3);
+        resBool = ruleWhitelist.addressIsListed(ADDRESS3);
         assertEq(resBool, true);
-        resUint256 = ruleWhitelist.numberWhitelistedAddress();
+        resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 3);
     }
 }

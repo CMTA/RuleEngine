@@ -2,14 +2,15 @@
 
 pragma solidity ^0.8.20;
 
-import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "OZ/access/AccessControl.sol";
 import "./RuleInternal.sol";
 import "../interfaces/IRuleEngineValidation.sol";
 import "../interfaces/IRuleValidation.sol";
+import "CMTAT/interfaces/draft-IERC1404/draft-IERC1404EnumCode.sol";
 /**
-@title Implementation of a ruleEngine defined by the CMTAT
+* @title Implementation of a ruleEngine defined by the CMTAT
 */
-abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngineValidation {
+abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngineValidation, IERC1404EnumCode  {
     /// @dev Array of rules
     address[] internal _rulesValidation;
 
@@ -38,7 +39,7 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
         _clearRulesValidation();
     }
 
-        /**
+    /**
      * @notice Clear all the rules of the array of rules
      *
      */
@@ -139,13 +140,13 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
     * @param _amount to transfer
     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
     **/
-    function detectTransferRestriction(
+    function detectTransferRestrictionValidation(
         address _from,
         address _to,
         uint256 _amount
     ) public view override returns (uint8) {
         uint256 rulesLength = _rulesValidation.length;
-        for (uint256 i = 0; i < rulesLength; ) {
+        for (uint256 i = 0; i < rulesLength; ++i ) {
             uint8 restriction = IRuleValidation(_rulesValidation[i]).detectTransferRestriction(
                 _from,
                 _to,
@@ -154,14 +155,9 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
             if (restriction > 0) {
                 return restriction;
             }
-            unchecked {
-                ++i;
-            }
         }
-        //
         
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-        //return uint8(0);
     }
 
     /** 
@@ -171,33 +167,11 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
     * @param _amount to transfer
     * @return True if the transfer is valid, false otherwise
     **/
-    function validateTransfer(
+    function validateTransferValidation(
         address _from,
         address _to,
         uint256 _amount
     ) public view override returns (bool) {
-        return detectTransferRestriction(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-        //return detectTransferRestriction(_from, _to, _amount) == uint8(0);
-    }
-
-    /** 
-    * @notice Return the message corresponding to the code
-    * @param _restrictionCode The target restriction code
-    * @return True if the transfer is valid, false otherwise
-    **/
-    function messageForTransferRestriction(
-        uint8 _restrictionCode
-    ) external view override returns (string memory) {
-        uint256 rulesLength = _rulesValidation.length;
-        for (uint256 i = 0; i < rulesLength; ) {
-            if (IRuleValidation(_rulesValidation[i]).canReturnTransferRestrictionCode(_restrictionCode)) {
-                return
-                    IRuleValidation(_rulesValidation[i]).messageForTransferRestriction(_restrictionCode);
-            }
-            unchecked {
-                ++i;
-            }
-        }
-        return "Unknown restriction code";
+        return detectTransferRestrictionValidation(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 }

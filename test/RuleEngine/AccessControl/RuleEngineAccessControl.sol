@@ -6,7 +6,7 @@ import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-@title Tests on the Access Control
+* @title Tests on the Access Control
 */
 contract RuleEngineAccessControlTest is Test, HelperContract {
     // Custom error openZeppelin
@@ -27,6 +27,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine(
             RULE_ENGINE_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
             ZERO_ADDRESS
         );
         resUint256 = ruleEngineMock.rulesCountValidation();
@@ -102,5 +103,13 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         // Assert
         resUint256 = ruleEngineMock.rulesCountValidation();
         assertEq(resUint256, 1);
+    }
+
+    function testCannotAttackerOperateOnTransfer() public {
+        // Act
+        vm.prank(ATTACKER);
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, TOKEN_CONTRACT_ROLE));   
+        ruleEngineMock.operateOnTransfer(ADDRESS1, ADDRESS2, 10);
     }
 }

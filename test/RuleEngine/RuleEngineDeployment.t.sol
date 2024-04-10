@@ -7,7 +7,7 @@ import "CMTAT/mocks/MinimalForwarderMock.sol";
 import "src/RuleEngine.sol";
 import "src/RuleEngine.sol";
 /**
-@title General functions of the RuleEngine
+* @title General functions of the RuleEngine
 */
 contract RuleEngineTest is Test, HelperContract {
     RuleEngine ruleEngineMock;
@@ -32,7 +32,8 @@ contract RuleEngineTest is Test, HelperContract {
         // Act
         ruleEngineMock = new RuleEngine(
             RULE_ENGINE_OPERATOR_ADDRESS,
-            address(forwarder)
+            address(forwarder),
+            ZERO_ADDRESS
         );
 
         // assert
@@ -52,7 +53,10 @@ contract RuleEngineTest is Test, HelperContract {
         // Act
         ruleEngineMock = new RuleEngine(
             address(0x0),
-            address(forwarder)
+            address(forwarder),
+            ZERO_ADDRESS
         );
     }
+
+
 }

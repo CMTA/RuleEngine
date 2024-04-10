@@ -5,9 +5,9 @@ pragma solidity ^0.8.20;
 import "./RuleInternal.sol";
 import "../interfaces/IRuleEngineOperation.sol";
 import "../interfaces/IRuleOperation.sol";
-import "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "OZ/access/AccessControl.sol";
 /**
-@title Implementation of a ruleEngine defined by the CMTAT
+* @title Implementation of a ruleEngine defined by the CMTAT
 */
 abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngineOperation {
     /// @dev Array of rules
@@ -22,7 +22,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
         address[] calldata rules_
     ) public onlyRole(RULE_ENGINE_ROLE) {
         if(rules_.length > 0){
-             clearRulesOperation();
+             _clearRulesOperation();
         }
         _setRules(rules_);
         _rulesOperation = rules_;
@@ -33,13 +33,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      *
      */
     function clearRulesOperation() public onlyRole(RULE_ENGINE_ROLE) {
-        uint256 rulesLength = _rulesOperation.length;
-        for(uint256 i = 0; i < rulesLength; ++i){
-            _removeRuleOperation(_rulesOperation[i], i);
-        }
-        emit ClearRules(_rulesOperation);
-        // No longer useful
-        //_rulesOperation  = new address[](0);
+        _clearRulesOperation(); 
     }
 
     /**
@@ -66,7 +60,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      */
     function addRuleOperation(IRuleOperation rule_) public onlyRole(RULE_ENGINE_ROLE) {
        RuleInternal._addRule( _rulesOperation, address(rule_));
-        emit AddRule(address(rule_));
+       emit AddRule(address(rule_));
     }
 
     /**
@@ -86,7 +80,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
         _removeRuleOperation(address(rule_), index);
     }
 
-        /**
+    /**
      * @notice Remove a rule from the array of rules
      * Revert if the rule found at the specified index does not match the rule in argument
      * @param rule_ address of the target rule
@@ -107,7 +101,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
     /**
     * @return The number of rules inside the array
     */
-    function rulesOperationCount() external view override returns (uint256) {
+    function rulesCountOperation() external view override returns (uint256) {
         return _rulesOperation.length;
     }
 
@@ -115,8 +109,8 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
     * @notice Get the index of a rule inside the list
     * @return index if the rule is found, _rulesOperation.length otherwise
     */
-    function getRuleOperationIndex(address rule_) external view returns (uint256 index) {
-        return RuleInternal.getRuleIndex(_rulesOperation, rule_);
+    function getRuleIndexOperation(IRuleOperation rule_) external view returns (uint256 index) {
+        return RuleInternal.getRuleIndex(_rulesOperation, address(rule_));
     }
 
     /**
@@ -147,17 +141,18 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
         address _from,
         address _to,
         uint256 _amount
-    ) internal {
+    ) internal returns (bool isValid){
         uint256 rulesLength = _rulesOperation.length;
-        for (uint256 i = 0; i < rulesLength; ) {
-            IRuleOperation(_rulesOperation[i]).operateOnTransfer(
+        for (uint256 i = 0; i < rulesLength; ++i ) {
+            bool result = IRuleOperation(_rulesOperation[i]).operateOnTransfer(
                 _from,
                 _to,
                 _amount
             );
-            unchecked {
-                ++i;
+            if(!result){
+                return false;
             }
         }
+        return true;
     }
 }

@@ -1,8 +1,6 @@
 //SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.0;
-
-//import "CMTAT/interfaces/draft-IERC1404/IRuleEngine.sol";
+pragma solidity ^0.8.20;
 
 interface IRuleOperation {
 
@@ -13,5 +11,5 @@ interface IRuleOperation {
         address _from,
         address _to,
         uint256 _amount
-    ) external;
+    ) external returns (bool isValid);
 }

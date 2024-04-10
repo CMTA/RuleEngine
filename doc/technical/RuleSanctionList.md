@@ -16,7 +16,7 @@ The documentation and the contracts addresses are available here: [Chainalysis o
 
 ### SanctionList
 
-![surya_graph_Whitelist](../schema/surya/surya_graph_SanctionList.png)
+![surya_graph_Whitelist](../surya/surya_graph/surya_graph_RuleSanctionList.sol.png)
 
 ## Access Control
 
@@ -30,5 +30,5 @@ Here a schema of the Access Control.
 
 **RuleSanctionList**
 
-![alt text](../accessControl/access-control-RuleSanctionList.drawio.png)
+![alt text](../security/accessControl/access-control-RuleSanctionList.drawio.png)
 

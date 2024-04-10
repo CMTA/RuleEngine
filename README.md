@@ -20,11 +20,12 @@ The CMTAT contracts and the OpenZeppelin library are included as a submodule of 
 
 The following rules are available:
 
-| Rule                                               | Type           | Description                                                  | Doc                                                        |
-| -------------------------------------------------- | -------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
-| [RuleWhitelist](src/rules/RuleWhitelist.sol)       | RuleValidation | This rule can be used to restrict transfers from/to only addresses inside a whitelist. | [RuleWhitelist.md](./doc/technical/RuleWhitelist.md)       |
-| [RuleSanctionList](src/rules/RuleSanctionList.sol) | RuleValidation | The purpose of this contract is to use the oracle contract from Chainalysis to forbid transfer from/to an address  included in a sanctions designation (US, EU, or UN). | [RuleSanctionList.md](./doc/technical/RuleSanctionList.md) |
-|                                                    |                |                                                              |                                                            |
+| Rule                                                         | Type           | Description                                                  | Doc                                                          |
+| ------------------------------------------------------------ | -------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [RuleWhitelist](src/rules/RuleWhitelist.sol)                 | RuleValidation | This rule can be used to restrict transfers from/to only addresses inside a whitelist. | [RuleWhitelist.md](./doc/technical/RuleWhitelist.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleWhitelist.sol.md) |
+| [RuleBlacklist](src/rules/RuleBlacklist.sol)                 | RuleValidation | This rule can be used to forbid transfer from/to addresses in the blacklist | [RuleBlacklist.md](./doc/technical/RuleBlacklist.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleBlacklist.sol.md) |
+| [RuleSanctionList](src/rules/RuleSanctionList.sol)           | RuleValidation | The purpose of this contract is to use the oracle contract from Chainalysis to forbid transfer from/to an address  included in a sanctions designation (US, EU, or UN). | [RuleSanctionList.md](./doc/technical/RuleSanctionList.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleSanctionList.sol.md) |
+| [RuleConditionalTransfer](src/rules/RuleConditionalTransfer.sol) | RuleOperation  | This page describes a Conditional Transfer implementation. This rule requires that transfers have to be approved before being executed by the token holders. | [RuleConditionalTransfer.md](./doc/technical/RuleConditionalTransfer.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleConditionalTransfer.sol.md) |
 
 
 
@@ -50,21 +51,18 @@ You will find the report performed with [Slither](https://github.com/crytic/slit
 
 | Version | File                                                         |
 | ------- | ------------------------------------------------------------ |
-| v1.0.2  | [v1.0.2-slither-report.md](./doc/audits/tools/v1.0.2-slither-report.md) |
-| v1.0.3  | [v1.0.3-slither-report.md](./doc/audits/tools/v1.0.3-slither-report.md) |
+| latest  | [slither-report.md](./doc/security/audits/tools/slither-report.md) |
 
 ## Documentation
 
 Here a summary of the main documentation
 
-| Document                            | Link/Files                                             |
-| ----------------------------------- | ------------------------------------------------------ |
-| Solidity API Documentation (docgen) | [doc/solidityAPI](./doc/solidityAPI)                   |
-| Technical documentation             | [doc/technical](./doc/technical)                       |
-| Toolchain                           | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md)                 |
-| Functionalities                     | [doc/functionalities.pdf](./doc/functionalities.pdf)   |
-| Surya report                        | [doc/surya](./doc/surya)                               |
-| Test (v1.0.2)                       | [doc/test/v1.0.2/test.pdf](./doc/test/v1.0.2/test.pdf) |
+| Document                | Link/Files                                           |
+| ----------------------- | ---------------------------------------------------- |
+| Technical documentation | [doc/technical](./doc/technical)                     |
+| Toolchain               | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md)               |
+| Functionalities         | [doc/functionalities.pdf](./doc/functionalities.pdf) |
+| Surya report            | [doc/surya](./doc/surya/)                            |
 
 
 
@@ -170,21 +168,3 @@ Only RuleEngine with a Whitelist contract
 ```bash
 forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  --broadcast --verify -vvv
 ```
-
-### Local
-
-> This documentation has been written for the version v1.0.2
-
-With Foundry, you [can create a local testnet](https://book.getfoundry.sh/reference/anvil/) node for deploying and testing smart contracts, based on the [Anvil](https://anvil.works/) framework. 
-
-On Linux, using the default RPC URL, and Anvil's test private key, run:  
-
-Example - Deploy the CMTAT, standalone version
-
-```  bash
-export RPC_URL=http://127.0.0.1:8545
-export PRIVATE_KEY=<Local Private Key>
-forge create CMTAT_BASE --rpc-url=$RPC_URL --private-key=$PRIVATE_KEY --constructor-args 0x0000000000000000000000000000000000000000,ADMIN,"CMTA Token","CMTAT","CMTAT_ISIN","https://cmta.ch",0x0000000000000000000000000000000000000000,"CMTAT_info",5
-```
-
-See also the command's [documentation](https://book.getfoundry.sh/reference/forge/deploy-command).

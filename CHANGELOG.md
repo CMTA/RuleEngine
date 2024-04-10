@@ -2,6 +2,15 @@
 
 Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
+## v2.0.0
+
+- Implement the new architecture for the RuleEngine, with ValidationRule and OperationRule
+- Add the rule ConditionalTransfer as an Operation rule
+- Add the rule Blacklist as a Validation rule
+- Whitelist and blacklist rules share a part of their code.
+- Upgrade the library CMTAT to the version [v2.3.1](https://github.com/CMTA/CMTAT/releases/tag/v2.3.1)
+- Fix a minor bug when rules are deleted with clearRules
+
 ## v1.0.3 - 20231122
 
 - Upgrade the library CMTAT to the version [v2.3.1](https://github.com/CMTA/CMTAT/releases/tag/v2.3.1)
