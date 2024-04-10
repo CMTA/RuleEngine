@@ -26,6 +26,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine(
             RULE_ENGINE_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
             ZERO_ADDRESS
         );
         resUint256 = ruleEngineMock.rulesCountValidation();

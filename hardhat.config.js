@@ -2,7 +2,7 @@
 require("@nomicfoundation/hardhat-foundry");
 require('solidity-docgen');
 module.exports = {
-  solidity: "0.8.20",
+  solidity: "0.8.22",
   settings: {
     optimizer: {
       enabled: true,

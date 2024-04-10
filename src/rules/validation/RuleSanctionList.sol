@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: MPL-2.0
-/** 
-* This code is not audited !!!
-*/
 
 pragma solidity ^0.8.20;
+
 import "OZ/access/AccessControl.sol";
-import "CMTAT/mocks/RuleEngine/interfaces/IRule.sol";
 import "../../modules/MetaTxModuleStandalone.sol";
 import "./abstract/RuleSanctionListInvariantStorage.sol";
+import "./abstract/RuleValidateTransfer.sol";
 interface SanctionsList {
     function isSanctioned(address addr) external view returns (bool);
 }
 
-contract RuleSanctionList is IRule, AccessControl, MetaTxModuleStandalone,  RuleSanctionlistInvariantStorage {
+contract RuleSanctionList is AccessControl, MetaTxModuleStandalone,  RuleValidateTransfer, RuleSanctionlistInvariantStorage {
     SanctionsList  public sanctionsList;
 
     /**
@@ -39,23 +37,6 @@ contract RuleSanctionList is IRule, AccessControl, MetaTxModuleStandalone,  Rule
        address sanctionContractOracle_
     ) public onlyRole(SANCTIONLIST_ROLE) {
         sanctionsList = SanctionsList(sanctionContractOracle_);
-    }
-
-    /** 
-    * @notice Validate a transfer
-    * @param _from the origin address
-    * @param _to the destination address
-    * @param _amount to transfer
-    * @return isValid => true if the transfer is valid, false otherwise
-    **/
-    function validateTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) public view override returns (bool isValid) {
-        return
-            detectTransferRestriction(_from, _to, _amount) ==
-            uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
     /** 

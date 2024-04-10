@@ -30,7 +30,7 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
         );
     }
 
-    function testCannotAttackeraddAddressToTheList() public {
+    function testCannotAttackerAddAddressToTheList() public {
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, ADDRESS_LIST_ROLE));  
         vm.prank(ATTACKER);
@@ -43,7 +43,7 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
         assertEq(resUint256, 0);
     }
 
-    function testCannotAttackeraddAddressesToTheList() public {
+    function testCannotAttackerAddAddressesToTheList() public {
         // Arrange
         resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 0);
@@ -96,7 +96,7 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
         assertEq(resUint256, 1);
     }
 
-    function testCannotAttackerremoveAddressesFromTheList() public {
+    function testCannotAttackerRemoveAddressesFromTheList() public {
         // Arrange
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;

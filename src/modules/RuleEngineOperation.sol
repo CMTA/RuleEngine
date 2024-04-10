@@ -7,7 +7,7 @@ import "../interfaces/IRuleEngineOperation.sol";
 import "../interfaces/IRuleOperation.sol";
 import "OZ/access/AccessControl.sol";
 /**
-@title Implementation of a ruleEngine defined by the CMTAT
+* @title Implementation of a ruleEngine defined by the CMTAT
 */
 abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngineOperation {
     /// @dev Array of rules
@@ -60,7 +60,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      */
     function addRuleOperation(IRuleOperation rule_) public onlyRole(RULE_ENGINE_ROLE) {
        RuleInternal._addRule( _rulesOperation, address(rule_));
-        emit AddRule(address(rule_));
+       emit AddRule(address(rule_));
     }
 
     /**
@@ -80,7 +80,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
         _removeRuleOperation(address(rule_), index);
     }
 
-        /**
+    /**
      * @notice Remove a rule from the array of rules
      * Revert if the rule found at the specified index does not match the rule in argument
      * @param rule_ address of the target rule
@@ -143,7 +143,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
         uint256 _amount
     ) internal returns (bool isValid){
         uint256 rulesLength = _rulesOperation.length;
-        for (uint256 i = 0; i < rulesLength; ) {
+        for (uint256 i = 0; i < rulesLength; ++i ) {
             bool result = IRuleOperation(_rulesOperation[i]).operateOnTransfer(
                 _from,
                 _to,
@@ -151,9 +151,6 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
             );
             if(!result){
                 return false;
-            }
-            unchecked {
-                ++i;
             }
         }
         return true;

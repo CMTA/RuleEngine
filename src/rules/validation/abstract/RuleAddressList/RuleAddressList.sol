@@ -10,7 +10,7 @@ import "./RuleAddressListInvariantStorage.sol";
 @title an addresses list manager
 */
 
-contract RuleAddressList is AccessControl, MetaTxModuleStandalone, RuleAddressListInternal, RuleAddressListInvariantStorage {
+abstract contract RuleAddressList is AccessControl, MetaTxModuleStandalone, RuleAddressListInternal, RuleAddressListInvariantStorage {
 
     
     // Number of addresses in the whitelist at the moment

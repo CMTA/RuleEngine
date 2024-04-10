@@ -24,13 +24,10 @@ abstract contract RuleAddressListInternal {
         address[] calldata listAddresses
     ) internal {
         uint256 numAddressesListLocal = numAddressesList;
-        for (uint256 i = 0; i < listAddresses.length; ) {
+        for (uint256 i = 0; i < listAddresses.length; ++i ) {
             if (!list[listAddresses[i]]) {
                 list[listAddresses[i]] = true;
                 ++numAddressesListLocal;
-            }
-            unchecked {
-                ++i;
             }
         }
         numAddressesList = numAddressesListLocal;
@@ -46,13 +43,10 @@ abstract contract RuleAddressListInternal {
         address[] calldata listAddresses
     ) internal {
         uint256 numAddressesListLocal = numAddressesList;
-        for (uint256 i = 0; i < listAddresses.length; ) {
+        for (uint256 i = 0; i < listAddresses.length; ++i ) {
             if (list[listAddresses[i]]) {
                 list[listAddresses[i]] = false;
                 --numAddressesListLocal;
-            }
-            unchecked {
-                ++i;
             }
         }
         numAddressesList = numAddressesListLocal;

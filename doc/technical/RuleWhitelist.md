@@ -8,7 +8,7 @@ This rule can be used to restrict transfers from/to only addresses inside a whit
 
 ### Graph
 
-![surya_graph_Whitelist](../schema/surya/surya_graph_Whitelist.png)
+![surya_graph_Whitelist](../surya/surya_graph/surya_graph_RuleWhitelist.sol.png)
 
 
 

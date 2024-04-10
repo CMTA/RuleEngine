@@ -32,7 +32,8 @@ contract RuleEngineTest is Test, HelperContract {
         // Act
         ruleEngineMock = new RuleEngine(
             RULE_ENGINE_OPERATOR_ADDRESS,
-            address(forwarder)
+            address(forwarder),
+            ZERO_ADDRESS
         );
 
         // assert
@@ -52,7 +53,10 @@ contract RuleEngineTest is Test, HelperContract {
         // Act
         ruleEngineMock = new RuleEngine(
             address(0x0),
-            address(forwarder)
+            address(forwarder),
+            ZERO_ADDRESS
         );
     }
+
+
 }

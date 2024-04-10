@@ -47,7 +47,7 @@ contract CMTATIntegration is Test, HelperContract {
 
         // specific arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleEngineMock = new RuleEngine(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngine(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS, address(CMTAT_CONTRACT));
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleEngineMock.addRuleValidation(ruleBlacklist);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
@@ -241,5 +241,15 @@ contract CMTATIntegration is Test, HelperContract {
         abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ZERO_ADDRESS, ADDRESS1, amount));   
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT.mint(ADDRESS1, amount);
+    }
+
+    function testCanReturnMessageNotFoundWithUnknownCodeId() public {
+        // Act
+        string memory message1 = CMTAT_CONTRACT.messageForTransferRestriction(
+            255
+        );
+
+        // Assert
+        assertEq(message1, TEXT_CODE_NOT_FOUND);
     }
 }

@@ -5,9 +5,9 @@ import "forge-std/Test.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
 
 import "src/modules/RuleEngineInvariantStorage.sol";
-// RuleVinkulierung
-import "src/rules/operation/abstract/RuleVinkulierungInvariantStorage.sol";
-import "src/rules/operation/RuleVinkulierung.sol";
+// RuleConditionalTransfer
+import "src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol";
+import "src/rules/operation/RuleConditionalTransfer.sol";
 // RuleSanctionList
 import "src/rules/validation/RuleSanctionList.sol";
 // RUleBlackList
@@ -25,14 +25,14 @@ import "src/interfaces/IRuleOperation.sol";
 /**
 * @title Constants used by the tests
 */
-abstract contract HelperContract is RuleWhitelistInvariantStorage, RuleBlacklistInvariantStorage, RuleAddressListInvariantStorage, RuleSanctionlistInvariantStorage, RuleEngineInvariantStorage, RuleVinkulierungInvariantStorage  {
+abstract contract HelperContract is RuleWhitelistInvariantStorage, RuleBlacklistInvariantStorage, RuleAddressListInvariantStorage, RuleSanctionlistInvariantStorage, RuleEngineInvariantStorage, RuleConditionalTransferInvariantStorage  {
     // EOA to perform tests
     address constant ZERO_ADDRESS = address(0);
     address constant DEFAULT_ADMIN_ADDRESS = address(1);
     address constant WHITELIST_OPERATOR_ADDRESS = address(2);
     address constant RULE_ENGINE_OPERATOR_ADDRESS = address(3);
     address constant SANCTIONLIST_OPERATOR_ADDRESS = address(8);
-    address constant VINKULIERUNG_OPERATOR_ADDRESS = address(9);
+    address constant CONDITIONAL_TRANSFER_OPERATOR_ADDRESS = address(9);
     address constant ATTACKER = address(4);
     address constant ADDRESS1 = address(5);
     address constant ADDRESS2 = address(6);
@@ -50,7 +50,7 @@ abstract contract HelperContract is RuleWhitelistInvariantStorage, RuleBlacklist
     // contract
     RuleBlacklist ruleBlacklist;
     RuleWhitelist ruleWhitelist;
-    RuleVinkulierung ruleVinkulierung;
+    RuleConditionalTransfer ruleConditionalTransfer;
     CMTAT_STANDALONE CMTAT_CONTRACT;
 
     //bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");

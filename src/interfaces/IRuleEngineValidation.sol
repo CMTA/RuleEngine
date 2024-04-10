@@ -1,10 +1,8 @@
 //SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "CMTAT/interfaces/draft-IERC1404/draft-IERC1404Wrapper.sol";
-
-interface IRuleEngineValidation is IERC1404Wrapper {
+interface IRuleEngineValidation {
     /**
      * @dev define the rules, the precedent rules will be overwritten
      */
@@ -24,4 +22,23 @@ interface IRuleEngineValidation is IERC1404Wrapper {
      * @dev return all the rules
      */
     function rulesValidation() external view returns (address[] memory);
+
+    /**
+     * @dev See ERC-1404
+     *
+     */
+    function detectTransferRestrictionValidation(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external view returns (uint8);
+    
+    /**
+     * @dev Returns true if the transfer is valid, and false otherwise.
+     */
+    function validateTransferValidation(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external view returns (bool isValid);
 }

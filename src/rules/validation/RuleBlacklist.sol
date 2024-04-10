@@ -2,17 +2,14 @@
 
 pragma solidity ^0.8.20;
 
-import "../../interfaces/IRuleEngineValidation.sol";
-import "../../interfaces/IRuleValidation.sol";
 import "./abstract/RuleAddressList/RuleBlacklistInvariantStorage.sol";
 import "./abstract/RuleAddressList/RuleAddressList.sol";
+import "./abstract/RuleValidateTransfer.sol";
 /**
 * @title a blacklist manager 
 */
 
-contract RuleBlacklist is IRuleValidation, RuleAddressList, RuleBlacklistInvariantStorage {
-   
-    
+contract RuleBlacklist is RuleValidateTransfer, RuleAddressList, RuleBlacklistInvariantStorage {
     /**
     * @param admin Address of the contract (Access Control)
     * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
@@ -21,23 +18,6 @@ contract RuleBlacklist is IRuleValidation, RuleAddressList, RuleBlacklistInvaria
         address admin,
         address forwarderIrrevocable
     )  RuleAddressList(admin, forwarderIrrevocable) {
-    }
-
-    /** 
-    * @notice Validate a transfer
-    * @param _from the origin address
-    * @param _to the destination address
-    * @param _amount to transfer
-    * @return isValid => true if the transfer is valid, false otherwise
-    **/
-    function validateTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) public view override returns (bool isValid) {
-        return
-            detectTransferRestriction(_from, _to, _amount) ==
-            uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
     /** 

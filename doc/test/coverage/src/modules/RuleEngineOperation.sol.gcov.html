@@ -31,13 +31,13 @@
             <td class="headerValue">lcov.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">26</td>
-            <td class="headerCovTableEntry">26</td>
+            <td class="headerCovTableEntry">25</td>
+            <td class="headerCovTableEntry">25</td>
             <td class="headerCovTableEntryHi">100.0 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2024-03-27 15:35:27</td>
+            <td class="headerValue">2024-04-09 15:20:43</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">11</td>
@@ -78,7 +78,7 @@
 <a name="7"><span class="lineNum">       7 </span>                :            : import &quot;../interfaces/IRuleOperation.sol&quot;;</a>
 <a name="8"><span class="lineNum">       8 </span>                :            : import &quot;OZ/access/AccessControl.sol&quot;;</a>
 <a name="9"><span class="lineNum">       9 </span>                :            : /**</a>
-<a name="10"><span class="lineNum">      10 </span>                :            : @title Implementation of a ruleEngine defined by the CMTAT</a>
+<a name="10"><span class="lineNum">      10 </span>                :            : * @title Implementation of a ruleEngine defined by the CMTAT</a>
 <a name="11"><span class="lineNum">      11 </span>                :            : */</a>
 <a name="12"><span class="lineNum">      12 </span>                :            : abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngineOperation {</a>
 <a name="13"><span class="lineNum">      13 </span>                :            :     /// @dev Array of rules</a>
@@ -104,7 +104,7 @@
 <a name="33"><span class="lineNum">      33 </span>                :            :      *</a>
 <a name="34"><span class="lineNum">      34 </span>                :            :      */</a>
 <a name="35"><span class="lineNum">      35 </span>                :            :     function clearRulesOperation() public onlyRole(RULE_ENGINE_ROLE) {</a>
-<a name="36"><span class="lineNum">      36 </span>                :<span class="lineCov">          6 :         _clearRulesOperation(); </span></a>
+<a name="36"><span class="lineNum">      36 </span>                :<span class="lineCov">          8 :         _clearRulesOperation(); </span></a>
 <a name="37"><span class="lineNum">      37 </span>                :            :     }</a>
 <a name="38"><span class="lineNum">      38 </span>                :            : </a>
 <a name="39"><span class="lineNum">      39 </span>                :            :     /**</a>
@@ -112,16 +112,16 @@
 <a name="41"><span class="lineNum">      41 </span>                :            :      *</a>
 <a name="42"><span class="lineNum">      42 </span>                :            :      */</a>
 <a name="43"><span class="lineNum">      43 </span>                :            :     function _clearRulesOperation() internal {</a>
-<a name="44"><span class="lineNum">      44 </span>                :<span class="lineCov">         26 :         uint256 index;</span></a>
+<a name="44"><span class="lineNum">      44 </span>                :<span class="lineCov">         28 :         uint256 index;</span></a>
 <a name="45"><span class="lineNum">      45 </span>                :            :         // we remove the last element first since it is more optimized.</a>
-<a name="46"><span class="lineNum">      46 </span>                :<span class="lineCov">         69 :         for(uint256 i = _rulesOperation.length; i &gt; 0; --i){</span></a>
+<a name="46"><span class="lineNum">      46 </span>                :<span class="lineCov">         74 :         for(uint256 i = _rulesOperation.length; i &gt; 0; --i){</span></a>
 <a name="47"><span class="lineNum">      47 </span>                :            :              unchecked {</a>
 <a name="48"><span class="lineNum">      48 </span>                :            :                 // don't underflow since i &gt; 0</a>
-<a name="49"><span class="lineNum">      49 </span>                :<span class="lineCov">         30 :                 index = i - 1;</span></a>
+<a name="49"><span class="lineNum">      49 </span>                :<span class="lineCov">         32 :                 index = i - 1;</span></a>
 <a name="50"><span class="lineNum">      50 </span>                :            :              }</a>
-<a name="51"><span class="lineNum">      51 </span>                :<span class="lineCov">         30 :             _removeRuleOperation(_rulesOperation[index], index);</span></a>
+<a name="51"><span class="lineNum">      51 </span>                :<span class="lineCov">         32 :             _removeRuleOperation(_rulesOperation[index], index);</span></a>
 <a name="52"><span class="lineNum">      52 </span>                :            :         }</a>
-<a name="53"><span class="lineNum">      53 </span>                :<span class="lineCov">         26 :         emit ClearRules(_rulesOperation);</span></a>
+<a name="53"><span class="lineNum">      53 </span>                :<span class="lineCov">         28 :         emit ClearRules(_rulesOperation);</span></a>
 <a name="54"><span class="lineNum">      54 </span>                :            :     }</a>
 <a name="55"><span class="lineNum">      55 </span>                :            : </a>
 <a name="56"><span class="lineNum">      56 </span>                :            :     /**</a>
@@ -130,8 +130,8 @@
 <a name="59"><span class="lineNum">      59 </span>                :            :      *</a>
 <a name="60"><span class="lineNum">      60 </span>                :            :      */</a>
 <a name="61"><span class="lineNum">      61 </span>                :            :     function addRuleOperation(IRuleOperation rule_) public onlyRole(RULE_ENGINE_ROLE) {</a>
-<a name="62"><span class="lineNum">      62 </span>                :<span class="lineCov">         72 :        RuleInternal._addRule( _rulesOperation, address(rule_));</span></a>
-<a name="63"><span class="lineNum">      63 </span>                :<span class="lineCov">         68 :         emit AddRule(address(rule_));</span></a>
+<a name="62"><span class="lineNum">      62 </span>                :<span class="lineCov">         88 :        RuleInternal._addRule( _rulesOperation, address(rule_));</span></a>
+<a name="63"><span class="lineNum">      63 </span>                :<span class="lineCov">         84 :        emit AddRule(address(rule_));</span></a>
 <a name="64"><span class="lineNum">      64 </span>                :            :     }</a>
 <a name="65"><span class="lineNum">      65 </span>                :            : </a>
 <a name="66"><span class="lineNum">      66 </span>                :            :     /**</a>
@@ -151,7 +151,7 @@
 <a name="80"><span class="lineNum">      80 </span>                :<span class="lineCov">         10 :         _removeRuleOperation(address(rule_), index);</span></a>
 <a name="81"><span class="lineNum">      81 </span>                :            :     }</a>
 <a name="82"><span class="lineNum">      82 </span>                :            : </a>
-<a name="83"><span class="lineNum">      83 </span>                :            :         /**</a>
+<a name="83"><span class="lineNum">      83 </span>                :            :     /**</a>
 <a name="84"><span class="lineNum">      84 </span>                :            :      * @notice Remove a rule from the array of rules</a>
 <a name="85"><span class="lineNum">      85 </span>                :            :      * Revert if the rule found at the specified index does not match the rule in argument</a>
 <a name="86"><span class="lineNum">      86 </span>                :            :      * @param rule_ address of the target rule</a>
@@ -165,15 +165,15 @@
 <a name="94"><span class="lineNum">      94 </span>                :            :         address rule_,</a>
 <a name="95"><span class="lineNum">      95 </span>                :            :         uint256 index</a>
 <a name="96"><span class="lineNum">      96 </span>                :            :     ) internal {</a>
-<a name="97"><span class="lineNum">      97 </span>                :<span class="lineCov">         40 :         RuleInternal._removeRule(_rulesOperation, rule_, index); </span></a>
-<a name="98"><span class="lineNum">      98 </span>                :<span class="lineCov">         38 :         emit RemoveRule(address(rule_));</span></a>
+<a name="97"><span class="lineNum">      97 </span>                :<span class="lineCov">         42 :         RuleInternal._removeRule(_rulesOperation, rule_, index); </span></a>
+<a name="98"><span class="lineNum">      98 </span>                :<span class="lineCov">         40 :         emit RemoveRule(address(rule_));</span></a>
 <a name="99"><span class="lineNum">      99 </span>                :            :     }</a>
 <a name="100"><span class="lineNum">     100 </span>                :            : </a>
 <a name="101"><span class="lineNum">     101 </span>                :            :     /**</a>
 <a name="102"><span class="lineNum">     102 </span>                :            :     * @return The number of rules inside the array</a>
 <a name="103"><span class="lineNum">     103 </span>                :            :     */</a>
 <a name="104"><span class="lineNum">     104 </span>                :            :     function rulesCountOperation() external view override returns (uint256) {</a>
-<a name="105"><span class="lineNum">     105 </span>                :<span class="lineCov">         72 :         return _rulesOperation.length;</span></a>
+<a name="105"><span class="lineNum">     105 </span>                :<span class="lineCov">         82 :         return _rulesOperation.length;</span></a>
 <a name="106"><span class="lineNum">     106 </span>                :            :     }</a>
 <a name="107"><span class="lineNum">     107 </span>                :            : </a>
 <a name="108"><span class="lineNum">     108 </span>                :            :     /**</a>
@@ -213,23 +213,20 @@
 <a name="142"><span class="lineNum">     142 </span>                :            :         address _to,</a>
 <a name="143"><span class="lineNum">     143 </span>                :            :         uint256 _amount</a>
 <a name="144"><span class="lineNum">     144 </span>                :            :     ) internal returns (bool isValid){</a>
-<a name="145"><span class="lineNum">     145 </span>                :<span class="lineCov">         26 :         uint256 rulesLength = _rulesOperation.length;</span></a>
-<a name="146"><span class="lineNum">     146 </span>                :<span class="lineCov">         45 :         for (uint256 i = 0; i &lt; rulesLength; ) {</span></a>
-<a name="147"><span class="lineNum">     147 </span>                :<span class="lineCov">         27 :             bool result = IRuleOperation(_rulesOperation[i]).operateOnTransfer(</span></a>
+<a name="145"><span class="lineNum">     145 </span>                :<span class="lineCov">         32 :         uint256 rulesLength = _rulesOperation.length;</span></a>
+<a name="146"><span class="lineNum">     146 </span>                :<span class="lineCov">         60 :         for (uint256 i = 0; i &lt; rulesLength; ++i ) {</span></a>
+<a name="147"><span class="lineNum">     147 </span>                :<span class="lineCov">         36 :             bool result = IRuleOperation(_rulesOperation[i]).operateOnTransfer(</span></a>
 <a name="148"><span class="lineNum">     148 </span>                :            :                 _from,</a>
 <a name="149"><span class="lineNum">     149 </span>                :            :                 _to,</a>
 <a name="150"><span class="lineNum">     150 </span>                :            :                 _amount</a>
 <a name="151"><span class="lineNum">     151 </span>                :            :             );</a>
-<a name="152"><span class="lineNum">     152 </span>        [<span class="branchCov" title="Branch 0 was taken 3 times"> + </span><span class="branchCov" title="Branch 1 was taken 6 times"> + </span>]:<span class="lineCov">         18 :             if(!result){</span></a>
-<a name="153"><span class="lineNum">     153 </span>                :<span class="lineCov">          6 :                 return false;</span></a>
+<a name="152"><span class="lineNum">     152 </span>        [<span class="branchCov" title="Branch 0 was taken 6 times"> + </span><span class="branchCov" title="Branch 1 was taken 6 times"> + </span>]:<span class="lineCov">         24 :             if(!result){</span></a>
+<a name="153"><span class="lineNum">     153 </span>                :<span class="lineCov">         12 :                 return false;</span></a>
 <a name="154"><span class="lineNum">     154 </span>                :            :             }</a>
-<a name="155"><span class="lineNum">     155 </span>                :            :             unchecked {</a>
-<a name="156"><span class="lineNum">     156 </span>                :<span class="lineCov">         12 :                 ++i;</span></a>
-<a name="157"><span class="lineNum">     157 </span>                :            :             }</a>
-<a name="158"><span class="lineNum">     158 </span>                :            :         }</a>
-<a name="159"><span class="lineNum">     159 </span>                :<span class="lineCov">         20 :         return true;</span></a>
-<a name="160"><span class="lineNum">     160 </span>                :            :     }</a>
-<a name="161"><span class="lineNum">     161 </span>                :            : }</a>
+<a name="155"><span class="lineNum">     155 </span>                :            :         }</a>
+<a name="156"><span class="lineNum">     156 </span>                :<span class="lineCov">         20 :         return true;</span></a>
+<a name="157"><span class="lineNum">     157 </span>                :            :     }</a>
+<a name="158"><span class="lineNum">     158 </span>                :            : }</a>
 </pre>
       </td>
     </tr>

@@ -14,7 +14,7 @@
 
 ### Upgradeable
 
-The Rule Engine, the Rule Whitelist and the Rule SanctionList contracts are not upgradeable. The reason is the following:
+The Rule Engine and the other rules are not upgradeable. The reason is the following:
 If we need a new on, we just issue a new one, and tell the CMTAT token (or the RuleEngine for the rules) to use the new. This would happen if we need more than just whitelisting, for ex.
 
 ### Urgency mechanism
@@ -39,18 +39,8 @@ If we need a new on, we just issue a new one, and tell the CMTAT token (or the R
 
 > The gasless integration was not part of the audit performed by ABDK on the version [1.0.1](https://github.com/CMTA/RuleEngine/releases/tag/1.0.1)
 
-The RuleEngine, the Whitelist and SanctionList contracts support client-side gasless transactions using the [Gas Station Network](https://docs.opengsn.org/#the-problem) (GSN) pattern, the main open standard for transfering fee payment to another account than that of the transaction issuer. The contract uses the OpenZeppelin contract `ERC2771Context`, which allows a contract to get the original client with `_msgSender()` instead of the fee payer given by `msg.sender` .
+The RuleEngine contracts and the other rules support client-side gasless transactions using the [Gas Station Network](https://docs.opengsn.org/#the-problem) (GSN) pattern, the main open standard for transfering fee payment to another account than that of the transaction issuer. The contract uses the OpenZeppelin contract `ERC2771Context`, which allows a contract to get the original client with `_msgSender()` instead of the fee payer given by `msg.sender` .
 
 At deployment, the parameter  `forwarder` inside the contract constructor has to be set  with the defined address of the forwarder. Please note that the forwarder can not be changed after deployment.
 
 Please see the OpenGSN [documentation](https://docs.opengsn.org/contracts/#receiving-a-relayed-call) for more details on what is done to support GSN in the contract.
-
-## Other
-
-### Gas Optimization
-
-Inside a loop, we use `uncheck` to increment to save gas because an array has a length of < 2\**256.
-```
- unchecked { ++i; }
-```
-See [hackmd.io - gas-optimization-loops](https://hackmd.io/@totomanov/gas-optimization-loops) and [https://github.com/ethereum/solidity/issues/10698](https://github.com/ethereum/solidity/issues/10698)
