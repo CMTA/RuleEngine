@@ -8,7 +8,15 @@ This repository includes the RuleEngine contract for the [CMTAT](https://github.
 
 The CMTAT contracts and the OpenZeppelin library are included as a submodule of the present repository.
 
+## How to include it
 
+While it has been designed for the CMTAT, the ruleEngine can be used with others contracts to apply restriction on transfer.
+
+For that, the only thing to do is to import in your contract the interface `IRuleEngine` which declares the function `operateOnTransfer`
+
+This interface can be found in `CMTAT/contracts/interfaces/engine/IRuleEngine.sol`
+
+Before each transfer, your contract have to call the function `operateOnTransfer` which is the entrypoint for the RuleEngine
 
 ## Schema
 
@@ -52,6 +60,10 @@ You will find the report performed with [Slither](https://github.com/crytic/slit
 | Version | File                                                         |
 | ------- | ------------------------------------------------------------ |
 | latest  | [slither-report.md](./doc/security/audits/tools/slither-report.md) |
+| v1.0.2  | [v1.0.2-slither-report.md](./doc/security/audits/archive/v1.0.2-slither-report.md) |
+| v1.0.3  | [v1.0.3-slither-report.md](./doc/security/audits/archive/v1.0.3-slither-report.md) |
+
+
 
 ## Documentation
 
@@ -59,7 +71,7 @@ Here a summary of the main documentation
 
 | Document                | Link/Files                                           |
 | ----------------------- | ---------------------------------------------------- |
-| Technical documentation | [doc/technical](./doc/technical)                     |
+| Technical documentation | [doc/technical/general](./doc/technical/general.md)  |
 | Toolchain               | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md)               |
 | Functionalities         | [doc/functionalities.pdf](./doc/functionalities.pdf) |
 | Surya report            | [doc/surya](./doc/surya/)                            |
