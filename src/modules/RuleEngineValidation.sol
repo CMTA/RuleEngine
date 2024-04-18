@@ -24,7 +24,7 @@ abstract contract RuleEngineValidation is AccessControl, RuleInternal, IRuleEngi
     function setRulesValidation(
         address[] calldata rules_
     ) public override onlyRole(RULE_ENGINE_ROLE) {
-        if(rules_.length > 0){
+        if(_rulesValidation.length > 0){
             _clearRulesValidation();
         }
         _setRules(rules_);

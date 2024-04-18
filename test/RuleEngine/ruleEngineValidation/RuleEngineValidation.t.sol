@@ -36,7 +36,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
         assertEq(resUint256, 1);
     }
 
-    function testCansetRulesValidation() public {
+    function testCanSetRulesValidation() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
@@ -67,7 +67,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
         assertEq(resUint256, 2);
     }
 
-    function testCannotSetRuleIfARuleIsAlreadyPresent() public {
+    function testCannotSetRuleWithSameRulePresentTwice() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
@@ -79,20 +79,49 @@ contract RuleEngineValidationTest is Test, HelperContract {
         ruleWhitelistTab[1] = address(ruleWhitelist1);
 
         // Act
-        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         vm.expectRevert(RuleEngine_RuleAlreadyExists.selector);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
         );
-
         // Assert
         // I do not know why but the function call return true
+        // Probably due to the vm.expectRevert
         // if the call is reverted with the message indicated in expectRevert
         // assertFalse(resCallBool);
         assertEq(resCallBool, true);
         resUint256 = ruleEngineMock.rulesCountValidation();
         assertEq(resUint256, 1);
     }
+
+    function testCanSetWithTheSameRuleAlreadyPresent() public {
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
+            WHITELIST_OPERATOR_ADDRESS,
+            ZERO_ADDRESS
+        );
+        address[] memory ruleWhitelistTab = new address[](1);
+        ruleWhitelistTab[0] = address(ruleWhitelist1);
+
+        // Arrange
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+        );
+
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        (resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+        );
+
+        // Assert
+        assertEq(resCallBool, true);
+        resUint256 = ruleEngineMock.rulesCountValidation();
+        assertEq(resUint256, 1);
+    }
+
 
     function testCannotSetEmptyRulesT1() public {
         // Arrange

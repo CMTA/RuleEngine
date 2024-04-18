@@ -166,7 +166,7 @@ contract CMTATIntegration is Test, HelperContract {
         assertEq(message1, TEXT_ADDRESS_FROM_IS_BLACKLISTED);
     }
 
-    function testDetectAndMessageWithFromAndToNotBlacklisted() public {
+    function testDetectAndMessageWithFromAndToNotBlacklisted() public view {
         // Act
         uint8 res1 = CMTAT_CONTRACT.detectTransferRestriction(
             ADDRESS1,
@@ -243,7 +243,7 @@ contract CMTATIntegration is Test, HelperContract {
         CMTAT_CONTRACT.mint(ADDRESS1, amount);
     }
 
-    function testCanReturnMessageNotFoundWithUnknownCodeId() public {
+    function testCanReturnMessageNotFoundWithUnknownCodeId() public view {
         // Act
         string memory message1 = CMTAT_CONTRACT.messageForTransferRestriction(
             255

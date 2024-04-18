@@ -169,7 +169,7 @@ contract CMTATIntegration is Test, HelperContract {
         assertEq(message1, TEXT_ADDRESS_TO_NOT_WHITELISTED);
     }
 
-    function testDetectAndMessageWithFromAndToNotWhitelisted() public {
+    function testDetectAndMessageWithFromAndToNotWhitelisted() public view {
         // Act
         uint8 res1 = CMTAT_CONTRACT.detectTransferRestriction(
             ADDRESS1,

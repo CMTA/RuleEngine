@@ -21,7 +21,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
     function setRulesOperation(
         address[] calldata rules_
     ) public onlyRole(RULE_ENGINE_ROLE) {
-        if(rules_.length > 0){
+        if(_rulesOperation.length > 0){
              _clearRulesOperation();
         }
         _setRules(rules_);
