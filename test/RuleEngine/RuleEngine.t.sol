@@ -67,6 +67,34 @@ contract RuleEngineTest is Test, HelperContract {
         assertEq(resUint256, 2);
     }
 
+    function testCanSetWithTheSameRuleAlreadyPresent() public {
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
+            WHITELIST_OPERATOR_ADDRESS,
+            ZERO_ADDRESS
+        );
+        IRule[] memory ruleWhitelistTab = new IRule[](1);
+        ruleWhitelistTab[0] = ruleWhitelist1;
+
+        // Arrange
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(ruleEngineMock.setRules, ruleWhitelistTab)
+        );
+
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        (resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(ruleEngineMock.setRules, ruleWhitelistTab)
+        );
+
+        // Assert
+        assertEq(resCallBool, true);
+        resUint256 = ruleEngineMock.rulesCount();
+        assertEq(resUint256, 1);
+    }
+
     function testCannotSetRuleIfARuleIsAlreadyPresent() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
@@ -173,6 +201,56 @@ contract RuleEngineTest is Test, HelperContract {
         // Assert
         resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 0);
+    }
+
+    function testCanClearRulesAndAddAgain() public {
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
+            WHITELIST_OPERATOR_ADDRESS,
+            ZERO_ADDRESS
+        );
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
+            WHITELIST_OPERATOR_ADDRESS,
+            ZERO_ADDRESS
+        );
+        IRule[] memory ruleWhitelistTab = new IRule[](2);
+        ruleWhitelistTab[0] = IRule(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRule(ruleWhitelist2);
+
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        (bool resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(ruleEngineMock.setRules, ruleWhitelistTab)
+        );
+
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.clearRules();
+
+        // Assert
+        resUint256 = ruleEngineMock.rulesCount();
+        assertEq(resUint256, 0);
+
+        // Can set again the previous rules
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        (resCallBool, ) = address(ruleEngineMock).call(
+            abi.encodeCall(ruleEngineMock.setRules, ruleWhitelistTab)
+        );
+        assertEq(resCallBool, true);
+        // Arrange before assert
+
+        // Act
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.clearRules();
+        resUint256 = ruleEngineMock.rulesCount();
+        assertEq(resUint256, 0);
+
+        // Can add previous rule again
+        vm.expectEmit(true, false, false, false);
+        emit AddRule(ruleWhitelist1);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(ruleWhitelist1);
     }
 
     function testCanAddRule() public {

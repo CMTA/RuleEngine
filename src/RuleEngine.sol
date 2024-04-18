@@ -37,7 +37,7 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
         _grantRole(RULE_ENGINE_ROLE, admin);
     }
 
-    /**
+ /**
      * @notice Set all the rules, will overwrite all the previous rules. \n
      * Revert if one rule is a zero address or if the rule is already present
      *
@@ -46,6 +46,9 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
         IRule[] calldata rules_
     ) external override onlyRole(RULE_ENGINE_ROLE) {
         require(rules_.length != 0, "The array is empty");
+        if(_rules.length > 0){
+            _clearRules();
+        }
         for (uint256 i = 0; i < rules_.length; ) {
             require(
                 address(rules_[i]) != address(0x0),
@@ -60,14 +63,29 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
         }
         _rules = rules_;
     }
-
     /**
      * @notice Clear all the rules of the array of rules
      *
      */
     function clearRules() public onlyRole(RULE_ENGINE_ROLE) {
+       _clearRules();
+    }
+
+    /**
+     * @notice Clear all the rules of the array of rules
+     *
+     */
+    function _clearRules() internal {
+        uint256 index;
+        // we remove the last element first since it is more optimized.
+        for(uint256 i = _rules.length; i > 0; --i){
+             unchecked {
+                // don't underflow since i > 0
+                index = i - 1;
+             }
+            _removeRule(_rules[index], index);
+        }
         emit ClearRules(_rules);
-        _rules = new IRule[](0);
     }
 
     /**
@@ -86,7 +104,7 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
         emit AddRule(rule_);
     }
 
-    /**
+       /**
      * @notice Remove a rule from the array of rules
      * Revert if the rule found at the specified index does not match the rule in argument
      * @param rule_ address of the target rule
@@ -100,6 +118,23 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
         IRule rule_,
         uint256 index
     ) public onlyRole(RULE_ENGINE_ROLE) {
+        _removeRule(rule_,index);
+    }
+
+    /**
+     * @notice Remove a rule from the array of rules
+     * Revert if the rule found at the specified index does not match the rule in argument
+     * @param rule_ address of the target rule
+     * @param index the position inside the array of rule
+     * @dev To reduce the array size, the last rule is moved to the location occupied
+     * by the rule to remove
+     *
+     *
+     */
+    function _removeRule(
+        IRule rule_,
+        uint256 index
+    ) internal {
         require(_rules[index] == rule_, "The rule don't match");
         if (index != _rules.length - 1) {
             _rules[index] = _rules[_rules.length - 1];
@@ -108,6 +143,7 @@ contract RuleEngine is IRuleEngine, AccessControl, MetaTxModuleStandalone {
         _ruleIsPresent[rule_] = false;
         emit RemoveRule(rule_);
     }
+
 
     /**
     * @return The number of rules inside the array
