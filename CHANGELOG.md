@@ -2,6 +2,20 @@
 
 Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
+## v.1.0.2.1
+
+The release `v1.0.2` contains a minor bug:
+
+> When using setRules and clearRules, the rules currently present in the array are not set to "False" in the map.
+>
+> As a result, a removed rule can not be added again since we use the map to check if a rule is already present
+
+The release `v1.0.2.1` fixes that by setting the removed rules to "False" in the map.
+
+This bug doesn't affect how the `RuleEngine` works with the CMTAT, since in this case, only the array is used.
+
+This patch is not audited. If you think that it is not a issue for your usage, you should prefer the use of the version `1.0.2` which is audited.
+
 ## v1.0.2 - 10120609
 
 - Upgrade the library CMTAT to the vesion [v2.3.0](https://github.com/CMTA/CMTAT/releases/tag/v2.3.0)
