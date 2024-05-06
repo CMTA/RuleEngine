@@ -6,6 +6,20 @@ This repository includes the RuleEngine contract for the [CMTAT](https://github.
 
 The CMTAT contracts and the OpenZeppelin library are included as a submodule of the present repository.
 
+## Release v1.0.2 & v.1.0.2.1
+
+The release v1.0.2 contains a minor bug:
+
+> When using setRules and clearRules, the rules currently present in the array are not set to "False" in the map.
+>
+> As a result, a removed rule can not be added again since we use the map to check if a rule is already present
+
+The release v1.0.2.1 fixes that by setting the removed rules to "False" in the map.
+
+This bug doesn't affect how the `RuleEngine` works with the CMTAT, since in this case, only the array is used.
+
+This patch is not audited. If you think that it is not a issue for your usage, you should prefer the use of the version `1.0.2` which is audited.
+
 ## Audit
 
 The contracts have been audited by [ABDKConsulting](https://www.abdk.consulting/), a globally recognized firm specialized in smart contracts' security.
