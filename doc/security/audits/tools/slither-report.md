@@ -242,6 +242,7 @@ src/RuleEngine.sol#L140-L147
 
 Impact: Informational
 Confidence: High
+
  - [ ] ID-21
 Version constraint ^0.8.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
 	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
@@ -301,6 +302,9 @@ Version constraint ^0.8.0 contains known severe issues (https://solidity.readthe
 	- src/rules/validation/abstract/RuleValidateTransfer.sol#3
 
 ## naming-convention
+
+> It is not really necessary to rename all the variables. It will generate a lot of work for a minor improvement.
+
 Impact: Informational
 Confidence: High
  - [ ] ID-23

@@ -34,7 +34,7 @@ contract RuleEngine is IRuleEngine, RuleEngineOperation, RuleEngineValidation, M
     }
 
 
-        /** 
+    /** 
     * @notice Go through all the rule to know if a restriction exists on the transfer
     * @param _from the origin address
     * @param _to the destination address
