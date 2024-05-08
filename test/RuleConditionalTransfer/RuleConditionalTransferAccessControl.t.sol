@@ -83,7 +83,7 @@ contract RuleConditionalTransferAccessControl is Test, HelperContract {
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE));  
         vm.prank(ATTACKER);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0, true);
     }
 
     function testCannotAttackerApproveWithIdARequestCreatedByTokenHolder() public {

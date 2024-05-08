@@ -56,6 +56,12 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
     function createTransferRequestWithApproval(
         address from, address to, uint256 value
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
+       _createTransferRequestWithApproval(from, to, value);
+    }
+
+    function _createTransferRequestWithApproval(
+        address from, address to, uint256 value
+    ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
         // WAIT => Will overwrite
         // APPROVED => will overwrite previous status with a new delay
         // DENIED => will overwrite
@@ -84,12 +90,32 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         }
     }
 
+    /**
+    @param from address from
+    @param to address to
+    @param value amount to transfer
+    @param partialValue amount approved. Put 0 if all the amount specified by value is approved.
+    @param isApproved_ approved (true) or refused (false). Put true if you use partialApproval
+    */
     function approveTransferRequest(
-        address from, address to, uint256 value, bool isApproved_
+        address from, address to, uint256 value, uint256 partialValue, bool isApproved_
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE) {
+        if(partialValue > value){
+            revert RuleConditionalTransfer_InvalidValueApproved();
+        }
         bytes32 key =  keccak256(abi.encode(from, to, value));
         TransferRequest memory transferRequest = transferRequests[key];
-        _approveRequest(transferRequest, isApproved_);
+        if(partialValue > 0 ){
+            if(! isApproved_){
+                revert RuleConditionalTransfer_InvalidValueApproved();
+            }
+            //Denied the first request
+            _approveRequest(transferRequest, false);
+            // Create new request
+            _createTransferRequestWithApproval(from, to, partialValue);
+        }else{
+            _approveRequest(transferRequest, isApproved_);
+        }
     }
 
     function approveTransferRequestWithId(

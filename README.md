@@ -14,9 +14,9 @@ While it has been designed for the CMTAT, the ruleEngine can be used with others
 
 For that, the only thing to do is to import in your contract the interface `IRuleEngine` which declares the function `operateOnTransfer`
 
-This interface can be found in `CMTAT/contracts/interfaces/engine/IRuleEngine.sol`
+This interface can be found in [CMTAT/contracts/interfaces/engine/IRuleEngine.sol](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/interfaces/engine/IRuleEngine.sol)
 
-Before each transfer, your contract have to call the function `operateOnTransfer` which is the entrypoint for the RuleEngine
+Before each transfer, your contract must call the function `operateOnTransfer` which is the entrypoint for the RuleEngine.
 
 ## Schema
 

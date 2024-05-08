@@ -135,7 +135,7 @@ contract CMTATIntegrationConditionalTransfer is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferApproved(key, ADDRESS1, ADDRESS2,defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, 0, true);
 
         // Act
         vm.expectEmit(true, true, true, true);
@@ -152,6 +152,54 @@ contract CMTATIntegrationConditionalTransfer is Test, HelperContract {
         assertEq(resUint256, 33);
     }
 
+    function testCanMakeAPartialTransferIfPartiallyApproved() public {
+        // Arrange
+        _createTransferRequest();
+
+        uint256 partialValue = 5;
+        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2,partialValue));
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferWaiting(key, ADDRESS1, ADDRESS2, partialValue, 1);
+        emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, partialValue,true);
+
+        // Act
+        vm.expectEmit(true, true, true, true);
+        emit transferProcessed(key, ADDRESS1, ADDRESS2, partialValue, 1);
+        vm.prank(ADDRESS1);
+        CMTAT_CONTRACT.transfer(ADDRESS2,partialValue);
+
+        // Assert
+        resUint256 = CMTAT_CONTRACT.balanceOf(ADDRESS1);
+        assertEq(resUint256, ADDRESS1_BALANCE_INIT - partialValue);
+        resUint256 = CMTAT_CONTRACT.balanceOf(ADDRESS2);
+        assertEq(resUint256, ADDRESS2_BALANCE_INIT + partialValue);
+        resUint256 = CMTAT_CONTRACT.balanceOf(ADDRESS3);
+        assertEq(resUint256, 33);
+    }
+
+    function testCannotMakeAWholeTransferIfPartiallyApproved() public {
+        // Arrange
+        _createTransferRequest();
+        uint256 partialValue = 5;
+        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2,partialValue));
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferWaiting(key, ADDRESS1, ADDRESS2, partialValue, 1);
+        emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, partialValue, true);
+
+        // Act
+        vm.expectRevert(
+        abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ADDRESS1, ADDRESS2, defaultValue));   
+        vm.prank(ADDRESS1);
+        CMTAT_CONTRACT.transfer(ADDRESS2, defaultValue);
+    }
+
+
     function testCannotMakeATransferIfDelayExceeded() public {
         // Arrange
         vm.prank(ADDRESS1);
@@ -163,7 +211,7 @@ contract CMTATIntegrationConditionalTransfer is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferApproved(key, ADDRESS1, ADDRESS2,defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, 0,true);
 
         // +30 days and one second
         vm.warp(block.timestamp + 2592001);
@@ -176,16 +224,13 @@ contract CMTATIntegrationConditionalTransfer is Test, HelperContract {
 
     function testCannotMakeATransferIfDelayJustInTime() public {
         // Arrange
-        vm.prank(ADDRESS1);
-        // Act
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2,defaultValue));
-        ruleConditionalTransfer.createTransferRequest(ADDRESS2,defaultValue);
+        _createTransferRequest();
         
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        emit transferApproved(key, ADDRESS1, ADDRESS2,defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, true);
+        emit transferApproved(defaultKey, ADDRESS1, ADDRESS2,defaultValue, 0);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, 0,true);
         // 30 days
         vm.warp(block.timestamp + 2592000);
         // Act
@@ -204,7 +249,7 @@ contract CMTATIntegrationConditionalTransfer is Test, HelperContract {
         // Arrange
         _createTransferRequest();
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0,true);
         
 
         // Assert
@@ -288,7 +333,7 @@ contract CMTATIntegrationConditionalTransfer is Test, HelperContract {
         emit transferApproved(defaultKey, ADDRESS1, ADDRESS2,defaultValue, 0);
         vm.expectEmit(true, true, true, true);
         emit transferProcessed(defaultKey, ADDRESS1, ADDRESS2,defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2,defaultValue, 0,true);
     }
 
     function testCanTransferIfAutomaticApprovalSetAndTimeExceeds() public {

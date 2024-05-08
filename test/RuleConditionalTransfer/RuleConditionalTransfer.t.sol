@@ -130,7 +130,21 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0,true);
+    }
+
+
+    function testCanPartiallyApproveRequestCreatedByHolder() public {
+        // Arrange
+        _createTransferRequest();
+        uint256 partialValue = 5;
+        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, partialValue));
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        emit transferWaiting(key, ADDRESS1, ADDRESS2, partialValue, 1);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, partialValue,true);
     }
 
     function testCanCreateAndApproveRequestCreatedByHolderAgain() public {
@@ -142,7 +156,7 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0, true);
 
         // Second request
         vm.prank(ADDRESS1);
@@ -152,7 +166,7 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0, true);
 
         // Assert
         TransferRequest memory transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
@@ -231,7 +245,7 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferDenied(defaultKey, ADDRESS1, ADDRESS2,  defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, false);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0,false);
 
         // Assert
         TransferRequest memory transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
@@ -253,7 +267,7 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferDenied(defaultKey, ADDRESS1, ADDRESS2,  defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, false);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0,false);
     
 
         // Act
@@ -280,7 +294,7 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         vm.prank(ADDRESS1);
         ruleConditionalTransfer.createTransferRequest(ADDRESS2, defaultValue);
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0,true);
 
         // Reset
         vm.prank(ADDRESS1);
@@ -317,7 +331,7 @@ contract RuleConditionalTransferTest is Test, HelperContract {
 
         // Denied
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, false);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0, false);
 
         // Act 
         // Reset
@@ -333,7 +347,7 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, false);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0,false);
 
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
@@ -386,7 +400,7 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, false);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0, false);
 
         // Second request
         uint256 value = 100;
@@ -434,7 +448,7 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectRevert(RuleConditionalTransfer_timeExceeded.selector);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0, true);
     }
 
     /*** Edge case ******/
@@ -449,7 +463,7 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectRevert(RuleConditionalTransfer_Wrong_Status.selector);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0, true);
     }
 
     function testCanSetTimeLimitWithTransferApprovalExceeded() public {
@@ -472,6 +486,6 @@ contract RuleConditionalTransferTest is Test, HelperContract {
 
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectRevert(RuleConditionalTransfer_timeExceeded.selector);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, true);
+        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0, true);
     }
 }

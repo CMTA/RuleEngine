@@ -64,6 +64,8 @@ abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariant
     error RuleConditionalTransfer_TransferDenied();
     error RuleConditionalTransfer_InvalidId();
     error RuleConditionalTransfer_InvalidSender();
+    error RuleConditionalTransfer_InvalidValueApproved();
+    error RuleConditionalTransfer_CannotDeniedPartially();
 
 
     // Event
