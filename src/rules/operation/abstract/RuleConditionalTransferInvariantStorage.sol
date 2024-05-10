@@ -11,8 +11,8 @@ abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariant
         IERC20 cmtat;
     }
     struct ISSUANCE {
-        bool  authorizedMintWithoutApproval;
-        bool  authorizedBurnWithoutApproval;
+        bool authorizedMintWithoutApproval;
+        bool authorizedBurnWithoutApproval;
     }
 
     struct TIME_LIMIT {

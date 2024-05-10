@@ -95,6 +95,18 @@ contract RuleConditionalTransferAccessControl is Test, HelperContract {
         ruleConditionalTransfer.approveTransferRequestWithId(0, true);
     }
 
+    function testCannotAttackerApproveBatchWithIdARequestCreatedByTokenHolder() public {
+        _createTransferRequest();
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 0;
+        bool[] memory isApproveds = new bool[](1);
+        isApproveds[0] = true;
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE));  
+        vm.prank(ATTACKER);
+        ruleConditionalTransfer.approveTransferRequestBatchWithId(ids, isApproveds);
+    }
+
     function testCannotAttackerResetARequest() public {
          _createTransferRequest();
         

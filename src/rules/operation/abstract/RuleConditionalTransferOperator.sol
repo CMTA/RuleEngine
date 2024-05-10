@@ -24,8 +24,12 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
 
 
     function setIssuanceOptions(ISSUANCE calldata issuance_) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
-        options.issuance.authorizedBurnWithoutApproval = issuance_.authorizedBurnWithoutApproval;
-        options.issuance.authorizedMintWithoutApproval = issuance_.authorizedMintWithoutApproval;
+        if(options.issuance.authorizedMintWithoutApproval != issuance_.authorizedMintWithoutApproval ){
+            options.issuance.authorizedMintWithoutApproval = issuance_.authorizedMintWithoutApproval;
+        }
+        if(options.issuance.authorizedBurnWithoutApproval != issuance_.authorizedBurnWithoutApproval ){
+            options.issuance.authorizedBurnWithoutApproval = issuance_.authorizedBurnWithoutApproval;
+        }
     }
 
     function setAutomaticTransfer(AUTOMATIC_TRANSFER calldata automaticTransfer_) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
@@ -43,13 +47,21 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
     * Don't affect already created requests
     */
     function setTimeLimit(TIME_LIMIT memory timeLimit_)  public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
-         options.timeLimit.timeLimitToApprove = timeLimit_.timeLimitToApprove;
-         options.timeLimit.timeLimitToTransfer = timeLimit_.timeLimitToTransfer;
+        if(options.timeLimit.timeLimitToApprove != timeLimit_.timeLimitToApprove){
+            options.timeLimit.timeLimitToApprove = timeLimit_.timeLimitToApprove;
+        }
+        if(options.timeLimit.timeLimitToTransfer != timeLimit_.timeLimitToTransfer){
+            options.timeLimit.timeLimitToTransfer = timeLimit_.timeLimitToTransfer;
+        }
     }
 
     function setAutomaticApproval(AUTOMATIC_APPROVAL memory automaticApproval_)  public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
-         options.automaticApproval.isActivate = automaticApproval_.isActivate;
-         options.automaticApproval.timeLimitBeforeAutomaticApproval = automaticApproval_.timeLimitBeforeAutomaticApproval;
+        if(options.automaticApproval.isActivate  != automaticApproval_.isActivate ){
+             options.automaticApproval.isActivate = automaticApproval_.isActivate;
+        }
+        if(options.automaticApproval.timeLimitBeforeAutomaticApproval != automaticApproval_.timeLimitBeforeAutomaticApproval){
+            options.automaticApproval.timeLimitBeforeAutomaticApproval = automaticApproval_.timeLimitBeforeAutomaticApproval;
+        }
     }
 
 
@@ -126,6 +138,21 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         }
         TransferRequest memory transferRequest = transferRequests[IdToKey[requestId_]];
         _approveRequest(transferRequest, isApproved_);
+    }
+
+    function approveTransferRequestBatchWithId(
+        uint256[] calldata requestId_, bool[] calldata isApproved_
+    ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
+        // Check id validity before performing actions
+        for(uint256 i = 0; i < requestId_.length; ++i){
+            if(requestId_[i] + 1 >  requestId) {
+                revert RuleConditionalTransfer_InvalidId();
+            }
+        }
+        for(uint256 i = 0; i < requestId_.length; ++i){
+             TransferRequest memory transferRequest = transferRequests[IdToKey[requestId_[i]]];
+            _approveRequest(transferRequest, isApproved_[i]);
+        }
     }
 
     function resetRequestStatus(

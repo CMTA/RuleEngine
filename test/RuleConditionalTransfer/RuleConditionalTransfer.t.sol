@@ -19,6 +19,17 @@ contract RuleConditionalTransferTest is Test, HelperContract {
     uint256 defaultValue = 10;
     bytes32 defaultKey = keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));
 
+
+    // BAtch test
+    uint256 value2 = 1;
+    uint256 value3 = 2;
+    uint256 value4 = 1000;
+    uint256 value5 = 2000;
+    bytes32 key2 = keccak256(abi.encode(ADDRESS1, ADDRESS2, value2));
+    bytes32 key3 = keccak256(abi.encode(ADDRESS2, ADDRESS1, value3));
+    bytes32 key4 = keccak256(abi.encode(ADDRESS1, ADDRESS2, value4));
+    bytes32 key5 = keccak256(abi.encode(ADDRESS1, ADDRESS2, value5));
+
     // Arrange
     function setUp() public {
         TIME_LIMIT memory timeLimit_ = TIME_LIMIT({
@@ -198,6 +209,137 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         assertEq(transferRequest.to, ADDRESS2);
         assertEq(transferRequest.value, defaultValue);
         assertEq(uint256(transferRequest.status), uint256(STATUS.APPROVED));
+    }
+
+    /***** Batch */
+
+    function _createTransferRequestBatch() public{
+         // Arrange
+        _createTransferRequest();
+
+        // Second and third request
+        vm.prank(ADDRESS1);
+        ruleConditionalTransfer.createTransferRequest(ADDRESS2, value2);
+        vm.prank(ADDRESS2);
+        ruleConditionalTransfer.createTransferRequest(ADDRESS1, value3);
+        //Fourth request => will be not validated
+        vm.prank(ADDRESS1);
+        ruleConditionalTransfer.createTransferRequest(ADDRESS2, value4);
+        //fifth request => will not be treated
+        vm.prank(ADDRESS1);
+        ruleConditionalTransfer.createTransferRequest(ADDRESS2, value5);
+    }
+
+    function testCanApproveRequestInBatchCreatedByHolderWithId() public {
+       _createTransferRequestBatch();
+        uint256[] memory ids = new uint256[](4);
+        ids[0] = 0;
+        ids[1] = 1;
+        ids[2] = 2;
+        ids[3] = 3;
+        bool[] memory  isApproveds = new bool[](4);
+        isApproveds[0] = true;
+        isApproveds[1] = true;
+        isApproveds[2] = true;
+        isApproveds[3] = false;
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        vm.expectEmit(true, true, true, true);
+        emit transferApproved(key2, ADDRESS1, ADDRESS2, value2, 1);
+        vm.expectEmit(true, true, true, true);
+        emit transferApproved(key3, ADDRESS2, ADDRESS1, value3, 2);
+        vm.expectEmit(true, true, true, true);
+        emit transferDenied(key4, ADDRESS1, ADDRESS2, value4, 3);
+        ruleConditionalTransfer.approveTransferRequestBatchWithId( ids, isApproveds);
+
+
+        // Assert
+        // Request 1
+        TransferRequest memory transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        assertEq(transferRequest.key, defaultKey);
+        assertEq(transferRequest.id, 0);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, defaultValue);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.APPROVED));
+
+        // 2
+        transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, value2);
+        assertEq(transferRequest.key, key2);
+        assertEq(transferRequest.id, 1);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, value2);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.APPROVED));
+
+        // 3
+        transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS2, ADDRESS1, value3);
+        assertEq(transferRequest.key, key3);
+        assertEq(transferRequest.id, 2);
+        assertEq(transferRequest.from, ADDRESS2);
+        assertEq(transferRequest.to, ADDRESS1);
+        assertEq(transferRequest.value, value3);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.APPROVED));
+
+        // 4
+        transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, value4);
+        assertEq(transferRequest.key, key4);
+        assertEq(transferRequest.id, 3);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, value4);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.DENIED));
+        
+        // 5
+        transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, value5);
+        assertEq(transferRequest.key, key5);
+        assertEq(transferRequest.id, 4);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, value5);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.WAIT));
+    }
+
+    function testCannotApproveRequestInBatchCreatedByHolderWithWrongId() public {
+        _createTransferRequestBatch();
+        uint256[] memory ids = new uint256[](4);
+        ids[0] = 0;
+        ids[1] = 1;
+        ////// Wrong id here !!!
+        ids[2] = 6;
+        ids[3] = 3;
+        bool[] memory  isApproveds = new bool[](4);
+        isApproveds[0] = true;
+        isApproveds[1] = true;
+        isApproveds[2] = true;
+        isApproveds[3] = false;
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectRevert(RuleConditionalTransfer_InvalidId.selector);
+        ruleConditionalTransfer.approveTransferRequestBatchWithId( ids, isApproveds);
+    }
+
+
+    function testCannotApproveRequestInBatchCreatedByHolderIfTimeExceed() public {
+       _createTransferRequestBatch();
+        // Jump
+        vm.warp(block.timestamp + 604801);
+        uint256[] memory ids = new uint256[](4);
+        ids[0] = 0;
+        ids[1] = 1;
+        ids[2] = 2;
+        ids[3] = 3;
+        bool[] memory  isApproveds = new bool[](4);
+        isApproveds[0] = true;
+        isApproveds[1] = true;
+        isApproveds[2] = true;
+        isApproveds[3] = false;
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectRevert(RuleConditionalTransfer_timeExceeded.selector);
+        ruleConditionalTransfer.approveTransferRequestBatchWithId( ids, isApproveds);
     }
 
     function testCannotApproveOrDeniedRequestCreatedByHolderWithWrongId() public {
