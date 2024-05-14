@@ -188,6 +188,13 @@ contract RuleConditionalTransfer is  RuleValidateTransfer, IRuleOperation, RuleC
         address _to,
         uint256 _amount
     ) public override onlyRole(RULE_ENGINE_CONTRACT_ROLE) returns(bool isValid){
+        // No need of approval if from and to are in the whitelist
+        if(address(whitelistConditionalTransfer) != address(0)){
+            if(whitelistConditionalTransfer.addressIsListed(_from) && whitelistConditionalTransfer.addressIsListed(_to)){
+                return true;
+            }      
+        }
+
         // Mint & Burn
         if(_validateBurnMint(_from, _to)) {
             return true;
@@ -212,6 +219,12 @@ contract RuleConditionalTransfer is  RuleValidateTransfer, IRuleOperation, RuleC
         address _to,
         uint256 _amount
     ) public view override returns (uint8) {
+        // No need of approval if from and to are in the whitelist
+        if(address(whitelistConditionalTransfer) != address(0)){
+            if(whitelistConditionalTransfer.addressIsListed(_from) && whitelistConditionalTransfer.addressIsListed(_to)){
+                return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+            }      
+        }
         bytes32 key = keccak256(abi.encode(_from, _to, _amount));
         if (!_validateBurnMint(_from,_to) && !_validateApproval(key)) {
             return CODE_TRANSFER_REQUEST_NOT_APPROVED;

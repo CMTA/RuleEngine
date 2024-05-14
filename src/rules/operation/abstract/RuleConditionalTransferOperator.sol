@@ -5,7 +5,6 @@ pragma solidity ^0.8.20;
 import "OZ/access/AccessControl.sol";
 import "./RuleConditionalTransferInvariantStorage.sol";
 import "OZ/token/ERC20/utils/SafeERC20.sol"; 
-
 /**
 * @title a RuleConditionalTransfer manager
 */
@@ -16,12 +15,17 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
     
     OPTION internal options;
 
-   
+    
     // Getter
     uint256 public requestId;
     mapping(uint256 => bytes32) public IdToKey;
     mapping(bytes32 => TransferRequest) public transferRequests;
+    RuleWhitelist public  whitelistConditionalTransfer;
 
+    function setConditionalWhitelist(RuleWhitelist newWhitelistConditionalTransfer) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
+        whitelistConditionalTransfer = newWhitelistConditionalTransfer;
+        emit WhitelistConditionalTransfer(newWhitelistConditionalTransfer);
+    } 
 
     function setIssuanceOptions(ISSUANCE calldata issuance_) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
         if(options.issuance.authorizedMintWithoutApproval != issuance_.authorizedMintWithoutApproval ){

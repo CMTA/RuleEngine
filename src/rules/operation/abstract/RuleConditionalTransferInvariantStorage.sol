@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "OZ/token/ERC20/IERC20.sol";
 
 import "../../validation/abstract/RuleCommonInvariantStorage.sol";
-
+import "src/rules/validation/RuleWhitelist.sol";
 abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariantStorage {
     struct AUTOMATIC_TRANSFER {
         bool isActivate;
@@ -81,4 +81,6 @@ abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariant
     event transferApproved(bytes32 indexed key, address indexed from, address indexed  to, uint256 value, uint256 id );
     event transferDenied(bytes32 indexed key, address indexed from, address indexed to, uint256 value, uint256 id);
     event transferReset(bytes32 indexed key, address indexed from, address indexed to, uint256 value, uint256 id);
+
+    event WhitelistConditionalTransfer(RuleWhitelist indexed whitelistConditionalTransfer);
 }  
