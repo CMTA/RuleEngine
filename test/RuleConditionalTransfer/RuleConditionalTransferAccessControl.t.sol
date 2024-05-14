@@ -24,6 +24,11 @@ contract RuleConditionalTransferAccessControl is Test, HelperContract {
     uint256 defaultValue = 10;
     bytes32 defaultKey = keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));
 
+    TransferRequestKeyElement transferRequestInput = TransferRequestKeyElement({
+            from: ADDRESS1,
+            to: ADDRESS2,
+            value:defaultValue
+          });
 
     // Arrange
     function setUp() public {
@@ -83,7 +88,7 @@ contract RuleConditionalTransferAccessControl is Test, HelperContract {
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE));  
         vm.prank(ATTACKER);
-        ruleConditionalTransfer.approveTransferRequest(ADDRESS1, ADDRESS2, defaultValue, 0, true);
+        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, 0, true);
     }
 
     function testCannotAttackerApproveWithIdARequestCreatedByTokenHolder() public {
@@ -120,7 +125,7 @@ contract RuleConditionalTransferAccessControl is Test, HelperContract {
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE));  
         vm.prank(ATTACKER);
-        ruleConditionalTransfer.createTransferRequestWithApproval(ADDRESS1, ADDRESS2, defaultValue);
+        ruleConditionalTransfer.createTransferRequestWithApproval(transferRequestInput);
     }
 
     /******** OPTIONS CONFIGURATION *********/

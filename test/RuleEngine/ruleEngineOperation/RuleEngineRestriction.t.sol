@@ -41,7 +41,11 @@ contract RuleEngineOperationTest is Test, HelperContract {
             automaticTransfer:automaticTransfer_
         });
 
-
+   TransferRequestKeyElement transferRequestInput = TransferRequestKeyElement({
+            from: ADDRESS1,
+            to: ADDRESS2,
+            value:defaultValue
+          });
     // Arrange
     function setUp() public {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -70,8 +74,8 @@ contract RuleEngineOperationTest is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));
         vm.expectEmit(true, true, true, true);
-        emit transferWaiting(key, ADDRESS1, ADDRESS2, defaultValue, 0);
-        ruleConditionalTransfer.createTransferRequestWithApproval(ADDRESS1, ADDRESS2, defaultValue);
+        emit transferApproved(key, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleConditionalTransfer.createTransferRequestWithApproval(transferRequestInput);
         // Act
         resUint8 = ruleEngineMock.detectTransferRestriction(
             ADDRESS1,

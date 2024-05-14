@@ -66,68 +66,20 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
 
 
     function createTransferRequestWithApproval(
-        address from, address to, uint256 value
+        TransferRequestKeyElement calldata keyElement
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
-       _createTransferRequestWithApproval(from, to, value);
-    }
-
-    function _createTransferRequestWithApproval(
-        address from, address to, uint256 value
-    ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
-        // WAIT => Will overwrite
-        // APPROVED => will overwrite previous status with a new delay
-        // DENIED => will overwrite
-       bytes32 key =  keccak256(abi.encode(from, to, value));
-        // Status NONE not enough because reset is possible
-        if(_checkRequestStatus(key)){
-             TransferRequest memory newTransferApproval = TransferRequest({
-                key: key,
-                id: requestId,
-                from: from,
-                to: to,
-                value: value,
-                askTime:0,
-                maxTime : block.timestamp +  options.timeLimit.timeLimitToTransfer,
-                status:STATUS.APPROVED
-             });
-            transferRequests[key] = newTransferApproval;
-            IdToKey[requestId] = key;
-            emit transferWaiting(key, from, to, value, requestId);
-            ++requestId;
-        } else {
-            // Overwrite previous approval
-            transferRequests[key].maxTime = block.timestamp +  options.timeLimit.timeLimitToTransfer;
-            transferRequests[key].status = STATUS.APPROVED;
-            emit transferWaiting(key, from, to, value, transferRequests[key].id);
-        }
+       _createTransferRequestWithApproval(keyElement);
     }
 
     /**
-    @param from address from
-    @param to address to
-    @param value amount to transfer
+    @param keyElement contains from, to, value
     @param partialValue amount approved. Put 0 if all the amount specified by value is approved.
     @param isApproved_ approved (true) or refused (false). Put true if you use partialApproval
     */
     function approveTransferRequest(
-        address from, address to, uint256 value, uint256 partialValue, bool isApproved_
+        TransferRequestKeyElement calldata keyElement, uint256 partialValue, bool isApproved_
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE) {
-        if(partialValue > value){
-            revert RuleConditionalTransfer_InvalidValueApproved();
-        }
-        bytes32 key =  keccak256(abi.encode(from, to, value));
-        TransferRequest memory transferRequest = transferRequests[key];
-        if(partialValue > 0 ){
-            if(! isApproved_){
-                revert RuleConditionalTransfer_InvalidValueApproved();
-            }
-            //Denied the first request
-            _approveRequest(transferRequest, false);
-            // Create new request
-            _createTransferRequestWithApproval(from, to, partialValue);
-        }else{
-            _approveRequest(transferRequest, isApproved_);
-        }
+        _approveTransferRequestKeyElement(keyElement, partialValue, isApproved_);
     }
 
     function approveTransferRequestWithId(
@@ -138,11 +90,30 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         }
         TransferRequest memory transferRequest = transferRequests[IdToKey[requestId_]];
         _approveRequest(transferRequest, isApproved_);
+    } 
+
+
+    function resetRequestStatus(
+        uint256 requestId_
+    ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
+        if(requestId_ + 1 >  requestId) {
+            revert RuleConditionalTransfer_InvalidId();
+        }
+        bytes32 key = IdToKey[requestId_];
+        _resetRequestStatus(key);
     }
+
+    /***** Batch function */
 
     function approveTransferRequestBatchWithId(
         uint256[] calldata requestId_, bool[] calldata isApproved_
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
+        if(requestId_.length == 0){
+            revert RuleConditionalTransfer_EmptyArray();
+        }
+        if(requestId_.length != isApproved_.length){
+            revert RuleConditionalTransfer_InvalidLengthArray();
+        }
         // Check id validity before performing actions
         for(uint256 i = 0; i < requestId_.length; ++i){
             if(requestId_[i] + 1 >  requestId) {
@@ -155,14 +126,102 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         }
     }
 
-    function resetRequestStatus(
-        uint256 requestId_
-    ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
-        if(requestId_ + 1 >  requestId) {
-            revert RuleConditionalTransfer_InvalidId();
+
+    function approveTransferRequestBatch(
+        TransferRequestKeyElement[] calldata keyElements, uint256[] calldata partialValues, bool[] calldata isApproved_
+    ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE) {
+        if(keyElements.length == 0){
+            revert RuleConditionalTransfer_EmptyArray();
         }
-        bytes32 key = IdToKey[requestId_];
-        _resetRequestStatus(key);
+        if((keyElements.length != partialValues.length) || (partialValues.length != isApproved_.length)){
+            revert RuleConditionalTransfer_InvalidLengthArray();
+        }
+        for(uint256 i = 0; i < keyElements.length; ++i){
+            _approveTransferRequestKeyElement(keyElements[i], partialValues[i], isApproved_[i]);
+        }
+    }
+
+
+    function createTransferRequestWithApprovalBatch(
+         TransferRequestKeyElement[] calldata keyElements
+    ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
+        if(keyElements.length == 0){
+            revert RuleConditionalTransfer_EmptyArray();
+        }
+        for(uint256 i = 0; i < keyElements.length; ++i){
+            _createTransferRequestWithApproval(keyElements[i]);
+        }
+    }
+
+
+    function resetRequestStatusBatch(
+        uint256[] memory requestIds
+    ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
+        // Check id validity before performing actions
+        for(uint256 i = 0; i < requestIds.length; ++i){
+            if(requestIds[i] + 1 >  requestId) {
+                revert RuleConditionalTransfer_InvalidId();
+            }
+        }
+        for(uint256 i = 0; i < requestIds.length; ++i){
+            bytes32 key = IdToKey[requestIds[i]];
+            _resetRequestStatus(key);
+        }
+    }
+
+
+    /*** Internal functions ****/
+
+    function _approveTransferRequestKeyElement(
+        TransferRequestKeyElement calldata keyElement, uint256 partialValue, bool isApproved_
+    ) internal {
+        if(partialValue > keyElement.value){
+            revert RuleConditionalTransfer_InvalidValueApproved();
+        }
+        bytes32 key =  keccak256(abi.encode(keyElement.from, keyElement.to, keyElement.value));
+        TransferRequest memory transferRequest = transferRequests[key];
+        if(partialValue > 0 ){
+            if(! isApproved_){
+                revert RuleConditionalTransfer_InvalidValueApproved();
+            }
+            //Denied the first request
+            _approveRequest(transferRequest, false);
+            // Create new request
+            _createTransferRequestWithApproval(TransferRequestKeyElement({from: keyElement.from, to: keyElement.to, value: partialValue}));
+        }else{
+            _approveRequest(transferRequest, isApproved_);
+        }
+    }
+
+    function _createTransferRequestWithApproval(
+        TransferRequestKeyElement memory keyElement
+    ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
+        // WAIT => Will overwrite
+        // APPROVED => will overwrite previous status with a new delay
+        // DENIED => will overwrite
+       bytes32 key =  keccak256(abi.encode(keyElement.from, keyElement.to, keyElement.value));
+        // Status NONE not enough because reset is possible
+        if(_checkRequestStatus(key)){
+             TransferRequest memory newTransferApproval = TransferRequest({
+                key: key,
+                id: requestId,
+                from: keyElement.from,
+                to: keyElement.to,
+                value: keyElement.value,
+                askTime:0,
+                maxTime : block.timestamp +  options.timeLimit.timeLimitToTransfer,
+                status:STATUS.APPROVED
+             });
+            transferRequests[key] = newTransferApproval;
+            IdToKey[requestId] = key;
+            emit transferApproved(key, keyElement.from, keyElement.to, keyElement.value, requestId);
+            ++requestId;
+        } else {
+            // Overwrite previous approval
+            transferRequests[key].maxTime = block.timestamp +  options.timeLimit.timeLimitToTransfer;
+            transferRequests[key].status = STATUS.APPROVED;
+            emit transferApproved(key, keyElement.from, keyElement.to, keyElement.value, transferRequests[key].id);
+        }
     }
 
     function _resetRequestStatus(

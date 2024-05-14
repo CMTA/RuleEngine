@@ -33,6 +33,12 @@ abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariant
     }
     
     enum STATUS { NONE, WAIT, APPROVED,  DENIED, EXECUTED, CANCELLED }
+
+    struct TransferRequestKeyElement {
+        address from;
+        address to;
+        uint256 value;
+    }
     struct TransferRequest {
         bytes32 key;
         uint256 id;
@@ -66,7 +72,8 @@ abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariant
     error RuleConditionalTransfer_InvalidSender();
     error RuleConditionalTransfer_InvalidValueApproved();
     error RuleConditionalTransfer_CannotDeniedPartially();
-
+    error RuleConditionalTransfer_InvalidLengthArray();
+    error RuleConditionalTransfer_EmptyArray();
 
     // Event
     event transferProcessed(bytes32 indexed key, address indexed from, address indexed  to, uint256 value, uint256 id);

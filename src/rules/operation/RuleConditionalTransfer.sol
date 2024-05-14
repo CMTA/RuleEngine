@@ -79,12 +79,45 @@ contract RuleConditionalTransfer is  RuleValidateTransfer, IRuleOperation, RuleC
         }
     }
 
+    function createTransferRequestBatch(address[] memory tos, uint256[] memory values) public{
+        if(tos.length == 0){
+            revert RuleConditionalTransfer_EmptyArray();
+        }
+        for(uint256 i = 0; i < tos.length; ++i){
+            createTransferRequest(tos[i], values[i]);
+        }
+    }
+
     /**
     * @notice allow a token holder to cancel/reset his own request
     */
     function cancelTransferRequest(
         uint256 requestId_
     ) public {
+        _cancelTransferRequest(requestId_);
+    }
+
+    /**
+    * @notice allow a token holder to cancel/reset his own request
+    */
+    function cancelTransferRequestBatch(
+        uint256[] memory requestIds
+    ) public {
+        // Check id validity before performing actions
+        for(uint256 i = 0; i < requestIds.length; ++i){
+            if(requestIds[i] + 1 >  requestId) {
+                revert RuleConditionalTransfer_InvalidId();
+            }
+        }
+        for(uint256 i = 0; i < requestIds.length; ++i){
+            _cancelTransferRequest(requestIds[i]);
+        }
+        
+    }
+
+    function _cancelTransferRequest(
+        uint256 requestId_
+    ) internal {
         if(requestId_ + 1 >  requestId) {
             revert RuleConditionalTransfer_InvalidId();
         }
