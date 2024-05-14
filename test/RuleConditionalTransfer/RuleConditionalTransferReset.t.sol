@@ -179,6 +179,31 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         ruleConditionalTransfer.cancelTransferRequestBatch(ids);
     }
 
+    function testHolderCannotBatchResetHisRequestWithWrongId() public {
+        // Arrange
+        _createTransferRequestBatchByHodler();
+        uint256[] memory ids = new uint256[](3);
+        ids[0] = 0;
+        ids[1] = 4;
+        ids[2] = 2;
+        // Act 
+        // Reset
+        vm.prank(ADDRESS1);
+        vm.expectRevert(RuleConditionalTransfer_InvalidId.selector);
+        ruleConditionalTransfer.cancelTransferRequestBatch(ids);
+    }
+
+    function testHolderCannotBatchResetHisRequestWithEmptyArray() public {
+        // Arrange
+        _createTransferRequestBatchByHodler();
+        uint256[] memory ids = new uint256[](0);
+        // Act 
+        // Reset
+        vm.prank(ADDRESS1);
+        vm.expectRevert(RuleConditionalTransfer_EmptyArray.selector);
+        ruleConditionalTransfer.cancelTransferRequestBatch(ids);
+    }
+
     function testHolderCannotResetRequestCreatedByOther() public {
         // Arrange
         _createTransferRequest();
@@ -215,6 +240,8 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         vm.expectRevert(RuleConditionalTransfer_Wrong_Status.selector);
         ruleConditionalTransfer.cancelTransferRequest(0);
     }
+
+    /***** Reset */
 
     function testCanResetADeniedRequestCreatedByHolder() public {
         // Arrange
@@ -257,6 +284,90 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         assertEq(uint256(transferRequest.status), uint256(STATUS.WAIT));
     }
 
+    function testCanBatchResetADeniedRequestCreatedByHolder() public {
+        // Arrange
+        _createTransferRequestBatchByHodler();
+        uint256[] memory ids = new uint256[](3);
+        ids[0] = 0;
+        ids[1] = 1;
+        ids[2] = 2;
+
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, 0,false);
+
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferReset(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        vm.expectEmit(true, true, true, true);
+        emit transferReset(key2, ADDRESS1, ADDRESS2, value2, 1);
+        vm.expectEmit(true, true, true, true);
+        emit transferReset(key3Hodler, ADDRESS1, ADDRESS2, value3, 2);
+        ruleConditionalTransfer.resetRequestStatusBatch(ids);
+
+        // Assert
+        TransferRequest memory transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        assertEq(transferRequest.key, defaultKey);
+        assertEq(transferRequest.id, 0);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, defaultValue);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.NONE));
+
+
+        transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, value2);
+        assertEq(transferRequest.key, key2);
+        assertEq(transferRequest.id, 1);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, value2);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.NONE));
+
+        transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, value3);
+        assertEq(transferRequest.key, key3Hodler);
+        assertEq(transferRequest.id, 2);
+        assertEq(transferRequest.from, ADDRESS1);
+        assertEq(transferRequest.to, ADDRESS2);
+        assertEq(transferRequest.value, value3);
+        assertEq(uint256(transferRequest.status), uint256(STATUS.NONE));
+    }
+
+
+    function testCannotBatchResetADeniedRequestCreatedByHolderWithWrongId() public {
+        // Arrange
+        _createTransferRequestBatchByHodler();
+        uint256[] memory ids = new uint256[](3);
+        ids[0] = 3;
+        ids[1] = 1;
+        ids[2] = 2;
+
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, 0,false);
+
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectRevert(RuleConditionalTransfer_InvalidId.selector);
+        ruleConditionalTransfer.resetRequestStatusBatch(ids);
+    }
+
+    function testCannotBatchResetADeniedRequestCreatedByHolderWithEmptyArray() public {
+        // Arrange
+        _createTransferRequestBatchByHodler();
+        uint256[] memory ids = new uint256[](0);
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, 0,false);
+
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectRevert(RuleConditionalTransfer_EmptyArray.selector);
+        ruleConditionalTransfer.resetRequestStatusBatch(ids);
+    }
 
     function testCannotResetARequestIfWrongId() public {
         // Act

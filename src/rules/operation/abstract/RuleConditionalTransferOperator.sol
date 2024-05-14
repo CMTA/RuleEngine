@@ -157,6 +157,9 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
     function resetRequestStatusBatch(
         uint256[] memory requestIds
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
+        if(requestIds.length == 0){
+            revert RuleConditionalTransfer_EmptyArray();
+        }
         // Check id validity before performing actions
         for(uint256 i = 0; i < requestIds.length; ++i){
             if(requestIds[i] + 1 >  requestId) {
@@ -182,9 +185,9 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         TransferRequest memory transferRequest = transferRequests[key];
         if(partialValue > 0 ){
             if(! isApproved_){
-                revert RuleConditionalTransfer_InvalidValueApproved();
+                revert RuleConditionalTransfer_CannotDeniedPartially();
             }
-            //Denied the first request
+            // Denied the first request
             _approveRequest(transferRequest, false);
             // Create new request
             _createTransferRequestWithApproval(TransferRequestKeyElement({from: keyElement.from, to: keyElement.to, value: partialValue}));

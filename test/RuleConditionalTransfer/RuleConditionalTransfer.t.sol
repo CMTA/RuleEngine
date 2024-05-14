@@ -200,11 +200,42 @@ contract RuleConditionalTransferTest is Test, HelperContract {
     function testCanCreateTransferRequestWithApproval() public {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         // Act
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));
         vm.expectEmit(true, true, true, true);
-        emit transferApproved(key, ADDRESS1, ADDRESS2, defaultValue, 0);
+        emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
         ruleConditionalTransfer.createTransferRequestWithApproval(transferRequestInput);
     }
+
+    function testCanCreateTransferRequestWithApprovalBatch() public {
+        // Arrange
+        TransferRequestKeyElement[] memory transferRequestKeyElements = new TransferRequestKeyElement[](4);
+        transferRequestKeyElements[0] = transferRequestInput;
+        transferRequestKeyElements[1] = transferRequestInput2;
+        transferRequestKeyElements[2] = transferRequestInput3;
+        transferRequestKeyElements[3] = transferRequestInput4;
+       
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit transferApproved(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        vm.expectEmit(true, true, true, true);
+        emit transferApproved(key2, ADDRESS1, ADDRESS2, value2, 1);
+        vm.expectEmit(true, true, true, true);
+        emit transferApproved(key3, ADDRESS2, ADDRESS1, value3, 2);
+        vm.expectEmit(true, true, true, true);
+        emit transferApproved(key4, ADDRESS1, ADDRESS2, value4, 3);
+        ruleConditionalTransfer.createTransferRequestWithApprovalBatch(transferRequestKeyElements);
+    }
+
+    function testCanCreateTransferRequestWithApprovalBatchWithEmptyArray() public {
+        // Arrange
+        TransferRequestKeyElement[] memory transferRequestKeyElements = new TransferRequestKeyElement[](0);
+       
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectRevert(RuleConditionalTransfer_EmptyArray.selector);
+        ruleConditionalTransfer.createTransferRequestWithApprovalBatch(transferRequestKeyElements);
+    }
+
 
     /**
     * @dev test overwrite branch, previous approval
@@ -227,6 +258,50 @@ contract RuleConditionalTransferTest is Test, HelperContract {
 
 
     /**** Request approval ****** */
+    function testCanHolderCreateRequestBatch() public {
+        // Arrange
+        uint256[] memory values = new uint256[](3);
+        values[0] = defaultValue;
+        values[1] = value2;
+        values[2] = value4;
+        address[] memory  addresses = new address[](3);
+        addresses[0] = ADDRESS2;
+        addresses[1] = ADDRESS2;
+        addresses[2] = ADDRESS2;
+        
+        // Act
+        vm.prank(ADDRESS1);
+        vm.expectEmit(true, true, true, true);
+        emit transferWaiting(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        vm.expectEmit(true, true, true, true);
+        emit transferWaiting(key2, ADDRESS1, ADDRESS2, value2, 1);
+        vm.expectEmit(true, true, true, true);
+        emit transferWaiting(key4, ADDRESS1, ADDRESS2, value4, 2);
+        ruleConditionalTransfer.createTransferRequestBatch(addresses,values );
+    }
+
+    function testCannotHolderCreateRequestBatchEmptyArray() public {
+        // Arrange
+        uint256[] memory values = new uint256[](0);
+        address[] memory  addresses = new address[](0);
+        
+        // Act
+        vm.prank(ADDRESS1);
+        vm.expectRevert(RuleConditionalTransfer_EmptyArray.selector);
+        ruleConditionalTransfer.createTransferRequestBatch(addresses, values);
+    }
+
+    function testCannotHolderCreateRequestBatchIfLEngthMismatch() public {
+        // Arrange
+        uint256[] memory values = new uint256[](3);
+        address[] memory  addresses = new address[](1);
+        
+        // Act
+        vm.prank(ADDRESS1);
+        vm.expectRevert(RuleConditionalTransfer_InvalidLengthArray.selector);
+        ruleConditionalTransfer.createTransferRequestBatch(addresses, values);
+    }
+
     function testCanApproveRequestCreatedByHolder() public {
         // Arrange
         _createTransferRequest();
@@ -250,6 +325,26 @@ contract RuleConditionalTransferTest is Test, HelperContract {
         emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
         emit transferWaiting(key, ADDRESS1, ADDRESS2, partialValue, 1);
         ruleConditionalTransfer.approveTransferRequest(transferRequestInput, partialValue,true);
+    }
+
+    function testCannotPartiallyDeniedRequestCreatedByHolder() public {
+        // Arrange
+        _createTransferRequest();
+        uint256 partialValue = 5;
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectRevert(RuleConditionalTransfer_CannotDeniedPartially.selector);
+        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, partialValue, false);
+    }
+
+    function testCannotPartiallyApprovedRequestCreatedByHolderIfPartialValueIsBiggerThanValue() public {
+        // Arrange
+        _createTransferRequest();
+        uint256 partialValue = 5000;
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectRevert(RuleConditionalTransfer_InvalidValueApproved.selector);
+        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, partialValue, false);
     }
 
     function testCanCreateAndApproveRequestCreatedByHolderAgain() public {
@@ -325,22 +420,10 @@ contract RuleConditionalTransferTest is Test, HelperContract {
     function testCannotCreateAndApproveRequestCreatedByHolderInBatchWithLenghtMismatch() public {
         // Arrange
         uint256[] memory partialValues = new uint256[](4);
-        partialValues[0] = 0;
-        partialValues[1] = 0;
-        partialValues[2] = 0;
-        partialValues[3] = 0;
         // Lenght mismatch
         bool[] memory  isApproveds = new bool[](3);
-        isApproveds[0] = true;
-        isApproveds[1] = true;
-        isApproveds[2] = true;
 
         TransferRequestKeyElement[] memory transferRequestKeyElements = new TransferRequestKeyElement[](4);
-        transferRequestKeyElements[0] = transferRequestInput;
-        transferRequestKeyElements[1] = transferRequestInput2;
-        transferRequestKeyElements[2] = transferRequestInput3;
-        transferRequestKeyElements[3] = transferRequestInput4;
-
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectRevert(RuleConditionalTransfer_InvalidLengthArray.selector);
@@ -356,22 +439,28 @@ contract RuleConditionalTransferTest is Test, HelperContract {
 
         // Act
         uint256[] memory partialValuesV3 = new uint256[](4);
-        partialValuesV3[0] = 0;
-        partialValuesV3[1] = 0;
-        partialValuesV3[2] = 0;
-        partialValuesV3[3] = 0;
         // Lenght mismatch
         bool[] memory  isApprovedsV3 = new bool[](4);
-        isApprovedsV3[0] = true;
-        isApprovedsV3[1] = true;
-        isApprovedsV3[2] = true;
-        isApprovedsV3[3] = true;
         TransferRequestKeyElement[] memory transferRequestKeyElementsV3 = new TransferRequestKeyElement[](2);
         transferRequestKeyElementsV3[0] = transferRequestInput;
         transferRequestKeyElementsV3[1] = transferRequestInput2;
         vm.expectRevert(RuleConditionalTransfer_InvalidLengthArray.selector);
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         ruleConditionalTransfer.approveTransferRequestBatch(transferRequestKeyElementsV3, partialValuesV3, isApprovedsV3);
+    }
+
+    function testCannotCreateAndApproveRequestCreatedByHolderInBatchWithEmptyArry() public {
+        // Arrange
+        uint256[] memory partialValues = new uint256[](0);
+        // Lenght mismatch
+        bool[] memory  isApproveds = new bool[](0);
+
+        TransferRequestKeyElement[] memory transferRequestKeyElements = new TransferRequestKeyElement[](0);
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectRevert(RuleConditionalTransfer_EmptyArray.selector);
+        ruleConditionalTransfer.approveTransferRequestBatch(transferRequestKeyElements, partialValues, isApproveds);
+
     }
 
     function testCanCreateAndApproveRequestCreatedByHolderInBatchWithPartialValues() public {
@@ -492,21 +581,25 @@ contract RuleConditionalTransferTest is Test, HelperContract {
     }
 
 
-    function testCannotApproveRequestInBatchCreatedByHolderWithIdWithWrongLenght() public {
+    function testCannotApproveRequestInBatchCreatedByHolderWithIdWithinvalidLength() public {
        _createTransferRequestBatch();
         uint256[] memory ids = new uint256[](4);
-        ids[0] = 0;
-        ids[1] = 1;
-        ids[2] = 2;
-        ids[3] = 3;
         // Wrong length here
         bool[] memory  isApproveds = new bool[](3);
-        isApproveds[0] = true;
-        isApproveds[1] = true;
-        isApproveds[2] = true;
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectRevert(RuleConditionalTransfer_InvalidLengthArray.selector);
+        ruleConditionalTransfer.approveTransferRequestBatchWithId( ids, isApproveds);
+    }
+
+    function testCannotApproveRequestInBatchCreatedByHolderWithIdWithEmptyArray() public {
+       _createTransferRequestBatch();
+        uint256[] memory ids = new uint256[](0);
+        // Wrong length here
+        bool[] memory  isApproveds = new bool[](0);
+        // Act
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        vm.expectRevert(RuleConditionalTransfer_EmptyArray.selector);
         ruleConditionalTransfer.approveTransferRequestBatchWithId( ids, isApproveds);
     }
 

@@ -83,6 +83,9 @@ contract RuleConditionalTransfer is  RuleValidateTransfer, IRuleOperation, RuleC
         if(tos.length == 0){
             revert RuleConditionalTransfer_EmptyArray();
         }
+        if(tos.length != values.length){
+            revert RuleConditionalTransfer_InvalidLengthArray();
+        }
         for(uint256 i = 0; i < tos.length; ++i){
             createTransferRequest(tos[i], values[i]);
         }
@@ -103,6 +106,9 @@ contract RuleConditionalTransfer is  RuleValidateTransfer, IRuleOperation, RuleC
     function cancelTransferRequestBatch(
         uint256[] memory requestIds
     ) public {
+        if(requestIds.length == 0){
+            revert RuleConditionalTransfer_EmptyArray();
+        }
         // Check id validity before performing actions
         for(uint256 i = 0; i < requestIds.length; ++i){
             if(requestIds[i] + 1 >  requestId) {
