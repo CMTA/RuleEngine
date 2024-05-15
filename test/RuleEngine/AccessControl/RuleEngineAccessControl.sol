@@ -6,7 +6,7 @@ import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-@title Tests on the Access Control
+* @title Tests on the Access Control
 */
 contract RuleEngineAccessControlTest is Test, HelperContract {
     // Custom error openZeppelin
@@ -27,18 +27,19 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine(
             RULE_ENGINE_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
             ZERO_ADDRESS
         );
-        resUint256 = ruleEngineMock.rulesCount();
+        resUint256 = ruleEngineMock.rulesCountValidation();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRule(ruleWhitelist);
+        ruleEngineMock.addRuleValidation(ruleWhitelist);
         // Arrange - Assert
-        resUint256 = ruleEngineMock.rulesCount();
+        resUint256 = ruleEngineMock.rulesCountValidation();
         assertEq(resUint256, 1);
     }
 
-    function testCannotAttackerSetRules() public {
+    function testCannotAttackerSetRulesValidation() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
@@ -50,21 +51,21 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        IRule[] memory ruleWhitelistTab = new IRule[](2);
-        ruleWhitelistTab[0] = IRule(ruleWhitelist1);
-        ruleWhitelistTab[1] = IRule(ruleWhitelist2);
+        address[] memory ruleWhitelistTab = new address[](2);
+        ruleWhitelistTab[0] = address(ruleWhitelist1);
+        ruleWhitelistTab[1] = address(ruleWhitelist2);
 
         // Act
         vm.prank(ATTACKER);
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
         (bool success, ) = address(ruleEngineMock).call(
-            abi.encodeCall(RuleEngine.setRules, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
         );
 
         // Assert
         assertEq(success, true);
-        resUint256 = ruleEngineMock.rulesCount();
+        resUint256 = ruleEngineMock.rulesCountValidation();
         assertEq(resUint256, 1);
     }
 
@@ -73,10 +74,10 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         vm.prank(ATTACKER);
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
-        ruleEngineMock.clearRules();
+        ruleEngineMock.clearRulesValidation();
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCount();
+        resUint256 = ruleEngineMock.rulesCountValidation();
         assertEq(resUint256, 1);
     }
 
@@ -85,10 +86,10 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         vm.prank(ATTACKER);
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
-        ruleEngineMock.addRule(ruleWhitelist);
+        ruleEngineMock.addRuleValidation(ruleWhitelist);
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCount();
+        resUint256 = ruleEngineMock.rulesCountValidation();
         assertEq(resUint256, 1);
     }
 
@@ -97,10 +98,18 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         vm.prank(ATTACKER);
         vm.expectRevert(
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
-        ruleEngineMock.removeRule(ruleWhitelist, 0);
+        ruleEngineMock.removeRuleValidation(ruleWhitelist, 0);
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCount();
+        resUint256 = ruleEngineMock.rulesCountValidation();
         assertEq(resUint256, 1);
+    }
+
+    function testCannotAttackerOperateOnTransfer() public {
+        // Act
+        vm.prank(ATTACKER);
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, TOKEN_CONTRACT_ROLE));   
+        ruleEngineMock.operateOnTransfer(ADDRESS1, ADDRESS2, 10);
     }
 }

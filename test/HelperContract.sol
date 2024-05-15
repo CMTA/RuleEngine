@@ -3,19 +3,36 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
-import "src/rules/RuleWhitelist.sol";
-import "src/rules/abstract/RuleWhitelistInvariantStorage.sol";
-import "src/rules/abstract/RuleSanctionListInvariantStorage.sol";
+
+import "src/modules/RuleEngineInvariantStorage.sol";
+// RuleConditionalTransfer
+import "src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol";
+import "src/rules/operation/RuleConditionalTransfer.sol";
+// RuleSanctionList
+import "src/rules/validation/RuleSanctionList.sol";
+// RUleBlackList
+import "src/rules/validation/RuleBlacklist.sol";
+// RuleWhitelist
+import "src/rules/validation/RuleWhitelist.sol";
+import "src/rules/validation/abstract/RuleAddressList/RuleWhitelistInvariantStorage.sol";
+import "src/rules/validation/abstract/RuleAddressList/RuleAddressListInvariantStorage.sol";
+
+import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
+import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
+// Rule interface
+import "src/interfaces/IRuleValidation.sol";
+import "src/interfaces/IRuleOperation.sol";
 /**
-@title Constants used by the tests
+* @title Constants used by the tests
 */
-abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionlistInvariantStorage  {
+abstract contract HelperContract is RuleWhitelistInvariantStorage, RuleBlacklistInvariantStorage, RuleAddressListInvariantStorage, RuleSanctionlistInvariantStorage, RuleEngineInvariantStorage, RuleConditionalTransferInvariantStorage  {
     // EOA to perform tests
     address constant ZERO_ADDRESS = address(0);
     address constant DEFAULT_ADMIN_ADDRESS = address(1);
     address constant WHITELIST_OPERATOR_ADDRESS = address(2);
     address constant RULE_ENGINE_OPERATOR_ADDRESS = address(3);
     address constant SANCTIONLIST_OPERATOR_ADDRESS = address(8);
+    address constant CONDITIONAL_TRANSFER_OPERATOR_ADDRESS = address(9);
     address constant ATTACKER = address(4);
     address constant ADDRESS1 = address(5);
     address constant ADDRESS2 = address(6);
@@ -28,29 +45,22 @@ abstract contract HelperContract is RuleWhitelistInvariantStorage,RuleSanctionli
     string constant DEFAULT_ADMIN_ROLE_HASH =
         "0x0000000000000000000000000000000000000000000000000000000000000000";
     
+    uint256 DEFAULT_TIME_LIMIT_TO_APPROVE = 7 days;              
+    uint256 DEFAULT_TIME_LIMIT_TO_TRANSFER = 7 days;
     // contract
+    RuleBlacklist ruleBlacklist;
     RuleWhitelist ruleWhitelist;
+    RuleConditionalTransfer ruleConditionalTransfer;
     CMTAT_STANDALONE CMTAT_CONTRACT;
 
-    bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
+    //bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
 
     uint8 constant NO_ERROR = 0;
 
     // Forwarder
     string ERC2771ForwarderDomain = 'ERC2771ForwarderDomain';
 
-    // RuleEngine event
-    event AddRule(IRule indexed rule);
-    event RemoveRule(IRule indexed rule);
-    event ClearRules(IRule[] rulesRemoved);
-
-    // Custom error RuleEngine
-    error RuleEngine_RuleAddressZeroNotAllowed();
-    error RuleEngine_RuleAlreadyExists();
-    error RuleEngine_RuleDoNotMatch();
-    error RuleEngine_AdminWithAddressZeroNotAllowed();
-    error RuleEngine_ArrayIsEmpty();
-
-
+    error Rulelist_AddressAlreadylisted();
+    error Rulelist_AddressNotPresent();
     constructor() {}
 }

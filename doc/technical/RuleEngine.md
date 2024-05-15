@@ -16,7 +16,7 @@ A possible rule is a whitelist rule where only the address inside the whitelist 
 
 
 
-![surya_graph_RuleEngine](../schema/surya/surya_graph_RuleEngine.png)
+![surya_graph_RuleEngine](../surya/surya_graph/surya_graph_RuleEngine.sol.png)
 
 
 
@@ -29,7 +29,7 @@ The default admin is the address put in argument(`admin`) inside the constructor
 ### Schema
 
 Here a schema of the Access Control.
-![alt text](../accessControl/access-control-RuleEngine.png)
+![alt text](../security/accessControl/access-control-RuleEngine.png)
 
 
 
@@ -56,5 +56,3 @@ The function is reverted if one rule is the zero address
 **addRule** 
 
 The function is reverted if one rule is the zero address
-
-https://github.com/ethereum/solidity/issues/10698)

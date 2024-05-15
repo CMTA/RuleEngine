@@ -6,7 +6,7 @@ pragma solidity ^0.8.17;
 import "forge-std/Script.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
 import "src/RuleEngine.sol";
-import "src/rules/RuleWhitelist.sol";
+import "src/rules/validation/RuleWhitelist.sol";
 import "CMTAT/modules/wrapper/controllers/ValidationModule.sol";
 
 /**
@@ -23,9 +23,9 @@ contract RuleEngineScript is Script {
         RuleWhitelist ruleWhitelist = new RuleWhitelist(ADMIN, address(0));
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
-        RuleEngine RULE_ENGINE = new RuleEngine(ADMIN, address(0));
+        RuleEngine RULE_ENGINE = new RuleEngine(ADMIN, address(0), address(0));
         console.log("RuleEngine: ", address(RULE_ENGINE));
-        RULE_ENGINE.addRule(ruleWhitelist);
+        RULE_ENGINE.addRuleValidation(ruleWhitelist);
         // Configure the new ruleEngine for CMTAT
         (bool success, ) = address(CMTAT_Address).call(
             abi.encodeCall(ValidationModule.setRuleEngine, RULE_ENGINE)

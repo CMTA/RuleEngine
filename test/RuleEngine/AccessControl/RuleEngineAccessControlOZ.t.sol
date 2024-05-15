@@ -7,7 +7,7 @@ import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-@title Tests on the provided functions by OpenZeppelin
+* @title Tests on the provided functions by OpenZeppelin
 */
 contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
     RuleEngine ruleEngineMock;
@@ -26,14 +26,15 @@ contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine(
             RULE_ENGINE_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
             ZERO_ADDRESS
         );
-        resUint256 = ruleEngineMock.rulesCount();
+        resUint256 = ruleEngineMock.rulesCountValidation();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRule(ruleWhitelist);
+        ruleEngineMock.addRuleValidation(ruleWhitelist);
         // Arrange - Assert
-        resUint256 = ruleEngineMock.rulesCount();
+        resUint256 = ruleEngineMock.rulesCountValidation();
         assertEq(resUint256, 1);
     }
 
