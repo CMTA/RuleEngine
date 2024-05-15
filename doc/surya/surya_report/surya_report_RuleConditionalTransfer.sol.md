@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./rules/operation/RuleConditionalTransfer.sol | 474d9ae65276913c7b367dbf47439e3a0558cf7a |
+| ./rules/operation/RuleConditionalTransfer.sol | 9e082774ea9e8c645735266d8935f0cea686ef07 |
 
 
 ### Contracts Description Table
@@ -18,7 +18,10 @@
 | **RuleConditionalTransfer** | Implementation | RuleValidateTransfer, IRuleOperation, RuleConditionalTransferOperator, MetaTxModuleStandalone |||
 | └ | <Constructor> | Public ❗️ | 🛑  | MetaTxModuleStandalone |
 | └ | createTransferRequest | Public ❗️ | 🛑  |NO❗️ |
+| └ | createTransferRequestBatch | Public ❗️ | 🛑  |NO❗️ |
 | └ | cancelTransferRequest | Public ❗️ | 🛑  |NO❗️ |
+| └ | cancelTransferRequestBatch | Public ❗️ | 🛑  |NO❗️ |
+| └ | _cancelTransferRequest | Internal 🔒 | 🛑  | |
 | └ | getRequestTrade | Public ❗️ |   |NO❗️ |
 | └ | getRequestByStatus | Public ❗️ |   |NO❗️ |
 | └ | operateOnTransfer | Public ❗️ | 🛑  | onlyRole |

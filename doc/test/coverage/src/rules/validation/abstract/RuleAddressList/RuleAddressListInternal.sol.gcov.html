@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2024-05-14 11:13:54</td>
+            <td class="headerValue">2024-05-15 12:20:21</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">6</td>
@@ -131,12 +131,12 @@
 <a name="60"><span class="lineNum">      60 </span>                :            :     function _addAddressToThelist(</a>
 <a name="61"><span class="lineNum">      61 </span>                :            :         address _newlistAddress</a>
 <a name="62"><span class="lineNum">      62 </span>                :            :     ) internal {</a>
-<a name="63"><span class="lineNum">      63 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 26 times"> + </span>]:<span class="lineCov">         27 :         if(list[_newlistAddress])</span></a>
+<a name="63"><span class="lineNum">      63 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 38 times"> + </span>]:<span class="lineCov">         39 :         if(list[_newlistAddress])</span></a>
 <a name="64"><span class="lineNum">      64 </span>                :            :         {</a>
 <a name="65"><span class="lineNum">      65 </span>                :<span class="lineCov">          2 :             revert Rulelist_AddressAlreadylisted();</span></a>
 <a name="66"><span class="lineNum">      66 </span>                :            :         }</a>
-<a name="67"><span class="lineNum">      67 </span>                :<span class="lineCov">         52 :         list[_newlistAddress] = true;</span></a>
-<a name="68"><span class="lineNum">      68 </span>                :<span class="lineCov">         52 :         ++numAddressesList;</span></a>
+<a name="67"><span class="lineNum">      67 </span>                :<span class="lineCov">         76 :         list[_newlistAddress] = true;</span></a>
+<a name="68"><span class="lineNum">      68 </span>                :<span class="lineCov">         76 :         ++numAddressesList;</span></a>
 <a name="69"><span class="lineNum">      69 </span>                :            :     }</a>
 <a name="70"><span class="lineNum">      70 </span>                :            : </a>
 <a name="71"><span class="lineNum">      71 </span>                :            :     /**</a>
@@ -173,7 +173,7 @@
 <a name="102"><span class="lineNum">     102 </span>                :            :     function _addressIsListed(</a>
 <a name="103"><span class="lineNum">     103 </span>                :            :         address _targetAddress</a>
 <a name="104"><span class="lineNum">     104 </span>                :            :     ) internal view returns (bool) {</a>
-<a name="105"><span class="lineNum">     105 </span>                :<span class="lineCov">        230 :         return list[_targetAddress];</span></a>
+<a name="105"><span class="lineNum">     105 </span>                :<span class="lineCov">        282 :         return list[_targetAddress];</span></a>
 <a name="106"><span class="lineNum">     106 </span>                :            :     }</a>
 <a name="107"><span class="lineNum">     107 </span>                :            : }</a>
 </pre>

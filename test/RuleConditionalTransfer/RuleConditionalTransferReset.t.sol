@@ -158,6 +158,20 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         vm.expectEmit(true, true, true, true);
         emit transferReset(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
         ruleConditionalTransfer.cancelTransferRequest(0);
+
+        // Can create a new request
+        // Id different from 0
+        vm.prank(ADDRESS1);
+        // Act
+        vm.expectEmit(true, true, true, true);
+        emit transferWaiting(key2, ADDRESS1, ADDRESS2, value2, 1);
+        ruleConditionalTransfer.createTransferRequest(ADDRESS2, value2);
+
+        // Can be cancel again
+        vm.prank(ADDRESS1);
+        vm.expectEmit(true, true, true, true);
+        emit transferReset(key2, ADDRESS1, ADDRESS2, value2, 1);
+        ruleConditionalTransfer.cancelTransferRequest(1);
     }
 
     function testHolderCanBatchResetHisRequest() public {
@@ -282,6 +296,14 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         assertEq(transferRequest.to, ADDRESS2);
         assertEq(transferRequest.value, defaultValue);
         assertEq(uint256(transferRequest.status), uint256(STATUS.WAIT));
+
+
+        // Id different from 0
+        vm.prank(ADDRESS1);
+        // Act
+        vm.expectEmit(true, true, true, true);
+        emit transferWaiting(key2, ADDRESS1, ADDRESS2, value2, 1);
+        ruleConditionalTransfer.createTransferRequest(ADDRESS2, value2);
     }
 
     function testCanBatchResetADeniedRequestCreatedByHolder() public {

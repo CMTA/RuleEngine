@@ -6,22 +6,36 @@ import "OZ/token/ERC20/IERC20.sol";
 import "../../validation/abstract/RuleCommonInvariantStorage.sol";
 import "src/rules/validation/RuleWhitelist.sol";
 abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariantStorage {
+    /**
+    * perform automatically a transfer if the transfer request is approved.
+    * To perform the transfer, the token holder has to approve the rule to spend tokens on his behalf (standard ERC-20 approval). 
+    * If the allowance is not sufficient, the request will be approved, but without performing the transfer.
+    */
     struct AUTOMATIC_TRANSFER {
         bool isActivate;
         IERC20 cmtat;
     }
+
     struct ISSUANCE {
+        // Authorize mint without the need of approval
         bool authorizedMintWithoutApproval;
+        // Authorize burn without the need of approval
         bool authorizedBurnWithoutApproval;
     }
 
     struct TIME_LIMIT {
+        // time limit for an operator to approve a request
         uint256 timeLimitToApprove;
+        // once a request is approved, time limit for the token holder to perform the transfer
         uint256 timeLimitToTransfer;
     }
 
     struct AUTOMATIC_APPROVAL {
         bool isActivate;
+        /**
+        * If the transfer is not approved or denied within {timeLimitBeforeAutomaticApproval}, 
+        * the request is considered as approved during a transfer.
+        */
         uint256 timeLimitBeforeAutomaticApproval;
     }
 

@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2024-05-14 11:13:54</td>
+            <td class="headerValue">2024-05-15 12:20:21</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">4</td>
@@ -115,16 +115,16 @@
 <a name="44"><span class="lineNum">      44 </span>                :            :      *</a>
 <a name="45"><span class="lineNum">      45 </span>                :            :      */</a>
 <a name="46"><span class="lineNum">      46 </span>                :            :     function _addRule(address[] storage _rules, address rule_) internal  {</a>
-<a name="47"><span class="lineNum">      47 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 110 times"> + </span>]:<span class="lineCov">        448 :         if( address(rule_) == address(0x0))</span></a>
+<a name="47"><span class="lineNum">      47 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 132 times"> + </span>]:<span class="lineCov">        536 :         if( address(rule_) == address(0x0))</span></a>
 <a name="48"><span class="lineNum">      48 </span>                :            :         {</a>
 <a name="49"><span class="lineNum">      49 </span>                :<span class="lineCov">          4 :             revert RuleEngine_RuleAddressZeroNotAllowed();</span></a>
 <a name="50"><span class="lineNum">      50 </span>                :            :         }</a>
-<a name="51"><span class="lineNum">      51 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 108 times"> + </span>]:<span class="lineCov">        110 :         if( _ruleIsPresent[rule_])</span></a>
+<a name="51"><span class="lineNum">      51 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 130 times"> + </span>]:<span class="lineCov">        132 :         if( _ruleIsPresent[rule_])</span></a>
 <a name="52"><span class="lineNum">      52 </span>                :            :         {</a>
 <a name="53"><span class="lineNum">      53 </span>                :<span class="lineCov">          4 :             revert RuleEngine_RuleAlreadyExists();</span></a>
 <a name="54"><span class="lineNum">      54 </span>                :            :         }</a>
-<a name="55"><span class="lineNum">      55 </span>                :<span class="lineCov">        216 :         _rules.push(rule_);</span></a>
-<a name="56"><span class="lineNum">      56 </span>                :<span class="lineCov">        216 :         _ruleIsPresent[rule_] = true;</span></a>
+<a name="55"><span class="lineNum">      55 </span>                :<span class="lineCov">        260 :         _rules.push(rule_);</span></a>
+<a name="56"><span class="lineNum">      56 </span>                :<span class="lineCov">        260 :         _ruleIsPresent[rule_] = true;</span></a>
 <a name="57"><span class="lineNum">      57 </span>                :            :     }</a>
 <a name="58"><span class="lineNum">      58 </span>                :            : </a>
 <a name="59"><span class="lineNum">      59 </span>                :            :     /**</a>

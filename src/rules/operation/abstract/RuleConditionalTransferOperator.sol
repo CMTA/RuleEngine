@@ -6,27 +6,30 @@ import "OZ/access/AccessControl.sol";
 import "./RuleConditionalTransferInvariantStorage.sol";
 import "OZ/token/ERC20/utils/SafeERC20.sol"; 
 /**
-* @title a RuleConditionalTransfer manager
+* @title Restricted functions
 */
-
 abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditionalTransferInvariantStorage {
     // Security
     using SafeERC20 for IERC20;
     
-    OPTION internal options;
-
-    
-    // Getter
+    // public variable with automatic Getter
+    OPTION public options;
     uint256 public requestId;
     mapping(uint256 => bytes32) public IdToKey;
     mapping(bytes32 => TransferRequest) public transferRequests;
     RuleWhitelist public  whitelistConditionalTransfer;
 
+    /**
+    * @notice set a whitelist. A transfer does not need of an approved request if from and to are in the whitelist
+    */
     function setConditionalWhitelist(RuleWhitelist newWhitelistConditionalTransfer) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
         whitelistConditionalTransfer = newWhitelistConditionalTransfer;
         emit WhitelistConditionalTransfer(newWhitelistConditionalTransfer);
     } 
 
+    /**
+    set/unset the issuance options (mint & burn)
+    */
     function setIssuanceOptions(ISSUANCE calldata issuance_) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
         if(options.issuance.authorizedMintWithoutApproval != issuance_.authorizedMintWithoutApproval ){
             options.issuance.authorizedMintWithoutApproval = issuance_.authorizedMintWithoutApproval;
@@ -36,6 +39,11 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         }
     }
 
+    /**
+    * @notice  set/unset the option to perform the transfer if the request is approved by the rule operator.
+    * To perform the transfer, the token holder has to approve the rule to spend tokens on his behalf (standard ERC-20 approval). 
+    * If the allowance is not sufficient, the request will be approved, but without performing the transfer.
+    */
     function setAutomaticTransfer(AUTOMATIC_TRANSFER calldata automaticTransfer_) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
          if(automaticTransfer_.isActivate !=  options.automaticTransfer.isActivate){
             options.automaticTransfer.isActivate = automaticTransfer_.isActivate;
@@ -48,7 +56,8 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
 
     /**
     * @notice set time limit for new requests (Approval and transfer)
-    * Don't affect already created requests
+    * timeLimitToApprove: time limit for an operator to approve a request
+    * timeLimitToTransfer: once a request is approved, time limit for the token holder to perform the transfer
     */
     function setTimeLimit(TIME_LIMIT memory timeLimit_)  public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
         if(options.timeLimit.timeLimitToApprove != timeLimit_.timeLimitToApprove){
@@ -58,7 +67,11 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
             options.timeLimit.timeLimitToTransfer = timeLimit_.timeLimitToTransfer;
         }
     }
-
+    /**
+    * @notice  If the transfer is not approved or denied within {timeLimitBeforeAutomaticApproval}, 
+    * the request is considered as approved during a transfer.
+    *
+    */
     function setAutomaticApproval(AUTOMATIC_APPROVAL memory automaticApproval_)  public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
         if(options.automaticApproval.isActivate  != automaticApproval_.isActivate ){
              options.automaticApproval.isActivate = automaticApproval_.isActivate;
@@ -68,7 +81,9 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         }
     }
 
-
+    /**
+    * @notice create a transfer request directly approved
+    */
     function createTransferRequestWithApproval(
         TransferRequestKeyElement calldata keyElement
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
@@ -76,27 +91,33 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
     }
 
     /**
+    @notice approve a transferRequest
     @param keyElement contains from, to, value
     @param partialValue amount approved. Put 0 if all the amount specified by value is approved.
-    @param isApproved_ approved (true) or refused (false). Put true if you use partialApproval
+    @param isApproved approved (true) or refused (false). Put true if you use partialApproval
     */
     function approveTransferRequest(
-        TransferRequestKeyElement calldata keyElement, uint256 partialValue, bool isApproved_
+        TransferRequestKeyElement calldata keyElement, uint256 partialValue, bool isApproved
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE) {
-        _approveTransferRequestKeyElement(keyElement, partialValue, isApproved_);
+        _approveTransferRequestKeyElement(keyElement, partialValue, isApproved);
     }
 
+    /**
+    * @notice approve a transferRequestby using its id
+    */
     function approveTransferRequestWithId(
-        uint256 requestId_, bool isApproved_
+        uint256 requestId_, bool isApproved
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
         if(requestId_ + 1 >  requestId) {
             revert RuleConditionalTransfer_InvalidId();
         }
         TransferRequest memory transferRequest = transferRequests[IdToKey[requestId_]];
-        _approveRequest(transferRequest, isApproved_);
+        _approveRequest(transferRequest, isApproved);
     } 
 
-
+    /**
+    * @notice reset to None the status of a request
+    */
     function resetRequestStatus(
         uint256 requestId_
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
@@ -108,14 +129,16 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
     }
 
     /***** Batch function */
-
+    /**
+    * @notice Batch version of {approveTransferRequestWithId}
+    */
     function approveTransferRequestBatchWithId(
-        uint256[] calldata requestId_, bool[] calldata isApproved_
+        uint256[] calldata requestId_, bool[] calldata isApproved
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
         if(requestId_.length == 0){
             revert RuleConditionalTransfer_EmptyArray();
         }
-        if(requestId_.length != isApproved_.length){
+        if(requestId_.length != isApproved.length){
             revert RuleConditionalTransfer_InvalidLengthArray();
         }
         // Check id validity before performing actions
@@ -126,26 +149,30 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         }
         for(uint256 i = 0; i < requestId_.length; ++i){
              TransferRequest memory transferRequest = transferRequests[IdToKey[requestId_[i]]];
-            _approveRequest(transferRequest, isApproved_[i]);
+            _approveRequest(transferRequest, isApproved[i]);
         }
     }
 
-
+    /**
+    * @notice Batch version of {approveTransferRequest}
+    */
     function approveTransferRequestBatch(
-        TransferRequestKeyElement[] calldata keyElements, uint256[] calldata partialValues, bool[] calldata isApproved_
+        TransferRequestKeyElement[] calldata keyElements, uint256[] calldata partialValues, bool[] calldata isApproved
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE) {
         if(keyElements.length == 0){
             revert RuleConditionalTransfer_EmptyArray();
         }
-        if((keyElements.length != partialValues.length) || (partialValues.length != isApproved_.length)){
+        if((keyElements.length != partialValues.length) || (partialValues.length != isApproved.length)){
             revert RuleConditionalTransfer_InvalidLengthArray();
         }
         for(uint256 i = 0; i < keyElements.length; ++i){
-            _approveTransferRequestKeyElement(keyElements[i], partialValues[i], isApproved_[i]);
+            _approveTransferRequestKeyElement(keyElements[i], partialValues[i], isApproved[i]);
         }
     }
 
-
+    /**
+    * @notice Batch version of {createTransferRequestWithApproval}
+    */
     function createTransferRequestWithApprovalBatch(
          TransferRequestKeyElement[] calldata keyElements
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
@@ -157,7 +184,9 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         }
     }
 
-
+    /**
+    * @notice Batch version of {resetRequestStatus}
+    */
     function resetRequestStatusBatch(
         uint256[] memory requestIds
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE){
@@ -178,9 +207,8 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
 
 
     /*** Internal functions ****/
-
     function _approveTransferRequestKeyElement(
-        TransferRequestKeyElement calldata keyElement, uint256 partialValue, bool isApproved_
+        TransferRequestKeyElement calldata keyElement, uint256 partialValue, bool isApproved
     ) internal {
         if(partialValue > keyElement.value){
             revert RuleConditionalTransfer_InvalidValueApproved();
@@ -188,7 +216,7 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         bytes32 key =  keccak256(abi.encode(keyElement.from, keyElement.to, keyElement.value));
         TransferRequest memory transferRequest = transferRequests[key];
         if(partialValue > 0 ){
-            if(! isApproved_){
+            if(! isApproved){
                 revert RuleConditionalTransfer_CannotDeniedPartially();
             }
             // Denied the first request
@@ -196,7 +224,7 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
             // Create new request
             _createTransferRequestWithApproval(TransferRequestKeyElement({from: keyElement.from, to: keyElement.to, value: partialValue}));
         }else{
-            _approveRequest(transferRequest, isApproved_);
+            _approveRequest(transferRequest, isApproved);
         }
     }
 
@@ -207,7 +235,6 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         // APPROVED => will overwrite previous status with a new delay
         // DENIED => will overwrite
        bytes32 key =  keccak256(abi.encode(keyElement.from, keyElement.to, keyElement.value));
-        // Status NONE not enough because reset is possible
         if(_checkRequestStatus(key)){
              TransferRequest memory newTransferApproval = TransferRequest({
                 key: key,
@@ -239,15 +266,16 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
     }
 
     function _checkRequestStatus(bytes32 key) internal view returns(bool) {
+        // Status NONE not enough because reset is possible
         return (transferRequests[key].status == STATUS.NONE) && (transferRequests[key].key == 0x0);
     }
 
-    function _approveRequest(TransferRequest memory transferRequest , bool isApproved_) internal{
+    function _approveRequest(TransferRequest memory transferRequest , bool isApproved) internal{
         // status
         if(transferRequest.status != STATUS.WAIT){
             revert RuleConditionalTransfer_Wrong_Status();
         }
-        if(isApproved_){
+        if(isApproved){
             // Time
             if(block.timestamp > (transferRequest.askTime +  options.timeLimit.timeLimitToApprove)){
                 revert RuleConditionalTransfer_timeExceeded();
@@ -261,7 +289,6 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
                 // Transfer with approval
                 // External call
                 if(options.automaticTransfer.cmtat.allowance(transferRequest.from, address(this)) >= transferRequest.value){
-                     //_updateProcessedTransfer(transferRequest.key);
                      // Will call the ruleEngine and the rule again...
                     options.automaticTransfer.cmtat.safeTransferFrom(transferRequest.from, transferRequest.to, transferRequest.value);
                 } 
@@ -272,6 +299,9 @@ abstract contract RuleConditionalTransferOperator is AccessControl, RuleConditio
         }
     }
 
+    /**
+    * @notice update the request during a transfer
+    */
     function _updateProcessedTransfer(bytes32 key) internal {
             // Reset to zero
             transferRequests[key].maxTime = 0;

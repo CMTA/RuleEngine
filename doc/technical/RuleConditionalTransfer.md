@@ -77,7 +77,7 @@ Each request has a status, which changes regarding the decision of the operator
 
 The default status is `NONE`.
 
-
+![conditionalTransfer-state machine.drawio](../schema/rule/conditionalTransfer-state machine.drawio.png)
 
 #### With the CMTAT
 

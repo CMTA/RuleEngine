@@ -42,18 +42,22 @@ contract RuleConditionalTransfer is  RuleValidateTransfer, IRuleOperation, RuleC
         options = options_;
     }
 
+    /**
+    * @notice Create a request of transfer for yourselves
+    * @param to recipient of tokens
+    * @param value amount of tokens to transfer
+    */
     function createTransferRequest(
         address to, uint256 value
     ) public {
         // WAIT => Will set a new delay to approve
         // APPROVED => will overwrite previous status
-        // DENIED => KO
+        // DENIED => reject
         address from = _msgSender();
         bytes32 key = keccak256(abi.encode(from, to, value));
         if(transferRequests[key].status == STATUS.DENIED){
            revert RuleConditionalTransfer_TransferDenied();
         }
-        // Status NONE not enough because reset is possible
         if(_checkRequestStatus(key)){
              uint256 requestIdLocal = requestId;
              TransferRequest memory newTransferApproval = TransferRequest({
@@ -79,6 +83,9 @@ contract RuleConditionalTransfer is  RuleValidateTransfer, IRuleOperation, RuleC
         }
     }
 
+    /**
+    * @notice Batch version of {createTransferRequest}
+    */
     function createTransferRequestBatch(address[] memory tos, uint256[] memory values) public{
         if(tos.length == 0){
             revert RuleConditionalTransfer_EmptyArray();

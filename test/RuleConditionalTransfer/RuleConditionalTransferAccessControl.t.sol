@@ -100,18 +100,6 @@ contract RuleConditionalTransferAccessControl is Test, HelperContract {
         ruleConditionalTransfer.approveTransferRequestWithId(0, true);
     }
 
-    function testCannotAttackerApproveBatchWithIdARequestCreatedByTokenHolder() public {
-        _createTransferRequest();
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 0;
-        bool[] memory isApproveds = new bool[](1);
-        isApproveds[0] = true;
-        vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE));  
-        vm.prank(ATTACKER);
-        ruleConditionalTransfer.approveTransferRequestBatchWithId(ids, isApproveds);
-    }
-
     function testCannotAttackerResetARequest() public {
          _createTransferRequest();
         
@@ -126,6 +114,47 @@ contract RuleConditionalTransferAccessControl is Test, HelperContract {
         abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE));  
         vm.prank(ATTACKER);
         ruleConditionalTransfer.createTransferRequestWithApproval(transferRequestInput);
+    }
+
+    /*** Batch */
+
+    function testCannotAttackerApproveBatchWithIdARequestCreatedByTokenHolder() public {
+        _createTransferRequest();
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 0;
+        bool[] memory isApproveds = new bool[](1);
+        isApproveds[0] = true;
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE));  
+        vm.prank(ATTACKER);
+        ruleConditionalTransfer.approveTransferRequestBatchWithId(ids, isApproveds);
+    }
+
+    function testCannotAttackerApproveBatchRequestCreatedByTokenHolder() public {
+        TransferRequestKeyElement[] memory keyElements = new TransferRequestKeyElement[](0);
+        uint256[] memory partialValues = new uint256[](0);
+        bool[] memory boolIsApproved = new bool[](0);
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE));  
+        vm.prank(ATTACKER);
+        ruleConditionalTransfer.approveTransferRequestBatch(keyElements, partialValues, boolIsApproved);
+    }
+
+    function testCannotAttackerResetBatch() public {
+        uint256[] memory ids = new uint256[](0);
+        bool[] memory boolIsApproved = new bool[](0);
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE));  
+        vm.prank(ATTACKER);
+        ruleConditionalTransfer.approveTransferRequestBatchWithId(ids, boolIsApproved);
+    }
+
+    function testCannotAttackerCreateTransferRequestWithApprovalBatch() public {
+        TransferRequestKeyElement[] memory keyElements = new TransferRequestKeyElement[](0);
+        vm.expectRevert(
+        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE));  
+        vm.prank(ATTACKER);
+        ruleConditionalTransfer.createTransferRequestWithApprovalBatch(keyElements);
     }
 
     /******** OPTIONS CONFIGURATION *********/

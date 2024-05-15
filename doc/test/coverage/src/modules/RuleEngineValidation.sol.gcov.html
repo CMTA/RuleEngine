@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2024-05-14 11:13:54</td>
+            <td class="headerValue">2024-05-15 12:20:21</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">12</td>
@@ -216,8 +216,8 @@
 <a name="145"><span class="lineNum">     145 </span>                :            :         address _to,</a>
 <a name="146"><span class="lineNum">     146 </span>                :            :         uint256 _amount</a>
 <a name="147"><span class="lineNum">     147 </span>                :            :     ) public view override returns (uint8) {</a>
-<a name="148"><span class="lineNum">     148 </span>                :<span class="lineCov">        104 :         uint256 rulesLength = _rulesValidation.length;</span></a>
-<a name="149"><span class="lineNum">     149 </span>                :<span class="lineCov">        176 :         for (uint256 i = 0; i &lt; rulesLength; ++i ) {</span></a>
+<a name="148"><span class="lineNum">     148 </span>                :<span class="lineCov">        142 :         uint256 rulesLength = _rulesValidation.length;</span></a>
+<a name="149"><span class="lineNum">     149 </span>                :<span class="lineCov">        233 :         for (uint256 i = 0; i &lt; rulesLength; ++i ) {</span></a>
 <a name="150"><span class="lineNum">     150 </span>                :<span class="lineCov">         96 :             uint8 restriction = IRuleValidation(_rulesValidation[i]).detectTransferRestriction(</span></a>
 <a name="151"><span class="lineNum">     151 </span>                :            :                 _from,</a>
 <a name="152"><span class="lineNum">     152 </span>                :            :                 _to,</a>
@@ -228,7 +228,7 @@
 <a name="157"><span class="lineNum">     157 </span>                :            :             }</a>
 <a name="158"><span class="lineNum">     158 </span>                :            :         }</a>
 <a name="159"><span class="lineNum">     159 </span>                :            :         </a>
-<a name="160"><span class="lineNum">     160 </span>                :<span class="lineCov">         90 :         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);</span></a>
+<a name="160"><span class="lineNum">     160 </span>                :<span class="lineCov">        147 :         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);</span></a>
 <a name="161"><span class="lineNum">     161 </span>                :            :     }</a>
 <a name="162"><span class="lineNum">     162 </span>                :            : </a>
 <a name="163"><span class="lineNum">     163 </span>                :            :     /** </a>
@@ -243,7 +243,7 @@
 <a name="172"><span class="lineNum">     172 </span>                :            :         address _to,</a>
 <a name="173"><span class="lineNum">     173 </span>                :            :         uint256 _amount</a>
 <a name="174"><span class="lineNum">     174 </span>                :            :     ) public view override returns (bool) {</a>
-<a name="175"><span class="lineNum">     175 </span>                :<span class="lineCov">        135 :         return detectTransferRestrictionValidation(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);</span></a>
+<a name="175"><span class="lineNum">     175 </span>                :<span class="lineCov">        230 :         return detectTransferRestrictionValidation(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);</span></a>
 <a name="176"><span class="lineNum">     176 </span>                :            :     }</a>
 <a name="177"><span class="lineNum">     177 </span>                :            : }</a>
 </pre>
