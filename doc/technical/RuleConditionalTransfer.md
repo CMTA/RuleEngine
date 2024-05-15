@@ -51,7 +51,11 @@ All these parameters can be updated after deployment.
 |                      | `isActivate`                       | Activate automatic approval                                  |
 |                      | `timeLimitBeforeAutomaticApproval` | Time limit before an approval is “automatically” approved. In this case, it is possible to perform the transfer with a status request to WAITING |
 
+### Conditional Whitelist
 
+There is the possibility to add a Rule whitelist. If `from`and `to` are in the whitelist, a CMTAT transfer will be authorized by the rule without an approved requestTransfer.
+
+The function to call is `setConditionalWhitelist`.
 
 ### Automatic transfer after approval
 
