@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-import "../RuleCommonInvariantStorage.sol";
+import "../../RuleCommonInvariantStorage.sol";
 abstract contract RuleWhitelistInvariantStorage is RuleCommonInvariantStorage {
 
     // String

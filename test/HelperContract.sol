@@ -14,8 +14,8 @@ import "src/rules/validation/RuleSanctionList.sol";
 import "src/rules/validation/RuleBlacklist.sol";
 // RuleWhitelist
 import "src/rules/validation/RuleWhitelist.sol";
-import "src/rules/validation/abstract/RuleAddressList/RuleWhitelistInvariantStorage.sol";
-import "src/rules/validation/abstract/RuleAddressList/RuleAddressListInvariantStorage.sol";
+import "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
+import "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
 
 import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
 import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";

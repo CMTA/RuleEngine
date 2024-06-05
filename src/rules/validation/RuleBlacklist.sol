@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-import "./abstract/RuleAddressList/RuleBlacklistInvariantStorage.sol";
+import "./abstract/RuleAddressList/invariantStorage/RuleBlacklistInvariantStorage.sol";
 import "./abstract/RuleAddressList/RuleAddressList.sol";
 import "./abstract/RuleValidateTransfer.sol";
 /**

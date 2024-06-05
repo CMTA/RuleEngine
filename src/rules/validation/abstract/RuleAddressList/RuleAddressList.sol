@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 import "OZ/access/AccessControl.sol";
 import "./../../../../modules/MetaTxModuleStandalone.sol";
 import "./RuleAddressListInternal.sol";
-import "./RuleAddressListInvariantStorage.sol";
+import "./invariantStorage/RuleAddressListInvariantStorage.sol";
 /**
 @title an addresses list manager
 */
@@ -98,6 +98,21 @@ abstract contract RuleAddressList is AccessControl, MetaTxModuleStandalone, Rule
     ) public view returns (bool) {
         return _addressIsListed(_targetAddress);
     }
+
+    /**
+     * @notice batch version of {addressIsListed}
+     *
+     */
+    function addressIsListedBatch(
+        address[] memory _targetAddresses
+    ) public view returns (bool[] memory ) {
+        bool[] memory isListed = new bool[](_targetAddresses.length);
+        for(uint256 i = 0; i <  _targetAddresses.length; ++i){
+            isListed[i] = _addressIsListed(_targetAddresses[i]);
+        }
+        return isListed;
+    }
+
 
 
         /** 
