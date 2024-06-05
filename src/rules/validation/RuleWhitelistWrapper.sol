@@ -12,7 +12,7 @@ import "./abstract/RuleAddressList/RuleAddressList.sol";
 /**
 * @title Implementation of a ruleEngine defined by the CMTAT
 */
-contract RuleWhitelistWrappers is RuleEngineValidationCommon, RuleValidateTransfer, RuleWhitelistInvariantStorage  {
+contract RuleWhitelistWrapper is RuleEngineValidationCommon, RuleValidateTransfer, RuleWhitelistInvariantStorage  {
 
     /** 
     * @notice Go through all the rule to know if a restriction exists on the transfer
