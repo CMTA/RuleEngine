@@ -10,21 +10,20 @@ import "./abstract/RuleValidateTransfer.sol";
 import "./abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
 import "./abstract/RuleAddressList/RuleAddressList.sol";
 /**
-* @title Implementation of a ruleEngine defined by the CMTAT
+* @title Wrapper to call several different whitelist rules
 */
 contract RuleWhitelistWrapper is RuleEngineValidationCommon, RuleValidateTransfer, RuleWhitelistInvariantStorage  {
 
     /** 
-    * @notice Go through all the rule to know if a restriction exists on the transfer
+    * @notice Go through all the whitelist rules to know if a restriction exists on the transfer
     * @param _from the origin address
     * @param _to the destination address
-    * @param _amount to transfer
     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
     **/
     function detectTransferRestriction(
         address _from,
         address _to,
-        uint256 _amount
+        uint256 /*_amount*/
     ) public view override returns (uint8) {
         address[] memory targetAddress = new address[](2);
         bool[] memory isListed = new bool[](2);
