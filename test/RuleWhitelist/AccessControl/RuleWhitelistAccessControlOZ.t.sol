@@ -7,8 +7,8 @@ import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "src/RuleEngine.sol";
 
 /**
-* @title Tests on the provided functions by OpenZeppelin
-*/
+ * @title Tests on the provided functions by OpenZeppelin
+ */
 contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
@@ -33,7 +33,11 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, false, true);
-        emit RoleGranted(ADDRESS_LIST_ROLE, ADDRESS1, WHITELIST_OPERATOR_ADDRESS);
+        emit RoleGranted(
+            ADDRESS_LIST_ROLE,
+            ADDRESS1,
+            WHITELIST_OPERATOR_ADDRESS
+        );
         ruleWhitelist.grantRole(ADDRESS_LIST_ROLE, ADDRESS1);
         // Assert
         bool res1 = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, ADDRESS1);
@@ -51,7 +55,11 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, false, true);
-        emit RoleRevoked(ADDRESS_LIST_ROLE, ADDRESS1, WHITELIST_OPERATOR_ADDRESS);
+        emit RoleRevoked(
+            ADDRESS_LIST_ROLE,
+            ADDRESS1,
+            WHITELIST_OPERATOR_ADDRESS
+        );
         ruleWhitelist.revokeRole(ADDRESS_LIST_ROLE, ADDRESS1);
         // Assert
         bool res2 = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, ADDRESS1);
@@ -62,10 +70,15 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
         // Arrange - Assert
         bool res1 = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, ADDRESS1);
         assertFalse(res1);
- 
+
         // Act
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE)); 
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ADDRESS2,
+                DEFAULT_ADMIN_ROLE
+            )
+        );
         vm.prank(ADDRESS2);
         ruleWhitelist.grantRole(ADDRESS_LIST_ROLE, ADDRESS1);
         // Assert
@@ -88,7 +101,12 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
         // Act
         vm.prank(ADDRESS2);
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE));  
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ADDRESS2,
+                DEFAULT_ADMIN_ROLE
+            )
+        );
         ruleWhitelist.revokeRole(ADDRESS_LIST_ROLE, ADDRESS1);
 
         // Assert

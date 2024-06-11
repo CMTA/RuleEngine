@@ -3,8 +3,8 @@
 pragma solidity ^0.8.20;
 
 import "../../RuleCommonInvariantStorage.sol";
-abstract contract RuleBlacklistInvariantStorage is RuleCommonInvariantStorage {
 
+abstract contract RuleBlacklistInvariantStorage is RuleCommonInvariantStorage {
     // String
     string constant TEXT_ADDRESS_FROM_IS_BLACKLISTED =
         "The sender is not in the whitelist";

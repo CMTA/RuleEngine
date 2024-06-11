@@ -2,8 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-
-interface IRuleEngineOperation{
+interface IRuleEngineOperation {
     /**
      * @dev define the rules, the precedent rules will be overwritten
      */
@@ -23,5 +22,4 @@ interface IRuleEngineOperation{
      * @dev return all the rules
      */
     function rulesOperation() external view returns (address[] memory);
-
 }

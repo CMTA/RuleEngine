@@ -5,9 +5,10 @@ import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 import "../utils/SanctionListOracle.sol";
+
 /**
-* @title General functions of the ruleSanctionList
-*/
+ * @title General functions of the ruleSanctionList
+ */
 contract RuleSanctionlistTest is Test, HelperContract {
     uint256 resUint256;
     uint8 resUint8;
@@ -17,6 +18,7 @@ contract RuleSanctionlistTest is Test, HelperContract {
     uint8 CODE_NONEXISTENT = 255;
     SanctionListOracle sanctionlistOracle;
     RuleSanctionList ruleSanctionList;
+
     // Arrange
     function setUp() public {
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
@@ -33,7 +35,7 @@ contract RuleSanctionlistTest is Test, HelperContract {
     function testCanReturnTransferRestrictionCode() public {
         // Act
         resBool = ruleSanctionList.canReturnTransferRestrictionCode(
-           CODE_ADDRESS_FROM_IS_SANCTIONED
+            CODE_ADDRESS_FROM_IS_SANCTIONED
         );
         // Assert
         assertEq(resBool, true);
@@ -54,13 +56,13 @@ contract RuleSanctionlistTest is Test, HelperContract {
     function testReturnTheRightMessageForAGivenCode() public {
         // Assert
         resString = ruleSanctionList.messageForTransferRestriction(
-             CODE_ADDRESS_FROM_IS_SANCTIONED
+            CODE_ADDRESS_FROM_IS_SANCTIONED
         );
         // Assert
         assertEq(resString, TEXT_ADDRESS_FROM_IS_SANCTIONED);
         // Act
         resString = ruleSanctionList.messageForTransferRestriction(
-             CODE_ADDRESS_TO_IS_SANCTIONED
+            CODE_ADDRESS_TO_IS_SANCTIONED
         );
         // Assert
         assertEq(resString, TEXT_ADDRESS_TO_IS_SANCTIONED);

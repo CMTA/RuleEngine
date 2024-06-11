@@ -6,8 +6,8 @@ import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-* @title General functions of the RuleEngine
-*/
+ * @title General functions of the RuleEngine
+ */
 contract RuleEngineValidationTest is Test, HelperContract {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
@@ -121,7 +121,6 @@ contract RuleEngineValidationTest is Test, HelperContract {
         resUint256 = ruleEngineMock.rulesCountValidation();
         assertEq(resUint256, 1);
     }
-
 
     function testCannotSetEmptyRulesT1() public {
         // Arrange

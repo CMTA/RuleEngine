@@ -3,7 +3,6 @@
 pragma solidity ^0.8.20;
 
 interface IRuleEngineValidation {
-
     /**
      * @dev See ERC-1404
      *
@@ -13,7 +12,7 @@ interface IRuleEngineValidation {
         address _to,
         uint256 _amount
     ) external view returns (uint8);
-    
+
     /**
      * @dev Returns true if the transfer is valid, and false otherwise.
      */
@@ -23,7 +22,6 @@ interface IRuleEngineValidation {
         uint256 _amount
     ) external view returns (bool isValid);
 }
-
 
 interface IRuleEngineValidationCommon {
     /**

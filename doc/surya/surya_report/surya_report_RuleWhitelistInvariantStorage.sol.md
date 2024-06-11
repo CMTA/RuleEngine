@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./rules/validation/abstract/RuleAddressList/RuleWhitelistInvariantStorage.sol | 539fc229948771c41225df414fbe1eb050fd75f9 |
+| ./rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol | fd28dfca118991fc5956bb5638de59a5a082ccbf |
 
 
 ### Contracts Description Table

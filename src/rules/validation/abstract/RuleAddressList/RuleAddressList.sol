@@ -6,25 +6,29 @@ import "OZ/access/AccessControl.sol";
 import "./../../../../modules/MetaTxModuleStandalone.sol";
 import "./RuleAddressListInternal.sol";
 import "./invariantStorage/RuleAddressListInvariantStorage.sol";
+
 /**
 @title an addresses list manager
 */
 
-abstract contract RuleAddressList is AccessControl, MetaTxModuleStandalone, RuleAddressListInternal, RuleAddressListInvariantStorage {
-
-    
+abstract contract RuleAddressList is
+    AccessControl,
+    MetaTxModuleStandalone,
+    RuleAddressListInternal,
+    RuleAddressListInvariantStorage
+{
     // Number of addresses in the whitelist at the moment
     uint256 private numAddressesWhitelisted;
-    
+
     /**
-    * @param admin Address of the contract (Access Control)
-    * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
-    */
+     * @param admin Address of the contract (Access Control)
+     * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
+     */
     constructor(
         address admin,
         address forwarderIrrevocable
     ) MetaTxModuleStandalone(forwarderIrrevocable) {
-        if(admin == address(0)){
+        if (admin == address(0)) {
             revert RuleAddressList_AdminWithAddressZeroNotAllowed();
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -39,12 +43,12 @@ abstract contract RuleAddressList is AccessControl, MetaTxModuleStandalone, Rule
     function addAddressesToTheList(
         address[] calldata listWhitelistedAddress
     ) public onlyRole(ADDRESS_LIST_ROLE) {
-       _addAddressesToThelist(listWhitelistedAddress);
+        _addAddressesToThelist(listWhitelistedAddress);
     }
 
     /**
      * @notice Remove addresses from the whitelist
-     * If the address does not exist in the whitelist, there is no change for this address. 
+     * If the address does not exist in the whitelist, there is no change for this address.
      * The transaction remains valid (no revert).
      * @param listWhitelistedAddress an array with the addresses to remove
      */
@@ -74,7 +78,7 @@ abstract contract RuleAddressList is AccessControl, MetaTxModuleStandalone, Rule
     function removeAddressFromTheList(
         address _removeWhitelistAddress
     ) public onlyRole(ADDRESS_LIST_ROLE) {
-       _removeAddressFromThelist( _removeWhitelistAddress);
+        _removeAddressFromThelist(_removeWhitelistAddress);
     }
 
     /**
@@ -85,7 +89,6 @@ abstract contract RuleAddressList is AccessControl, MetaTxModuleStandalone, Rule
     function numberListedAddress() public view returns (uint256) {
         return _numberListedAddress();
     }
-
 
     /**
      * @notice Know if an address is listed or not
@@ -105,19 +108,17 @@ abstract contract RuleAddressList is AccessControl, MetaTxModuleStandalone, Rule
      */
     function addressIsListedBatch(
         address[] memory _targetAddresses
-    ) public view returns (bool[] memory ) {
+    ) public view returns (bool[] memory) {
         bool[] memory isListed = new bool[](_targetAddresses.length);
-        for(uint256 i = 0; i <  _targetAddresses.length; ++i){
+        for (uint256 i = 0; i < _targetAddresses.length; ++i) {
             isListed[i] = _addressIsListed(_targetAddresses[i]);
         }
         return isListed;
     }
 
-
-
-        /** 
-    * @dev This surcharge is not necessary if you do not use the MetaTxModule
-    */
+    /**
+     * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     */
     function _msgSender()
         internal
         view
@@ -127,9 +128,9 @@ abstract contract RuleAddressList is AccessControl, MetaTxModuleStandalone, Rule
         return ERC2771Context._msgSender();
     }
 
-    /** 
-    * @dev This surcharge is not necessary if you do not use the MetaTxModule
-    */
+    /**
+     * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     */
     function _msgData()
         internal
         view
@@ -139,10 +140,15 @@ abstract contract RuleAddressList is AccessControl, MetaTxModuleStandalone, Rule
         return ERC2771Context._msgData();
     }
 
-    /** 
-    * @dev This surcharge is not necessary if you do not use the MetaTxModule
-    */
-    function _contextSuffixLength() internal view override(ERC2771Context, Context) returns (uint256) {
+    /**
+     * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     */
+    function _contextSuffixLength()
+        internal
+        view
+        override(ERC2771Context, Context)
+        returns (uint256)
+    {
         return ERC2771Context._contextSuffixLength();
     }
 }

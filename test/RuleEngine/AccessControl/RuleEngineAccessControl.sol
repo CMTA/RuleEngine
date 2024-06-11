@@ -6,8 +6,8 @@ import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-* @title Tests on the Access Control
-*/
+ * @title Tests on the Access Control
+ */
 contract RuleEngineAccessControlTest is Test, HelperContract {
     // Custom error openZeppelin
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
@@ -58,7 +58,12 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         // Act
         vm.prank(ATTACKER);
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ATTACKER,
+                RULE_ENGINE_OPERATOR_ROLE
+            )
+        );
         (bool success, ) = address(ruleEngineMock).call(
             abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
         );
@@ -73,7 +78,12 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         // Act
         vm.prank(ATTACKER);
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ATTACKER,
+                RULE_ENGINE_OPERATOR_ROLE
+            )
+        );
         ruleEngineMock.clearRulesValidation();
 
         // Assert
@@ -85,7 +95,12 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         // Act
         vm.prank(ATTACKER);
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ATTACKER,
+                RULE_ENGINE_OPERATOR_ROLE
+            )
+        );
         ruleEngineMock.addRuleValidation(ruleWhitelist);
 
         // Assert
@@ -97,7 +112,12 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         // Act
         vm.prank(ATTACKER);
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULE_ENGINE_ROLE));   
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ATTACKER,
+                RULE_ENGINE_OPERATOR_ROLE
+            )
+        );
         ruleEngineMock.removeRuleValidation(ruleWhitelist, 0);
 
         // Assert
@@ -109,7 +129,12 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         // Act
         vm.prank(ATTACKER);
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, TOKEN_CONTRACT_ROLE));   
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ATTACKER,
+                TOKEN_CONTRACT_ROLE
+            )
+        );
         ruleEngineMock.operateOnTransfer(ADDRESS1, ADDRESS2, 10);
     }
 }

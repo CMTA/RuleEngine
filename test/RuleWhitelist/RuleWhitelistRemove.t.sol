@@ -6,8 +6,8 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-* @title Tests the functions to remove addresses from the whitelist
-*/
+ * @title Tests the functions to remove addresses from the whitelist
+ */
 contract RuleWhitelistRemoveTest is Test, HelperContract {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
@@ -29,7 +29,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         );
     }
 
-    function _addAddressesToTheList() internal {  
+    function _addAddressesToTheList() internal {
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;

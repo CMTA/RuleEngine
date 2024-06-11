@@ -5,12 +5,15 @@ import "OZ/token/ERC20/IERC20.sol";
 
 import "../../validation/abstract/RuleCommonInvariantStorage.sol";
 import "src/rules/validation/RuleWhitelist.sol";
-abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariantStorage {
+
+abstract contract RuleConditionalTransferInvariantStorage is
+    RuleCommonInvariantStorage
+{
     /**
-    * perform automatically a transfer if the transfer request is approved.
-    * To perform the transfer, the token holder has to approve the rule to spend tokens on his behalf (standard ERC-20 approval). 
-    * If the allowance is not sufficient, the request will be approved, but without performing the transfer.
-    */
+     * perform automatically a transfer if the transfer request is approved.
+     * To perform the transfer, the token holder has to approve the rule to spend tokens on his behalf (standard ERC-20 approval).
+     * If the allowance is not sufficient, the request will be approved, but without performing the transfer.
+     */
     struct AUTOMATIC_TRANSFER {
         bool isActivate;
         IERC20 cmtat;
@@ -33,9 +36,9 @@ abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariant
     struct AUTOMATIC_APPROVAL {
         bool isActivate;
         /**
-        * If the transfer is not approved or denied within {timeLimitBeforeAutomaticApproval}, 
-        * the request is considered as approved during a transfer.
-        */
+         * If the transfer is not approved or denied within {timeLimitBeforeAutomaticApproval},
+         * the request is considered as approved during a transfer.
+         */
         uint256 timeLimitBeforeAutomaticApproval;
     }
 
@@ -45,8 +48,15 @@ abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariant
         AUTOMATIC_APPROVAL automaticApproval;
         AUTOMATIC_TRANSFER automaticTransfer;
     }
-    
-    enum STATUS { NONE, WAIT, APPROVED,  DENIED, EXECUTED, CANCELLED }
+
+    enum STATUS {
+        NONE,
+        WAIT,
+        APPROVED,
+        DENIED,
+        EXECUTED,
+        CANCELLED
+    }
 
     struct TransferRequestKeyElement {
         address from;
@@ -65,8 +75,10 @@ abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariant
     }
 
     // Role
-    bytes32 public constant RULE_ENGINE_CONTRACT_ROLE = keccak256("RULE_ENGINE_CONTRACT_ROLE");
-    bytes32 public constant RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE = keccak256("RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE");
+    bytes32 public constant RULE_ENGINE_CONTRACT_ROLE =
+        keccak256("RULE_ENGINE_CONTRACT_ROLE");
+    bytes32 public constant RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE =
+        keccak256("RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE");
 
     // String
     string constant TEXT_TRANSFER_REQUEST_NOT_APPROVED =
@@ -74,7 +86,6 @@ abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariant
     // Code
     // It is very important that each rule uses an unique code
     uint8 public constant CODE_TRANSFER_REQUEST_NOT_APPROVED = 51;
-
 
     // error
     error RuleConditionalTransfer_AdminWithAddressZeroNotAllowed();
@@ -90,11 +101,43 @@ abstract contract RuleConditionalTransferInvariantStorage is RuleCommonInvariant
     error RuleConditionalTransfer_EmptyArray();
 
     // Event
-    event transferProcessed(bytes32 indexed key, address indexed from, address indexed  to, uint256 value, uint256 id);
-    event transferWaiting(bytes32 indexed key, address indexed  from, address  indexed  to, uint256 value, uint256 id);
-    event transferApproved(bytes32 indexed key, address indexed from, address indexed  to, uint256 value, uint256 id );
-    event transferDenied(bytes32 indexed key, address indexed from, address indexed to, uint256 value, uint256 id);
-    event transferReset(bytes32 indexed key, address indexed from, address indexed to, uint256 value, uint256 id);
+    event transferProcessed(
+        bytes32 indexed key,
+        address indexed from,
+        address indexed to,
+        uint256 value,
+        uint256 id
+    );
+    event transferWaiting(
+        bytes32 indexed key,
+        address indexed from,
+        address indexed to,
+        uint256 value,
+        uint256 id
+    );
+    event transferApproved(
+        bytes32 indexed key,
+        address indexed from,
+        address indexed to,
+        uint256 value,
+        uint256 id
+    );
+    event transferDenied(
+        bytes32 indexed key,
+        address indexed from,
+        address indexed to,
+        uint256 value,
+        uint256 id
+    );
+    event transferReset(
+        bytes32 indexed key,
+        address indexed from,
+        address indexed to,
+        uint256 value,
+        uint256 id
+    );
 
-    event WhitelistConditionalTransfer(RuleWhitelist indexed whitelistConditionalTransfer);
-}  
+    event WhitelistConditionalTransfer(
+        RuleWhitelist indexed whitelistConditionalTransfer
+    );
+}

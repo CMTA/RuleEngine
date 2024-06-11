@@ -6,14 +6,17 @@ import "OZ/access/AccessControl.sol";
 import "./RuleInternal.sol";
 import "../interfaces/IRuleEngineValidation.sol";
 import "../interfaces/IRuleValidation.sol";
-import "CMTAT/interfaces/draft-IERC1404/draft-IERC1404EnumCode.sol";
+
 /**
-* @title Implementation of a ruleEngine defined by the CMTAT
-*/
-abstract contract RuleEngineValidationCommon is AccessControl, RuleInternal, IRuleEngineValidationCommon{
+ * @title Implementation of a ruleEngine defined by the CMTAT
+ */
+abstract contract RuleEngineValidationCommon is
+    AccessControl,
+    RuleInternal,
+    IRuleEngineValidationCommon
+{
     /// @dev Array of rules
     address[] internal _rulesValidation;
-
 
     /**
      * @notice Set all the rules, will overwrite all the previous rules. \n
@@ -23,8 +26,8 @@ abstract contract RuleEngineValidationCommon is AccessControl, RuleInternal, IRu
      */
     function setRulesValidation(
         address[] calldata rules_
-    ) public override onlyRole(RULE_ENGINE_ROLE) {
-        if(_rulesValidation.length > 0){
+    ) public override onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+        if (_rulesValidation.length > 0) {
             _clearRulesValidation();
         }
         _setRules(rules_);
@@ -35,7 +38,7 @@ abstract contract RuleEngineValidationCommon is AccessControl, RuleInternal, IRu
      * @notice Clear all the rules of the array of rules
      *
      */
-    function clearRulesValidation() public onlyRole(RULE_ENGINE_ROLE) {
+    function clearRulesValidation() public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         _clearRulesValidation();
     }
 
@@ -46,11 +49,11 @@ abstract contract RuleEngineValidationCommon is AccessControl, RuleInternal, IRu
     function _clearRulesValidation() internal {
         uint256 index;
         // we remove the last element first since it is more optimized.
-        for(uint256 i = _rulesValidation.length; i > 0; --i){
-             unchecked {
+        for (uint256 i = _rulesValidation.length; i > 0; --i) {
+            unchecked {
                 // don't underflow since i > 0
                 index = i - 1;
-             }
+            }
             _removeRuleValidation(_rulesValidation[index], index);
         }
         emit ClearRules(_rulesValidation);
@@ -61,8 +64,10 @@ abstract contract RuleEngineValidationCommon is AccessControl, RuleInternal, IRu
      * Revert if one rule is a zero address or if the rule is already present
      *
      */
-    function addRuleValidation(IRuleValidation rule_) public onlyRole(RULE_ENGINE_ROLE) {
-        RuleInternal._addRule( _rulesValidation, address(rule_));
+    function addRuleValidation(
+        IRuleValidation rule_
+    ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+        RuleInternal._addRule(_rulesValidation, address(rule_));
         emit AddRule(address(rule_));
     }
 
@@ -79,8 +84,8 @@ abstract contract RuleEngineValidationCommon is AccessControl, RuleInternal, IRu
     function removeRuleValidation(
         IRuleValidation rule_,
         uint256 index
-    ) public onlyRole(RULE_ENGINE_ROLE) {
-        _removeRuleValidation(address(rule_), index); 
+    ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+        _removeRuleValidation(address(rule_), index);
     }
 
     /**
@@ -93,43 +98,49 @@ abstract contract RuleEngineValidationCommon is AccessControl, RuleInternal, IRu
      *
      *
      */
-    function _removeRuleValidation(
-        address rule_,
-        uint256 index
-    ) internal {
-        RuleInternal._removeRule(_rulesValidation, rule_, index); 
+    function _removeRuleValidation(address rule_, uint256 index) internal {
+        RuleInternal._removeRule(_rulesValidation, rule_, index);
         emit RemoveRule(address(rule_));
     }
 
     /**
-    * @return The number of rules inside the array
-    */
+     * @return The number of rules inside the array
+     */
     function rulesCountValidation() external view override returns (uint256) {
         return _rulesValidation.length;
     }
 
     /**
-    * @notice Get the index of a rule inside the list
-    * @return index if the rule is found, _rulesValidation.length otherwise
-    */
-    function getRuleIndexValidation(IRuleValidation rule_) external view returns (uint256 index) {
+     * @notice Get the index of a rule inside the list
+     * @return index if the rule is found, _rulesValidation.length otherwise
+     */
+    function getRuleIndexValidation(
+        IRuleValidation rule_
+    ) external view returns (uint256 index) {
         return RuleInternal.getRuleIndex(_rulesValidation, address(rule_));
     }
 
     /**
-    * @notice Get the rule at the position specified by ruleId
-    * @param ruleId index of the rule
-    * @return a rule address
-    */
-    function ruleValidation(uint256 ruleId) external view override returns (address) {
+     * @notice Get the rule at the position specified by ruleId
+     * @param ruleId index of the rule
+     * @return a rule address
+     */
+    function ruleValidation(
+        uint256 ruleId
+    ) external view override returns (address) {
         return _rulesValidation[ruleId];
     }
 
     /**
-    * @notice Get all the rules
-    * @return An array of rules
-    */
-    function rulesValidation() external view override returns (address[] memory) {
+     * @notice Get all the rules
+     * @return An array of rules
+     */
+    function rulesValidation()
+        external
+        view
+        override
+        returns (address[] memory)
+    {
         return _rulesValidation;
     }
 }

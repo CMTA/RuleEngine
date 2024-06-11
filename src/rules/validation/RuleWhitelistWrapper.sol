@@ -3,23 +3,42 @@
 pragma solidity ^0.8.20;
 
 import "OZ/access/AccessControl.sol";
-import "../../interfaces/IRuleEngineValidation.sol";
 import "../../modules/RuleEngineValidationCommon.sol";
-import "../../interfaces/IRuleValidation.sol";
+import "../../modules/MetaTxModuleStandalone.sol";
 import "./abstract/RuleValidateTransfer.sol";
 import "./abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
 import "./abstract/RuleAddressList/RuleAddressList.sol";
-/**
-* @title Wrapper to call several different whitelist rules
-*/
-contract RuleWhitelistWrapper is RuleEngineValidationCommon, RuleValidateTransfer, RuleWhitelistInvariantStorage  {
 
-    /** 
-    * @notice Go through all the whitelist rules to know if a restriction exists on the transfer
-    * @param _from the origin address
-    * @param _to the destination address
-    * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
-    **/
+/**
+ * @title Wrapper to call several different whitelist rules
+ */
+contract RuleWhitelistWrapper is
+    RuleEngineValidationCommon,
+    MetaTxModuleStandalone,
+    RuleValidateTransfer,
+    RuleWhitelistInvariantStorage
+{
+    /**
+     * @param admin Address of the contract (Access Control)
+     * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
+     */
+    constructor(
+        address admin,
+        address forwarderIrrevocable
+    ) MetaTxModuleStandalone(forwarderIrrevocable) {
+        if (admin == address(0)) {
+            revert RuleEngine_AdminWithAddressZeroNotAllowed();
+        }
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(RULE_ENGINE_OPERATOR_ROLE, admin);
+    }
+
+    /**
+     * @notice Go through all the whitelist rules to know if a restriction exists on the transfer
+     * @param _from the origin address
+     * @param _to the destination address
+     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     **/
     function detectTransferRestriction(
         address _from,
         address _to,
@@ -32,14 +51,15 @@ contract RuleWhitelistWrapper is RuleEngineValidationCommon, RuleValidateTransfe
         targetAddress[1] = _to;
         uint256 rulesLength = _rulesValidation.length;
         // For each whitelist rule, we ask if from or to are in the whitelist
-        for (uint256 i = 0; i < rulesLength; ++i ) {
+        for (uint256 i = 0; i < rulesLength; ++i) {
             // External call
-            isListed = RuleAddressList(_rulesValidation[i]).addressIsListedBatch(targetAddress);
-            if(isListed[0] && !result[0]){
+            isListed = RuleAddressList(_rulesValidation[i])
+                .addressIsListedBatch(targetAddress);
+            if (isListed[0] && !result[0]) {
                 // Update if from is in the list
                 result[0] = true;
             }
-            if(isListed[1] && !result[1]){
+            if (isListed[1] && !result[1]) {
                 // Update if to is in the list
                 result[1] = true;
             }
@@ -53,11 +73,11 @@ contract RuleWhitelistWrapper is RuleEngineValidationCommon, RuleValidateTransfe
         }
     }
 
-        /** 
-    * @notice To know if the restriction code is valid for this rule or not
-    * @param _restrictionCode The target restriction code
-    * @return true if the restriction code is known, false otherwise
-    **/
+    /**
+     * @notice To know if the restriction code is valid for this rule or not
+     * @param _restrictionCode The target restriction code
+     * @return true if the restriction code is known, false otherwise
+     **/
     function canReturnTransferRestrictionCode(
         uint8 _restrictionCode
     ) external pure override returns (bool) {
@@ -66,11 +86,11 @@ contract RuleWhitelistWrapper is RuleEngineValidationCommon, RuleValidateTransfe
             _restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED;
     }
 
-    /** 
-    * @notice Return the corresponding message
-    * @param _restrictionCode The target restriction code
-    * @return true if the transfer is valid, false otherwise
-    **/
+    /**
+     * @notice Return the corresponding message
+     * @param _restrictionCode The target restriction code
+     * @return true if the transfer is valid, false otherwise
+     **/
     function messageForTransferRestriction(
         uint8 _restrictionCode
     ) external pure override returns (string memory) {
@@ -81,5 +101,41 @@ contract RuleWhitelistWrapper is RuleEngineValidationCommon, RuleValidateTransfe
         } else {
             return TEXT_CODE_NOT_FOUND;
         }
+    }
+
+    /**
+     * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     */
+    function _msgSender()
+        internal
+        view
+        override(ERC2771Context, Context)
+        returns (address sender)
+    {
+        return ERC2771Context._msgSender();
+    }
+
+    /**
+     * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     */
+    function _msgData()
+        internal
+        view
+        override(ERC2771Context, Context)
+        returns (bytes calldata)
+    {
+        return ERC2771Context._msgData();
+    }
+
+    /**
+     * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     */
+    function _contextSuffixLength()
+        internal
+        view
+        override(ERC2771Context, Context)
+        returns (uint256)
+    {
+        return ERC2771Context._contextSuffixLength();
     }
 }

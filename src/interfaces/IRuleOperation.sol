@@ -3,7 +3,6 @@
 pragma solidity ^0.8.20;
 
 interface IRuleOperation {
-
     /**
      * @dev Returns true if the transfer is valid, and false otherwise.
      */

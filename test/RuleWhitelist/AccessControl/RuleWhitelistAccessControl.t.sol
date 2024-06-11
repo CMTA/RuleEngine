@@ -6,8 +6,8 @@ import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-* @title Tests on the Access Control
-*/
+ * @title Tests on the Access Control
+ */
 contract RuleWhitelistAccessControl is Test, HelperContract {
     // Custom error openZeppelin
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
@@ -32,7 +32,12 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
 
     function testCannotAttackerAddAddressToTheList() public {
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, ADDRESS_LIST_ROLE));  
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ATTACKER,
+                ADDRESS_LIST_ROLE
+            )
+        );
         vm.prank(ATTACKER);
         ruleWhitelist.addAddressToTheList(ADDRESS1);
 
@@ -53,7 +58,12 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
 
         // Act
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, ADDRESS_LIST_ROLE));  
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ATTACKER,
+                ADDRESS_LIST_ROLE
+            )
+        );
         vm.prank(ATTACKER);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
@@ -85,7 +95,12 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
 
         // Act
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, ADDRESS_LIST_ROLE));  
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ATTACKER,
+                ADDRESS_LIST_ROLE
+            )
+        );
         vm.prank(ATTACKER);
         ruleWhitelist.removeAddressFromTheList(ADDRESS1);
 
@@ -117,7 +132,12 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
 
         // Act
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, ADDRESS_LIST_ROLE));  
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ATTACKER,
+                ADDRESS_LIST_ROLE
+            )
+        );
         vm.prank(ATTACKER);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(

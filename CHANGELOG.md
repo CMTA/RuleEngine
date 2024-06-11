@@ -2,6 +2,12 @@
 
 Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
+## v2.0.1
+
+- Add a new rule WhitelistWrapper
+
+This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators.
+
 ## v2.0.0
 
 - Implement the new architecture for the RuleEngine, with ValidationRule and OperationRule

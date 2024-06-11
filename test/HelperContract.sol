@@ -14,6 +14,7 @@ import "src/rules/validation/RuleSanctionList.sol";
 import "src/rules/validation/RuleBlacklist.sol";
 // RuleWhitelist
 import "src/rules/validation/RuleWhitelist.sol";
+import "src/rules/validation/RuleWhitelistWrapper.sol";
 import "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
 import "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
 
@@ -22,10 +23,18 @@ import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
 // Rule interface
 import "src/interfaces/IRuleValidation.sol";
 import "src/interfaces/IRuleOperation.sol";
+
 /**
-* @title Constants used by the tests
-*/
-abstract contract HelperContract is RuleWhitelistInvariantStorage, RuleBlacklistInvariantStorage, RuleAddressListInvariantStorage, RuleSanctionlistInvariantStorage, RuleEngineInvariantStorage, RuleConditionalTransferInvariantStorage  {
+ * @title Constants used by the tests
+ */
+abstract contract HelperContract is
+    RuleWhitelistInvariantStorage,
+    RuleBlacklistInvariantStorage,
+    RuleAddressListInvariantStorage,
+    RuleSanctionlistInvariantStorage,
+    RuleEngineInvariantStorage,
+    RuleConditionalTransferInvariantStorage
+{
     // EOA to perform tests
     address constant ZERO_ADDRESS = address(0);
     address constant DEFAULT_ADMIN_ADDRESS = address(1);
@@ -44,8 +53,8 @@ abstract contract HelperContract is RuleWhitelistInvariantStorage, RuleBlacklist
         "0xdc72ed553f2544c34465af23b847953efeb813428162d767f9ba5f4013be6760";
     string constant DEFAULT_ADMIN_ROLE_HASH =
         "0x0000000000000000000000000000000000000000000000000000000000000000";
-    
-    uint256 DEFAULT_TIME_LIMIT_TO_APPROVE = 7 days;              
+
+    uint256 DEFAULT_TIME_LIMIT_TO_APPROVE = 7 days;
     uint256 DEFAULT_TIME_LIMIT_TO_TRANSFER = 7 days;
     // contract
     RuleBlacklist ruleBlacklist;
@@ -58,9 +67,10 @@ abstract contract HelperContract is RuleWhitelistInvariantStorage, RuleBlacklist
     uint8 constant NO_ERROR = 0;
 
     // Forwarder
-    string ERC2771ForwarderDomain = 'ERC2771ForwarderDomain';
+    string ERC2771ForwarderDomain = "ERC2771ForwarderDomain";
 
     error Rulelist_AddressAlreadylisted();
     error Rulelist_AddressNotPresent();
+
     constructor() {}
 }
