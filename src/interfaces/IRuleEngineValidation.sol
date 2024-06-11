@@ -4,6 +4,27 @@ pragma solidity ^0.8.20;
 
 interface IRuleEngineValidation {
     /**
+     * @dev See ERC-1404
+     *
+     */
+    function detectTransferRestrictionValidation(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external view returns (uint8);
+
+    /**
+     * @dev Returns true if the transfer is valid, and false otherwise.
+     */
+    function validateTransferValidation(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external view returns (bool isValid);
+}
+
+interface IRuleEngineValidationCommon {
+    /**
      * @dev define the rules, the precedent rules will be overwritten
      */
     function setRulesValidation(address[] calldata rules_) external;
@@ -22,23 +43,4 @@ interface IRuleEngineValidation {
      * @dev return all the rules
      */
     function rulesValidation() external view returns (address[] memory);
-
-    /**
-     * @dev See ERC-1404
-     *
-     */
-    function detectTransferRestrictionValidation(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external view returns (uint8);
-    
-    /**
-     * @dev Returns true if the transfer is valid, and false otherwise.
-     */
-    function validateTransferValidation(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external view returns (bool isValid);
 }

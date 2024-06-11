@@ -18,6 +18,10 @@ The documentation and the contracts addresses are available here: [Chainalysis o
 
 ![surya_graph_Whitelist](../surya/surya_graph/surya_graph_RuleSanctionList.sol.png)
 
+### Inheritance
+
+![surya_inheritance_RuleWhitelistWrapper.sol](../surya/surya_inheritance/surya_inheritance_RuleSanctionList.sol.png)
+
 ## Access Control
 
 ### Admin

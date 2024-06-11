@@ -5,9 +5,10 @@ import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 import "CMTAT/mocks/MinimalForwarderMock.sol";
+
 /**
-* @title General functions of the RuleWhitelist
-*/
+ * @title General functions of the RuleWhitelist
+ */
 contract RuleWhitelistTest is Test, HelperContract {
     uint256 resUint256;
     uint8 resUint8;
@@ -17,14 +18,12 @@ contract RuleWhitelistTest is Test, HelperContract {
     uint8 CODE_NONEXISTENT = 255;
 
     // Arrange
-    function setUp() public {
-    }
+    function setUp() public {}
 
     function testRightDeployment() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        MinimalForwarderMock forwarder = new MinimalForwarderMock(
-        );
+        MinimalForwarderMock forwarder = new MinimalForwarderMock();
         forwarder.initialize(ERC2771ForwarderDomain);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist = new RuleWhitelist(
@@ -33,7 +32,10 @@ contract RuleWhitelistTest is Test, HelperContract {
         );
 
         // assert
-        resBool = ruleWhitelist.hasRole(ADDRESS_LIST_ROLE, WHITELIST_OPERATOR_ADDRESS);
+        resBool = ruleWhitelist.hasRole(
+            ADDRESS_LIST_ROLE,
+            WHITELIST_OPERATOR_ADDRESS
+        );
         assertEq(resBool, true);
         resBool = ruleWhitelist.isTrustedForwarder(address(forwarder));
         assertEq(resBool, true);
@@ -42,14 +44,12 @@ contract RuleWhitelistTest is Test, HelperContract {
     function testCannotDeployContractIfAdminAddressIsZero() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        MinimalForwarderMock forwarder = new MinimalForwarderMock(
-        );
+        MinimalForwarderMock forwarder = new MinimalForwarderMock();
         forwarder.initialize(ERC2771ForwarderDomain);
-        vm.expectRevert(RuleAddressList_AdminWithAddressZeroNotAllowed.selector);
-        vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(
-            address(0),
-            address(forwarder)
+        vm.expectRevert(
+            RuleAddressList_AdminWithAddressZeroNotAllowed.selector
         );
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        ruleWhitelist = new RuleWhitelist(address(0), address(forwarder));
     }
 }

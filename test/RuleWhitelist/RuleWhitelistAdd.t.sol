@@ -6,8 +6,8 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-* @title Tests the functions to add addresses to the whitelist
-*/
+ * @title Tests the functions to add addresses to the whitelist
+ */
 contract RuleWhitelistAddTest is Test, HelperContract {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
@@ -28,7 +28,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         );
     }
 
-    function _addAddressesToTheList() internal {  
+    function _addAddressesToTheList() internal {
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
@@ -47,9 +47,18 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         assertEq(resBool, true);
         resBool = ruleWhitelist.addressIsListed(ADDRESS2);
         assertEq(resBool, true);
+        address[] memory addressesListInput = new address[](2);
+        addressesListInput[0] = ADDRESS1;
+        addressesListInput[1] = ADDRESS2;
+        bool[] memory resBools = ruleWhitelist.addressIsListedBatch(
+            addressesListInput
+        );
+        assertEq(resBools[0], true);
+        assertEq(resBools[1], true);
+        assertEq(resBools.length, 2);
     }
 
-    function testaddAddressToTheList() public {
+    function testAddAddressToTheList() public {
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheList(ADDRESS1);
@@ -57,11 +66,18 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         // Assert
         resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertEq(resBool, true);
+        address[] memory addressesListInput = new address[](1);
+        addressesListInput[0] = ADDRESS1;
+        bool[] memory resBools = ruleWhitelist.addressIsListedBatch(
+            addressesListInput
+        );
+        assertEq(resBools[0], true);
+        assertEq(resBools.length, 1);
         resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 1);
     }
 
-    function testaddAddressesToTheList() public {
+    function testAddAddressesToTheList() public {
         // Arrange
         resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 0);

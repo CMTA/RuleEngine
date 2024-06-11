@@ -6,13 +6,14 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 import "../utils/SanctionListOracle.sol";
+
 /**
-* @title General functions of the ruleSanctionList
-*/
+ * @title General functions of the ruleSanctionList
+ */
 contract RuleSanctionlistTest is Test, HelperContract {
     // Custom error openZeppelin
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-    
+
     uint256 resUint256;
     uint8 resUint8;
     bool resBool;
@@ -21,6 +22,7 @@ contract RuleSanctionlistTest is Test, HelperContract {
     uint8 CODE_NONEXISTENT = 255;
     SanctionListOracle sanctionlistOracle;
     RuleSanctionList ruleSanctionList;
+
     // Arrange
     function setUp() public {
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
@@ -30,7 +32,6 @@ contract RuleSanctionlistTest is Test, HelperContract {
             SANCTIONLIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-
     }
 
     function testCanSetOracle() public {
@@ -41,7 +42,12 @@ contract RuleSanctionlistTest is Test, HelperContract {
     function testCannotAttackerSetOracle() public {
         vm.prank(ATTACKER);
         vm.expectRevert(
-        abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, SANCTIONLIST_ROLE));  
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                ATTACKER,
+                SANCTIONLIST_ROLE
+            )
+        );
         ruleSanctionList.setSanctionListOracle(address(sanctionlistOracle));
     }
 }

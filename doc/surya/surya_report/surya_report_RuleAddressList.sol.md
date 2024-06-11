@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./rules/validation/abstract/RuleAddressList/RuleAddressList.sol | daf3fa53f0f864274951e68bb9c8e6b44eba5fa0 |
+| ./rules/validation/abstract/RuleAddressList/RuleAddressList.sol | 5cbdfeb513dd3181dd8654b57e32bd0f4b49f981 |
 
 
 ### Contracts Description Table
@@ -23,6 +23,7 @@
 | └ | removeAddressFromTheList | Public ❗️ | 🛑  | onlyRole |
 | └ | numberListedAddress | Public ❗️ |   |NO❗️ |
 | └ | addressIsListed | Public ❗️ |   |NO❗️ |
+| └ | addressIsListedBatch | Public ❗️ |   |NO❗️ |
 | └ | _msgSender | Internal 🔒 |   | |
 | └ | _msgData | Internal 🔒 |   | |
 | └ | _contextSuffixLength | Internal 🔒 |   | |

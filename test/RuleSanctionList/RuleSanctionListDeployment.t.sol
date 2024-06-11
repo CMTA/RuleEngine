@@ -4,9 +4,10 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "CMTAT/mocks/MinimalForwarderMock.sol";
+
 /**
-* @title General functions of the ruleSanctionList
-*/
+ * @title General functions of the ruleSanctionList
+ */
 contract RuleSanctionListDeploymentTest is Test, HelperContract {
     uint256 resUint256;
     uint8 resUint8;
@@ -15,16 +16,14 @@ contract RuleSanctionListDeploymentTest is Test, HelperContract {
     string resString;
     uint8 CODE_NONEXISTENT = 255;
     RuleSanctionList ruleSanctionList;
-    // Arrange
-    function setUp() public {
 
-    }
+    // Arrange
+    function setUp() public {}
 
     function testRightDeployment() public {
         // Arrange
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
-        MinimalForwarderMock forwarder = new MinimalForwarderMock(
-        );
+        MinimalForwarderMock forwarder = new MinimalForwarderMock();
         forwarder.initialize(ERC2771ForwarderDomain);
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
         ruleSanctionList = new RuleSanctionList(
@@ -33,7 +32,10 @@ contract RuleSanctionListDeploymentTest is Test, HelperContract {
         );
 
         // assert
-        resBool = ruleSanctionList.hasRole(SANCTIONLIST_ROLE, SANCTIONLIST_OPERATOR_ADDRESS);
+        resBool = ruleSanctionList.hasRole(
+            SANCTIONLIST_ROLE,
+            SANCTIONLIST_OPERATOR_ADDRESS
+        );
         assertEq(resBool, true);
         resBool = ruleSanctionList.isTrustedForwarder(address(forwarder));
         assertEq(resBool, true);
@@ -42,14 +44,12 @@ contract RuleSanctionListDeploymentTest is Test, HelperContract {
     function testCannotDeployContractIfAdminAddressIsZero() public {
         // Arrange
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
-        MinimalForwarderMock forwarder = new MinimalForwarderMock(
-        );
+        MinimalForwarderMock forwarder = new MinimalForwarderMock();
         forwarder.initialize(ERC2771ForwarderDomain);
-        vm.expectRevert(RuleSanctionList_AdminWithAddressZeroNotAllowed.selector);
-        vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
-        ruleSanctionList = new RuleSanctionList(
-            address(0),
-            address(forwarder)
+        vm.expectRevert(
+            RuleSanctionList_AdminWithAddressZeroNotAllowed.selector
         );
+        vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
+        ruleSanctionList = new RuleSanctionList(address(0), address(forwarder));
     }
 }

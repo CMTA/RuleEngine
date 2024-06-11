@@ -4,10 +4,9 @@ pragma solidity ^0.8.20;
 import "./RuleEngineInvariantStorage.sol";
 
 /**
-* @title Implementation of a ruleEngine defined by the CMTAT
-*/
+ * @title Implementation of a ruleEngine defined by the CMTAT
+ */
 abstract contract RuleInternal is RuleEngineInvariantStorage {
-
     /// @dev Indicate if a rule already exists
     // Can be shared betwen RuleOperation and RuleValidation since it is a mapping
     mapping(address => bool) _ruleIsPresent;
@@ -17,17 +16,15 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
      * Revert if one rule is a zero address or if the rule is already present
      *
      */
-    function _setRules(
-        address[] calldata rules_
-    ) internal {
-        if(rules_.length == 0){
+    function _setRules(address[] calldata rules_) internal {
+        if (rules_.length == 0) {
             revert RuleEngine_ArrayIsEmpty();
         }
         for (uint256 i = 0; i < rules_.length; ) {
-            if( address(rules_[i]) == address(0x0)){
-                revert  RuleEngine_RuleAddressZeroNotAllowed();
+            if (address(rules_[i]) == address(0x0)) {
+                revert RuleEngine_RuleAddressZeroNotAllowed();
             }
-            if(_ruleIsPresent[rules_[i]]){
+            if (_ruleIsPresent[rules_[i]]) {
                 revert RuleEngine_RuleAlreadyExists();
             }
             _ruleIsPresent[rules_[i]] = true;
@@ -43,13 +40,11 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
      * Revert if one rule is a zero address or if the rule is already present
      *
      */
-    function _addRule(address[] storage _rules, address rule_) internal  {
-        if( address(rule_) == address(0x0))
-        {
+    function _addRule(address[] storage _rules, address rule_) internal {
+        if (address(rule_) == address(0x0)) {
             revert RuleEngine_RuleAddressZeroNotAllowed();
         }
-        if( _ruleIsPresent[rule_])
-        {
+        if (_ruleIsPresent[rule_]) {
             revert RuleEngine_RuleAlreadyExists();
         }
         _rules.push(rule_);
@@ -71,8 +66,7 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
         address rule_,
         uint256 index
     ) internal {
-        if(_rules[index] != rule_)
-        {
+        if (_rules[index] != rule_) {
             revert RuleEngine_RuleDoNotMatch();
         }
         if (index != _rules.length - 1) {
@@ -84,12 +78,15 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
     }
 
     /**
-    * @notice Get the index of a rule inside the list
-    * @return index if the rule is found, _rules.length otherwise
-    */
-    function getRuleIndex(address[] storage _rules, address rule_) internal view returns (uint256 index) {
+     * @notice Get the index of a rule inside the list
+     * @return index if the rule is found, _rules.length otherwise
+     */
+    function getRuleIndex(
+        address[] storage _rules,
+        address rule_
+    ) internal view returns (uint256 index) {
         uint256 rulesLength = _rules.length;
-        for (index = 0; index < rulesLength;) {
+        for (index = 0; index < rulesLength; ) {
             if (_rules[index] == rule_) {
                 return index;
             }

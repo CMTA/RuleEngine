@@ -2,30 +2,34 @@
 
 pragma solidity ^0.8.20;
 
-import "./abstract/RuleAddressList/RuleBlacklistInvariantStorage.sol";
+import "./abstract/RuleAddressList/invariantStorage/RuleBlacklistInvariantStorage.sol";
 import "./abstract/RuleAddressList/RuleAddressList.sol";
 import "./abstract/RuleValidateTransfer.sol";
-/**
-* @title a blacklist manager 
-*/
 
-contract RuleBlacklist is RuleValidateTransfer, RuleAddressList, RuleBlacklistInvariantStorage {
+/**
+ * @title a blacklist manager
+ */
+
+contract RuleBlacklist is
+    RuleValidateTransfer,
+    RuleAddressList,
+    RuleBlacklistInvariantStorage
+{
     /**
-    * @param admin Address of the contract (Access Control)
-    * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
-    */
+     * @param admin Address of the contract (Access Control)
+     * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
+     */
     constructor(
         address admin,
         address forwarderIrrevocable
-    )  RuleAddressList(admin, forwarderIrrevocable) {
-    }
+    ) RuleAddressList(admin, forwarderIrrevocable) {}
 
-    /** 
-    * @notice Check if an addres is in the whitelist or not
-    * @param _from the origin address
-    * @param _to the destination address
-    * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
-    **/
+    /**
+     * @notice Check if an addres is in the whitelist or not
+     * @param _from the origin address
+     * @param _to the destination address
+     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     **/
     function detectTransferRestriction(
         address _from,
         address _to,
@@ -40,11 +44,11 @@ contract RuleBlacklist is RuleValidateTransfer, RuleAddressList, RuleBlacklistIn
         }
     }
 
-    /** 
-    * @notice To know if the restriction code is valid for this rule or not.
-    * @param _restrictionCode The target restriction code
-    * @return true if the restriction code is known, false otherwise
-    **/
+    /**
+     * @notice To know if the restriction code is valid for this rule or not.
+     * @param _restrictionCode The target restriction code
+     * @return true if the restriction code is known, false otherwise
+     **/
     function canReturnTransferRestrictionCode(
         uint8 _restrictionCode
     ) external pure override returns (bool) {
@@ -53,11 +57,11 @@ contract RuleBlacklist is RuleValidateTransfer, RuleAddressList, RuleBlacklistIn
             _restrictionCode == CODE_ADDRESS_TO_IS_BLACKLISTED;
     }
 
-    /** 
-    * @notice Return the corresponding message
-    * @param _restrictionCode The target restriction code
-    * @return true if the transfer is valid, false otherwise
-    **/
+    /**
+     * @notice Return the corresponding message
+     * @param _restrictionCode The target restriction code
+     * @return true if the transfer is valid, false otherwise
+     **/
     function messageForTransferRestriction(
         uint8 _restrictionCode
     ) external pure override returns (string memory) {

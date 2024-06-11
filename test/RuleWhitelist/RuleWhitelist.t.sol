@@ -6,8 +6,8 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-* @title General functions of the RuleWhitelist
-*/
+ * @title General functions of the RuleWhitelist
+ */
 contract RuleWhitelistTest is Test, HelperContract {
     uint256 resUint256;
     uint8 resUint8;
@@ -25,7 +25,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         );
     }
 
-    function _addAddressesToTheList() internal {  
+    function _addAddressesToTheList() internal {
         address[] memory whitelist = new address[](2);
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
