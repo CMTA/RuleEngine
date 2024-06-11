@@ -7,6 +7,7 @@ import "forge-std/Script.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
 import "src/RuleEngine.sol";
 import "src/rules/validation/RuleWhitelist.sol";
+
 /**
 @title Deploy a CMTAT, a RuleWhitelist and a RuleEngine
 */
@@ -41,7 +42,11 @@ contract CMTATWithRuleEngineScript is Script {
         );
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
-        RuleEngine RULE_ENGINE = new RuleEngine(ADMIN, trustedForwarder, address(CMTAT_CONTRACT));
+        RuleEngine RULE_ENGINE = new RuleEngine(
+            ADMIN,
+            trustedForwarder,
+            address(CMTAT_CONTRACT)
+        );
         console.log("RuleEngine : ", address(RULE_ENGINE));
         RULE_ENGINE.addRuleValidation(ruleWhitelist);
         CMTAT_CONTRACT.setRuleEngine(RULE_ENGINE);

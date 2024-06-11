@@ -10,7 +10,9 @@ This rule can be used to restrict transfers from/to only addresses inside a whit
 
 ![surya_graph_Whitelist](../surya/surya_graph/surya_graph_RuleWhitelist.sol.png)
 
+### Inheritance
 
+![surya_inheritance_RuleWhitelistWrapper.sol](../surya/surya_inheritance/surya_inheritance_RuleWhitelist.sol.png)
 
 ## Access Control
 
@@ -21,7 +23,7 @@ The default admin is the address put in argument(`admin`) inside the constructor
 ### Schema
 
 Here a schema of the Access Control.
-![alt text](../accessControl/access-control-RuleWhitelist.png)
+![alt text](../security/accessControl/access-control-RuleWhitelist.png)
 
 
 

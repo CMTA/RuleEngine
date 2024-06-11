@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./interfaces/IRuleEngineValidation.sol | 79955886291ed983850b8b82060b7c2b0b90e4f7 |
+| ./interfaces/IRuleEngineValidation.sol | 11118806381880ade78b3dbba1cea694c9a8014e |
 
 
 ### Contracts Description Table
@@ -16,12 +16,14 @@
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
 | **IRuleEngineValidation** | Interface |  |||
+| └ | detectTransferRestrictionValidation | External ❗️ |   |NO❗️ |
+| └ | validateTransferValidation | External ❗️ |   |NO❗️ |
+||||||
+| **IRuleEngineValidationCommon** | Interface |  |||
 | └ | setRulesValidation | External ❗️ | 🛑  |NO❗️ |
 | └ | rulesCountValidation | External ❗️ |   |NO❗️ |
 | └ | ruleValidation | External ❗️ |   |NO❗️ |
 | └ | rulesValidation | External ❗️ |   |NO❗️ |
-| └ | detectTransferRestrictionValidation | External ❗️ |   |NO❗️ |
-| └ | validateTransferValidation | External ❗️ |   |NO❗️ |
 
 
 ### Legend

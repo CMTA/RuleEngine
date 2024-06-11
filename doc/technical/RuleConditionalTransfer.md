@@ -71,7 +71,9 @@ To perform the transfer, the token holder has to `approve` the rule to spend tok
 
 ![surya_graph_Blacklist](../surya/surya_graph/surya_graph_RuleConditionalTransfer.sol.png)
 
+### Inheritance
 
+![surya_inheritance_RuleWhitelistWrapper.sol](../surya/surya_inheritance/surya_inheritance_RuleConditionalTransfer.sol.png)
 
 ### Workflow
 

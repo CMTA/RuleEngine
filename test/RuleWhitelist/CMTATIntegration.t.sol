@@ -7,8 +7,8 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-* @title Integration test with the CMTAT
-*/
+ * @title Integration test with the CMTAT
+ */
 contract CMTATIntegration is Test, HelperContract {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
@@ -47,7 +47,11 @@ contract CMTATIntegration is Test, HelperContract {
 
         // specific arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleEngineMock = new RuleEngine(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS, address(CMTAT_CONTRACT));
+        ruleEngineMock = new RuleEngine(
+            DEFAULT_ADMIN_ADDRESS,
+            ZERO_ADDRESS,
+            address(CMTAT_CONTRACT)
+        );
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleEngineMock.addRuleValidation(ruleWhitelist);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
@@ -66,7 +70,13 @@ contract CMTATIntegration is Test, HelperContract {
         // Arrange
         vm.prank(ADDRESS1);
         vm.expectRevert(
-        abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ADDRESS1, ADDRESS2, 21));   
+            abi.encodeWithSelector(
+                Errors.CMTAT_InvalidTransfer.selector,
+                ADDRESS1,
+                ADDRESS2,
+                21
+            )
+        );
         // Act
         CMTAT_CONTRACT.transfer(ADDRESS2, 21);
     }
@@ -79,7 +89,13 @@ contract CMTATIntegration is Test, HelperContract {
 
         vm.prank(ADDRESS1);
         vm.expectRevert(
-        abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ADDRESS1, ADDRESS2, amount));   
+            abi.encodeWithSelector(
+                Errors.CMTAT_InvalidTransfer.selector,
+                ADDRESS1,
+                ADDRESS2,
+                amount
+            )
+        );
         // Act
         CMTAT_CONTRACT.transfer(ADDRESS2, amount);
     }
@@ -92,7 +108,13 @@ contract CMTATIntegration is Test, HelperContract {
 
         vm.prank(ADDRESS1);
         vm.expectRevert(
-        abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ADDRESS1, ADDRESS2, amount));   
+            abi.encodeWithSelector(
+                Errors.CMTAT_InvalidTransfer.selector,
+                ADDRESS1,
+                ADDRESS2,
+                amount
+            )
+        );
         // Act
         CMTAT_CONTRACT.transfer(ADDRESS2, amount);
     }

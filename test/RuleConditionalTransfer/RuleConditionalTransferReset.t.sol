@@ -6,8 +6,8 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-* @title General functions of the RuleWhitelist
-*/
+ * @title General functions of the RuleWhitelist
+ */
 contract RuleConditionalTransferResetTest is Test, HelperContract {
     RuleEngine ruleEngineMock;
     uint256 resUint256;
@@ -17,13 +17,15 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
     string resString;
     uint8 CODE_NONEXISTENT = 255;
     uint256 defaultValue = 10;
-    bytes32 defaultKey = keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));
+    bytes32 defaultKey =
+        keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));
 
-    TransferRequestKeyElement transferRequestInput = TransferRequestKeyElement({
+    TransferRequestKeyElement transferRequestInput =
+        TransferRequestKeyElement({
             from: ADDRESS1,
             to: ADDRESS2,
-            value:defaultValue
-          });
+            value: defaultValue
+        });
 
     uint256 value2 = 1;
     uint256 value3 = 2;
@@ -35,17 +37,19 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
     bytes32 key4 = keccak256(abi.encode(ADDRESS1, ADDRESS2, value4));
     bytes32 key5 = keccak256(abi.encode(ADDRESS1, ADDRESS2, value5));
 
-    TransferRequestKeyElement transferRequestInput2 = TransferRequestKeyElement({
+    TransferRequestKeyElement transferRequestInput2 =
+        TransferRequestKeyElement({
             from: ADDRESS1,
             to: ADDRESS2,
-            value:value2
-          });
+            value: value2
+        });
 
-    TransferRequestKeyElement transferRequestInput3 = TransferRequestKeyElement({
+    TransferRequestKeyElement transferRequestInput3 =
+        TransferRequestKeyElement({
             from: ADDRESS2,
             to: ADDRESS1,
-            value:value3
-          });
+            value: value3
+        });
 
     // Arrange
     function setUp() public {
@@ -53,26 +57,26 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
             timeLimitToApprove: 7 days,
             timeLimitToTransfer: 30 days
         });
-        
-       AUTOMATIC_APPROVAL memory automaticApproval_ = AUTOMATIC_APPROVAL({
+
+        AUTOMATIC_APPROVAL memory automaticApproval_ = AUTOMATIC_APPROVAL({
             isActivate: false,
             timeLimitBeforeAutomaticApproval: 0
         });
 
         ISSUANCE memory issuanceOption_ = ISSUANCE({
-            authorizedMintWithoutApproval:false,
-            authorizedBurnWithoutApproval:false
+            authorizedMintWithoutApproval: false,
+            authorizedBurnWithoutApproval: false
         });
         AUTOMATIC_TRANSFER memory automaticTransfer_ = AUTOMATIC_TRANSFER({
-            isActivate:false,
+            isActivate: false,
             cmtat: IERC20(address(0))
         });
 
         OPTION memory options = OPTION({
-            issuance:issuanceOption_,
+            issuance: issuanceOption_,
             timeLimit: timeLimit_,
             automaticApproval: automaticApproval_,
-            automaticTransfer:automaticTransfer_
+            automaticTransfer: automaticTransfer_
         });
         ruleEngineMock = new RuleEngine(
             RULE_ENGINE_OPERATOR_ADDRESS,
@@ -83,15 +87,18 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         ruleConditionalTransfer = new RuleConditionalTransfer(
             DEFAULT_ADMIN_ADDRESS,
             ZERO_ADDRESS,
-            ruleEngineMock,                    
+            ruleEngineMock,
             options
         );
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleConditionalTransfer.grantRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE, CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        ruleConditionalTransfer.grantRole(
+            RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE,
+            CONDITIONAL_TRANSFER_OPERATOR_ADDRESS
+        );
     }
 
-    function _createTransferRequestBatch() public{
-         // Arrange
+    function _createTransferRequestBatch() public {
+        // Arrange
         _createTransferRequest();
 
         // Second and third request
@@ -101,8 +108,8 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         ruleConditionalTransfer.createTransferRequest(ADDRESS1, value3);
     }
 
-    function _createTransferRequestBatchByHodler() public{
-         // Arrange
+    function _createTransferRequestBatchByHodler() public {
+        // Arrange
         _createTransferRequest();
 
         // Second and third request
@@ -112,7 +119,7 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         ruleConditionalTransfer.createTransferRequest(ADDRESS2, value3);
     }
 
-    function _createTransferRequest() internal{
+    function _createTransferRequest() internal {
         vm.prank(ADDRESS1);
         // Act
         vm.expectEmit(true, true, true, true);
@@ -120,7 +127,8 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         ruleConditionalTransfer.createTransferRequest(ADDRESS2, defaultValue);
 
         // Assert
-        TransferRequest memory transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        TransferRequest memory transferRequest = ruleConditionalTransfer
+            .getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
         assertEq(transferRequest.key, defaultKey);
         assertEq(transferRequest.id, 0);
         assertEq(transferRequest.from, ADDRESS1);
@@ -128,9 +136,10 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         assertEq(transferRequest.value, defaultValue);
         assertEq(uint256(transferRequest.status), uint256(STATUS.WAIT));
 
-        TransferRequest[] memory transferRequests = ruleConditionalTransfer.getRequestByStatus(STATUS.WAIT);
-        assertEq(transferRequests[0].key , defaultKey);
-        assertEq(transferRequests.length , 1);
+        TransferRequest[] memory transferRequests = ruleConditionalTransfer
+            .getRequestByStatus(STATUS.WAIT);
+        assertEq(transferRequests[0].key, defaultKey);
+        assertEq(transferRequests.length, 1);
     }
 
     /***** Reset  ********/
@@ -139,7 +148,7 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         // Arrange
         _createTransferRequest();
 
-        // Act 
+        // Act
         // Reset
         vm.prank(ADDRESS1);
         vm.expectEmit(true, true, true, true);
@@ -151,7 +160,11 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         vm.prank(ADDRESS1);
         ruleConditionalTransfer.createTransferRequest(ADDRESS2, defaultValue);
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
-        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, 0,true);
+        ruleConditionalTransfer.approveTransferRequest(
+            transferRequestInput,
+            0,
+            true
+        );
 
         // Reset
         vm.prank(ADDRESS1);
@@ -181,7 +194,7 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         ids[0] = 0;
         ids[1] = 1;
         ids[2] = 2;
-        // Act 
+        // Act
         // Reset
         vm.prank(ADDRESS1);
         vm.expectEmit(true, true, true, true);
@@ -200,7 +213,7 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         ids[0] = 0;
         ids[1] = 4;
         ids[2] = 2;
-        // Act 
+        // Act
         // Reset
         vm.prank(ADDRESS1);
         vm.expectRevert(RuleConditionalTransfer_InvalidId.selector);
@@ -211,7 +224,7 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         // Arrange
         _createTransferRequestBatchByHodler();
         uint256[] memory ids = new uint256[](0);
-        // Act 
+        // Act
         // Reset
         vm.prank(ADDRESS1);
         vm.expectRevert(RuleConditionalTransfer_EmptyArray.selector);
@@ -222,7 +235,7 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         // Arrange
         _createTransferRequest();
 
-        // Act 
+        // Act
         // Reset
         vm.prank(ADDRESS2);
         vm.expectRevert(RuleConditionalTransfer_InvalidSender.selector);
@@ -233,7 +246,7 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         // Arrange
         _createTransferRequest();
 
-        // Act 
+        // Act
         // Reset
         vm.prank(ADDRESS1);
         vm.expectRevert(RuleConditionalTransfer_InvalidId.selector);
@@ -246,9 +259,13 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
 
         // Denied
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
-        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, 0, false);
+        ruleConditionalTransfer.approveTransferRequest(
+            transferRequestInput,
+            0,
+            false
+        );
 
-        // Act 
+        // Act
         // Reset
         vm.prank(ADDRESS1);
         vm.expectRevert(RuleConditionalTransfer_Wrong_Status.selector);
@@ -264,7 +281,11 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, 0,false);
+        ruleConditionalTransfer.approveTransferRequest(
+            transferRequestInput,
+            0,
+            false
+        );
 
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
@@ -273,7 +294,8 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         ruleConditionalTransfer.resetRequestStatus(0);
 
         // Assert
-        TransferRequest memory transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        TransferRequest memory transferRequest = ruleConditionalTransfer
+            .getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
         assertEq(transferRequest.key, defaultKey);
         assertEq(transferRequest.id, 0);
         assertEq(transferRequest.from, ADDRESS1);
@@ -289,14 +311,17 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         ruleConditionalTransfer.createTransferRequest(ADDRESS2, defaultValue);
 
         // Assert
-        transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        transferRequest = ruleConditionalTransfer.getRequestTrade(
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
         assertEq(transferRequest.key, defaultKey);
         assertEq(transferRequest.id, 0);
         assertEq(transferRequest.from, ADDRESS1);
         assertEq(transferRequest.to, ADDRESS2);
         assertEq(transferRequest.value, defaultValue);
         assertEq(uint256(transferRequest.status), uint256(STATUS.WAIT));
-
 
         // Id different from 0
         vm.prank(ADDRESS1);
@@ -317,7 +342,11 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, 0,false);
+        ruleConditionalTransfer.approveTransferRequest(
+            transferRequestInput,
+            0,
+            false
+        );
 
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
@@ -330,7 +359,8 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         ruleConditionalTransfer.resetRequestStatusBatch(ids);
 
         // Assert
-        TransferRequest memory transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
+        TransferRequest memory transferRequest = ruleConditionalTransfer
+            .getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
         assertEq(transferRequest.key, defaultKey);
         assertEq(transferRequest.id, 0);
         assertEq(transferRequest.from, ADDRESS1);
@@ -338,8 +368,11 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         assertEq(transferRequest.value, defaultValue);
         assertEq(uint256(transferRequest.status), uint256(STATUS.NONE));
 
-
-        transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, value2);
+        transferRequest = ruleConditionalTransfer.getRequestTrade(
+            ADDRESS1,
+            ADDRESS2,
+            value2
+        );
         assertEq(transferRequest.key, key2);
         assertEq(transferRequest.id, 1);
         assertEq(transferRequest.from, ADDRESS1);
@@ -347,7 +380,11 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         assertEq(transferRequest.value, value2);
         assertEq(uint256(transferRequest.status), uint256(STATUS.NONE));
 
-        transferRequest = ruleConditionalTransfer.getRequestTrade(ADDRESS1, ADDRESS2, value3);
+        transferRequest = ruleConditionalTransfer.getRequestTrade(
+            ADDRESS1,
+            ADDRESS2,
+            value3
+        );
         assertEq(transferRequest.key, key3Hodler);
         assertEq(transferRequest.id, 2);
         assertEq(transferRequest.from, ADDRESS1);
@@ -356,8 +393,9 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         assertEq(uint256(transferRequest.status), uint256(STATUS.NONE));
     }
 
-
-    function testCannotBatchResetADeniedRequestCreatedByHolderWithWrongId() public {
+    function testCannotBatchResetADeniedRequestCreatedByHolderWithWrongId()
+        public
+    {
         // Arrange
         _createTransferRequestBatchByHodler();
         uint256[] memory ids = new uint256[](3);
@@ -368,7 +406,11 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, 0,false);
+        ruleConditionalTransfer.approveTransferRequest(
+            transferRequestInput,
+            0,
+            false
+        );
 
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
@@ -376,14 +418,20 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         ruleConditionalTransfer.resetRequestStatusBatch(ids);
     }
 
-    function testCannotBatchResetADeniedRequestCreatedByHolderWithEmptyArray() public {
+    function testCannotBatchResetADeniedRequestCreatedByHolderWithEmptyArray()
+        public
+    {
         // Arrange
         _createTransferRequestBatchByHodler();
         uint256[] memory ids = new uint256[](0);
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
         emit transferDenied(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
-        ruleConditionalTransfer.approveTransferRequest(transferRequestInput, 0,false);
+        ruleConditionalTransfer.approveTransferRequest(
+            transferRequestInput,
+            0,
+            false
+        );
 
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);

@@ -4,14 +4,14 @@ pragma solidity ^0.8.20;
 
 import "../../../interfaces/IRuleValidation.sol";
 
-abstract contract RuleValidateTransfer is IRuleValidation{
-    /** 
-    * @notice Validate a transfer
-    * @param _from the origin address
-    * @param _to the destination address
-    * @param _amount to transfer
-    * @return isValid => true if the transfer is valid, false otherwise
-    **/
+abstract contract RuleValidateTransfer is IRuleValidation {
+    /**
+     * @notice Validate a transfer
+     * @param _from the origin address
+     * @param _to the destination address
+     * @param _amount to transfer
+     * @return isValid => true if the transfer is valid, false otherwise
+     **/
     function validateTransfer(
         address _from,
         address _to,

@@ -6,10 +6,15 @@ import "./RuleInternal.sol";
 import "../interfaces/IRuleEngineOperation.sol";
 import "../interfaces/IRuleOperation.sol";
 import "OZ/access/AccessControl.sol";
+
 /**
-* @title Implementation of a ruleEngine defined by the CMTAT
-*/
-abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngineOperation {
+ * @title Implementation of a ruleEngine defined by the CMTAT
+ */
+abstract contract RuleEngineOperation is
+    AccessControl,
+    RuleInternal,
+    IRuleEngineOperation
+{
     /// @dev Array of rules
     address[] internal _rulesOperation;
 
@@ -20,9 +25,9 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      */
     function setRulesOperation(
         address[] calldata rules_
-    ) public onlyRole(RULE_ENGINE_ROLE) {
-        if(_rulesOperation.length > 0){
-             _clearRulesOperation();
+    ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+        if (_rulesOperation.length > 0) {
+            _clearRulesOperation();
         }
         _setRules(rules_);
         _rulesOperation = rules_;
@@ -32,8 +37,8 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      * @notice Clear all the rules of the array of rules
      *
      */
-    function clearRulesOperation() public onlyRole(RULE_ENGINE_ROLE) {
-        _clearRulesOperation(); 
+    function clearRulesOperation() public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+        _clearRulesOperation();
     }
 
     /**
@@ -43,11 +48,11 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
     function _clearRulesOperation() internal {
         uint256 index;
         // we remove the last element first since it is more optimized.
-        for(uint256 i = _rulesOperation.length; i > 0; --i){
-             unchecked {
+        for (uint256 i = _rulesOperation.length; i > 0; --i) {
+            unchecked {
                 // don't underflow since i > 0
                 index = i - 1;
-             }
+            }
             _removeRuleOperation(_rulesOperation[index], index);
         }
         emit ClearRules(_rulesOperation);
@@ -58,9 +63,11 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      * Revert if one rule is a zero address or if the rule is already present
      *
      */
-    function addRuleOperation(IRuleOperation rule_) public onlyRole(RULE_ENGINE_ROLE) {
-       RuleInternal._addRule( _rulesOperation, address(rule_));
-       emit AddRule(address(rule_));
+    function addRuleOperation(
+        IRuleOperation rule_
+    ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+        RuleInternal._addRule(_rulesOperation, address(rule_));
+        emit AddRule(address(rule_));
     }
 
     /**
@@ -76,7 +83,7 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
     function removeRuleOperation(
         IRuleOperation rule_,
         uint256 index
-    ) public onlyRole(RULE_ENGINE_ROLE) {
+    ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         _removeRuleOperation(address(rule_), index);
     }
 
@@ -90,66 +97,71 @@ abstract contract RuleEngineOperation is AccessControl, RuleInternal, IRuleEngin
      *
      *
      */
-    function _removeRuleOperation(
-        address rule_,
-        uint256 index
-    ) internal {
-        RuleInternal._removeRule(_rulesOperation, rule_, index); 
+    function _removeRuleOperation(address rule_, uint256 index) internal {
+        RuleInternal._removeRule(_rulesOperation, rule_, index);
         emit RemoveRule(address(rule_));
     }
 
     /**
-    * @return The number of rules inside the array
-    */
+     * @return The number of rules inside the array
+     */
     function rulesCountOperation() external view override returns (uint256) {
         return _rulesOperation.length;
     }
 
     /**
-    * @notice Get the index of a rule inside the list
-    * @return index if the rule is found, _rulesOperation.length otherwise
-    */
-    function getRuleIndexOperation(IRuleOperation rule_) external view returns (uint256 index) {
+     * @notice Get the index of a rule inside the list
+     * @return index if the rule is found, _rulesOperation.length otherwise
+     */
+    function getRuleIndexOperation(
+        IRuleOperation rule_
+    ) external view returns (uint256 index) {
         return RuleInternal.getRuleIndex(_rulesOperation, address(rule_));
     }
 
     /**
-    * @notice Get the rule at the position specified by ruleId
-    * @param ruleId index of the rule
-    * @return a rule address
-    */
-    function ruleOperation(uint256 ruleId) external view override returns (address) {
+     * @notice Get the rule at the position specified by ruleId
+     * @param ruleId index of the rule
+     * @return a rule address
+     */
+    function ruleOperation(
+        uint256 ruleId
+    ) external view override returns (address) {
         return _rulesOperation[ruleId];
     }
 
     /**
-    * @notice Get all the rules
-    * @return An array of rules
-    */
-    function rulesOperation() external view override returns (address[] memory) {
+     * @notice Get all the rules
+     * @return An array of rules
+     */
+    function rulesOperation()
+        external
+        view
+        override
+        returns (address[] memory)
+    {
         return _rulesOperation;
     }
 
-    
-    /** 
-    * @notice Go through all the rule to know if a restriction exists on the transfer
-    * @param _from the origin address
-    * @param _to the destination address
-    * @param _amount to transfer
-    **/
+    /**
+     * @notice Go through all the rule to know if a restriction exists on the transfer
+     * @param _from the origin address
+     * @param _to the destination address
+     * @param _amount to transfer
+     **/
     function _operateOnTransfer(
         address _from,
         address _to,
         uint256 _amount
-    ) internal returns (bool isValid){
+    ) internal returns (bool isValid) {
         uint256 rulesLength = _rulesOperation.length;
-        for (uint256 i = 0; i < rulesLength; ++i ) {
+        for (uint256 i = 0; i < rulesLength; ++i) {
             bool result = IRuleOperation(_rulesOperation[i]).operateOnTransfer(
                 _from,
                 _to,
                 _amount
             );
-            if(!result){
+            if (!result) {
                 return false;
             }
         }

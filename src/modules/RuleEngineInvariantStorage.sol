@@ -16,10 +16,11 @@ abstract contract RuleEngineInvariantStorage {
     /// @notice Generate when all the rules are cleared
     event ClearRules(address[] rulesRemoved);
 
-
     /// @notice Role to manage the ruleEngine
-    bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
+    bytes32 public constant RULE_ENGINE_OPERATOR_ROLE =
+        keccak256("RULE_ENGINE_OPERATOR_ROLE");
 
     /// @notice token contract
-    bytes32 public constant TOKEN_CONTRACT_ROLE = keccak256("TOKEN_CONTRACT_ROLE");
+    bytes32 public constant TOKEN_CONTRACT_ROLE =
+        keccak256("TOKEN_CONTRACT_ROLE");
 }

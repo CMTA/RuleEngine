@@ -6,9 +6,10 @@ import "../HelperContract.sol";
 import "CMTAT/mocks/MinimalForwarderMock.sol";
 import "src/RuleEngine.sol";
 import "src/RuleEngine.sol";
+
 /**
-* @title General functions of the RuleEngine
-*/
+ * @title General functions of the RuleEngine
+ */
 contract RuleEngineTest is Test, HelperContract {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
@@ -18,15 +19,12 @@ contract RuleEngineTest is Test, HelperContract {
     uint8 CODE_NONEXISTENT = 255;
 
     // Arrange
-    function setUp() public {
-       
-    }
+    function setUp() public {}
 
     function testRightDeployment() public {
         // Arrange
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        MinimalForwarderMock forwarder = new MinimalForwarderMock(
-        );
+        MinimalForwarderMock forwarder = new MinimalForwarderMock();
         forwarder.initialize(ERC2771ForwarderDomain);
 
         // Act
@@ -37,7 +35,10 @@ contract RuleEngineTest is Test, HelperContract {
         );
 
         // assert
-        resBool = ruleEngineMock.hasRole(RULE_ENGINE_ROLE, RULE_ENGINE_OPERATOR_ADDRESS);
+        resBool = ruleEngineMock.hasRole(
+            RULE_ENGINE_OPERATOR_ROLE,
+            RULE_ENGINE_OPERATOR_ADDRESS
+        );
         assertEq(resBool, true);
         resBool = ruleEngineMock.isTrustedForwarder(address(forwarder));
         assertEq(resBool, true);
@@ -46,8 +47,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testCannotDeployContractifAdminAddressIsZero() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        MinimalForwarderMock forwarder = new MinimalForwarderMock(
-        );
+        MinimalForwarderMock forwarder = new MinimalForwarderMock();
         forwarder.initialize(ERC2771ForwarderDomain);
         vm.expectRevert(RuleEngine_AdminWithAddressZeroNotAllowed.selector);
         // Act
@@ -57,6 +57,4 @@ contract RuleEngineTest is Test, HelperContract {
             ZERO_ADDRESS
         );
     }
-
-
 }

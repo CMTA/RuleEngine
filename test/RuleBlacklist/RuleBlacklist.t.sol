@@ -7,8 +7,8 @@ import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-* @title Integration test with the CMTAT
-*/
+ * @title Integration test with the CMTAT
+ */
 contract RuleBlacklistTest is Test, HelperContract {
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
@@ -23,7 +23,10 @@ contract RuleBlacklistTest is Test, HelperContract {
         ruleBlacklist = new RuleBlacklist(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
     }
 
-    function testCanRuleBlacklistReturnMessageNotFoundWithUnknownCodeId() public view {
+    function testCanRuleBlacklistReturnMessageNotFoundWithUnknownCodeId()
+        public
+        view
+    {
         // Act
         string memory message1 = ruleBlacklist.messageForTransferRestriction(
             255

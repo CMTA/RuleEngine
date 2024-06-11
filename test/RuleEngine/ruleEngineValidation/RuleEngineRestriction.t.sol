@@ -6,8 +6,8 @@ import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
 /**
-* @title tests concerning the restrictions and validation for the transfers
-*/
+ * @title tests concerning the restrictions and validation for the transfers
+ */
 contract RuleEngineRestrictionTest is Test, HelperContract {
     RuleEngine ruleEngineMock;
     uint8 resUint8;
@@ -123,7 +123,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // ruleEngineValidation
 
         // Act
-         resUint8 = ruleEngineMock.detectTransferRestrictionValidation(
+        resUint8 = ruleEngineMock.detectTransferRestrictionValidation(
             ADDRESS1,
             ADDRESS2,
             20
@@ -181,11 +181,14 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // ruleEngineValidation
 
         // Act
-        resBool = ruleEngineMock.validateTransferValidation(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleEngineMock.validateTransferValidation(
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
 
         // Assert
         assertEq(resBool, true);
-
     }
 
     function testValidateTransferRestricted() public {
@@ -198,7 +201,11 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // ruleEngineValidation
 
         // Act
-        resBool = ruleEngineMock.validateTransferValidation(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleEngineMock.validateTransferValidation(
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
 
         // Assert
         assertFalse(resBool);
