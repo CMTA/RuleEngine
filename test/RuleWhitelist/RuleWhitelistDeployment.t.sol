@@ -33,7 +33,12 @@ contract RuleWhitelistTest is Test, HelperContract {
 
         // assert
         resBool = ruleWhitelist.hasRole(
-            ADDRESS_LIST_ROLE,
+            ADDRESS_LIST_ADD_ROLE,
+            WHITELIST_OPERATOR_ADDRESS
+        );
+        assertEq(resBool, true);
+        resBool = ruleWhitelist.hasRole(
+            ADDRESS_LIST_REMOVE_ROLE,
             WHITELIST_OPERATOR_ADDRESS
         );
         assertEq(resBool, true);

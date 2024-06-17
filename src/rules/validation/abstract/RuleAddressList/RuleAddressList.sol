@@ -32,7 +32,8 @@ abstract contract RuleAddressList is
             revert RuleAddressList_AdminWithAddressZeroNotAllowed();
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(ADDRESS_LIST_ROLE, admin);
+        _grantRole(ADDRESS_LIST_ADD_ROLE, admin);
+        _grantRole(ADDRESS_LIST_REMOVE_ROLE, admin);
     }
 
     /**
@@ -42,7 +43,7 @@ abstract contract RuleAddressList is
      */
     function addAddressesToTheList(
         address[] calldata listWhitelistedAddress
-    ) public onlyRole(ADDRESS_LIST_ROLE) {
+    ) public onlyRole(ADDRESS_LIST_ADD_ROLE) {
         _addAddressesToThelist(listWhitelistedAddress);
     }
 
@@ -54,7 +55,7 @@ abstract contract RuleAddressList is
      */
     function removeAddressesFromTheList(
         address[] calldata listWhitelistedAddress
-    ) public onlyRole(ADDRESS_LIST_ROLE) {
+    ) public onlyRole(ADDRESS_LIST_REMOVE_ROLE) {
         _removeAddressesFromThelist(listWhitelistedAddress);
     }
 
@@ -65,7 +66,7 @@ abstract contract RuleAddressList is
      */
     function addAddressToTheList(
         address _newWhitelistAddress
-    ) public onlyRole(ADDRESS_LIST_ROLE) {
+    ) public onlyRole(ADDRESS_LIST_ADD_ROLE) {
         _addAddressToThelist(_newWhitelistAddress);
     }
 
@@ -77,7 +78,7 @@ abstract contract RuleAddressList is
      */
     function removeAddressFromTheList(
         address _removeWhitelistAddress
-    ) public onlyRole(ADDRESS_LIST_ROLE) {
+    ) public onlyRole(ADDRESS_LIST_REMOVE_ROLE) {
         _removeAddressFromThelist(_removeWhitelistAddress);
     }
 

@@ -35,7 +35,7 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
             abi.encodeWithSelector(
                 AccessControlUnauthorizedAccount.selector,
                 ATTACKER,
-                ADDRESS_LIST_ROLE
+                ADDRESS_LIST_ADD_ROLE
             )
         );
         vm.prank(ATTACKER);
@@ -61,7 +61,7 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
             abi.encodeWithSelector(
                 AccessControlUnauthorizedAccount.selector,
                 ATTACKER,
-                ADDRESS_LIST_ROLE
+                ADDRESS_LIST_ADD_ROLE
             )
         );
         vm.prank(ATTACKER);
@@ -98,7 +98,7 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
             abi.encodeWithSelector(
                 AccessControlUnauthorizedAccount.selector,
                 ATTACKER,
-                ADDRESS_LIST_ROLE
+                ADDRESS_LIST_REMOVE_ROLE
             )
         );
         vm.prank(ATTACKER);
@@ -135,7 +135,7 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
             abi.encodeWithSelector(
                 AccessControlUnauthorizedAccount.selector,
                 ATTACKER,
-                ADDRESS_LIST_ROLE
+                ADDRESS_LIST_REMOVE_ROLE
             )
         );
         vm.prank(ATTACKER);
