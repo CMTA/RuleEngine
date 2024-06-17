@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.20;
 
-import "../../../interfaces/IRuleValidation.sol";
 import "./RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
 import "./RuleValidateTransfer.sol";
 

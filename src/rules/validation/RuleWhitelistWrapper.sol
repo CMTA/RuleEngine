@@ -5,10 +5,7 @@ pragma solidity ^0.8.20;
 import "OZ/access/AccessControl.sol";
 import "../../modules/RuleEngineValidationCommon.sol";
 import "../../modules/MetaTxModuleStandalone.sol";
-import "./abstract/RuleValidateTransfer.sol";
-import "./abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
 import "./abstract/RuleAddressList/RuleAddressList.sol";
-import "./abstract/RuleWhitelistCommon.sol";
 import "./abstract/RuleWhitelistCommon.sol";
 
 /**

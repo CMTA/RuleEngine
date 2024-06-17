@@ -2,9 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-import "./abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
 import "./abstract/RuleAddressList/RuleAddressList.sol";
-import "./abstract/RuleValidateTransfer.sol";
 import "./abstract/RuleWhitelistCommon.sol";
 /**
  * @title a whitelist manager
