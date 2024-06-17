@@ -2,13 +2,18 @@
 
 Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
-## v2.0.1
+## v2.0.2 - 20240617
+
+- Create abstract contract ruleWhitelistCommon to contain code shared between ruleWhitelist & ruleWhitelistWrapper
+- Split ADDRESS_LIST_ROLE in two distinct roles : ADDRESS_LIST_ADD_ROLE && ADDRESS_LIST_REMOVE_ROLE
+
+## v2.0.1 - 20240611
 
 - Add a new rule WhitelistWrapper
 
 This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators.
 
-## v2.0.0
+## v2.0.0 - 20240515
 
 - Implement the new architecture for the RuleEngine, with ValidationRule and OperationRule
 - Add the rule ConditionalTransfer as an Operation rule
