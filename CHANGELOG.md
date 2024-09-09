@@ -2,6 +2,13 @@
 
 Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
+
+
+## v2.0.3
+
+- Small optimization in WhitelistWrapper; add a break in a loop
+- 
+
 ## v2.0.2 - 20240617
 
 - Create abstract contract ruleWhitelistCommon to contain code shared between ruleWhitelist & ruleWhitelistWrapper

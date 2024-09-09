@@ -7,8 +7,9 @@ import "./RuleValidateTransfer.sol";
 
 abstract contract RuleWhitelistCommon is
     RuleValidateTransfer,
-    RuleWhitelistInvariantStorage {
-     /**
+    RuleWhitelistInvariantStorage
+{
+    /**
      * @notice To know if the restriction code is valid for this rule or not
      * @param _restrictionCode The target restriction code
      * @return true if the restriction code is known, false otherwise

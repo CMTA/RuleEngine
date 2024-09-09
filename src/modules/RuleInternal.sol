@@ -81,7 +81,7 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
      * @notice Get the index of a rule inside the list
      * @return index if the rule is found, _rules.length otherwise
      */
-    function getRuleIndex(
+    function _getRuleIndex(
         address[] storage _rules,
         address rule_
     ) internal view returns (uint256 index) {

@@ -117,6 +117,10 @@ abstract contract RuleAddressList is
         return isListed;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                           ERC-2771
+    //////////////////////////////////////////////////////////////*/
+
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
      */

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/RuleInternal.sol | 9c97852f35d10e4504f43f5594387eb63ca8e501 |
+| ./modules/RuleInternal.sol | 7bad85bfbad52abc2ab9082628bf6bba2ee116f4 |
 
 
 ### Contracts Description Table
@@ -19,7 +19,7 @@
 | └ | _setRules | Internal 🔒 | 🛑  | |
 | └ | _addRule | Internal 🔒 | 🛑  | |
 | └ | _removeRule | Internal 🔒 | 🛑  | |
-| └ | getRuleIndex | Internal 🔒 |   | |
+| └ | _getRuleIndex | Internal 🔒 |   | |
 
 
 ### Legend

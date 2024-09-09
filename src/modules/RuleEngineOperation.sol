@@ -116,7 +116,7 @@ abstract contract RuleEngineOperation is
     function getRuleIndexOperation(
         IRuleOperation rule_
     ) external view returns (uint256 index) {
-        return RuleInternal.getRuleIndex(_rulesOperation, address(rule_));
+        return RuleInternal._getRuleIndex(_rulesOperation, address(rule_));
     }
 
     /**

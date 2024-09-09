@@ -18,6 +18,9 @@ abstract contract RuleEngineValidationCommon is
     /// @dev Array of rules
     address[] internal _rulesValidation;
 
+    /*//////////////////////////////////////////////////////////////
+                           PUBLIC/EXTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
     /**
      * @notice Set all the rules, will overwrite all the previous rules. \n
      * Revert if one rule is a zero address or if the rule is already present
@@ -40,23 +43,6 @@ abstract contract RuleEngineValidationCommon is
      */
     function clearRulesValidation() public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         _clearRulesValidation();
-    }
-
-    /**
-     * @notice Clear all the rules of the array of rules
-     *
-     */
-    function _clearRulesValidation() internal {
-        uint256 index;
-        // we remove the last element first since it is more optimized.
-        for (uint256 i = _rulesValidation.length; i > 0; --i) {
-            unchecked {
-                // don't underflow since i > 0
-                index = i - 1;
-            }
-            _removeRuleValidation(_rulesValidation[index], index);
-        }
-        emit ClearRules(_rulesValidation);
     }
 
     /**
@@ -89,21 +75,6 @@ abstract contract RuleEngineValidationCommon is
     }
 
     /**
-     * @notice Remove a rule from the array of rules
-     * Revert if the rule found at the specified index does not match the rule in argument
-     * @param rule_ address of the target rule
-     * @param index the position inside the array of rule
-     * @dev To reduce the array size, the last rule is moved to the location occupied
-     * by the rule to remove
-     *
-     *
-     */
-    function _removeRuleValidation(address rule_, uint256 index) internal {
-        RuleInternal._removeRule(_rulesValidation, rule_, index);
-        emit RemoveRule(address(rule_));
-    }
-
-    /**
      * @return The number of rules inside the array
      */
     function rulesCountValidation() external view override returns (uint256) {
@@ -117,7 +88,7 @@ abstract contract RuleEngineValidationCommon is
     function getRuleIndexValidation(
         IRuleValidation rule_
     ) external view returns (uint256 index) {
-        return RuleInternal.getRuleIndex(_rulesValidation, address(rule_));
+        return RuleInternal._getRuleIndex(_rulesValidation, address(rule_));
     }
 
     /**
@@ -142,5 +113,40 @@ abstract contract RuleEngineValidationCommon is
         returns (address[] memory)
     {
         return _rulesValidation;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                           INTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+    /**
+     * @notice Clear all the rules of the array of rules
+     *
+     */
+    function _clearRulesValidation() internal {
+        uint256 index;
+        // we remove the last element first since it is more optimized.
+        for (uint256 i = _rulesValidation.length; i > 0; --i) {
+            unchecked {
+                // don't underflow since i > 0
+                index = i - 1;
+            }
+            _removeRuleValidation(_rulesValidation[index], index);
+        }
+        emit ClearRules(_rulesValidation);
+    }
+
+    /**
+     * @notice Remove a rule from the array of rules
+     * Revert if the rule found at the specified index does not match the rule in argument
+     * @param rule_ address of the target rule
+     * @param index the position inside the array of rule
+     * @dev To reduce the array size, the last rule is moved to the location occupied
+     * by the rule to remove
+     *
+     *
+     */
+    function _removeRuleValidation(address rule_, uint256 index) internal {
+        RuleInternal._removeRule(_rulesValidation, rule_, index);
+        emit RemoveRule(address(rule_));
     }
 }

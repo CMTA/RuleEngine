@@ -6,36 +6,38 @@
 
 ### UML
 
+#### Global
+
+> npm run-script uml
+
 ![uml](../schema/classDiagram.svg)
 
 
+
+#### RuleEngine
+
+> npm run-script uml:ruleEngine
+
+![uml](../schema/RuleEngine.svg)
 
 ## Functionality
 
 ### Upgradeable
 
 The Rule Engine and the other rules are not upgradeable. The reason is the following:
-If we need a new on, we just issue a new one, and tell the CMTAT token (or the RuleEngine for the rules) to use the new. This would happen if we need more than just whitelisting, for ex.
+If we need a new on, we just issue a new one, and set inside the CMTAT token (or the RuleEngine for the rules) to use the new. 
 
 ### Urgency mechanism
-* Pause
-  There are no functionalities to put in pause the contracts.
+- Pause
 
-* We have removed the possibility to Kill the contracts,  to destroy the bytecode, from
-  the different contracts (RuleEngine and Rule)  for the following reasons:
+There are no functionalities to put in pause the contracts.
 
-  * The opcode SELFDESTRUCT which the property of destroying the contract (= deletion of any storage keys or code) will be remove with the Cancun Upgrade, an upgrade of the Ethereum network.
+* Kill / Deactivate the contracts
 
-    Therefore, when the Ethereum Network will integrate this upgrade, this functionality will no longer be available.
-
-    See [https://eips.ethereum.org/EIPS/eip-6780](https://eips.ethereum.org/EIPS/eip-6780) & [https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md)
-
-  * It was recommended by the audit team
-
-    > Implementing an ability to destroy a contract is a bad practice, as it cause more risks than benefits.
+There are no functionalities to kill/deactivate the contracts.
 
 
-### Gasless support
+### Gasless support (ERC-2771)
 
 > The gasless integration was not part of the audit performed by ABDK on the version [1.0.1](https://github.com/CMTA/RuleEngine/releases/tag/1.0.1)
 

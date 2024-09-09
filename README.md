@@ -3,7 +3,7 @@
 # RuleEngine
 
 This repository includes the RuleEngine contract for the [CMTAT](https://github.com/CMTA/CMTAT) token. 
-- The CMTAT version used is the version [v2.4.0](https://github.com/CMTA/CMTAT/releases/tag/v2.4.0)
+- The CMTAT version used is the version [v2.5.0-rc0](https://github.com/CMTA/CMTAT/releases/tag/v2.5.0-rc0)
 - The OpenZeppelin version used is the version [v5.0.2](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.2)
 
 The CMTAT contracts and the OpenZeppelin library are included as a submodule of the present repository.
@@ -22,7 +22,9 @@ Before each transfer, your contract must call the function `operateOnTransfer` w
 
 ![Engine-RuleEngine.drawio](./doc/schema/Engine-RuleEngine.drawio.png)
 
+### UML
 
+![RuleEngine](/home/ryan/Downloads/CM/RuleEngine/doc/schema/RuleEngine.svg)
 
 ## Available Rules
 
@@ -77,7 +79,7 @@ Here a summary of the main documentation
 | Functionalities         | [doc/functionalities.pdf](./doc/functionalities.pdf) |
 | Surya report            | [doc/surya](./doc/surya/)                            |
 
-
+See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMTAT and ERC-1404](https://www.taurushq.com/blog/token-transfer-management-how-to-apply-restrictions-with-cmtat-and-erc-1404/)
 
 ## Usage
 
@@ -122,14 +124,20 @@ The official documentation is available in the Foundry [website](https://book.ge
 ## Testing
 You can run the tests with
 
-```
+```bash
 forge test
 ```
 
 To run a specific test, use
 
-```
+```bash
 forge test --match-contract <contract name> --match-test <function name>
+```
+
+Generate gas report
+
+```bash
+forge test --gas-report
 ```
 
 See also the test framework's [official documentation](https://book.getfoundry.sh/forge/tests), and that of the [test commands](https://book.getfoundry.sh/reference/forge/test-commands).
@@ -181,3 +189,7 @@ Only RuleEngine with a Whitelist contract
 ```bash
 forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  --broadcast --verify -vvv
 ```
+
+## Intellectual property
+
+The code is copyright (c) Capital Market and Technology Association, 2018-2024, and is released under [Mozilla Public License 2.0](https://github.com/CMTA/CMTAT/blob/master/LICENSE.md).

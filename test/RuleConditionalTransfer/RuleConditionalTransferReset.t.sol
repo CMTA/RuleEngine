@@ -131,9 +131,9 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
             .getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
         assertEq(transferRequest.key, defaultKey);
         assertEq(transferRequest.id, 0);
-        assertEq(transferRequest.from, ADDRESS1);
-        assertEq(transferRequest.to, ADDRESS2);
-        assertEq(transferRequest.value, defaultValue);
+        assertEq(transferRequest.keyElement.from, ADDRESS1);
+        assertEq(transferRequest.keyElement.to, ADDRESS2);
+        assertEq(transferRequest.keyElement.value, defaultValue);
         assertEq(uint256(transferRequest.status), uint256(STATUS.WAIT));
 
         TransferRequest[] memory transferRequests = ruleConditionalTransfer
@@ -298,9 +298,9 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
             .getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
         assertEq(transferRequest.key, defaultKey);
         assertEq(transferRequest.id, 0);
-        assertEq(transferRequest.from, ADDRESS1);
-        assertEq(transferRequest.to, ADDRESS2);
-        assertEq(transferRequest.value, defaultValue);
+        assertEq(transferRequest.keyElement.from, ADDRESS1);
+        assertEq(transferRequest.keyElement.to, ADDRESS2);
+        assertEq(transferRequest.keyElement.value, defaultValue);
         assertEq(uint256(transferRequest.status), uint256(STATUS.NONE));
 
         // Assert
@@ -318,9 +318,9 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         );
         assertEq(transferRequest.key, defaultKey);
         assertEq(transferRequest.id, 0);
-        assertEq(transferRequest.from, ADDRESS1);
-        assertEq(transferRequest.to, ADDRESS2);
-        assertEq(transferRequest.value, defaultValue);
+        assertEq(transferRequest.keyElement.from, ADDRESS1);
+        assertEq(transferRequest.keyElement.to, ADDRESS2);
+        assertEq(transferRequest.keyElement.value, defaultValue);
         assertEq(uint256(transferRequest.status), uint256(STATUS.WAIT));
 
         // Id different from 0
@@ -363,9 +363,9 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
             .getRequestTrade(ADDRESS1, ADDRESS2, defaultValue);
         assertEq(transferRequest.key, defaultKey);
         assertEq(transferRequest.id, 0);
-        assertEq(transferRequest.from, ADDRESS1);
-        assertEq(transferRequest.to, ADDRESS2);
-        assertEq(transferRequest.value, defaultValue);
+        assertEq(transferRequest.keyElement.from, ADDRESS1);
+        assertEq(transferRequest.keyElement.to, ADDRESS2);
+        assertEq(transferRequest.keyElement.value, defaultValue);
         assertEq(uint256(transferRequest.status), uint256(STATUS.NONE));
 
         transferRequest = ruleConditionalTransfer.getRequestTrade(
@@ -375,9 +375,9 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         );
         assertEq(transferRequest.key, key2);
         assertEq(transferRequest.id, 1);
-        assertEq(transferRequest.from, ADDRESS1);
-        assertEq(transferRequest.to, ADDRESS2);
-        assertEq(transferRequest.value, value2);
+        assertEq(transferRequest.keyElement.from, ADDRESS1);
+        assertEq(transferRequest.keyElement.to, ADDRESS2);
+        assertEq(transferRequest.keyElement.value, value2);
         assertEq(uint256(transferRequest.status), uint256(STATUS.NONE));
 
         transferRequest = ruleConditionalTransfer.getRequestTrade(
@@ -387,9 +387,9 @@ contract RuleConditionalTransferResetTest is Test, HelperContract {
         );
         assertEq(transferRequest.key, key3Hodler);
         assertEq(transferRequest.id, 2);
-        assertEq(transferRequest.from, ADDRESS1);
-        assertEq(transferRequest.to, ADDRESS2);
-        assertEq(transferRequest.value, value3);
+        assertEq(transferRequest.keyElement.from, ADDRESS1);
+        assertEq(transferRequest.keyElement.to, ADDRESS2);
+        assertEq(transferRequest.keyElement.value, value3);
         assertEq(uint256(transferRequest.status), uint256(STATUS.NONE));
     }
 
