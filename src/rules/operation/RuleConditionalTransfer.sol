@@ -11,7 +11,7 @@ import "../validation/abstract/RuleValidateTransfer.sol";
 import "CMTAT/interfaces/engine/IRuleEngine.sol";
 
 /**
- * @title a whitelist manager
+ * @title RuleConditionalTransfer
  */
 
 contract RuleConditionalTransfer is

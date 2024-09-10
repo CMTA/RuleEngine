@@ -1,10 +1,10 @@
 # Contributing Guidelines
 
-There are many ways to contribute to CMTAT Contracts.
+There are many ways to contribute to RuleEngine Contracts.
 
 ## Opening an issue
 
-You can [open an issue] to suggest a feature, a difficulty you have or report a minor bug. For serious bugs in an audited version please do not open an issue, instead refer to our [security policy] for appropriate steps. See [SECURITY.md](./SECURITY.MD).
+You can [open an issue] to suggest a feature, a difficulty you have or report a minor bug. For serious bugs in an audited version please do not open an issue, instead refer to our [security policy] for appropriate steps. See [SECURITY.md](./SECURITY.MD) in CMTAT project.
 
 Before opening an issue, be sure to search through the existing open and closed issues, and consider posting a comment in one of those instead.
 

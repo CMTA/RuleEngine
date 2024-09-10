@@ -7,7 +7,7 @@ Please follow [https://changelog.md/](https://changelog.md/) conventions.
 ## v2.0.3
 
 - Small optimization in WhitelistWrapper; add a break in a loop
-- 
+- Set Solidity version to 0.8.26 in config file
 
 ## v2.0.2 - 20240617
 
