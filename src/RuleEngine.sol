@@ -16,6 +16,12 @@ contract RuleEngine is
     RuleEngineValidation,
     MetaTxModuleStandalone
 {
+    /**
+     * @notice
+     * Get the current version of the smart contract
+     */
+    string public constant VERSION = "2.0.3";
+    
     error RuleEngine_TransferInvalid();
 
     /**
