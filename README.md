@@ -3,10 +3,16 @@
 # RuleEngine
 
 This repository includes the RuleEngine contract for the [CMTAT](https://github.com/CMTA/CMTAT) token. 
-- The CMTAT version used is the version [v2.4.0](https://github.com/CMTA/CMTAT/releases/tag/v2.4.0)
-- The OpenZeppelin version used is the version [v5.0.2](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.2)
 
-The CMTAT contracts and the OpenZeppelin library are included as a submodule of the present repository.
+The RuleEngine is an external contract used to apply transfer restrictions to another contract, initially the CMTAT. Acting as a controller, it can call different contract rules and apply these rules on each transfer.
+
+## Dependencies
+
+The toolchain includes the following components, where the versions are the latest ones that we tested:
+
+- Foundry
+- Solidity 0.8.26 (via solc-js)
+- OpenZeppelin Contracts (submodule) [v5.0.2](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.2)
 
 ## How to include it
 
@@ -22,7 +28,21 @@ Before each transfer, your contract must call the function `operateOnTransfer` w
 
 ![Engine-RuleEngine.drawio](./doc/schema/Engine-RuleEngine.drawio.png)
 
+### UML
 
+#### Global
+
+> npm run-script uml
+
+![uml](./doc/schema/classDiagram.svg)
+
+
+
+#### RuleEngine
+
+> npm run-script uml:ruleEngine
+
+![uml](./doc/schema/RuleEngine.svg)
 
 ## Available Rules
 
@@ -38,11 +58,41 @@ The following rules are available:
 
 
 
+
+
+## Functionality
+
+### Upgradeable
+
+The Rule Engine and the other rules are not upgradeable. The reason is the following:
+If we need a new on, we just issue a new one, and set inside the CMTAT token (or the RuleEngine for the rules) to use the new. 
+
+### Urgency mechanism
+
+- Pause
+
+There are no functionalities to put in pause the contracts.
+
+* Kill / Deactivate the contracts
+
+There are no functionalities to kill/deactivate the contracts.
+
+
+### Gasless support (ERC-2771)
+
+> The gasless integration was not part of the audit performed by ABDK on the version [1.0.1](https://github.com/CMTA/RuleEngine/releases/tag/1.0.1)
+
+The RuleEngine contracts and the other rules support client-side gasless transactions using the [Gas Station Network](https://docs.opengsn.org/#the-problem) (GSN) pattern, the main open standard for transfering fee payment to another account than that of the transaction issuer. The contract uses the OpenZeppelin contract `ERC2771Context`, which allows a contract to get the original client with `_msgSender()` instead of the fee payer given by `msg.sender` .
+
+At deployment, the parameter  `forwarder` inside the contract constructor has to be set  with the defined address of the forwarder. Please note that the forwarder can not be changed after deployment.
+
+Please see the OpenGSN [documentation](https://docs.opengsn.org/contracts/#receiving-a-relayed-call) for more details on what is done to support GSN in the contract.
+
 ## Audit
 
 The contracts have been audited by [ABDKConsulting](https://www.abdk.consulting/), a globally recognized firm specialized in smart contracts' security.
 
-#### First Audit - March 2022
+### First Audit - March 2022
 
 Fixed version : [v1.0.2](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2)
 
@@ -72,24 +122,24 @@ Here a summary of the main documentation
 
 | Document                | Link/Files                                           |
 | ----------------------- | ---------------------------------------------------- |
-| Technical documentation | [doc/technical/general](./doc/technical/general.md)  |
+| Technical documentation | [doc/technical/](./doc/technical/)                   |
 | Toolchain               | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md)               |
 | Functionalities         | [doc/functionalities.pdf](./doc/functionalities.pdf) |
 | Surya report            | [doc/surya](./doc/surya/)                            |
 
-
+See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMTAT and ERC-1404](https://www.taurushq.com/blog/token-transfer-management-how-to-apply-restrictions-with-cmtat-and-erc-1404/)
 
 ## Usage
 
 *Explain how it works.*
 
 
-## Toolchain installation
+### Toolchain installation
 The contracts are developed and tested with [Foundry](https://book.getfoundry.sh), a smart contract development toolchain.
 
 To install the Foundry suite, please refer to the official instructions in the [Foundry book](https://book.getfoundry.sh/getting-started/installation).
 
-## Initialization
+### Initialization
 
 You must first initialize the submodules, with
 
@@ -109,7 +159,7 @@ See also the command's [documentation](https://book.getfoundry.sh/reference/forg
 
 
 
-## Compilation
+### Compilation
 
 The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/build-commands) 
 ```
@@ -119,17 +169,23 @@ The official documentation is available in the Foundry [website](https://book.ge
  forge build --contracts src/RuleWhiteList.sol
 ```
 
-## Testing
+### Testing
 You can run the tests with
 
-```
+```bash
 forge test
 ```
 
 To run a specific test, use
 
-```
+```bash
 forge test --match-contract <contract name> --match-test <function name>
+```
+
+Generate gas report
+
+```bash
+forge test --gas-report
 ```
 
 See also the test framework's [official documentation](https://book.getfoundry.sh/forge/tests), and that of the [test commands](https://book.getfoundry.sh/reference/forge/test-commands).
@@ -153,9 +209,9 @@ forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir
 
 See [Solidity Coverage in VS Code with Foundry](https://mirror.xyz/devanon.eth/RrDvKPnlD-pmpuW7hQeR5wWdVjklrpOgPCOA-PJkWFU) & [Foundry forge coverage](https://www.rareskills.io/post/foundry-forge-coverage)
 
-## Deployment
+### Deployment
 The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/deploy-commands) 
-### Script
+#### Script
 
 > This documentation has been written for the version v1.0.2
 
@@ -174,10 +230,14 @@ CMTAT with RuleEngine
 ```bash
 forge script script/CMTATWithRuleEngineScript.s.sol:CMTATWithRuleEngineScript --rpc-url=$RPC_URL  --broadcast --verify -vvv
 ```
-Value of YOUR_RPC_URL with a local instance of anvil : [http://127.0.0.1:8545](http://127.0.0.1:8545)
+Value of YOUR_RPC_URL with a local instance of anvil : [127.0.0.1:8545](http://127.0.0.1:8545)
 
 Only RuleEngine with a Whitelist contract
 
 ```bash
 forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  --broadcast --verify -vvv
 ```
+
+## Intellectual property
+
+The code is copyright (c) Capital Market and Technology Association, 2018-2024, and is released under [Mozilla Public License 2.0](https://github.com/CMTA/CMTAT/blob/master/LICENSE.md).

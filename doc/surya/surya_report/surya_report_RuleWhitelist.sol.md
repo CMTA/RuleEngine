@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./rules/validation/RuleWhitelist.sol | 95fbe2f3831b9a71b1b332868ca5594f4b3d4332 |
+| ./rules/validation/RuleWhitelist.sol | 23d835c06c94cfc07433db85afa3a493771d44b4 |
 
 
 ### Contracts Description Table
@@ -15,11 +15,9 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleWhitelist** | Implementation | RuleValidateTransfer, RuleAddressList, RuleWhitelistInvariantStorage |||
+| **RuleWhitelist** | Implementation | RuleAddressList, RuleWhitelistCommon |||
 | └ | <Constructor> | Public ❗️ | 🛑  | RuleAddressList |
 | └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
-| └ | canReturnTransferRestrictionCode | External ❗️ |   |NO❗️ |
-| └ | messageForTransferRestriction | External ❗️ |   |NO❗️ |
 
 
 ### Legend

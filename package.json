@@ -8,6 +8,7 @@
     "lint:sol:script:fix": "npx solium -d script --fix",
     "lint:sol:prettier": "npx prettier --write 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
     "uml": "npx sol2uml class src",
+    "uml:ruleEngine": "npx sol2uml src contracts -b RuleEngine",
     "uml:test": "npx sol2uml class test",
     "surya:report": "npx surya mdreport surya_report_ruleEngine.md src/RuleEngine.sol && npx surya mdreport surya_report_ruleWhitelist.md src/RuleWhitelist.sol",
     "surya:graph": "npx surya graph  src/rules/operation/RuleConditionalTransfer.sol | dot -Tpng > surya_graph_conditionalTransfer.png && npx surya graph  src/rules/validation/RuleBlacklist.sol| dot -Tpng > surya_graph_blacklist.png && npx surya graph  src/rules/validation/RuleWhitelist.sol | dot -Tpng > surya_graph_Whitelist.png && npx surya graph  src/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png && npx surya graph  src/rules/validation/RuleSanctionList.sol | dot -Tpng > surya_graph_SanctionList.png",

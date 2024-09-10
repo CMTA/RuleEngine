@@ -61,6 +61,9 @@ contract RuleWhitelistWrapper is
                 // Update if to is in the list
                 result[1] = true;
             }
+            if (result[0] && result[1]) {
+                break;
+            }
         }
         if (!result[0]) {
             return CODE_ADDRESS_FROM_NOT_WHITELISTED;

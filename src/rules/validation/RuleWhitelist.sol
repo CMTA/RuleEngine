@@ -4,12 +4,11 @@ pragma solidity ^0.8.20;
 
 import "./abstract/RuleAddressList/RuleAddressList.sol";
 import "./abstract/RuleWhitelistCommon.sol";
+
 /**
  * @title a whitelist manager
  */
-
-contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon
-{
+contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
     /**
      * @param admin Address of the contract (Access Control)
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support

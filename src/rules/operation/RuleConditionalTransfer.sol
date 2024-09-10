@@ -11,7 +11,7 @@ import "../validation/abstract/RuleValidateTransfer.sol";
 import "CMTAT/interfaces/engine/IRuleEngine.sol";
 
 /**
- * @title a whitelist manager
+ * @title RuleConditionalTransfer
  */
 
 contract RuleConditionalTransfer is
@@ -47,6 +47,47 @@ contract RuleConditionalTransfer is
         options = options_;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC/EXTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+    /**
+     * @notice function called by the RuleEngine
+     * @dev Returns true if the transfer is valid, and false otherwise.
+     * Add access control with the RuleEngine
+     */
+    function operateOnTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    )
+        public
+        override
+        onlyRole(RULE_ENGINE_CONTRACT_ROLE)
+        returns (bool isValid)
+    {
+        // No need of approval if from and to are in the whitelist
+        if (address(whitelistConditionalTransfer) != address(0)) {
+            if (
+                whitelistConditionalTransfer.addressIsListed(_from) &&
+                whitelistConditionalTransfer.addressIsListed(_to)
+            ) {
+                return true;
+            }
+        }
+
+        // Mint & Burn
+        if (_validateBurnMint(_from, _to)) {
+            return true;
+        }
+        bytes32 key = keccak256(abi.encode(_from, _to, _amount));
+        if (_validateApproval(key)) {
+            _updateProcessedTransfer(key);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * @notice Create a request of transfer for yourselves
      * @param to recipient of tokens
@@ -66,9 +107,11 @@ contract RuleConditionalTransfer is
             TransferRequest memory newTransferApproval = TransferRequest({
                 key: key,
                 id: requestIdLocal,
-                from: from,
-                to: to,
-                value: value,
+                keyElement: TransferRequestKeyElement({
+                    from: from,
+                    to: to,
+                    value: value
+                }),
                 askTime: block.timestamp,
                 maxTime: 0,
                 status: STATUS.WAIT
@@ -134,25 +177,6 @@ contract RuleConditionalTransfer is
         }
     }
 
-    function _cancelTransferRequest(uint256 requestId_) internal {
-        if (requestId_ + 1 > requestId) {
-            revert RuleConditionalTransfer_InvalidId();
-        }
-        bytes32 key = IdToKey[requestId_];
-        // Check Sender
-        if (transferRequests[key].from != _msgSender()) {
-            revert RuleConditionalTransfer_InvalidSender();
-        }
-        // Check status
-        if (
-            transferRequests[key].status != STATUS.WAIT &&
-            transferRequests[key].status != STATUS.APPROVED
-        ) {
-            revert RuleConditionalTransfer_Wrong_Status();
-        }
-        _resetRequestStatus(key);
-    }
-
     function getRequestTrade(
         address from,
         address to,
@@ -196,43 +220,6 @@ contract RuleConditionalTransfer is
             }
         }
         return requests;
-    }
-
-    /**
-     * @dev Returns true if the transfer is valid, and false otherwise.
-     * Add access control with the RuleEngine
-     */
-    function operateOnTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    )
-        public
-        override
-        onlyRole(RULE_ENGINE_CONTRACT_ROLE)
-        returns (bool isValid)
-    {
-        // No need of approval if from and to are in the whitelist
-        if (address(whitelistConditionalTransfer) != address(0)) {
-            if (
-                whitelistConditionalTransfer.addressIsListed(_from) &&
-                whitelistConditionalTransfer.addressIsListed(_to)
-            ) {
-                return true;
-            }
-        }
-
-        // Mint & Burn
-        if (_validateBurnMint(_from, _to)) {
-            return true;
-        }
-        bytes32 key = keccak256(abi.encode(_from, _to, _amount));
-        if (_validateApproval(key)) {
-            _updateProcessedTransfer(key);
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -289,6 +276,29 @@ contract RuleConditionalTransfer is
         }
     }
 
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+
+    function _cancelTransferRequest(uint256 requestId_) internal {
+        if (requestId_ + 1 > requestId) {
+            revert RuleConditionalTransfer_InvalidId();
+        }
+        bytes32 key = IdToKey[requestId_];
+        // Check Sender
+        if (transferRequests[key].keyElement.from != _msgSender()) {
+            revert RuleConditionalTransfer_InvalidSender();
+        }
+        // Check status
+        if (
+            transferRequests[key].status != STATUS.WAIT &&
+            transferRequests[key].status != STATUS.APPROVED
+        ) {
+            revert RuleConditionalTransfer_Wrong_Status();
+        }
+        _resetRequestStatus(key);
+    }
+
     /**
      *
      * @dev
@@ -321,12 +331,14 @@ contract RuleConditionalTransfer is
     function _validateApproval(
         bytes32 key
     ) internal view returns (bool isValid) {
+        // If automatic approval is activate and time to approve the request has passed
         bool automaticApprovalCondition = options
             .automaticApproval
             .isActivate &&
             ((transferRequests[key].askTime +
                 options.automaticApproval.timeLimitBeforeAutomaticApproval) >=
                 block.timestamp);
+        // If the transfer is approved and delay to perform the transfer is respected
         bool isTransferApproved = (transferRequests[key].status ==
             STATUS.APPROVED) &&
             (transferRequests[key].maxTime >= block.timestamp);
@@ -336,6 +348,10 @@ contract RuleConditionalTransfer is
             return false;
         }
     }
+
+    /*//////////////////////////////////////////////////////////////
+                           ERC-2771
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule

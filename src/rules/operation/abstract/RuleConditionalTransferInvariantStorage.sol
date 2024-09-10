@@ -9,6 +9,7 @@ import "src/rules/validation/RuleWhitelist.sol";
 abstract contract RuleConditionalTransferInvariantStorage is
     RuleCommonInvariantStorage
 {
+    /* ============ Struct ============ */
     /**
      * perform automatically a transfer if the transfer request is approved.
      * To perform the transfer, the token holder has to approve the rule to spend tokens on his behalf (standard ERC-20 approval).
@@ -49,45 +50,43 @@ abstract contract RuleConditionalTransferInvariantStorage is
         AUTOMATIC_TRANSFER automaticTransfer;
     }
 
-    enum STATUS {
-        NONE,
-        WAIT,
-        APPROVED,
-        DENIED,
-        EXECUTED,
-        CANCELLED
-    }
-
     struct TransferRequestKeyElement {
         address from;
         address to;
         uint256 value;
     }
+
     struct TransferRequest {
         bytes32 key;
         uint256 id;
-        address from;
-        address to;
-        uint256 value;
+        TransferRequestKeyElement keyElement;
         uint256 askTime;
         uint256 maxTime;
         STATUS status;
     }
+    /* ============ Enum ============ */
+    enum STATUS {
+        NONE,
+        WAIT,
+        APPROVED,
+        DENIED,
+        EXECUTED
+    }
 
-    // Role
+    /* ============ Role ============ */
     bytes32 public constant RULE_ENGINE_CONTRACT_ROLE =
         keccak256("RULE_ENGINE_CONTRACT_ROLE");
     bytes32 public constant RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE =
         keccak256("RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE");
 
-    // String
+    /* ============ State variables ============ */
     string constant TEXT_TRANSFER_REQUEST_NOT_APPROVED =
         "The request is not approved";
     // Code
     // It is very important that each rule uses an unique code
     uint8 public constant CODE_TRANSFER_REQUEST_NOT_APPROVED = 51;
 
-    // error
+    /* ============ Custom error ============ */
     error RuleConditionalTransfer_AdminWithAddressZeroNotAllowed();
     error RuleConditionalTransfer_TransferAlreadyApproved();
     error RuleConditionalTransfer_Wrong_Status();
@@ -100,7 +99,7 @@ abstract contract RuleConditionalTransferInvariantStorage is
     error RuleConditionalTransfer_InvalidLengthArray();
     error RuleConditionalTransfer_EmptyArray();
 
-    // Event
+    /* ============ Events ============ */
     event transferProcessed(
         bytes32 indexed key,
         address indexed from,

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./interfaces/IRuleOperation.sol | 7ea885c00f24740a5d85ba1b2447a0bc0b8df410 |
+| ./interfaces/IRuleOperation.sol | 0284e295bdd4e46766290c62aa04841ffba6e056 |
 
 
 ### Contracts Description Table

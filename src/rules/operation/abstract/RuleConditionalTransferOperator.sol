@@ -15,13 +15,16 @@ abstract contract RuleConditionalTransferOperator is
 {
     // Security
     using SafeERC20 for IERC20;
-
-    // public variable with automatic Getter
+    /* ============ State Variables ============ */
     OPTION public options;
     uint256 public requestId;
     mapping(uint256 => bytes32) public IdToKey;
     mapping(bytes32 => TransferRequest) public transferRequests;
     RuleWhitelist public whitelistConditionalTransfer;
+
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC/EXTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice set a whitelist. A transfer does not need of an approved request if from and to are in the whitelist
@@ -34,8 +37,8 @@ abstract contract RuleConditionalTransferOperator is
     }
 
     /**
-    set/unset the issuance options (mint & burn)
-    */
+     * @notice set/unset the issuance options (mint & burn)
+     */
     function setIssuanceOptions(
         ISSUANCE calldata issuance_
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE) {
@@ -270,7 +273,9 @@ abstract contract RuleConditionalTransferOperator is
         }
     }
 
-    /*** Internal functions ****/
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
     function _approveTransferRequestKeyElement(
         TransferRequestKeyElement calldata keyElement,
         uint256 partialValue,
@@ -303,21 +308,19 @@ abstract contract RuleConditionalTransferOperator is
     }
 
     function _createTransferRequestWithApproval(
-        TransferRequestKeyElement memory keyElement
+        TransferRequestKeyElement memory keyElement_
     ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE) {
         // WAIT => Will overwrite
         // APPROVED => will overwrite previous status with a new delay
         // DENIED => will overwrite
         bytes32 key = keccak256(
-            abi.encode(keyElement.from, keyElement.to, keyElement.value)
+            abi.encode(keyElement_.from, keyElement_.to, keyElement_.value)
         );
         if (_checkRequestStatus(key)) {
             TransferRequest memory newTransferApproval = TransferRequest({
                 key: key,
                 id: requestId,
-                from: keyElement.from,
-                to: keyElement.to,
-                value: keyElement.value,
+                keyElement: keyElement_,
                 askTime: 0,
                 maxTime: block.timestamp +
                     options.timeLimit.timeLimitToTransfer,
@@ -327,9 +330,9 @@ abstract contract RuleConditionalTransferOperator is
             IdToKey[requestId] = key;
             emit transferApproved(
                 key,
-                keyElement.from,
-                keyElement.to,
-                keyElement.value,
+                keyElement_.from,
+                keyElement_.to,
+                keyElement_.value,
                 requestId
             );
             ++requestId;
@@ -341,9 +344,9 @@ abstract contract RuleConditionalTransferOperator is
             transferRequests[key].status = STATUS.APPROVED;
             emit transferApproved(
                 key,
-                keyElement.from,
-                keyElement.to,
-                keyElement.value,
+                keyElement_.from,
+                keyElement_.to,
+                keyElement_.value,
                 transferRequests[key].id
             );
         }
@@ -353,9 +356,9 @@ abstract contract RuleConditionalTransferOperator is
         transferRequests[key].status = STATUS.NONE;
         emit transferReset(
             key,
-            transferRequests[key].from,
-            transferRequests[key].to,
-            transferRequests[key].value,
+            transferRequests[key].keyElement.from,
+            transferRequests[key].keyElement.to,
+            transferRequests[key].keyElement.value,
             transferRequests[key].id
         );
     }
@@ -391,9 +394,9 @@ abstract contract RuleConditionalTransferOperator is
                 options.timeLimit.timeLimitToTransfer;
             emit transferApproved(
                 transferRequest.key,
-                transferRequest.from,
-                transferRequest.to,
-                transferRequest.value,
+                transferRequest.keyElement.from,
+                transferRequest.keyElement.to,
+                transferRequest.keyElement.value,
                 transferRequests[transferRequest.key].id
             );
             if (
@@ -404,15 +407,15 @@ abstract contract RuleConditionalTransferOperator is
                 // External call
                 if (
                     options.automaticTransfer.cmtat.allowance(
-                        transferRequest.from,
+                        transferRequest.keyElement.from,
                         address(this)
-                    ) >= transferRequest.value
+                    ) >= transferRequest.keyElement.value
                 ) {
                     // Will call the ruleEngine and the rule again...
                     options.automaticTransfer.cmtat.safeTransferFrom(
-                        transferRequest.from,
-                        transferRequest.to,
-                        transferRequest.value
+                        transferRequest.keyElement.from,
+                        transferRequest.keyElement.to,
+                        transferRequest.keyElement.value
                     );
                 }
             }
@@ -420,9 +423,9 @@ abstract contract RuleConditionalTransferOperator is
             transferRequests[transferRequest.key].status = STATUS.DENIED;
             emit transferDenied(
                 transferRequest.key,
-                transferRequest.from,
-                transferRequest.to,
-                transferRequest.value,
+                transferRequest.keyElement.from,
+                transferRequest.keyElement.to,
+                transferRequest.keyElement.value,
                 transferRequests[transferRequest.key].id
             );
         }
@@ -440,9 +443,9 @@ abstract contract RuleConditionalTransferOperator is
         // Emit event
         emit transferProcessed(
             key,
-            transferRequests[key].from,
-            transferRequests[key].to,
-            transferRequests[key].value,
+            transferRequests[key].keyElement.from,
+            transferRequests[key].keyElement.to,
+            transferRequests[key].keyElement.value,
             transferRequests[key].id
         );
     }

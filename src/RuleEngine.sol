@@ -16,6 +16,12 @@ contract RuleEngine is
     RuleEngineValidation,
     MetaTxModuleStandalone
 {
+    /**
+     * @notice
+     * Get the current version of the smart contract
+     */
+    string public constant VERSION = "2.0.3";
+    
     error RuleEngine_TransferInvalid();
 
     /**
@@ -141,6 +147,10 @@ contract RuleEngine is
         // Apply operation on RuleEngine
         return RuleEngineOperation._operateOnTransfer(from, to, amount);
     }
+
+    /*//////////////////////////////////////////////////////////////
+                           ERC-2771
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
