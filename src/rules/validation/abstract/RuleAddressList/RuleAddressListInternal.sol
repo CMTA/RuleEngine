@@ -17,13 +17,13 @@ abstract contract RuleAddressListInternal {
     /**
      * @notice Add addresses to the list
      * If one of addresses already exist, there is no change for this address. The transaction remains valid (no revert).
-     * @param listAddresses an array with the addresses to list
+     * @param listTargetAddresses an array with the addresses to list
      */
-    function _addAddressesToThelist(address[] calldata listAddresses) internal {
+    function _addAddressesToThelist(address[] calldata listTargetAddresses) internal {
         uint256 numAddressesListLocal = numAddressesList;
-        for (uint256 i = 0; i < listAddresses.length; ++i) {
-            if (!list[listAddresses[i]]) {
-                list[listAddresses[i]] = true;
+        for (uint256 i = 0; i < listTargetAddresses.length; ++i) {
+            if (!list[listTargetAddresses[i]]) {
+                list[listTargetAddresses[i]] = true;
                 ++numAddressesListLocal;
             }
         }
@@ -34,15 +34,15 @@ abstract contract RuleAddressListInternal {
      * @notice Remove addresses from the list
      * If the address does not exist in the list, there is no change for this address.
      * The transaction remains valid (no revert).
-     * @param listAddresses an array with the addresses to remove
+     * @param listTargetAddresses an array with the addresses to remove
      */
     function _removeAddressesFromThelist(
-        address[] calldata listAddresses
+        address[] calldata listTargetAddresses
     ) internal {
         uint256 numAddressesListLocal = numAddressesList;
-        for (uint256 i = 0; i < listAddresses.length; ++i) {
-            if (list[listAddresses[i]]) {
-                list[listAddresses[i]] = false;
+        for (uint256 i = 0; i < listTargetAddresses.length; ++i) {
+            if (list[listTargetAddresses[i]]) {
+                list[listTargetAddresses[i]] = false;
                 --numAddressesListLocal;
             }
         }
@@ -52,27 +52,27 @@ abstract contract RuleAddressListInternal {
     /**
      * @notice Add one address to the list
      * If the address already exists, the transaction is reverted to save gas.
-     * @param _newlistAddress The address to list
+     * @param targetAddress The address to list
      */
-    function _addAddressToThelist(address _newlistAddress) internal {
-        if (list[_newlistAddress]) {
+    function _addAddressToThelist(address targetAddress) internal {
+        if (list[targetAddress]) {
             revert Rulelist_AddressAlreadylisted();
         }
-        list[_newlistAddress] = true;
+        list[targetAddress] = true;
         ++numAddressesList;
     }
 
     /**
      * @notice Remove one address from the list
      * If the address does not exist in the list, the transaction is reverted to save gas.
-     * @param _removelistAddress The address to remove
+     * @param targetAddress The address to remove
      *
      */
-    function _removeAddressFromThelist(address _removelistAddress) internal {
-        if (!list[_removelistAddress]) {
+    function _removeAddressFromThelist(address targetAddress) internal {
+        if (!list[targetAddress]) {
             revert Rulelist_AddressNotPresent();
         }
-        list[_removelistAddress] = false;
+        list[targetAddress] = false;
         --numAddressesList;
     }
 

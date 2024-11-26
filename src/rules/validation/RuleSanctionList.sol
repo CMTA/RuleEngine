@@ -25,10 +25,14 @@ contract RuleSanctionList is
      */
     constructor(
         address admin,
-        address forwarderIrrevocable
+        address forwarderIrrevocable,
+        address sanctionContractOracle_
     ) MetaTxModuleStandalone(forwarderIrrevocable) {
         if (admin == address(0)) {
             revert RuleSanctionList_AdminWithAddressZeroNotAllowed();
+        }
+        if(sanctionContractOracle_ != address(0)){
+            _setSanctionListOracle(sanctionContractOracle_);
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(SANCTIONLIST_ROLE, admin);
@@ -42,7 +46,14 @@ contract RuleSanctionList is
     function setSanctionListOracle(
         address sanctionContractOracle_
     ) public onlyRole(SANCTIONLIST_ROLE) {
+        _setSanctionListOracle(sanctionContractOracle_);
+    }
+
+    function _setSanctionListOracle(
+        address sanctionContractOracle_
+    ) internal {
         sanctionsList = SanctionsList(sanctionContractOracle_);
+        emit SetSanctionListOracle(address(sanctionContractOracle_));
     }
 
     /**

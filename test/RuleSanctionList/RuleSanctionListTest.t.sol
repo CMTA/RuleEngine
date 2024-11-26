@@ -26,6 +26,7 @@ contract RuleSanctionlistTest is Test, HelperContract {
         sanctionlistOracle.addToSanctionsList(ATTACKER);
         ruleSanctionList = new RuleSanctionList(
             SANCTIONLIST_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
             ZERO_ADDRESS
         );
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);

@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "CMTAT/mocks/MinimalForwarderMock.sol";
+import "../utils/SanctionListOracle.sol";
 
 /**
  * @title General functions of the ruleSanctionList
@@ -16,7 +17,7 @@ contract RuleSanctionListDeploymentTest is Test, HelperContract {
     string resString;
     uint8 CODE_NONEXISTENT = 255;
     RuleSanctionList ruleSanctionList;
-
+    SanctionListOracle sanctionlistOracle;
     // Arrange
     function setUp() public {}
 
@@ -28,7 +29,8 @@ contract RuleSanctionListDeploymentTest is Test, HelperContract {
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
         ruleSanctionList = new RuleSanctionList(
             SANCTIONLIST_OPERATOR_ADDRESS,
-            address(forwarder)
+            address(forwarder), 
+            ZERO_ADDRESS
         );
 
         // assert
@@ -50,6 +52,17 @@ contract RuleSanctionListDeploymentTest is Test, HelperContract {
             RuleSanctionList_AdminWithAddressZeroNotAllowed.selector
         );
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
-        ruleSanctionList = new RuleSanctionList(address(0), address(forwarder));
+        ruleSanctionList = new RuleSanctionList(address(0), address(forwarder), ZERO_ADDRESS);
     }
+
+    function testCanSetAnOracleAtDeployment() public {
+        sanctionlistOracle = new SanctionListOracle();
+        vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
+        emit SetSanctionListOracle(address(sanctionlistOracle));
+        ruleSanctionList = new RuleSanctionList(
+                SANCTIONLIST_OPERATOR_ADDRESS,
+                address(0x0), 
+                ZERO_ADDRESS
+            );
+        }
 }

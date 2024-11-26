@@ -4,13 +4,12 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
-
 import "../utils/SanctionListOracle.sol";
 
 /**
  * @title General functions of the ruleSanctionList
  */
-contract RuleSanctionlistTest is Test, HelperContract {
+contract RuleSanctionlistAddTest is Test, HelperContract {
     // Custom error openZeppelin
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
@@ -30,13 +29,27 @@ contract RuleSanctionlistTest is Test, HelperContract {
         sanctionlistOracle.addToSanctionsList(ATTACKER);
         ruleSanctionList = new RuleSanctionList(
             SANCTIONLIST_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
             ZERO_ADDRESS
         );
     }
 
-    function testCanSetOracle() public {
+    function testCanSetandRemoveOracle() public {
+        // ADD
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
+        emit SetSanctionListOracle(address(sanctionlistOracle));
         ruleSanctionList.setSanctionListOracle(address(sanctionlistOracle));
+
+        SanctionsList sanctionListOracleGet = ruleSanctionList.sanctionsList();
+        // Assert
+        vm.assertEq(address(sanctionListOracleGet), address(sanctionlistOracle));
+        // Remove
+        vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
+        emit SetSanctionListOracle(ZERO_ADDRESS);
+        ruleSanctionList.setSanctionListOracle(ZERO_ADDRESS);
+        // Assert
+        sanctionListOracleGet = ruleSanctionList.sanctionsList();
+        vm.assertEq(address(sanctionListOracleGet), address(ZERO_ADDRESS));
     }
 
     function testCannotAttackerSetOracle() public {

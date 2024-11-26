@@ -61,6 +61,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
     function testAddAddressToTheList() public {
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        emit AddAddressToTheList(ADDRESS1);
         ruleWhitelist.addAddressToTheList(ADDRESS1);
 
         // Assert
@@ -97,6 +98,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        emit AddAddressToTheList(address(0x0));
         ruleWhitelist.addAddressToTheList(address(0x0));
 
         // Assert
@@ -116,6 +118,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        emit AddAddressesToTheList(whitelist);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
                 "addAddressesToTheList(address[])",
