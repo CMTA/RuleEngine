@@ -324,7 +324,7 @@ abstract contract RuleConditionalTransferOperator is
 
     function _createTransferRequestWithApproval(
         TransferRequestKeyElement memory keyElement_
-    ) internal onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE) {
+    ) internal {
         // WAIT => Will overwrite
         // APPROVED => will overwrite previous status with a new delay
         // DENIED => will overwrite
