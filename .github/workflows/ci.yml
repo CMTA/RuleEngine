@@ -12,18 +12,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Setup NodeJS 20.5.0
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20.5.0
-
-      - name: Show NodeJS version
-        run: npm --version
-
-      - name: Install Project Dependencies
-        run: npm install
-      
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
@@ -31,6 +19,15 @@ jobs:
 
       - name: Run Forge install
         run: forge install
+
+      - name: Setup NodeJS 20.5.0
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.5.0
+
+      - name: Install nodes modules inside OZ
+        run: npm install
+        working-directory: ./lib/openzeppelin-contracts
 
       - name: Run Forge build
         run: forge build --sizes
