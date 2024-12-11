@@ -2,9 +2,32 @@
 
 Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
+## Checklist
 
+> Before a new release, perform the following tasks
 
-## v2.0.3
+- Code: Update the version name, variable VERSION
+- Run linter
+
+> npm run-script lint:all:prettier
+
+- Documentation
+  - Perform a code coverage and update the files in the corresponding directory [./doc/coverage](./doc/coverage)
+  - Perform an audit with several audit tools (Mythril and Slither), update the report in the corresponding directory [./doc/security/audits/tools](./doc/security/audits/tools)
+  - Update surya doc by running the 3 scripts in [./doc/script](./doc/script)
+  - Update changelog
+
+## v2.0.4
+
+- Fix a bug present in the Conditional Transfer rule and the corresponding test.
+- Config file:
+  - Set Solidity version to 0.8.27 in config file
+  - Set EVM version to `Cancun`
+- Add events for the following rules : whitelist/blacklist and sanctionList rules
+- Some improvements in testing
+  - Integration test with CMTAT: set the CMTAT version to [v2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1)
+
+## v2.0.3 - 20240910
 
 - Small optimization in WhitelistWrapper; add a break in a loop
 - Set Solidity version to 0.8.26 in config file

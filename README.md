@@ -10,9 +10,10 @@ The RuleEngine is an external contract used to apply transfer restrictions to an
 
 The toolchain includes the following components, where the versions are the latest ones that we tested:
 
-- Foundry
-- Solidity 0.8.26 (via solc-js)
-- OpenZeppelin Contracts (submodule) [v5.0.2](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.2)
+- Foundry [v1.9.4](https://github.com/foundry-rs/forge-std/releases/tag/v1.9.4)
+- Solidity 0.8.27 (via solc-js)
+- OpenZeppelin Contracts (submodule) [v5.1.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.2)
+- CMTAT [v2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1)
 
 ## How to include it
 
@@ -33,6 +34,8 @@ Before each transfer, your contract must call the function `operateOnTransfer` w
 #### Global
 
 > npm run-script uml
+>
+> No longer works, generate the following error: RangeError: Maximum call stack size exceeded
 
 ![uml](./doc/schema/classDiagram.svg)
 
@@ -41,6 +44,12 @@ Before each transfer, your contract must call the function `operateOnTransfer` w
 #### RuleEngine
 
 > npm run-script uml:ruleEngine
+>
+> No longer works, instead:
+>
+> forge flatten src/RuleEngine.sol -o RuleEngine.sol
+>
+> npx sol2uml class RuleEngine.sol
 
 ![uml](./doc/schema/RuleEngine.svg)
 
@@ -111,8 +120,6 @@ You will find the report performed with [Slither](https://github.com/crytic/slit
 | Version | File                                                         |
 | ------- | ------------------------------------------------------------ |
 | latest  | [slither-report.md](./doc/security/audits/tools/slither-report.md) |
-| v1.0.2  | [v1.0.2-slither-report.md](./doc/security/audits/archive/v1.0.2-slither-report.md) |
-| v1.0.3  | [v1.0.3-slither-report.md](./doc/security/audits/archive/v1.0.3-slither-report.md) |
 
 
 

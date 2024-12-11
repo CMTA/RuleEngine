@@ -8,7 +8,7 @@ abstract contract RuleAddressListInvariantStorage {
     event RemoveAddressesFromTheList(address[] listTargetAddresses);
     event AddAddressToTheList(address targetAddress);
     event RemoveAddressFromTheList(address targetAddress);
-    
+
     /* ============ Custom errors ============ */
     error RuleAddressList_AdminWithAddressZeroNotAllowed();
 

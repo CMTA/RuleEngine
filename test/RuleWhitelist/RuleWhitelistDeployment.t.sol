@@ -9,14 +9,7 @@ import "CMTAT/mocks/MinimalForwarderMock.sol";
 /**
  * @title General functions of the RuleWhitelist
  */
-contract RuleWhitelistTest is Test, HelperContract {
-    uint256 resUint256;
-    uint8 resUint8;
-    bool resBool;
-    bool resCallBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
-
+contract RuleWhitelistDeploymentTest is Test, HelperContract {
     // Arrange
     function setUp() public {}
 

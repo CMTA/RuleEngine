@@ -6,7 +6,7 @@ Summary
  - [costly-loop](#costly-loop) (2 results) (Informational)
  - [dead-code](#dead-code) (5 results) (Informational)
  - [solc-version](#solc-version) (1 results) (Informational)
- - [naming-convention](#naming-convention) (54 results) (Informational)
+ - [naming-convention](#naming-convention) (50 results) (Informational)
  - [similar-names](#similar-names) (7 results) (Informational)
  - [unused-import](#unused-import) (1 results) (Informational)
  - [var-read-using-this](#var-read-using-this) (1 results) (Optimization)
@@ -17,31 +17,31 @@ Summary
 Impact: Medium
 Confidence: High
  - [ ] ID-0
-	[RuleConditionalTransfer.getRequestByStatus(RuleConditionalTransferInvariantStorage.STATUS)](src/rules/operation/RuleConditionalTransfer.sol#L194-L223) uses a dangerous strict equality:
-	- [transferRequests[IdToKey[i]].status == _targetStatus](src/rules/operation/RuleConditionalTransfer.sol#L203)
+	[RuleConditionalTransfer.getRequestByStatus(RuleConditionalTransferInvariantStorage.STATUS)](src/rules/operation/RuleConditionalTransfer.sol#L177-L206) uses a dangerous strict equality:
+	- [transferRequests[IdToKey[i_scope_0]].status == _targetStatus](src/rules/operation/RuleConditionalTransfer.sol#L196)
 
-src/rules/operation/RuleConditionalTransfer.sol#L194-L223
+src/rules/operation/RuleConditionalTransfer.sol#L177-L206
 
 
  - [ ] ID-1
-	[RuleConditionalTransferOperator._checkRequestStatus(bytes32)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L367-L372) uses a dangerous strict equality:
-	- [(transferRequests[key].status == STATUS.NONE) && (transferRequests[key].key == 0x0)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L369-L371)
+	[RuleConditionalTransfer._validateApproval(bytes32)](src/rules/operation/RuleConditionalTransfer.sol#L329-L349) uses a dangerous strict equality:
+	- [isTransferApproved = (transferRequests[key].status == STATUS.APPROVED) && (transferRequests[key].maxTime >= block.timestamp)](src/rules/operation/RuleConditionalTransfer.sol#L341-L343)
 
-src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L367-L372
+src/rules/operation/RuleConditionalTransfer.sol#L329-L349
 
 
  - [ ] ID-2
-	[RuleConditionalTransfer.getRequestByStatus(RuleConditionalTransferInvariantStorage.STATUS)](src/rules/operation/RuleConditionalTransfer.sol#L194-L223) uses a dangerous strict equality:
-	- [transferRequests[IdToKey[i_scope_0]].status == _targetStatus](src/rules/operation/RuleConditionalTransfer.sol#L213)
+	[RuleConditionalTransferOperator._checkRequestStatus(bytes32)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L383-L388) uses a dangerous strict equality:
+	- [(transferRequests[key].status == STATUS.NONE) && (transferRequests[key].key == 0x0)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L385-L387)
 
-src/rules/operation/RuleConditionalTransfer.sol#L194-L223
+src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L383-L388
 
 
  - [ ] ID-3
-	[RuleConditionalTransfer._validateApproval(bytes32)](src/rules/operation/RuleConditionalTransfer.sol#L332-L351) uses a dangerous strict equality:
-	- [isTransferApproved = (transferRequests[key].status == STATUS.APPROVED) && (transferRequests[key].maxTime >= block.timestamp)](src/rules/operation/RuleConditionalTransfer.sol#L343-L345)
+	[RuleConditionalTransfer.getRequestByStatus(RuleConditionalTransferInvariantStorage.STATUS)](src/rules/operation/RuleConditionalTransfer.sol#L177-L206) uses a dangerous strict equality:
+	- [transferRequests[IdToKey[i]].status == _targetStatus](src/rules/operation/RuleConditionalTransfer.sol#L186)
 
-src/rules/operation/RuleConditionalTransfer.sol#L332-L351
+src/rules/operation/RuleConditionalTransfer.sol#L177-L206
 
 ## calls-loop
 
@@ -49,53 +49,52 @@ src/rules/operation/RuleConditionalTransfer.sol#L332-L351
 
 Impact: Low
 Confidence: Medium
-
  - [ ] ID-4
+[RuleWhitelistWrapper.detectTransferRestriction(address,address,uint256)](src/rules/validation/RuleWhitelistWrapper.sol#L39-L74) has external calls inside a loop: [isListed = RuleAddressList(_rulesValidation[i]).addressIsListedBatch(targetAddress)](src/rules/validation/RuleWhitelistWrapper.sol#L53-L54)
+
+src/rules/validation/RuleWhitelistWrapper.sol#L39-L74
+
+
+ - [ ] ID-5
 [RuleEngineValidation.detectTransferRestrictionValidation(address,address,uint256)](src/modules/RuleEngineValidation.sol#L29-L44) has external calls inside a loop: [restriction = IRuleValidation(_rulesValidation[i]).detectTransferRestriction(_from,_to,_amount)](src/modules/RuleEngineValidation.sol#L36-L37)
 
 src/modules/RuleEngineValidation.sol#L29-L44
 
 
- - [ ] ID-5
-[RuleWhitelistWrapper.detectTransferRestriction(address,address,uint256)](src/rules/validation/RuleWhitelistWrapper.sol#L40-L75) has external calls inside a loop: [isListed = RuleAddressList(_rulesValidation[i]).addressIsListedBatch(targetAddress)](src/rules/validation/RuleWhitelistWrapper.sol#L54-L55)
-
-src/rules/validation/RuleWhitelistWrapper.sol#L40-L75
-
-
  - [ ] ID-6
-[RuleEngine.messageForTransferRestriction(uint8)](src/RuleEngine.sol#L97-L125) has external calls inside a loop: [IRuleValidation(_rulesValidation[i]).canReturnTransferRestrictionCode(_restrictionCode)](src/RuleEngine.sol#L104-L105)
+[RuleEngine.messageForTransferRestriction(uint8)](src/RuleEngine.sol#L100-L128) has external calls inside a loop: [IRuleValidation(_rulesOperation[i_scope_0]).messageForTransferRestriction(_restrictionCode)](src/RuleEngine.sol#L122-L124)
 
-src/RuleEngine.sol#L97-L125
+src/RuleEngine.sol#L100-L128
 
 
  - [ ] ID-7
-[RuleEngine.messageForTransferRestriction(uint8)](src/RuleEngine.sol#L97-L125) has external calls inside a loop: [IRuleValidation(_rulesOperation[i_scope_0]).canReturnTransferRestrictionCode(_restrictionCode)](src/RuleEngine.sol#L116-L117)
+[RuleEngine.messageForTransferRestriction(uint8)](src/RuleEngine.sol#L100-L128) has external calls inside a loop: [IRuleValidation(_rulesValidation[i]).canReturnTransferRestrictionCode(_restrictionCode)](src/RuleEngine.sol#L107-L108)
 
-src/RuleEngine.sol#L97-L125
+src/RuleEngine.sol#L100-L128
 
 
  - [ ] ID-8
-[RuleEngine.messageForTransferRestriction(uint8)](src/RuleEngine.sol#L97-L125) has external calls inside a loop: [IRuleValidation(_rulesValidation[i]).messageForTransferRestriction(_restrictionCode)](src/RuleEngine.sol#L107-L109)
+[RuleEngine.messageForTransferRestriction(uint8)](src/RuleEngine.sol#L100-L128) has external calls inside a loop: [IRuleValidation(_rulesValidation[i]).messageForTransferRestriction(_restrictionCode)](src/RuleEngine.sol#L110-L112)
 
-src/RuleEngine.sol#L97-L125
+src/RuleEngine.sol#L100-L128
 
 
  - [ ] ID-9
-[RuleEngine.detectTransferRestriction(address,address,uint256)](src/RuleEngine.sol#L47-L73) has external calls inside a loop: [restriction = IRuleValidation(_rulesOperation[i]).detectTransferRestriction(_from,_to,_amount)](src/RuleEngine.sol#L65-L66)
+[RuleConditionalTransferOperator._approveRequest(RuleConditionalTransferInvariantStorage.TransferRequest,bool)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L390-L449) has external calls inside a loop: [options.automaticTransfer.cmtat.allowance(transferRequest.keyElement.from,address(this)) >= transferRequest.keyElement.value](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L426-L429)
 
-src/RuleEngine.sol#L47-L73
+src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L390-L449
 
 
  - [ ] ID-10
-[RuleConditionalTransferOperator._approveRequest(RuleConditionalTransferInvariantStorage.TransferRequest,bool)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L374-L433) has external calls inside a loop: [options.automaticTransfer.cmtat.allowance(transferRequest.keyElement.from,address(this)) >= transferRequest.keyElement.value](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L410-L413)
+[RuleEngine.messageForTransferRestriction(uint8)](src/RuleEngine.sol#L100-L128) has external calls inside a loop: [IRuleValidation(_rulesOperation[i_scope_0]).canReturnTransferRestrictionCode(_restrictionCode)](src/RuleEngine.sol#L119-L120)
 
-src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L374-L433
+src/RuleEngine.sol#L100-L128
 
 
  - [ ] ID-11
-[RuleEngine.messageForTransferRestriction(uint8)](src/RuleEngine.sol#L97-L125) has external calls inside a loop: [IRuleValidation(_rulesOperation[i_scope_0]).messageForTransferRestriction(_restrictionCode)](src/RuleEngine.sol#L119-L121)
+[RuleEngine.detectTransferRestriction(address,address,uint256)](src/RuleEngine.sol#L50-L76) has external calls inside a loop: [restriction = IRuleValidation(_rulesOperation[i]).detectTransferRestriction(_from,_to,_amount)](src/RuleEngine.sol#L68-L69)
 
-src/RuleEngine.sol#L97-L125
+src/RuleEngine.sol#L50-L76
 
 ## timestamp
 
@@ -104,52 +103,55 @@ src/RuleEngine.sol#L97-L125
 > With the Proof Of Stake, a new block is created every 12 seconds
 >
 > In all cases, we are not looking for such precision
+>
+> btw, ID-13 and ID-15 don't use timestamp in their comparison
 
 Impact: Low
 Confidence: Medium
- - [ ] ID-12
-	[RuleConditionalTransferOperator._checkRequestStatus(bytes32)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L367-L372) uses timestamp for comparisons
-	Dangerous comparisons:
-	- [(transferRequests[key].status == STATUS.NONE) && (transferRequests[key].key == 0x0)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L369-L371)
 
-src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L367-L372
+ - [ ] ID-12
+	[RuleConditionalTransfer._validateApproval(bytes32)](src/rules/operation/RuleConditionalTransfer.sol#L329-L349) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [automaticApprovalCondition = options.automaticApproval.isActivate && block.timestamp >= (transferRequests[key].askTime + options.automaticApproval.timeLimitBeforeAutomaticApproval)](src/rules/operation/RuleConditionalTransfer.sol#L334-L339)
+	- [isTransferApproved = (transferRequests[key].status == STATUS.APPROVED) && (transferRequests[key].maxTime >= block.timestamp)](src/rules/operation/RuleConditionalTransfer.sol#L341-L343)
+	- [automaticApprovalCondition || isTransferApproved](src/rules/operation/RuleConditionalTransfer.sol#L344)
+
+src/rules/operation/RuleConditionalTransfer.sol#L329-L349
 
 
  - [ ] ID-13
-	[RuleConditionalTransfer._validateApproval(bytes32)](src/rules/operation/RuleConditionalTransfer.sol#L332-L351) uses timestamp for comparisons
+	[RuleConditionalTransferOperator._checkRequestStatus(bytes32)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L383-L388) uses timestamp for comparisons
 	Dangerous comparisons:
-	- [automaticApprovalCondition = options.automaticApproval.isActivate && ((transferRequests[key].askTime + options.automaticApproval.timeLimitBeforeAutomaticApproval) >= block.timestamp)](src/rules/operation/RuleConditionalTransfer.sol#L336-L341)
-	- [isTransferApproved = (transferRequests[key].status == STATUS.APPROVED) && (transferRequests[key].maxTime >= block.timestamp)](src/rules/operation/RuleConditionalTransfer.sol#L343-L345)
-	- [automaticApprovalCondition || isTransferApproved](src/rules/operation/RuleConditionalTransfer.sol#L346)
+	- [(transferRequests[key].status == STATUS.NONE) && (transferRequests[key].key == 0x0)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L385-L387)
 
-src/rules/operation/RuleConditionalTransfer.sol#L332-L351
+src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L383-L388
 
 
  - [ ] ID-14
-	[RuleConditionalTransfer.getRequestByStatus(RuleConditionalTransferInvariantStorage.STATUS)](src/rules/operation/RuleConditionalTransfer.sol#L194-L223) uses timestamp for comparisons
+	[RuleConditionalTransfer.getRequestByStatus(RuleConditionalTransferInvariantStorage.STATUS)](src/rules/operation/RuleConditionalTransfer.sol#L177-L206) uses timestamp for comparisons
 	Dangerous comparisons:
-	- [transferRequests[IdToKey[i]].status == _targetStatus](src/rules/operation/RuleConditionalTransfer.sol#L203)
-	- [transferRequests[IdToKey[i_scope_0]].status == _targetStatus](src/rules/operation/RuleConditionalTransfer.sol#L213)
+	- [transferRequests[IdToKey[i]].status == _targetStatus](src/rules/operation/RuleConditionalTransfer.sol#L186)
+	- [transferRequests[IdToKey[i_scope_0]].status == _targetStatus](src/rules/operation/RuleConditionalTransfer.sol#L196)
 
-src/rules/operation/RuleConditionalTransfer.sol#L194-L223
+src/rules/operation/RuleConditionalTransfer.sol#L177-L206
 
 
  - [ ] ID-15
-	[RuleConditionalTransferOperator._approveRequest(RuleConditionalTransferInvariantStorage.TransferRequest,bool)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L374-L433) uses timestamp for comparisons
+	[RuleConditionalTransfer._cancelTransferRequest(uint256)](src/rules/operation/RuleConditionalTransfer.sol#L281-L298) uses timestamp for comparisons
 	Dangerous comparisons:
-	- [transferRequest.status != STATUS.WAIT](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L379)
-	- [block.timestamp > (transferRequest.askTime + options.timeLimit.timeLimitToApprove)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L385-L386)
-	- [options.automaticTransfer.cmtat.allowance(transferRequest.keyElement.from,address(this)) >= transferRequest.keyElement.value](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L410-L413)
+	- [transferRequests[key].keyElement.from != _msgSender()](src/rules/operation/RuleConditionalTransfer.sol#L287)
 
-src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L374-L433
+src/rules/operation/RuleConditionalTransfer.sol#L281-L298
 
 
  - [ ] ID-16
-	[RuleConditionalTransfer._cancelTransferRequest(uint256)](src/rules/operation/RuleConditionalTransfer.sol#L284-L301) uses timestamp for comparisons
+	[RuleConditionalTransferOperator._approveRequest(RuleConditionalTransferInvariantStorage.TransferRequest,bool)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L390-L449) uses timestamp for comparisons
 	Dangerous comparisons:
-	- [transferRequests[key].keyElement.from != _msgSender()](src/rules/operation/RuleConditionalTransfer.sol#L290)
+	- [transferRequest.status != STATUS.WAIT](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L395)
+	- [block.timestamp > (transferRequest.askTime + options.timeLimit.timeLimitToApprove)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L401-L402)
+	- [options.automaticTransfer.cmtat.allowance(transferRequest.keyElement.from,address(this)) >= transferRequest.keyElement.value](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L426-L429)
 
-src/rules/operation/RuleConditionalTransfer.sol#L284-L301
+src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L390-L449
 
 ## costly-loop
 
@@ -158,17 +160,17 @@ src/rules/operation/RuleConditionalTransfer.sol#L284-L301
 Impact: Informational
 Confidence: Medium
  - [ ] ID-17
-	[RuleConditionalTransferOperator._createTransferRequestWithApproval(RuleConditionalTransferInvariantStorage.TransferRequestKeyElement)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L311-L354) has costly operations inside a loop:
-	- [++ requestId](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L339)
+	[RuleConditionalTransfer.createTransferRequest(address,uint256)](src/rules/operation/RuleConditionalTransfer.sol#L79-L118) has costly operations inside a loop:
+	- [++ requestId](src/rules/operation/RuleConditionalTransfer.sol#L105)
 
-src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L311-L354
+src/rules/operation/RuleConditionalTransfer.sol#L79-L118
 
 
  - [ ] ID-18
-	[RuleConditionalTransfer.createTransferRequest(address,uint256)](src/rules/operation/RuleConditionalTransfer.sol#L96-L135) has costly operations inside a loop:
-	- [++ requestId](src/rules/operation/RuleConditionalTransfer.sol#L122)
+	[RuleConditionalTransferOperator._createTransferRequestWithApproval(RuleConditionalTransferInvariantStorage.TransferRequestKeyElement)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L325-L370) has costly operations inside a loop:
+	- [++ requestId](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L354)
 
-src/rules/operation/RuleConditionalTransfer.sol#L96-L135
+src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L325-L370
 
 ## dead-code
 
@@ -180,41 +182,43 @@ src/rules/operation/RuleConditionalTransfer.sol#L96-L135
 
 Impact: Informational
 Confidence: Medium
- - [ ] ID-19
-[RuleSanctionList._msgData()](src/rules/validation/RuleSanctionList.sol#L114-L121) is never used and should be removed
 
-src/rules/validation/RuleSanctionList.sol#L114-L121
+ - [ ] ID-19
+[RuleSanctionList._msgData()](src/rules/validation/RuleSanctionList.sol#L145-L152) is never used and should be removed
+
+src/rules/validation/RuleSanctionList.sol#L145-L152
 
 
  - [ ] ID-20
-[RuleAddressList._msgData()](src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L135-L142) is never used and should be removed
+[RuleAddressList._msgData()](src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L156-L163) is never used and should be removed
 
-src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L135-L142
+src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L156-L163
 
 
  - [ ] ID-21
-[RuleWhitelistWrapper._msgData()](src/rules/validation/RuleWhitelistWrapper.sol#L92-L99) is never used and should be removed
+[RuleWhitelistWrapper._msgData()](src/rules/validation/RuleWhitelistWrapper.sol#L110-L117) is never used and should be removed
 
-src/rules/validation/RuleWhitelistWrapper.sol#L92-L99
+src/rules/validation/RuleWhitelistWrapper.sol#L110-L117
 
 
  - [ ] ID-22
-[RuleConditionalTransfer._msgData()](src/rules/operation/RuleConditionalTransfer.sol#L368-L375) is never used and should be removed
+[RuleConditionalTransfer._msgData()](src/rules/operation/RuleConditionalTransfer.sol#L370-L377) is never used and should be removed
 
-src/rules/operation/RuleConditionalTransfer.sol#L368-L375
+src/rules/operation/RuleConditionalTransfer.sol#L370-L377
 
 
  - [ ] ID-23
-[RuleEngine._msgData()](src/RuleEngine.sol#L160-L167) is never used and should be removed
+[RuleEngine._msgData()](src/RuleEngine.sol#L182-L189) is never used and should be removed
 
-src/RuleEngine.sol#L160-L167
+src/RuleEngine.sol#L182-L189
 
 ## solc-version
 
-> The version set in the config file is 0.8.26
+> The version set in the config file is 0.8.27
 
 Impact: Informational
 Confidence: High
+
  - [ ] ID-24
 	Version constraint ^0.8.20 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
 	- VerbatimInvalidDeduplication
@@ -264,24 +268,28 @@ Confidence: High
 	- src/rules/validation/abstract/RuleWhitelistCommon.sol#3
 
 ## naming-convention
+
+> Acknowledge
+
 Impact: Informational
 Confidence: High
- - [ ] ID-25
-Event [RuleConditionalTransferInvariantStorage.transferDenied(bytes32,address,address,uint256,uint256)](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L125-L131) is not in CapWords
 
-src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L125-L131
+ - [ ] ID-25
+Event [RuleConditionalTransferInvariantStorage.transferDenied(bytes32,address,address,uint256,uint256)](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L124-L130) is not in CapWords
+
+src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L124-L130
 
 
  - [ ] ID-26
-Parameter [RuleConditionalTransfer.operateOnTransfer(address,address,uint256)._amount](src/rules/operation/RuleConditionalTransfer.sol#L61) is not in mixedCase
+Parameter [RuleConditionalTransfer.operateOnTransfer(address,address,uint256)._amount](src/rules/operation/RuleConditionalTransfer.sol#L54) is not in mixedCase
 
-src/rules/operation/RuleConditionalTransfer.sol#L61
+src/rules/operation/RuleConditionalTransfer.sol#L54
 
 
  - [ ] ID-27
-Parameter [RuleWhitelistCommon.canReturnTransferRestrictionCode(uint8)._restrictionCode](src/rules/validation/abstract/RuleWhitelistCommon.sol#L17) is not in mixedCase
+Parameter [RuleWhitelistCommon.canReturnTransferRestrictionCode(uint8)._restrictionCode](src/rules/validation/abstract/RuleWhitelistCommon.sol#L18) is not in mixedCase
 
-src/rules/validation/abstract/RuleWhitelistCommon.sol#L17
+src/rules/validation/abstract/RuleWhitelistCommon.sol#L18
 
 
  - [ ] ID-28
@@ -291,15 +299,15 @@ src/rules/validation/abstract/RuleValidateTransfer.sol#L16
 
 
  - [ ] ID-29
-Parameter [RuleEngine.detectTransferRestriction(address,address,uint256)._amount](src/RuleEngine.sol#L50) is not in mixedCase
+Parameter [RuleEngine.detectTransferRestriction(address,address,uint256)._amount](src/RuleEngine.sol#L53) is not in mixedCase
 
-src/RuleEngine.sol#L50
+src/RuleEngine.sol#L53
 
 
  - [ ] ID-30
-Event [RuleConditionalTransferInvariantStorage.transferReset(bytes32,address,address,uint256,uint256)](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L132-L138) is not in CapWords
+Event [RuleConditionalTransferInvariantStorage.transferReset(bytes32,address,address,uint256,uint256)](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L131-L137) is not in CapWords
 
-src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L132-L138
+src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L131-L137
 
 
  - [ ] ID-31
@@ -315,21 +323,21 @@ src/rules/validation/RuleBlacklist.sol#L53
 
 
  - [ ] ID-33
-Parameter [RuleWhitelistCommon.messageForTransferRestriction(uint8)._restrictionCode](src/rules/validation/abstract/RuleWhitelistCommon.sol#L30) is not in mixedCase
+Parameter [RuleWhitelistCommon.messageForTransferRestriction(uint8)._restrictionCode](src/rules/validation/abstract/RuleWhitelistCommon.sol#L31) is not in mixedCase
 
-src/rules/validation/abstract/RuleWhitelistCommon.sol#L30
+src/rules/validation/abstract/RuleWhitelistCommon.sol#L31
 
 
  - [ ] ID-34
-Variable [RuleConditionalTransferOperator.IdToKey](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L22) is not in mixedCase
+Variable [RuleConditionalTransferOperator.IdToKey](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L21) is not in mixedCase
 
-src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L22
+src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L21
 
 
  - [ ] ID-35
-Parameter [RuleSanctionList.detectTransferRestriction(address,address,uint256)._to](src/rules/validation/RuleSanctionList.sol#L56) is not in mixedCase
+Parameter [RuleSanctionList.detectTransferRestriction(address,address,uint256)._to](src/rules/validation/RuleSanctionList.sol#L59) is not in mixedCase
 
-src/rules/validation/RuleSanctionList.sol#L56
+src/rules/validation/RuleSanctionList.sol#L59
 
 
  - [ ] ID-36
@@ -339,39 +347,39 @@ src/rules/validation/RuleBlacklist.sol#L35
 
 
  - [ ] ID-37
-Parameter [RuleEngine.detectTransferRestriction(address,address,uint256)._to](src/RuleEngine.sol#L49) is not in mixedCase
+Parameter [RuleEngine.detectTransferRestriction(address,address,uint256)._to](src/RuleEngine.sol#L52) is not in mixedCase
 
-src/RuleEngine.sol#L49
+src/RuleEngine.sol#L52
 
 
  - [ ] ID-38
-Parameter [RuleConditionalTransfer.detectTransferRestriction(address,address,uint256)._amount](src/rules/operation/RuleConditionalTransfer.sol#L234) is not in mixedCase
+Parameter [RuleConditionalTransfer.detectTransferRestriction(address,address,uint256)._amount](src/rules/operation/RuleConditionalTransfer.sol#L217) is not in mixedCase
 
-src/rules/operation/RuleConditionalTransfer.sol#L234
+src/rules/operation/RuleConditionalTransfer.sol#L217
 
 
  - [ ] ID-39
-Parameter [RuleConditionalTransfer.getRequestByStatus(RuleConditionalTransferInvariantStorage.STATUS)._targetStatus](src/rules/operation/RuleConditionalTransfer.sol#L195) is not in mixedCase
+Parameter [RuleConditionalTransfer.getRequestByStatus(RuleConditionalTransferInvariantStorage.STATUS)._targetStatus](src/rules/operation/RuleConditionalTransfer.sol#L178) is not in mixedCase
 
-src/rules/operation/RuleConditionalTransfer.sol#L195
+src/rules/operation/RuleConditionalTransfer.sol#L178
 
 
  - [ ] ID-40
-Parameter [RuleEngine.detectTransferRestriction(address,address,uint256)._from](src/RuleEngine.sol#L48) is not in mixedCase
+Parameter [RuleEngine.detectTransferRestriction(address,address,uint256)._from](src/RuleEngine.sol#L51) is not in mixedCase
 
-src/RuleEngine.sol#L48
+src/RuleEngine.sol#L51
 
 
  - [ ] ID-41
-Parameter [RuleWhitelistWrapper.detectTransferRestriction(address,address,uint256)._to](src/rules/validation/RuleWhitelistWrapper.sol#L42) is not in mixedCase
+Parameter [RuleWhitelistWrapper.detectTransferRestriction(address,address,uint256)._to](src/rules/validation/RuleWhitelistWrapper.sol#L41) is not in mixedCase
 
-src/rules/validation/RuleWhitelistWrapper.sol#L42
+src/rules/validation/RuleWhitelistWrapper.sol#L41
 
 
  - [ ] ID-42
-Parameter [RuleConditionalTransfer.operateOnTransfer(address,address,uint256)._from](src/rules/operation/RuleConditionalTransfer.sol#L59) is not in mixedCase
+Parameter [RuleConditionalTransfer.operateOnTransfer(address,address,uint256)._from](src/rules/operation/RuleConditionalTransfer.sol#L52) is not in mixedCase
 
-src/rules/operation/RuleConditionalTransfer.sol#L59
+src/rules/operation/RuleConditionalTransfer.sol#L52
 
 
  - [ ] ID-43
@@ -381,271 +389,254 @@ src/rules/validation/RuleBlacklist.sol#L66
 
 
  - [ ] ID-44
-Parameter [RuleEngine.messageForTransferRestriction(uint8)._restrictionCode](src/RuleEngine.sol#L98) is not in mixedCase
+Parameter [RuleEngine.messageForTransferRestriction(uint8)._restrictionCode](src/RuleEngine.sol#L101) is not in mixedCase
 
-src/RuleEngine.sol#L98
+src/RuleEngine.sol#L101
 
 
  - [ ] ID-45
-Parameter [RuleAddressList.removeAddressFromTheList(address)._removeWhitelistAddress](src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L80) is not in mixedCase
+Parameter [RuleSanctionList.canReturnTransferRestrictionCode(uint8)._restrictionCode](src/rules/validation/RuleSanctionList.sol#L78) is not in mixedCase
 
-src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L80
+src/rules/validation/RuleSanctionList.sol#L78
 
 
  - [ ] ID-46
-Parameter [RuleSanctionList.canReturnTransferRestrictionCode(uint8)._restrictionCode](src/rules/validation/RuleSanctionList.sol#L75) is not in mixedCase
+Parameter [RuleAddressList.addressIsListed(address)._targetAddress](src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L103) is not in mixedCase
 
-src/rules/validation/RuleSanctionList.sol#L75
+src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L103
 
 
  - [ ] ID-47
-Parameter [RuleAddressList.addressIsListed(address)._targetAddress](src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L101) is not in mixedCase
-
-src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L101
-
-
- - [ ] ID-48
 Parameter [RuleEngineValidation.validateTransferValidation(address,address,uint256)._to](src/modules/RuleEngineValidation.sol#L55) is not in mixedCase
 
 src/modules/RuleEngineValidation.sol#L55
 
 
+ - [ ] ID-48
+Event [RuleConditionalTransferInvariantStorage.transferWaiting(bytes32,address,address,uint256,uint256)](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L110-L116) is not in CapWords
+
+src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L110-L116
+
+
  - [ ] ID-49
-Event [RuleConditionalTransferInvariantStorage.transferWaiting(bytes32,address,address,uint256,uint256)](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L111-L117) is not in CapWords
-
-src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L111-L117
-
-
- - [ ] ID-50
 Struct [RuleConditionalTransferInvariantStorage.TIME_LIMIT](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L30-L35) is not in CapWords
 
 src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L30-L35
 
 
- - [ ] ID-51
-Parameter [RuleConditionalTransfer.canReturnTransferRestrictionCode(uint8)._restrictionCode](src/rules/operation/RuleConditionalTransfer.sol#L259) is not in mixedCase
+ - [ ] ID-50
+Parameter [RuleConditionalTransfer.canReturnTransferRestrictionCode(uint8)._restrictionCode](src/rules/operation/RuleConditionalTransfer.sol#L237) is not in mixedCase
 
-src/rules/operation/RuleConditionalTransfer.sol#L259
+src/rules/operation/RuleConditionalTransfer.sol#L237
+
+
+ - [ ] ID-51
+Parameter [RuleEngine.validateTransfer(address,address,uint256)._amount](src/RuleEngine.sol#L88) is not in mixedCase
+
+src/RuleEngine.sol#L88
 
 
  - [ ] ID-52
-Parameter [RuleEngine.validateTransfer(address,address,uint256)._amount](src/RuleEngine.sol#L85) is not in mixedCase
-
-src/RuleEngine.sol#L85
-
-
- - [ ] ID-53
 Struct [RuleConditionalTransferInvariantStorage.AUTOMATIC_APPROVAL](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L37-L44) is not in CapWords
 
 src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L37-L44
 
 
- - [ ] ID-54
+ - [ ] ID-53
 Parameter [RuleEngineValidation.validateTransferValidation(address,address,uint256)._from](src/modules/RuleEngineValidation.sol#L54) is not in mixedCase
 
 src/modules/RuleEngineValidation.sol#L54
 
 
- - [ ] ID-55
-Parameter [RuleSanctionList.detectTransferRestriction(address,address,uint256)._from](src/rules/validation/RuleSanctionList.sol#L55) is not in mixedCase
+ - [ ] ID-54
+Parameter [RuleSanctionList.detectTransferRestriction(address,address,uint256)._from](src/rules/validation/RuleSanctionList.sol#L58) is not in mixedCase
 
-src/rules/validation/RuleSanctionList.sol#L55
+src/rules/validation/RuleSanctionList.sol#L58
+
+
+ - [ ] ID-55
+Parameter [RuleConditionalTransfer.detectTransferRestriction(address,address,uint256)._to](src/rules/operation/RuleConditionalTransfer.sol#L216) is not in mixedCase
+
+src/rules/operation/RuleConditionalTransfer.sol#L216
 
 
  - [ ] ID-56
-Parameter [RuleConditionalTransfer.detectTransferRestriction(address,address,uint256)._to](src/rules/operation/RuleConditionalTransfer.sol#L233) is not in mixedCase
-
-src/rules/operation/RuleConditionalTransfer.sol#L233
-
-
- - [ ] ID-57
 Parameter [RuleEngineValidation.detectTransferRestrictionValidation(address,address,uint256)._from](src/modules/RuleEngineValidation.sol#L30) is not in mixedCase
 
 src/modules/RuleEngineValidation.sol#L30
 
 
- - [ ] ID-58
+ - [ ] ID-57
 Parameter [RuleEngineValidation.validateTransferValidation(address,address,uint256)._amount](src/modules/RuleEngineValidation.sol#L56) is not in mixedCase
 
 src/modules/RuleEngineValidation.sol#L56
 
 
- - [ ] ID-59
-Parameter [RuleWhitelistWrapper.detectTransferRestriction(address,address,uint256)._from](src/rules/validation/RuleWhitelistWrapper.sol#L41) is not in mixedCase
+ - [ ] ID-58
+Parameter [RuleWhitelistWrapper.detectTransferRestriction(address,address,uint256)._from](src/rules/validation/RuleWhitelistWrapper.sol#L40) is not in mixedCase
 
-src/rules/validation/RuleWhitelistWrapper.sol#L41
+src/rules/validation/RuleWhitelistWrapper.sol#L40
+
+
+ - [ ] ID-59
+Parameter [RuleWhitelist.detectTransferRestriction(address,address,uint256)._to](src/rules/validation/RuleWhitelist.sol#L29) is not in mixedCase
+
+src/rules/validation/RuleWhitelist.sol#L29
 
 
  - [ ] ID-60
-Parameter [RuleWhitelist.detectTransferRestriction(address,address,uint256)._to](src/rules/validation/RuleWhitelist.sol#L30) is not in mixedCase
-
-src/rules/validation/RuleWhitelist.sol#L30
-
-
- - [ ] ID-61
 Struct [RuleConditionalTransferInvariantStorage.AUTOMATIC_TRANSFER](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L18-L21) is not in CapWords
 
 src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L18-L21
 
 
- - [ ] ID-62
+ - [ ] ID-61
 Parameter [RuleValidateTransfer.validateTransfer(address,address,uint256)._to](src/rules/validation/abstract/RuleValidateTransfer.sol#L17) is not in mixedCase
 
 src/rules/validation/abstract/RuleValidateTransfer.sol#L17
 
 
- - [ ] ID-63
-Parameter [RuleInternal.getRuleIndex(address[],address)._rules](src/modules/RuleInternal.sol#L85) is not in mixedCase
+ - [ ] ID-62
+Event [RuleConditionalTransferInvariantStorage.transferProcessed(bytes32,address,address,uint256,uint256)](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L103-L109) is not in CapWords
 
-src/modules/RuleInternal.sol#L85
+src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L103-L109
+
+
+ - [ ] ID-63
+Parameter [RuleWhitelist.detectTransferRestriction(address,address,uint256)._from](src/rules/validation/RuleWhitelist.sol#L28) is not in mixedCase
+
+src/rules/validation/RuleWhitelist.sol#L28
 
 
  - [ ] ID-64
-Function [RuleConditionalTransferOperator._createTransferRequestWithApproval(RuleConditionalTransferInvariantStorage.TransferRequestKeyElement)](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L311-L354) is not in mixedCase
-
-src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L311-L354
-
-
- - [ ] ID-65
-Parameter [RuleAddressList.addAddressToTheList(address)._newWhitelistAddress](src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L68) is not in mixedCase
-
-src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L68
-
-
- - [ ] ID-66
-Event [RuleConditionalTransferInvariantStorage.transferProcessed(bytes32,address,address,uint256,uint256)](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L104-L110) is not in CapWords
-
-src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L104-L110
-
-
- - [ ] ID-67
-Parameter [RuleWhitelist.detectTransferRestriction(address,address,uint256)._from](src/rules/validation/RuleWhitelist.sol#L29) is not in mixedCase
-
-src/rules/validation/RuleWhitelist.sol#L29
-
-
- - [ ] ID-68
 Parameter [RuleValidateTransfer.validateTransfer(address,address,uint256)._amount](src/rules/validation/abstract/RuleValidateTransfer.sol#L18) is not in mixedCase
 
 src/rules/validation/abstract/RuleValidateTransfer.sol#L18
 
 
- - [ ] ID-69
-Parameter [RuleEngine.validateTransfer(address,address,uint256)._from](src/RuleEngine.sol#L83) is not in mixedCase
+ - [ ] ID-65
+Parameter [RuleEngine.validateTransfer(address,address,uint256)._from](src/RuleEngine.sol#L86) is not in mixedCase
 
-src/RuleEngine.sol#L83
-
-
- - [ ] ID-70
-Parameter [RuleConditionalTransfer.operateOnTransfer(address,address,uint256)._to](src/rules/operation/RuleConditionalTransfer.sol#L60) is not in mixedCase
-
-src/rules/operation/RuleConditionalTransfer.sol#L60
+src/RuleEngine.sol#L86
 
 
- - [ ] ID-71
-Parameter [RuleConditionalTransfer.detectTransferRestriction(address,address,uint256)._from](src/rules/operation/RuleConditionalTransfer.sol#L232) is not in mixedCase
+ - [ ] ID-66
+Parameter [RuleConditionalTransfer.operateOnTransfer(address,address,uint256)._to](src/rules/operation/RuleConditionalTransfer.sol#L53) is not in mixedCase
 
-src/rules/operation/RuleConditionalTransfer.sol#L232
+src/rules/operation/RuleConditionalTransfer.sol#L53
 
 
- - [ ] ID-72
+ - [ ] ID-67
+Parameter [RuleConditionalTransfer.detectTransferRestriction(address,address,uint256)._from](src/rules/operation/RuleConditionalTransfer.sol#L215) is not in mixedCase
+
+src/rules/operation/RuleConditionalTransfer.sol#L215
+
+
+ - [ ] ID-68
 Parameter [RuleEngineValidation.detectTransferRestrictionValidation(address,address,uint256)._to](src/modules/RuleEngineValidation.sol#L31) is not in mixedCase
 
 src/modules/RuleEngineValidation.sol#L31
 
 
- - [ ] ID-73
+ - [ ] ID-69
 Parameter [RuleBlacklist.detectTransferRestriction(address,address,uint256)._from](src/rules/validation/RuleBlacklist.sol#L34) is not in mixedCase
 
 src/rules/validation/RuleBlacklist.sol#L34
 
 
+ - [ ] ID-70
+Parameter [RuleConditionalTransfer.messageForTransferRestriction(uint8)._restrictionCode](src/rules/operation/RuleConditionalTransfer.sol#L248) is not in mixedCase
+
+src/rules/operation/RuleConditionalTransfer.sol#L248
+
+
+ - [ ] ID-71
+Parameter [RuleSanctionList.messageForTransferRestriction(uint8)._restrictionCode](src/rules/validation/RuleSanctionList.sol#L91) is not in mixedCase
+
+src/rules/validation/RuleSanctionList.sol#L91
+
+
+ - [ ] ID-72
+Parameter [RuleAddressList.addressIsListedBatch(address[])._targetAddresses](src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L113) is not in mixedCase
+
+src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L113
+
+
+ - [ ] ID-73
+Parameter [RuleEngine.validateTransfer(address,address,uint256)._to](src/RuleEngine.sol#L87) is not in mixedCase
+
+src/RuleEngine.sol#L87
+
+
  - [ ] ID-74
-Parameter [RuleConditionalTransfer.messageForTransferRestriction(uint8)._restrictionCode](src/rules/operation/RuleConditionalTransfer.sol#L270) is not in mixedCase
+Event [RuleConditionalTransferInvariantStorage.transferApproved(bytes32,address,address,uint256,uint256)](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L117-L123) is not in CapWords
 
-src/rules/operation/RuleConditionalTransfer.sol#L270
+src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L117-L123
 
+## similar-names
 
+> Acknowlege
+
+Impact: Informational
+Confidence: Medium
  - [ ] ID-75
-Parameter [RuleSanctionList.messageForTransferRestriction(uint8)._restrictionCode](src/rules/validation/RuleSanctionList.sol#L88) is not in mixedCase
+Variable [RuleSanctionlistInvariantStorage.CODE_ADDRESS_FROM_IS_SANCTIONED](src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol#L27) is too similar to [RuleSanctionlistInvariantStorage.TEXT_ADDRESS_FROM_IS_SANCTIONED](src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol#L20-L21)
 
-src/rules/validation/RuleSanctionList.sol#L88
+src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol#L27
 
 
  - [ ] ID-76
-Parameter [RuleAddressList.addressIsListedBatch(address[])._targetAddresses](src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L111) is not in mixedCase
+Variable [RuleConditionalTransferOperator._createTransferRequestWithApproval(RuleConditionalTransferInvariantStorage.TransferRequestKeyElement).keyElement_](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L326) is too similar to [RuleConditionalTransferOperator.createTransferRequestWithApprovalBatch(RuleConditionalTransferInvariantStorage.TransferRequestKeyElement[]).keyElements](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L245)
 
-src/rules/validation/abstract/RuleAddressList/RuleAddressList.sol#L111
+src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L326
 
 
  - [ ] ID-77
-Parameter [RuleEngine.validateTransfer(address,address,uint256)._to](src/RuleEngine.sol#L84) is not in mixedCase
+Variable [RuleConditionalTransferOperator._createTransferRequestWithApproval(RuleConditionalTransferInvariantStorage.TransferRequestKeyElement).keyElement_](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L326) is too similar to [RuleConditionalTransferOperator.approveTransferRequestBatch(RuleConditionalTransferInvariantStorage.TransferRequestKeyElement[],uint256[],bool[]).keyElements](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L219)
 
-src/RuleEngine.sol#L84
+src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L326
 
 
  - [ ] ID-78
-Event [RuleConditionalTransferInvariantStorage.transferApproved(bytes32,address,address,uint256,uint256)](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L118-L124) is not in CapWords
+Variable [RuleConditionalTransferInvariantStorage.CODE_TRANSFER_REQUEST_NOT_APPROVED](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L87) is too similar to [RuleConditionalTransferInvariantStorage.TEXT_TRANSFER_REQUEST_NOT_APPROVED](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L83-L84)
 
-src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L118-L124
+src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L87
 
 
-## similar-names
-Impact: Informational
-Confidence: Medium
  - [ ] ID-79
-Variable [RuleSanctionlistInvariantStorage.CODE_ADDRESS_FROM_IS_SANCTIONED](src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol#L25) is too similar to [RuleSanctionlistInvariantStorage.TEXT_ADDRESS_FROM_IS_SANCTIONED](src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol#L18-L19)
-
-src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol#L25
-
-
- - [ ] ID-80
-Variable [RuleConditionalTransferOperator._createTransferRequestWithApproval(RuleConditionalTransferInvariantStorage.TransferRequestKeyElement).keyElement_](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L312) is too similar to [RuleConditionalTransferOperator.createTransferRequestWithApprovalBatch(RuleConditionalTransferInvariantStorage.TransferRequestKeyElement[]).keyElements](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L246)
-
-src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L312
-
-
- - [ ] ID-81
-Variable [RuleConditionalTransferOperator._createTransferRequestWithApproval(RuleConditionalTransferInvariantStorage.TransferRequestKeyElement).keyElement_](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L312) is too similar to [RuleConditionalTransferOperator.approveTransferRequestBatch(RuleConditionalTransferInvariantStorage.TransferRequestKeyElement[],uint256[],bool[]).keyElements](src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L220)
-
-src/rules/operation/abstract/RuleConditionalTransferOperator.sol#L312
-
-
- - [ ] ID-82
-Variable [RuleConditionalTransferInvariantStorage.CODE_TRANSFER_REQUEST_NOT_APPROVED](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L88) is too similar to [RuleConditionalTransferInvariantStorage.TEXT_TRANSFER_REQUEST_NOT_APPROVED](src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L84-L85)
-
-src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol#L88
-
-
- - [ ] ID-83
 Variable [RuleBlacklistInvariantStorage.CODE_ADDRESS_FROM_IS_BLACKLISTED](src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleBlacklistInvariantStorage.sol#L16) is too similar to [RuleBlacklistInvariantStorage.TEXT_ADDRESS_FROM_IS_BLACKLISTED](src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleBlacklistInvariantStorage.sol#L9-L10)
 
 src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleBlacklistInvariantStorage.sol#L16
 
 
- - [ ] ID-84
+ - [ ] ID-80
 Variable [RuleWhitelistInvariantStorage.CODE_ADDRESS_TO_NOT_WHITELISTED](src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol#L17) is too similar to [RuleWhitelistInvariantStorage.TEXT_ADDRESS_TO_NOT_WHITELISTED](src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol#L11-L12)
 
 src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol#L17
 
 
- - [ ] ID-85
+ - [ ] ID-81
 Variable [RuleWhitelistInvariantStorage.CODE_ADDRESS_FROM_NOT_WHITELISTED](src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol#L16) is too similar to [RuleWhitelistInvariantStorage.TEXT_ADDRESS_FROM_NOT_WHITELISTED](src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol#L9-L10)
 
 src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol#L16
 
-
 ## unused-import
+
+> Concerns OpenZeppelin library
+
 Impact: Informational
 Confidence: High
- - [ ] ID-86
+ - [ ] ID-82
 	The following unused import(s) in lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol should be removed: 
 	-import {IERC20Permit} from "../extensions/IERC20Permit.sol"; (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#7)
 
 ## var-read-using-this
+
+> Don't manage to find a better solution
+
 Impact: Optimization
 Confidence: High
- - [ ] ID-87
+ - [ ] ID-83
 The function [RuleValidateTransfer.validateTransfer(address,address,uint256)](src/rules/validation/abstract/RuleValidateTransfer.sol#L15-L24) reads [this.detectTransferRestriction(_from,_to,_amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK)](src/rules/validation/abstract/RuleValidateTransfer.sol#L21-L23) with `this` which adds an extra STATICCALL.
 
 src/rules/validation/abstract/RuleValidateTransfer.sol#L15-L24

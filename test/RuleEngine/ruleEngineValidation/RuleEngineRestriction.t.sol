@@ -9,12 +9,6 @@ import "src/RuleEngine.sol";
  * @title tests concerning the restrictions and validation for the transfers
  */
 contract RuleEngineRestrictionTest is Test, HelperContract {
-    RuleEngine ruleEngineMock;
-    uint8 resUint8;
-    uint256 resUint256;
-    bool resBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
     RuleWhitelist ruleWhitelist1;
 
     // Arrange

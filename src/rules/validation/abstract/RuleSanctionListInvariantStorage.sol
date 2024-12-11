@@ -3,6 +3,7 @@
 pragma solidity ^0.8.20;
 
 import "./RuleCommonInvariantStorage.sol";
+
 abstract contract RuleSanctionlistInvariantStorage is
     RuleCommonInvariantStorage
 {

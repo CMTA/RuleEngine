@@ -10,13 +10,6 @@ import "src/RuleEngine.sol";
  * @title Tests on the provided functions by OpenZeppelin
  */
 contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
-    RuleEngine ruleEngineMock;
-    uint8 resUint8;
-    uint256 resUint256;
-    bool resBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
-
     // Arrange
     function setUp() public {
         ruleWhitelist = new RuleWhitelist(

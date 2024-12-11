@@ -9,13 +9,6 @@ import "src/RuleEngine.sol";
  * @title General functions of the RuleWhitelist
  */
 contract RuleConditionalTransferResetTest is Test, HelperContract {
-    RuleEngine ruleEngineMock;
-    uint256 resUint256;
-    uint8 resUint8;
-    bool resBool;
-    bool resCallBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
     uint256 defaultValue = 10;
     bytes32 defaultKey =
         keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));

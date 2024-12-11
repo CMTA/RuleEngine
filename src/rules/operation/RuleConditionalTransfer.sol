@@ -34,15 +34,8 @@ contract RuleConditionalTransfer is
             revert RuleConditionalTransfer_AdminWithAddressZeroNotAllowed();
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE, admin);
         if (address(ruleEngineContract) != address(0x0)) {
             _grantRole(RULE_ENGINE_CONTRACT_ROLE, address(ruleEngineContract));
-        }
-        if (options_.timeLimit.timeLimitToApprove == 0) {
-            options_.timeLimit.timeLimitToApprove = type(uint64).max;
-        }
-        if (options_.timeLimit.timeLimitToTransfer == 0) {
-            options_.timeLimit.timeLimitToTransfer = type(uint64).max;
         }
         options = options_;
     }
@@ -65,17 +58,17 @@ contract RuleConditionalTransfer is
         onlyRole(RULE_ENGINE_CONTRACT_ROLE)
         returns (bool isValid)
     {
-       if(_validateTransfer(_from,_to,_amount)){
+        if (_validateTransfer(_from, _to)) {
             return true;
-       }else {
-         bytes32 key = keccak256(abi.encode(_from, _to, _amount));
-         if (_validateApproval(key)) {
+        } else {
+            bytes32 key = keccak256(abi.encode(_from, _to, _amount));
+            if (_validateApproval(key)) {
                 _updateProcessedTransfer(key);
                 return true;
             } else {
                 return false;
             }
-       }
+        }
     }
 
     /**
@@ -224,8 +217,8 @@ contract RuleConditionalTransfer is
         uint256 _amount
     ) public view override returns (uint8) {
         // No need of approval if from and to are in the whitelist
-        if(_validateTransfer(_from,_to,_amount)){
-             return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+        if (_validateTransfer(_from, _to)) {
+            return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
         }
         bytes32 key = keccak256(abi.encode(_from, _to, _amount));
         if (_validateApproval(key)) {
@@ -264,9 +257,10 @@ contract RuleConditionalTransfer is
     /*//////////////////////////////////////////////////////////////
                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
-    function _validateTransfer(address _from,
-        address _to,
-        uint256 _amount) internal view returns(bool) {
+    function _validateTransfer(
+        address _from,
+        address _to
+    ) internal view returns (bool) {
         // No need of approval if from and to are in the whitelist
         if (address(whitelistConditionalTransfer) != address(0)) {
             if (
@@ -281,7 +275,7 @@ contract RuleConditionalTransfer is
         if (_validateBurnMint(_from, _to)) {
             return true;
         }
-            return false;
+        return false;
     }
 
     function _cancelTransferRequest(uint256 requestId_) internal {
@@ -336,9 +330,13 @@ contract RuleConditionalTransfer is
         bytes32 key
     ) internal view returns (bool isValid) {
         // If automatic approval is activate and time to approve the request has passed
+        // Warning: overflow possible if timeLimitBeforeAutomaticApproval == max(uint256)
         bool automaticApprovalCondition = options
             .automaticApproval
-            .isActivate && block.timestamp >= (transferRequests[key].askTime + options.automaticApproval.timeLimitBeforeAutomaticApproval);
+            .isActivate &&
+            block.timestamp >=
+            (transferRequests[key].askTime +
+                options.automaticApproval.timeLimitBeforeAutomaticApproval);
         // If the transfer is approved and delay to perform the transfer is respected
         bool isTransferApproved = (transferRequests[key].status ==
             STATUS.APPROVED) &&

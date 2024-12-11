@@ -19,6 +19,7 @@ abstract contract RuleAddressList is
 {
     // Number of addresses in the list at the moment
     uint256 private numAddressesWhitelisted;
+
     /**
      * @param admin Address of the contract (Access Control)
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
@@ -31,8 +32,6 @@ abstract contract RuleAddressList is
             revert RuleAddressList_AdminWithAddressZeroNotAllowed();
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(ADDRESS_LIST_ADD_ROLE, admin);
-        _grantRole(ADDRESS_LIST_REMOVE_ROLE, admin);
     }
 
     /**
@@ -118,6 +117,21 @@ abstract contract RuleAddressList is
             isListed[i] = _addressIsListed(_targetAddresses[i]);
         }
         return isListed;
+    }
+
+    /* ============ ACCESS CONTROL ============ */
+    /**
+     * @dev Returns `true` if `account` has been granted `role`.
+     */
+    function hasRole(
+        bytes32 role,
+        address account
+    ) public view virtual override(AccessControl) returns (bool) {
+        // The Default Admin has all roles
+        if (AccessControl.hasRole(DEFAULT_ADMIN_ROLE, account)) {
+            return true;
+        }
+        return AccessControl.hasRole(role, account);
     }
 
     /*//////////////////////////////////////////////////////////////

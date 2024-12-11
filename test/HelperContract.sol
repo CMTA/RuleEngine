@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 import "CMTAT/CMTAT_STANDALONE.sol";
 
 import "src/modules/RuleEngineInvariantStorage.sol";
+// RuleEngine
+import "src/RuleEngine.sol";
 // RuleConditionalTransfer
 import "src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol";
 import "src/rules/operation/RuleConditionalTransfer.sol";
@@ -24,6 +26,9 @@ import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
 import "src/interfaces/IRuleValidation.sol";
 import "src/interfaces/IRuleOperation.sol";
 
+// utils
+import "./utils/CMTATDeployment.sol";
+
 /**
  * @title Constants used by the tests
  */
@@ -35,6 +40,12 @@ abstract contract HelperContract is
     RuleEngineInvariantStorage,
     RuleConditionalTransferInvariantStorage
 {
+    // Test result
+    uint256 internal resUint256;
+    uint8 internal resUint8;
+    bool internal resBool;
+    bool internal resCallBool;
+    string internal resString;
     // EOA to perform tests
     address constant ZERO_ADDRESS = address(0);
     address constant DEFAULT_ADMIN_ADDRESS = address(1);
@@ -57,15 +68,24 @@ abstract contract HelperContract is
     uint256 DEFAULT_TIME_LIMIT_TO_APPROVE = 7 days;
     uint256 DEFAULT_TIME_LIMIT_TO_TRANSFER = 7 days;
     // contract
-    RuleBlacklist ruleBlacklist;
-    RuleWhitelist ruleWhitelist;
-    RuleConditionalTransfer ruleConditionalTransfer;
+    RuleBlacklist public ruleBlacklist;
+    RuleWhitelist public ruleWhitelist;
+    RuleConditionalTransfer public ruleConditionalTransfer;
+
+    // CMTAT
+    CMTATDeployment cmtatDeployment;
     CMTAT_STANDALONE CMTAT_CONTRACT;
+
+    // RuleEngine Mock
+    RuleEngine public ruleEngineMock;
 
     //bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
 
     uint8 constant NO_ERROR = 0;
-
+    uint8 CODE_NONEXISTENT = 255;
+    // Defined in CMTAT.sol
+    uint8 constant TRANSFER_OK = 0;
+    string constant TEXT_TRANSFER_OK = "No restriction";
     // Forwarder
     string ERC2771ForwarderDomain = "ERC2771ForwarderDomain";
 

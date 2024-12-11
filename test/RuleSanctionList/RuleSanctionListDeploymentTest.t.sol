@@ -10,14 +10,10 @@ import "../utils/SanctionListOracle.sol";
  * @title General functions of the ruleSanctionList
  */
 contract RuleSanctionListDeploymentTest is Test, HelperContract {
-    uint256 resUint256;
-    uint8 resUint8;
-    bool resBool;
-    bool resCallBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
     RuleSanctionList ruleSanctionList;
     SanctionListOracle sanctionlistOracle;
+    event Testa();
+
     // Arrange
     function setUp() public {}
 
@@ -29,7 +25,7 @@ contract RuleSanctionListDeploymentTest is Test, HelperContract {
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
         ruleSanctionList = new RuleSanctionList(
             SANCTIONLIST_OPERATOR_ADDRESS,
-            address(forwarder), 
+            address(forwarder),
             ZERO_ADDRESS
         );
 
@@ -52,17 +48,27 @@ contract RuleSanctionListDeploymentTest is Test, HelperContract {
             RuleSanctionList_AdminWithAddressZeroNotAllowed.selector
         );
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
-        ruleSanctionList = new RuleSanctionList(address(0), address(forwarder), ZERO_ADDRESS);
+        ruleSanctionList = new RuleSanctionList(
+            address(0),
+            address(forwarder),
+            ZERO_ADDRESS
+        );
     }
 
     function testCanSetAnOracleAtDeployment() public {
         sanctionlistOracle = new SanctionListOracle();
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
+        // TODO: Event seems not checked by Foundry at deployment
         emit SetSanctionListOracle(address(sanctionlistOracle));
+
         ruleSanctionList = new RuleSanctionList(
-                SANCTIONLIST_OPERATOR_ADDRESS,
-                address(0x0), 
-                ZERO_ADDRESS
-            );
-        }
+            SANCTIONLIST_OPERATOR_ADDRESS,
+            ZERO_ADDRESS,
+            address(sanctionlistOracle)
+        );
+        assertEq(
+            address(ruleSanctionList.sanctionsList()),
+            address(sanctionlistOracle)
+        );
+    }
 }

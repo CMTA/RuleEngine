@@ -5,18 +5,10 @@ import "forge-std/Test.sol";
 import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
 
-//ADmin, forwarder irrect /RuleEngine
 /**
  * @title General functions of the RuleEngine
  */
 contract RuleEngineOperationTest is Test, HelperContract {
-    RuleEngine ruleEngineMock;
-    uint8 resUint8;
-    uint256 resUint256;
-    bool resBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
-
     TIME_LIMIT timeLimit_ =
         TIME_LIMIT({
             timeLimitToApprove: DEFAULT_TIME_LIMIT_TO_APPROVE,

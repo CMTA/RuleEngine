@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./RuleEngine.sol | 6454d098574b8dc8cd532554aa71faf9cd9dd28a |
+| ./RuleEngine.sol | 442f079ba0d2f4ec3c497569b1c891452bd967dc |
 
 
 ### Contracts Description Table

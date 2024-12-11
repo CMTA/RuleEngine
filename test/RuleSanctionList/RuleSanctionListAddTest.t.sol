@@ -12,13 +12,6 @@ import "../utils/SanctionListOracle.sol";
 contract RuleSanctionlistAddTest is Test, HelperContract {
     // Custom error openZeppelin
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-
-    uint256 resUint256;
-    uint8 resUint8;
-    bool resBool;
-    bool resCallBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
     SanctionListOracle sanctionlistOracle;
     RuleSanctionList ruleSanctionList;
 
@@ -42,7 +35,10 @@ contract RuleSanctionlistAddTest is Test, HelperContract {
 
         SanctionsList sanctionListOracleGet = ruleSanctionList.sanctionsList();
         // Assert
-        vm.assertEq(address(sanctionListOracleGet), address(sanctionlistOracle));
+        vm.assertEq(
+            address(sanctionListOracleGet),
+            address(sanctionlistOracle)
+        );
         // Remove
         vm.prank(SANCTIONLIST_OPERATOR_ADDRESS);
         emit SetSanctionListOracle(ZERO_ADDRESS);

@@ -10,12 +10,6 @@ import "../utils/SanctionListOracle.sol";
  * @title General functions of the ruleSanctionList
  */
 contract RuleSanctionlistTest is Test, HelperContract {
-    uint256 resUint256;
-    uint8 resUint8;
-    bool resBool;
-    bool resCallBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
     SanctionListOracle sanctionlistOracle;
     RuleSanctionList ruleSanctionList;
 

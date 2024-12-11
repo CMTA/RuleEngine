@@ -31,11 +31,10 @@ contract RuleSanctionList is
         if (admin == address(0)) {
             revert RuleSanctionList_AdminWithAddressZeroNotAllowed();
         }
-        if(sanctionContractOracle_ != address(0)){
+        if (sanctionContractOracle_ != address(0)) {
             _setSanctionListOracle(sanctionContractOracle_);
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(SANCTIONLIST_ROLE, admin);
     }
 
     /**
@@ -47,13 +46,6 @@ contract RuleSanctionList is
         address sanctionContractOracle_
     ) public onlyRole(SANCTIONLIST_ROLE) {
         _setSanctionListOracle(sanctionContractOracle_);
-    }
-
-    function _setSanctionListOracle(
-        address sanctionContractOracle_
-    ) internal {
-        sanctionsList = SanctionsList(sanctionContractOracle_);
-        emit SetSanctionListOracle(address(sanctionContractOracle_));
     }
 
     /**
@@ -106,6 +98,34 @@ contract RuleSanctionList is
             return TEXT_CODE_NOT_FOUND;
         }
     }
+
+    /* ============ ACCESS CONTROL ============ */
+    /**
+     * @dev Returns `true` if `account` has been granted `role`.
+     */
+    function hasRole(
+        bytes32 role,
+        address account
+    ) public view virtual override(AccessControl) returns (bool) {
+        // The Default Admin has all roles
+        if (AccessControl.hasRole(DEFAULT_ADMIN_ROLE, account)) {
+            return true;
+        }
+        return AccessControl.hasRole(role, account);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+
+    function _setSanctionListOracle(address sanctionContractOracle_) internal {
+        sanctionsList = SanctionsList(sanctionContractOracle_);
+        emit SetSanctionListOracle(address(sanctionContractOracle_));
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                           ERC-2771
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
