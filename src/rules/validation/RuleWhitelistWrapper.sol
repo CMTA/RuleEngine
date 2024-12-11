@@ -28,7 +28,6 @@ contract RuleWhitelistWrapper is
             revert RuleEngine_AdminWithAddressZeroNotAllowed();
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(RULE_ENGINE_OPERATOR_ROLE, admin);
     }
 
     /**
@@ -73,6 +72,25 @@ contract RuleWhitelistWrapper is
             return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
         }
     }
+
+    /* ============ ACCESS CONTROL ============ */
+    /**
+     * @dev Returns `true` if `account` has been granted `role`.
+     */
+    function hasRole(
+        bytes32 role,
+        address account
+    ) public view virtual override(AccessControl) returns (bool) {
+        // The Default Admin has all roles
+        if (AccessControl.hasRole(DEFAULT_ADMIN_ROLE, account)) {
+            return true;
+        }
+        return AccessControl.hasRole(role, account);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                           ERC-2771
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule

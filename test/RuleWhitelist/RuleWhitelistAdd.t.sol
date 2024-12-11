@@ -9,16 +9,6 @@ import "src/RuleEngine.sol";
  * @title Tests the functions to add addresses to the whitelist
  */
 contract RuleWhitelistAddTest is Test, HelperContract {
-    // Defined in CMTAT.sol
-    uint8 constant TRANSFER_OK = 0;
-    string constant TEXT_TRANSFER_OK = "No restriction";
-    uint256 resUint256;
-    uint8 resUint8;
-    bool resBool;
-    bool resCallBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
-
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
@@ -61,6 +51,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
     function testAddAddressToTheList() public {
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        emit AddAddressToTheList(ADDRESS1);
         ruleWhitelist.addAddressToTheList(ADDRESS1);
 
         // Assert
@@ -97,6 +88,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        emit AddAddressToTheList(address(0x0));
         ruleWhitelist.addAddressToTheList(address(0x0));
 
         // Assert
@@ -116,6 +108,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        emit AddAddressesToTheList(whitelist);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
                 "addAddressesToTheList(address[])",

@@ -142,11 +142,11 @@ abstract contract RuleConditionalTransferOperator is
     }
 
     /**
-    @notice approve a transferRequest
-    @param keyElement contains from, to, value
-    @param partialValue amount approved. Put 0 if all the amount specified by value is approved.
-    @param isApproved approved (true) or refused (false). Put true if you use partialApproval
-    */
+     * @notice approve a transferRequest
+     * @param keyElement contains from, to, value
+     * @param partialValue amount approved. Put 0 if all the amount specified by value is approved.
+     * @param isApproved approved (true) or refused (false). Put true if you use partialApproval
+     */
     function approveTransferRequest(
         TransferRequestKeyElement calldata keyElement,
         uint256 partialValue,
@@ -184,7 +184,7 @@ abstract contract RuleConditionalTransferOperator is
         _resetRequestStatus(key);
     }
 
-    /***** Batch function */
+    /* ============ Batch function ============ */
     /**
      * @notice Batch version of {approveTransferRequestWithId}
      */
@@ -273,6 +273,21 @@ abstract contract RuleConditionalTransferOperator is
         }
     }
 
+    /* ============ ACCESS CONTROL ============ */
+    /**
+     * @dev Returns `true` if `account` has been granted `role`.
+     */
+    function hasRole(
+        bytes32 role,
+        address account
+    ) public view virtual override(AccessControl) returns (bool) {
+        // The Default Admin has all roles
+        if (AccessControl.hasRole(DEFAULT_ADMIN_ROLE, account)) {
+            return true;
+        }
+        return AccessControl.hasRole(role, account);
+    }
+
     /*//////////////////////////////////////////////////////////////
                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -309,7 +324,7 @@ abstract contract RuleConditionalTransferOperator is
 
     function _createTransferRequestWithApproval(
         TransferRequestKeyElement memory keyElement_
-    ) public onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE) {
+    ) internal onlyRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE) {
         // WAIT => Will overwrite
         // APPROVED => will overwrite previous status with a new delay
         // DENIED => will overwrite
@@ -322,6 +337,7 @@ abstract contract RuleConditionalTransferOperator is
                 id: requestId,
                 keyElement: keyElement_,
                 askTime: 0,
+                // Warning: overflow possible if timeLimitToTransfer == max(uint256)
                 maxTime: block.timestamp +
                     options.timeLimit.timeLimitToTransfer,
                 status: STATUS.APPROVED
@@ -338,6 +354,7 @@ abstract contract RuleConditionalTransferOperator is
             ++requestId;
         } else {
             // Overwrite previous approval
+            // Warning: overflow possible if timeLimitToTransfer == max(uint256)
             transferRequests[key].maxTime =
                 block.timestamp +
                 options.timeLimit.timeLimitToTransfer;

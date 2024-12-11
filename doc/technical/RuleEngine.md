@@ -31,7 +31,7 @@ The default admin is the address put in argument(`admin`) inside the constructor
 Here a schema of the Access Control.
 ![alt text](../security/accessControl/access-control-RuleEngine.png)
 
-
+By default, the `DEFAULT_ADMIN_ROLE` has the role `RULE_ENGINE_ROLE`.
 
 
 

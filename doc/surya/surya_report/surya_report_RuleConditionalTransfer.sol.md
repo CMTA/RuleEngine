@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./rules/operation/RuleConditionalTransfer.sol | c374bce394733d30cfdeaabb4fd96ac904c701a3 |
+| ./rules/operation/RuleConditionalTransfer.sol | eaf4569f1376ea3e0d975f9c9c1c5e078abf0c8d |
 
 
 ### Contracts Description Table
@@ -17,17 +17,17 @@
 ||||||
 | **RuleConditionalTransfer** | Implementation | RuleValidateTransfer, IRuleOperation, RuleConditionalTransferOperator, MetaTxModuleStandalone |||
 | └ | <Constructor> | Public ❗️ | 🛑  | MetaTxModuleStandalone |
-| └ | operateOnTransfer | Public ❗️ | 🛑  | onlyRole |
 | └ | createTransferRequest | Public ❗️ | 🛑  |NO❗️ |
 | └ | createTransferRequestBatch | Public ❗️ | 🛑  |NO❗️ |
 | └ | cancelTransferRequest | Public ❗️ | 🛑  |NO❗️ |
 | └ | cancelTransferRequestBatch | Public ❗️ | 🛑  |NO❗️ |
+| └ | _cancelTransferRequest | Internal 🔒 | 🛑  | |
 | └ | getRequestTrade | Public ❗️ |   |NO❗️ |
 | └ | getRequestByStatus | Public ❗️ |   |NO❗️ |
+| └ | operateOnTransfer | Public ❗️ | 🛑  | onlyRole |
 | └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
 | └ | canReturnTransferRestrictionCode | External ❗️ |   |NO❗️ |
 | └ | messageForTransferRestriction | External ❗️ |   |NO❗️ |
-| └ | _cancelTransferRequest | Internal 🔒 | 🛑  | |
 | └ | _validateBurnMint | Internal 🔒 |   | |
 | └ | _validateApproval | Internal 🔒 |   | |
 | └ | _msgSender | Internal 🔒 |   | |

@@ -10,14 +10,6 @@ import "src/RuleEngine.sol";
  * @title Integration test with the CMTAT
  */
 contract CMTATIntegrationConditionalTransfer is Test, HelperContract {
-    // Defined in CMTAT.sol
-    uint8 constant TRANSFER_OK = 0;
-    string constant TEXT_TRANSFER_OK = "No restriction";
-
-    RuleEngine ruleEngineMock;
-    uint256 resUint256;
-    bool resBool;
-
     uint256 ADDRESS1_BALANCE_INIT = 31;
     uint256 ADDRESS2_BALANCE_INIT = 32;
     uint256 ADDRESS3_BALANCE_INIT = 33;
@@ -63,21 +55,8 @@ contract CMTATIntegrationConditionalTransfer is Test, HelperContract {
         });
 
         // global arrange
-        uint8 decimals = 0;
-        vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT = new CMTAT_STANDALONE(
-            ZERO_ADDRESS,
-            DEFAULT_ADMIN_ADDRESS,
-            IAuthorizationEngine(address(0)),
-            "CMTA Token",
-            "CMTAT",
-            decimals,
-            "CMTAT_ISIN",
-            "https://cmta.ch",
-            IRuleEngine(address(0)),
-            "CMTAT_info",
-            FLAG
-        );
+        cmtatDeployment = new CMTATDeployment();
+        CMTAT_CONTRACT = cmtatDeployment.cmtat();
 
         // Whitelist
         ruleWhitelist = new RuleWhitelist(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
@@ -575,19 +554,92 @@ contract CMTATIntegrationConditionalTransfer is Test, HelperContract {
         );
     }
 
+    function testCanTransferIfAutomaticApprovalSetAndTimeExceedsJustInTime()
+        public
+    {
+        AUTOMATIC_APPROVAL memory automaticApproval_ = AUTOMATIC_APPROVAL({
+            isActivate: true,
+            timeLimitBeforeAutomaticApproval: 90 days
+        });
+
+        resBool = ruleConditionalTransfer.validateTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+        assertFalse(resBool);
+        vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
+        ruleConditionalTransfer.setAutomaticApproval(automaticApproval_);
+
+        resBool = ruleConditionalTransfer.validateTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+        assertFalse(resBool);
+        // Arrange
+        _createTransferRequest();
+
+        resBool = ruleConditionalTransfer.validateTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+        assertFalse(resBool);
+
+        vm.warp(block.timestamp + 90 days);
+        // Act
+        resBool = ruleConditionalTransfer.validateTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+        assertEq(resBool, true);
+        vm.prank(ADDRESS1);
+        vm.expectEmit(true, true, true, true);
+        emit transferProcessed(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
+        CMTAT_CONTRACT.transfer(ADDRESS2, defaultValue);
+    }
+
     function testCanTransferIfAutomaticApprovalSetAndTimeExceeds() public {
         AUTOMATIC_APPROVAL memory automaticApproval_ = AUTOMATIC_APPROVAL({
             isActivate: true,
             timeLimitBeforeAutomaticApproval: 90 days
         });
+
+        resBool = ruleConditionalTransfer.validateTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+        assertFalse(resBool);
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         ruleConditionalTransfer.setAutomaticApproval(automaticApproval_);
 
+        resBool = ruleConditionalTransfer.validateTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+        assertFalse(resBool);
         // Arrange
         _createTransferRequest();
 
-        vm.warp(block.timestamp + 90 days);
+        resBool = ruleConditionalTransfer.validateTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+        assertFalse(resBool);
+
+        vm.warp(block.timestamp + 91 days);
         // Act
+        resBool = ruleConditionalTransfer.validateTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+        assertEq(resBool, true);
         vm.prank(ADDRESS1);
         vm.expectEmit(true, true, true, true);
         emit transferProcessed(defaultKey, ADDRESS1, ADDRESS2, defaultValue, 0);
@@ -607,7 +659,8 @@ contract CMTATIntegrationConditionalTransfer is Test, HelperContract {
         // Arrange
         _createTransferRequest();
 
-        vm.warp(block.timestamp + 92 days);
+        // Time not exceeds
+        vm.warp(block.timestamp + 85 days);
         // Act
         vm.prank(ADDRESS1);
         vm.expectRevert(

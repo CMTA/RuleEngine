@@ -17,7 +17,7 @@ abstract contract RuleAddressList is
     RuleAddressListInternal,
     RuleAddressListInvariantStorage
 {
-    // Number of addresses in the whitelist at the moment
+    // Number of addresses in the list at the moment
     uint256 private numAddressesWhitelisted;
 
     /**
@@ -32,54 +32,56 @@ abstract contract RuleAddressList is
             revert RuleAddressList_AdminWithAddressZeroNotAllowed();
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(ADDRESS_LIST_ADD_ROLE, admin);
-        _grantRole(ADDRESS_LIST_REMOVE_ROLE, admin);
     }
 
     /**
-     * @notice Add addresses to the whitelist
+     * @notice Add addresses to the list
      * If one of addresses already exist, there is no change for this address. The transaction remains valid (no revert).
-     * @param listWhitelistedAddress an array with the addresses to whitelist
+     * @param listTargetAddresses an array with the addresses to list
      */
     function addAddressesToTheList(
-        address[] calldata listWhitelistedAddress
+        address[] calldata listTargetAddresses
     ) public onlyRole(ADDRESS_LIST_ADD_ROLE) {
-        _addAddressesToThelist(listWhitelistedAddress);
+        _addAddressesToThelist(listTargetAddresses);
+        emit AddAddressesToTheList(listTargetAddresses);
     }
 
     /**
-     * @notice Remove addresses from the whitelist
-     * If the address does not exist in the whitelist, there is no change for this address.
+     * @notice Remove addresses from the list
+     * If the address does not exist in the list, there is no change for this address.
      * The transaction remains valid (no revert).
-     * @param listWhitelistedAddress an array with the addresses to remove
+     * @param listTargetAddresses an array with the addresses to remove
      */
     function removeAddressesFromTheList(
-        address[] calldata listWhitelistedAddress
+        address[] calldata listTargetAddresses
     ) public onlyRole(ADDRESS_LIST_REMOVE_ROLE) {
-        _removeAddressesFromThelist(listWhitelistedAddress);
+        _removeAddressesFromThelist(listTargetAddresses);
+        emit RemoveAddressesFromTheList(listTargetAddresses);
     }
 
     /**
-     * @notice Add one address to the whitelist
+     * @notice Add one address to the list
      * If the address already exists, the transaction is reverted to save gas.
-     * @param _newWhitelistAddress The address to whitelist
+     * @param targetAddress The address to list
      */
     function addAddressToTheList(
-        address _newWhitelistAddress
+        address targetAddress
     ) public onlyRole(ADDRESS_LIST_ADD_ROLE) {
-        _addAddressToThelist(_newWhitelistAddress);
+        _addAddressToThelist(targetAddress);
+        emit AddAddressToTheList(targetAddress);
     }
 
     /**
-     * @notice Remove one address from the whitelist
-     * If the address does not exist in the whitelist, the transaction is reverted to save gas.
-     * @param _removeWhitelistAddress The address to remove
+     * @notice Remove one address from the list
+     * If the address does not exist in the list, the transaction is reverted to save gas.
+     * @param targetAddress The address to remove
      *
      */
     function removeAddressFromTheList(
-        address _removeWhitelistAddress
+        address targetAddress
     ) public onlyRole(ADDRESS_LIST_REMOVE_ROLE) {
-        _removeAddressFromThelist(_removeWhitelistAddress);
+        _removeAddressFromThelist(targetAddress);
+        emit RemoveAddressFromTheList(targetAddress);
     }
 
     /**
@@ -115,6 +117,21 @@ abstract contract RuleAddressList is
             isListed[i] = _addressIsListed(_targetAddresses[i]);
         }
         return isListed;
+    }
+
+    /* ============ ACCESS CONTROL ============ */
+    /**
+     * @dev Returns `true` if `account` has been granted `role`.
+     */
+    function hasRole(
+        bytes32 role,
+        address account
+    ) public view virtual override(AccessControl) returns (bool) {
+        // The Default Admin has all roles
+        if (AccessControl.hasRole(DEFAULT_ADMIN_ROLE, account)) {
+            return true;
+        }
+        return AccessControl.hasRole(role, account);
     }
 
     /*//////////////////////////////////////////////////////////////

@@ -10,13 +10,6 @@ import "src/RuleEngine.sol";
  * @title Integration test with the CMTAT
  */
 contract RuleBlacklistTest is Test, HelperContract {
-    // Defined in CMTAT.sol
-    uint8 constant TRANSFER_OK = 0;
-    string constant TEXT_TRANSFER_OK = "No restriction";
-
-    uint256 resUint256;
-    bool resBool;
-
     // Arrange
     function setUp() public {
         vm.prank(DEFAULT_ADMIN_ADDRESS);

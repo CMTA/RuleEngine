@@ -34,15 +34,8 @@ contract RuleConditionalTransfer is
             revert RuleConditionalTransfer_AdminWithAddressZeroNotAllowed();
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE, admin);
         if (address(ruleEngineContract) != address(0x0)) {
             _grantRole(RULE_ENGINE_CONTRACT_ROLE, address(ruleEngineContract));
-        }
-        if (options_.timeLimit.timeLimitToApprove == 0) {
-            options_.timeLimit.timeLimitToApprove = type(uint64).max;
-        }
-        if (options_.timeLimit.timeLimitToTransfer == 0) {
-            options_.timeLimit.timeLimitToTransfer = type(uint64).max;
         }
         options = options_;
     }
@@ -65,26 +58,16 @@ contract RuleConditionalTransfer is
         onlyRole(RULE_ENGINE_CONTRACT_ROLE)
         returns (bool isValid)
     {
-        // No need of approval if from and to are in the whitelist
-        if (address(whitelistConditionalTransfer) != address(0)) {
-            if (
-                whitelistConditionalTransfer.addressIsListed(_from) &&
-                whitelistConditionalTransfer.addressIsListed(_to)
-            ) {
-                return true;
-            }
-        }
-
-        // Mint & Burn
-        if (_validateBurnMint(_from, _to)) {
-            return true;
-        }
-        bytes32 key = keccak256(abi.encode(_from, _to, _amount));
-        if (_validateApproval(key)) {
-            _updateProcessedTransfer(key);
+        if (_validateTransfer(_from, _to)) {
             return true;
         } else {
-            return false;
+            bytes32 key = keccak256(abi.encode(_from, _to, _amount));
+            if (_validateApproval(key)) {
+                _updateProcessedTransfer(key);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
@@ -234,19 +217,14 @@ contract RuleConditionalTransfer is
         uint256 _amount
     ) public view override returns (uint8) {
         // No need of approval if from and to are in the whitelist
-        if (address(whitelistConditionalTransfer) != address(0)) {
-            if (
-                whitelistConditionalTransfer.addressIsListed(_from) &&
-                whitelistConditionalTransfer.addressIsListed(_to)
-            ) {
-                return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-            }
+        if (_validateTransfer(_from, _to)) {
+            return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
         }
         bytes32 key = keccak256(abi.encode(_from, _to, _amount));
-        if (!_validateBurnMint(_from, _to) && !_validateApproval(key)) {
-            return CODE_TRANSFER_REQUEST_NOT_APPROVED;
-        } else {
+        if (_validateApproval(key)) {
             return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+        } else {
+            return CODE_TRANSFER_REQUEST_NOT_APPROVED;
         }
     }
 
@@ -279,6 +257,26 @@ contract RuleConditionalTransfer is
     /*//////////////////////////////////////////////////////////////
                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
+    function _validateTransfer(
+        address _from,
+        address _to
+    ) internal view returns (bool) {
+        // No need of approval if from and to are in the whitelist
+        if (address(whitelistConditionalTransfer) != address(0)) {
+            if (
+                whitelistConditionalTransfer.addressIsListed(_from) &&
+                whitelistConditionalTransfer.addressIsListed(_to)
+            ) {
+                return true;
+            }
+        }
+
+        // Mint & Burn
+        if (_validateBurnMint(_from, _to)) {
+            return true;
+        }
+        return false;
+    }
 
     function _cancelTransferRequest(uint256 requestId_) internal {
         if (requestId_ + 1 > requestId) {
@@ -332,12 +330,13 @@ contract RuleConditionalTransfer is
         bytes32 key
     ) internal view returns (bool isValid) {
         // If automatic approval is activate and time to approve the request has passed
+        // Warning: overflow possible if timeLimitBeforeAutomaticApproval == max(uint256)
         bool automaticApprovalCondition = options
             .automaticApproval
             .isActivate &&
-            ((transferRequests[key].askTime +
-                options.automaticApproval.timeLimitBeforeAutomaticApproval) >=
-                block.timestamp);
+            block.timestamp >=
+            (transferRequests[key].askTime +
+                options.automaticApproval.timeLimitBeforeAutomaticApproval);
         // If the transfer is approved and delay to perform the transfer is respected
         bool isTransferApproved = (transferRequests[key].status ==
             STATUS.APPROVED) &&

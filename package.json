@@ -13,13 +13,12 @@
     "surya:report": "npx surya mdreport surya_report_ruleEngine.md src/RuleEngine.sol && npx surya mdreport surya_report_ruleWhitelist.md src/RuleWhitelist.sol",
     "surya:graph": "npx surya graph  src/rules/operation/RuleConditionalTransfer.sol | dot -Tpng > surya_graph_conditionalTransfer.png && npx surya graph  src/rules/validation/RuleBlacklist.sol| dot -Tpng > surya_graph_blacklist.png && npx surya graph  src/rules/validation/RuleWhitelist.sol | dot -Tpng > surya_graph_Whitelist.png && npx surya graph  src/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png && npx surya graph  src/rules/validation/RuleSanctionList.sol | dot -Tpng > surya_graph_SanctionList.png",
     "docgen": "npx hardhat docgen"
-  
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-foundry": "^1.0.1",
     "ethlint": "^1.2.5",
     "prettier-plugin-solidity": "^1.0.0-rc.1",
-    "sol2uml": "^2.2.6",
+    "sol2uml": "^2.5.20",
     "solidity-docgen": "^0.6.0-beta.35",
     "surya": "^0.4.6"
   }

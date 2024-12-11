@@ -10,14 +10,6 @@ import "src/RuleEngine.sol";
  * @title Integration test with the CMTAT
  */
 contract CMTATIntegrationWhitelistWrapper is Test, HelperContract {
-    // Defined in CMTAT.sol
-    uint8 constant TRANSFER_OK = 0;
-    string constant TEXT_TRANSFER_OK = "No restriction";
-
-    RuleEngine ruleEngineMock;
-    uint256 resUint256;
-    bool resBool;
-
     uint256 ADDRESS1_BALANCE_INIT = 31;
     uint256 ADDRESS2_BALANCE_INIT = 32;
     uint256 ADDRESS3_BALANCE_INIT = 33;
@@ -44,22 +36,8 @@ contract CMTATIntegrationWhitelistWrapper is Test, HelperContract {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelistWrapper.addRuleValidation(ruleWhitelist3);
         // global arrange
-        uint8 decimals = 0;
-        vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT = new CMTAT_STANDALONE(
-            ZERO_ADDRESS,
-            DEFAULT_ADMIN_ADDRESS,
-            IAuthorizationEngine(address(0)),
-            "CMTA Token",
-            "CMTAT",
-            decimals,
-            "CMTAT_ISIN",
-            "https://cmta.ch",
-            IRuleEngine(address(0)),
-            "CMTAT_info",
-            FLAG
-        );
-
+        cmtatDeployment = new CMTATDeployment();
+        CMTAT_CONTRACT = cmtatDeployment.cmtat();
         // specific arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleEngineMock = new RuleEngine(
@@ -78,6 +56,17 @@ contract CMTATIntegrationWhitelistWrapper is Test, HelperContract {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         // We set the Rule Engine
         CMTAT_CONTRACT.setRuleEngine(ruleEngineMock);
+    }
+
+    /******* Deployment *******/
+
+    function testCannotDeployContractIfAdminAddressIsZero() public {
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        vm.expectRevert(RuleEngine_AdminWithAddressZeroNotAllowed.selector);
+        ruleWhitelistWrapper = new RuleWhitelistWrapper(
+            ZERO_ADDRESS,
+            ZERO_ADDRESS
+        );
     }
 
     /******* Transfer *******/

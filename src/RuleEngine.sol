@@ -20,9 +20,7 @@ contract RuleEngine is
      * @notice
      * Get the current version of the smart contract
      */
-    string public constant VERSION = "2.0.3";
-    
-    error RuleEngine_TransferInvalid();
+    string public constant VERSION = "2.0.4";
 
     /**
      * @param admin Address of the contract (Access Control)
@@ -40,7 +38,6 @@ contract RuleEngine is
             _grantRole(TOKEN_CONTRACT_ROLE, tokenContract);
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(RULE_ENGINE_OPERATOR_ROLE, admin);
     }
 
     /**
@@ -146,6 +143,21 @@ contract RuleEngine is
         }
         // Apply operation on RuleEngine
         return RuleEngineOperation._operateOnTransfer(from, to, amount);
+    }
+
+    /* ============ ACCESS CONTROL ============ */
+    /**
+     * @dev Returns `true` if `account` has been granted `role`.
+     */
+    function hasRole(
+        bytes32 role,
+        address account
+    ) public view virtual override(AccessControl) returns (bool) {
+        // The Default Admin has all roles
+        if (AccessControl.hasRole(DEFAULT_ADMIN_ROLE, account)) {
+            return true;
+        }
+        return AccessControl.hasRole(role, account);
     }
 
     /*//////////////////////////////////////////////////////////////

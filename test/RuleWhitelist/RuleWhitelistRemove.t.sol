@@ -9,17 +9,6 @@ import "src/RuleEngine.sol";
  * @title Tests the functions to remove addresses from the whitelist
  */
 contract RuleWhitelistRemoveTest is Test, HelperContract {
-    // Defined in CMTAT.sol
-    uint8 constant TRANSFER_OK = 0;
-    string constant TEXT_TRANSFER_OK = "No restriction";
-
-    uint256 resUint256;
-    uint8 resUint8;
-    bool resBool;
-    bool resCallBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
-
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
@@ -34,6 +23,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        emit AddAddressesToTheList(whitelist);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
                 "addAddressesToTheList(address[])",
@@ -61,6 +51,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        emit RemoveAddressFromTheList(ADDRESS1);
         ruleWhitelist.removeAddressFromTheList(ADDRESS1);
 
         // Assert
@@ -91,6 +82,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        emit RemoveAddressesFromTheList(whitelist);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
                 "removeAddressesFromTheList(address[])",
@@ -115,6 +107,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        emit RemoveAddressFromTheList(ADDRESS1);
         ruleWhitelist.removeAddressFromTheList(ADDRESS1);
 
         // Assert
@@ -135,6 +128,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
 
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        emit RemoveAddressesFromTheList(whitelistRemove);
         (resCallBool, ) = address(ruleWhitelist).call(
             abi.encodeWithSignature(
                 "removeAddressesFromTheList(address[])",

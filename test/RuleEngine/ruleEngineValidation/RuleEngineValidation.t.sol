@@ -9,13 +9,6 @@ import "src/RuleEngine.sol";
  * @title General functions of the RuleEngine
  */
 contract RuleEngineValidationTest is Test, HelperContract {
-    RuleEngine ruleEngineMock;
-    uint8 resUint8;
-    uint256 resUint256;
-    bool resBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
-
     // Arrange
     function setUp() public {
         ruleWhitelist = new RuleWhitelist(

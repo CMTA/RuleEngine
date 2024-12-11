@@ -4,23 +4,14 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
+import "./RuleCTDeployment.sol";
 
 /**
  * @title Tests on the Access Control
  */
 contract RuleConditionalTransferAccessControl is Test, HelperContract {
-    RuleEngine ruleEngineMock;
     // Custom error openZeppelin
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-    // Defined in CMTAT.sol
-    uint8 constant TRANSFER_OK = 0;
-    string constant TEXT_TRANSFER_OK = "No restriction";
-    uint256 resUint256;
-    uint8 resUint8;
-    bool resBool;
-    bool resCallBool;
-    string resString;
-    uint8 CODE_NONEXISTENT = 255;
     uint256 defaultValue = 10;
     bytes32 defaultKey =
         keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));
@@ -31,51 +22,13 @@ contract RuleConditionalTransferAccessControl is Test, HelperContract {
             to: ADDRESS2,
             value: defaultValue
         });
+    RuleCTDeployment ruleCTDeployment;
 
     // Arrange
     function setUp() public {
-        TIME_LIMIT memory timeLimit_ = TIME_LIMIT({
-            timeLimitToApprove: 7 days,
-            timeLimitToTransfer: 30 days
-        });
-
-        AUTOMATIC_APPROVAL memory automaticApproval_ = AUTOMATIC_APPROVAL({
-            isActivate: false,
-            timeLimitBeforeAutomaticApproval: 0
-        });
-
-        ISSUANCE memory issuanceOption_ = ISSUANCE({
-            authorizedMintWithoutApproval: false,
-            authorizedBurnWithoutApproval: false
-        });
-        AUTOMATIC_TRANSFER memory automaticTransfer_ = AUTOMATIC_TRANSFER({
-            isActivate: false,
-            cmtat: IERC20(address(0))
-        });
-
-        OPTION memory options = OPTION({
-            issuance: issuanceOption_,
-            timeLimit: timeLimit_,
-            automaticApproval: automaticApproval_,
-            automaticTransfer: automaticTransfer_
-        });
-        ruleEngineMock = new RuleEngine(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS
-        );
-        vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleConditionalTransfer = new RuleConditionalTransfer(
-            DEFAULT_ADMIN_ADDRESS,
-            ZERO_ADDRESS,
-            ruleEngineMock,
-            options
-        );
-        vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleConditionalTransfer.grantRole(
-            RULE_CONDITIONAL_TRANSFER_OPERATOR_ROLE,
-            CONDITIONAL_TRANSFER_OPERATOR_ADDRESS
-        );
+        ruleCTDeployment = new RuleCTDeployment();
+        ruleEngineMock = ruleCTDeployment.ruleEngineMock();
+        ruleConditionalTransfer = ruleCTDeployment.ruleConditionalTransfer();
     }
 
     function _createTransferRequest() internal {
