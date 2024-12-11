@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: 20.5.0
 
-      - name: Install nodes modules inside OZ
+      - name: Install nodes modules inside CMTAT lib
         run: npm install
         working-directory: ./lib/CMTAT
 
