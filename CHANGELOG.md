@@ -26,6 +26,7 @@ Please follow [https://changelog.md/](https://changelog.md/) conventions.
 - Add events for the following rules : whitelist/blacklist and sanctionList rules
 - Some improvements in testing
   - Integration test with CMTAT: set the CMTAT version to [v2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1)
+- Access control: The default admin has by default all the roles for the RuleEngine and the different rules
 
 ## v2.0.3 - 20240910
 
