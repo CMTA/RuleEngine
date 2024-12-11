@@ -27,7 +27,7 @@ jobs:
 
       - name: Install nodes modules inside OZ
         run: npm install
-        working-directory: ./lib/openzeppelin-contracts
+        working-directory: ./lib/CMTAT
 
       - name: Run Forge build
         run: forge build --sizes
