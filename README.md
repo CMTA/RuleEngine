@@ -12,7 +12,7 @@ The toolchain includes the following components, where the versions are the late
 
 - Foundry [v1.9.4](https://github.com/foundry-rs/forge-std/releases/tag/v1.9.4)
 - Solidity 0.8.27 (via solc-js)
-- OpenZeppelin Contracts (submodule) [v5.1.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.2)
+- OpenZeppelin Contracts (submodule) [v5.0.2](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.2)
 - CMTAT [v2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1)
 
 ## How to include it
