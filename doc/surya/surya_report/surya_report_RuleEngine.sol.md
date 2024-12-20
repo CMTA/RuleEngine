@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./RuleEngine.sol | 442f079ba0d2f4ec3c497569b1c891452bd967dc |
+| ./RuleEngine.sol | e13fc0c25fc199c56abd6dfbad3496431af1359f |
 
 
 ### Contracts Description Table
@@ -21,6 +21,7 @@
 | └ | validateTransfer | Public ❗️ |   |NO❗️ |
 | └ | messageForTransferRestriction | External ❗️ |   |NO❗️ |
 | └ | operateOnTransfer | External ❗️ | 🛑  | onlyRole |
+| └ | hasRole | Public ❗️ |   |NO❗️ |
 | └ | _msgSender | Internal 🔒 |   | |
 | └ | _msgData | Internal 🔒 |   | |
 | └ | _contextSuffixLength | Internal 🔒 |   | |

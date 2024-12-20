@@ -20,7 +20,7 @@ contract RuleEngine is
      * @notice
      * Get the current version of the smart contract
      */
-    string public constant VERSION = "2.0.4";
+    string public constant VERSION = "2.0.5";
 
     /**
      * @param admin Address of the contract (Access Control)

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./rules/validation/RuleWhitelistWrapper.sol | 6fb02b05c189d5c5be34023ec0ee623996068517 |
+| ./rules/validation/RuleWhitelistWrapper.sol | b9e309a42544f758b4cfbe05e1739e2a828ce237 |
 
 
 ### Contracts Description Table
@@ -18,6 +18,7 @@
 | **RuleWhitelistWrapper** | Implementation | RuleEngineValidationCommon, MetaTxModuleStandalone, RuleWhitelistCommon |||
 | └ | <Constructor> | Public ❗️ | 🛑  | MetaTxModuleStandalone |
 | └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
+| └ | hasRole | Public ❗️ |   |NO❗️ |
 | └ | _msgSender | Internal 🔒 |   | |
 | └ | _msgData | Internal 🔒 |   | |
 | └ | _contextSuffixLength | Internal 🔒 |   | |

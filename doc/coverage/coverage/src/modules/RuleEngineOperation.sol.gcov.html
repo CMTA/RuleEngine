@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2024-12-11 15:33:42</td>
+            <td class="headerValue">2024-12-20 10:41:14</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">11</td>
@@ -137,8 +137,8 @@
 <a name="66"><span class="lineNum">      66 </span>                :            :     function addRuleOperation(</a>
 <a name="67"><span class="lineNum">      67 </span>                :            :         IRuleOperation rule_</a>
 <a name="68"><span class="lineNum">      68 </span>                :            :     ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {</a>
-<a name="69"><span class="lineNum">      69 </span>                :<span class="lineCov">         70 :         RuleInternal._addRule(_rulesOperation, address(rule_));</span></a>
-<a name="70"><span class="lineNum">      70 </span>                :<span class="lineCov">         68 :         emit AddRule(address(rule_));</span></a>
+<a name="69"><span class="lineNum">      69 </span>                :<span class="lineCov">         85 :         RuleInternal._addRule(_rulesOperation, address(rule_));</span></a>
+<a name="70"><span class="lineNum">      70 </span>                :<span class="lineCov">         83 :         emit AddRule(address(rule_));</span></a>
 <a name="71"><span class="lineNum">      71 </span>                :            :     }</a>
 <a name="72"><span class="lineNum">      72 </span>                :            : </a>
 <a name="73"><span class="lineNum">      73 </span>                :            :     /**</a>
@@ -225,18 +225,18 @@
 <a name="154"><span class="lineNum">     154 </span>                :            :         address _to,</a>
 <a name="155"><span class="lineNum">     155 </span>                :            :         uint256 _amount</a>
 <a name="156"><span class="lineNum">     156 </span>                :            :     ) internal returns (bool isValid) {</a>
-<a name="157"><span class="lineNum">     157 </span>                :<span class="lineCov">         43 :         uint256 rulesLength = _rulesOperation.length;</span></a>
-<a name="158"><span class="lineNum">     158 </span>                :<span class="lineCov">         43 :         for (uint256 i = 0; i &lt; rulesLength; ++i) {</span></a>
-<a name="159"><span class="lineNum">     159 </span>                :<span class="lineCov">         35 :             bool result = IRuleOperation(_rulesOperation[i]).operateOnTransfer(</span></a>
+<a name="157"><span class="lineNum">     157 </span>                :<span class="lineCov">         58 :         uint256 rulesLength = _rulesOperation.length;</span></a>
+<a name="158"><span class="lineNum">     158 </span>                :<span class="lineCov">         58 :         for (uint256 i = 0; i &lt; rulesLength; ++i) {</span></a>
+<a name="159"><span class="lineNum">     159 </span>                :<span class="lineCov">         50 :             bool result = IRuleOperation(_rulesOperation[i]).operateOnTransfer(</span></a>
 <a name="160"><span class="lineNum">     160 </span>                :            :                 _from,</a>
 <a name="161"><span class="lineNum">     161 </span>                :            :                 _to,</a>
 <a name="162"><span class="lineNum">     162 </span>                :            :                 _amount</a>
 <a name="163"><span class="lineNum">     163 </span>                :            :             );</a>
-<a name="164"><span class="lineNum">     164 </span>           [<span class="branchCov" title="Branch 0 was taken 17 times"> + </span>]:<span class="lineCov">         35 :             if (!result) {</span></a>
-<a name="165"><span class="lineNum">     165 </span>                :<span class="lineCov">         17 :                 return false;</span></a>
+<a name="164"><span class="lineNum">     164 </span>           [<span class="branchCov" title="Branch 0 was taken 24 times"> + </span>]:<span class="lineCov">         50 :             if (!result) {</span></a>
+<a name="165"><span class="lineNum">     165 </span>                :<span class="lineCov">         24 :                 return false;</span></a>
 <a name="166"><span class="lineNum">     166 </span>                :            :             }</a>
 <a name="167"><span class="lineNum">     167 </span>                :            :         }</a>
-<a name="168"><span class="lineNum">     168 </span>                :<span class="lineCov">         26 :         return true;</span></a>
+<a name="168"><span class="lineNum">     168 </span>                :<span class="lineCov">         34 :         return true;</span></a>
 <a name="169"><span class="lineNum">     169 </span>                :            :     }</a>
 <a name="170"><span class="lineNum">     170 </span>                :            : }</a>
 </pre>

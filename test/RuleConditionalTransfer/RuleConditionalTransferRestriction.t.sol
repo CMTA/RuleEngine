@@ -56,6 +56,15 @@ contract RuleEngineOperationTest is Test, HelperContract {
     }
 
     function testCanDetectTransferRestrictionOK() public {
+        // Arrange - Assert
+        resUint8 = ruleConditionalTransfer.detectTransferRestriction(
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+
+        // Assert
+        assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
         // Arrange
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));
