@@ -59,7 +59,7 @@ contract RuleConditionalTransferTest is Test, HelperContract {
     // Arrange
     function setUp() public {
         TIME_LIMIT memory timeLimit_ = TIME_LIMIT({
-            timeLimitToApprove: 7 days,
+            timeLimitToApprove: 3 days,
             timeLimitToTransfer: 30 days
         });
 
@@ -640,7 +640,6 @@ contract RuleConditionalTransferTest is Test, HelperContract {
     function testCanApproveRequestCreatedByHolderWithId() public {
         // Arrange
         _createTransferRequest();
-
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, true, true);
@@ -792,6 +791,8 @@ contract RuleConditionalTransferTest is Test, HelperContract {
     function testCanDeniedRequestCreatedByHolderWithId() public {
         // Arrange
         _createTransferRequest();
+        // can still approve
+        vm.warp(block.timestamp + 1);
 
         // Act
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);

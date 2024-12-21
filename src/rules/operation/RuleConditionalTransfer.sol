@@ -330,17 +330,28 @@ contract RuleConditionalTransfer is
         bytes32 key
     ) internal view returns (bool isValid) {
         // If automatic approval is activate and time to approve the request has passed
-        // Warning: overflow possible if timeLimitBeforeAutomaticApproval == max(uint256)
-        bool automaticApprovalCondition = options
+        if(transferRequests[key].status == STATUS.NONE
+        ||
+        transferRequests[key].status == STATUS.DENIED
+        || 
+        transferRequests[key].status == STATUS.EXECUTED)
+        {
+            return false;
+        }
+        bool isTransferApproved;
+        bool automaticApprovalCondition;
+        if(transferRequests[key].status ==
+            STATUS.APPROVED){
+                 isTransferApproved = (transferRequests[key].maxTime >= block.timestamp);
+        } else if(options
             .automaticApproval
-            .isActivate &&
-            block.timestamp >=
+            .isActivate){
+        // Warning: overflow possible if timeLimitBeforeAutomaticApproval == max(uint256)
+                 automaticApprovalCondition= block.timestamp >=
             (transferRequests[key].askTime +
                 options.automaticApproval.timeLimitBeforeAutomaticApproval);
+        }
         // If the transfer is approved and delay to perform the transfer is respected
-        bool isTransferApproved = (transferRequests[key].status ==
-            STATUS.APPROVED) &&
-            (transferRequests[key].maxTime >= block.timestamp);
         if (automaticApprovalCondition || isTransferApproved) {
             return true;
         } else {

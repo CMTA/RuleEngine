@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./rules/operation/abstract/RuleConditionalTransferOperator.sol | 16b39f4a6d66b9b22ad4e7c5d673ce48afbeeb1f |
+| ./rules/operation/abstract/RuleConditionalTransferOperator.sol | 51e02c78db77b0f0984e14cfad7a5def39bc1964 |
 
 
 ### Contracts Description Table
@@ -29,8 +29,9 @@
 | └ | approveTransferRequestBatch | Public ❗️ | 🛑  | onlyRole |
 | └ | createTransferRequestWithApprovalBatch | Public ❗️ | 🛑  | onlyRole |
 | └ | resetRequestStatusBatch | Public ❗️ | 🛑  | onlyRole |
+| └ | hasRole | Public ❗️ |   |NO❗️ |
 | └ | _approveTransferRequestKeyElement | Internal 🔒 | 🛑  | |
-| └ | _createTransferRequestWithApproval | Public ❗️ | 🛑  | onlyRole |
+| └ | _createTransferRequestWithApproval | Internal 🔒 | 🛑  | |
 | └ | _resetRequestStatus | Internal 🔒 | 🛑  | |
 | └ | _checkRequestStatus | Internal 🔒 |   | |
 | └ | _approveRequest | Internal 🔒 | 🛑  | |

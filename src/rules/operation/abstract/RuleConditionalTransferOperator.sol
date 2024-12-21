@@ -59,7 +59,7 @@ abstract contract RuleConditionalTransferOperator is
     }
 
     /**
-     * @notice  set/unset the option to perform the transfer if the request is approved by the rule operator.
+     * @notice set/unset the option to perform the transfer if the request is approved by the rule operator.
      * To perform the transfer, the token holder has to approve the rule to spend tokens on his behalf (standard ERC-20 approval).
      * If the allowance is not sufficient, the request will be approved, but without performing the transfer.
      */
@@ -332,6 +332,7 @@ abstract contract RuleConditionalTransferOperator is
             abi.encode(keyElement_.from, keyElement_.to, keyElement_.value)
         );
         if (_checkRequestStatus(key)) {
+            // Only if it is a new request
             TransferRequest memory newTransferApproval = TransferRequest({
                 key: key,
                 id: requestId,
@@ -380,6 +381,9 @@ abstract contract RuleConditionalTransferOperator is
         );
     }
 
+    /**
+    * @dev check if it is a new request or not
+    */
     function _checkRequestStatus(bytes32 key) internal view returns (bool) {
         // Status NONE not enough because reset is possible
         return

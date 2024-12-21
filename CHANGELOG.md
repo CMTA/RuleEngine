@@ -17,6 +17,10 @@ Please follow [https://changelog.md/](https://changelog.md/) conventions.
   - Update surya doc by running the 3 scripts in [./doc/script](./doc/script)
   - Update changelog
 
+## v2.0.5
+
+- Fix a bug present in the Conditional Transfer rule and improve the corresponding tests.
+
 ## v2.0.4
 
 - Fix a bug present in the Conditional Transfer rule and the corresponding test.
