@@ -13,10 +13,18 @@ interface IRuleEngineValidation {
         uint256 _amount
     ) external view returns (uint8);
 
+    function detectTransferRestrictionValidationFrom(
+        address spender,
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external view returns (uint8);
+
     /**
      * @dev Returns true if the transfer is valid, and false otherwise.
      */
-    function validateTransferValidation(
+    function canTransferValidationFrom(
+        address spender,
         address _from,
         address _to,
         uint256 _amount

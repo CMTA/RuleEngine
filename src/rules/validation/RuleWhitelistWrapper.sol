@@ -73,6 +73,51 @@ contract RuleWhitelistWrapper is
         }
     }
 
+    function detectTransferRestrictionFrom(
+        address spender,
+        address _from,
+        address _to,
+        uint256 /*_amount*/
+    ) public view override returns (uint8) {
+        address[] memory targetAddress = new address[](3);
+        bool[] memory isListed = new bool[](3);
+        bool[] memory result = new bool[](3);
+        targetAddress[0] = _from;
+        targetAddress[1] = _to;
+        targetAddress[2] = spender;
+        uint256 rulesLength = _rulesValidation.length;
+        // For each whitelist rule, we ask if from or to are in the whitelist
+        for (uint256 i = 0; i < rulesLength; ++i) {
+            // External call
+            isListed = RuleAddressList(_rulesValidation[i])
+                .addressIsListedBatch(targetAddress);
+            if (isListed[0] && !result[0]) {
+                // Update if from is in the list
+                result[0] = true;
+            }
+            if (isListed[1] && !result[1]) {
+                // Update if to is in the list
+                result[1] = true;
+            }
+            if (isListed[2] && !result[2]) {
+                // Update if spender is in the list
+                result[2] = true;
+            }
+            if (result[0] && result[1] && result[2]) {
+                break;
+            }
+        }
+        if (!result[0]) {
+            return CODE_ADDRESS_FROM_NOT_WHITELISTED;
+        } else if (!result[1]) {
+            return CODE_ADDRESS_TO_NOT_WHITELISTED;
+        } else if (!result[2]) {
+            return CODE_ADDRESS_SPENDER_NOT_WHITELISTED;
+        } else {
+            return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+        }
+    }
+
     /* ============ ACCESS CONTROL ============ */
     /**
      * @dev Returns `true` if `account` has been granted `role`.

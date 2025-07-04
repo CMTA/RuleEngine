@@ -5,8 +5,8 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Script.sol";
 import "../test/HelperContract.sol";
-import "src/RuleEngine.sol";
-import "src/rules/validation/RuleWhitelist.sol";
+import {RuleEngine} from "src/RuleEngine.sol";
+import {RuleWhitelist} from "src/rules/validation/RuleWhitelist.sol";
 
 /**
 @title Deploy a CMTAT, a RuleWhitelist and a RuleEngine

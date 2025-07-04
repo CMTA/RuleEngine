@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 import "../utils/SanctionListOracle.sol";
-
+import {RuleSanctionList, SanctionsList} from "src/rules/validation/RuleSanctionList.sol";
 /**
  * @title General functions of the ruleSanctionList
  */
@@ -69,26 +69,26 @@ contract RuleSanctionlistTest is Test, HelperContract {
         assertEq(resString, TEXT_CODE_NOT_FOUND);
     }
 
-    function testValidateTransfer() public {
+    function testcanTransfer() public {
         // Act
         // ADDRESS1 -> ADDRESS2
-        resBool = ruleSanctionList.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleSanctionList.canTransfer(ADDRESS1, ADDRESS2, 20);
         assertEq(resBool, true);
         // ADDRESS2 -> ADDRESS1
-        resBool = ruleSanctionList.validateTransfer(ADDRESS2, ADDRESS1, 20);
+        resBool = ruleSanctionList.canTransfer(ADDRESS2, ADDRESS1, 20);
         assertEq(resBool, true);
     }
 
     function testTransferFromDetectedAsInvalid() public {
         // Act
-        resBool = ruleSanctionList.validateTransfer(ATTACKER, ADDRESS2, 20);
+        resBool = ruleSanctionList.canTransfer(ATTACKER, ADDRESS2, 20);
         // Assert
         assertFalse(resBool);
     }
 
     function testTransferToDetectedAsInvalid() public {
         // Act
-        resBool = ruleSanctionList.validateTransfer(ADDRESS1, ATTACKER, 20);
+        resBool = ruleSanctionList.canTransfer(ADDRESS1, ATTACKER, 20);
         // Assert
         assertFalse(resBool);
     }

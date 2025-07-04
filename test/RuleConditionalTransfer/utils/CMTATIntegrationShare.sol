@@ -2,10 +2,10 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "CMTAT/CMTAT_STANDALONE.sol";
+import {CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
 import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
-
+import "OZ/token/ERC20/IERC20.sol";
 /**
  * @title Integration testShare with the CMTAT
  */
@@ -41,7 +41,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
         vm.prank(ADDRESS1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.CMTAT_InvalidTransfer.selector,
+                RuleEngine_InvalidTransfer.selector,
                 ADDRESS1,
                 ADDRESS2,
                 21
@@ -152,7 +152,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
         // Act
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.CMTAT_InvalidTransfer.selector,
+                RuleEngine_InvalidTransfer.selector,
                 ADDRESS1,
                 ADDRESS2,
                 defaultValue
@@ -184,7 +184,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
         // Act
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.CMTAT_InvalidTransfer.selector,
+                RuleEngine_InvalidTransfer.selector,
                 ADDRESS1,
                 ADDRESS2,
                 defaultValue
@@ -238,7 +238,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.CMTAT_InvalidTransfer.selector,
+                RuleEngine_InvalidTransfer.selector,
                 ADDRESS1,
                 ADDRESS2,
                 defaultValue
@@ -279,7 +279,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.CMTAT_InvalidTransfer.selector,
+                RuleEngine_InvalidTransfer.selector,
                 ZERO_ADDRESS,
                 ADDRESS1,
                 11
@@ -299,7 +299,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.CMTAT_InvalidTransfer.selector,
+                RuleEngine_InvalidTransfer.selector,
                 ADDRESS1,
                 ZERO_ADDRESS,
                 defaultValue
@@ -311,7 +311,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
     function testShareAutomaticTransferIfOptionsSet() internal {
         AUTOMATIC_TRANSFER memory automaticTransfertestShare = AUTOMATIC_TRANSFER({
             isActivate: true,
-            cmtat: CMTAT_CONTRACT
+            cmtat: IERC20(address(CMTAT_CONTRACT))
         });
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         ruleConditionalTransfer.setAutomaticTransfer(automaticTransfertestShare);
@@ -344,7 +344,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
             timeLimitBeforeAutomaticApproval: 90 days
         });
 
-        resBool = ruleConditionalTransfer.validateTransfer(
+        resBool = ruleConditionalTransfer.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
@@ -353,7 +353,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         ruleConditionalTransfer.setAutomaticApproval(automaticApproval_);
 
-        resBool = ruleConditionalTransfer.validateTransfer(
+        resBool = ruleConditionalTransfer.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
@@ -362,7 +362,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
         // Arrange
         _createTransferRequestShare();
 
-        resBool = ruleConditionalTransfer.validateTransfer(
+        resBool = ruleConditionalTransfer.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
@@ -371,7 +371,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
 
         vm.warp(block.timestamp + 90 days);
         // Act
-        resBool = ruleConditionalTransfer.validateTransfer(
+        resBool = ruleConditionalTransfer.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
@@ -389,7 +389,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
             timeLimitBeforeAutomaticApproval: 90 days
         });
 
-        resBool = ruleConditionalTransfer.validateTransfer(
+        resBool = ruleConditionalTransfer.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
@@ -398,7 +398,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         ruleConditionalTransfer.setAutomaticApproval(automaticApproval_);
 
-        resBool = ruleConditionalTransfer.validateTransfer(
+        resBool = ruleConditionalTransfer.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
@@ -407,7 +407,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
         // Arrange
         _createTransferRequestShare();
 
-        resBool = ruleConditionalTransfer.validateTransfer(
+        resBool = ruleConditionalTransfer.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
@@ -416,7 +416,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
 
         vm.warp(block.timestamp + 91 days);
         // Act
-        resBool = ruleConditionalTransfer.validateTransfer(
+        resBool = ruleConditionalTransfer.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
@@ -435,7 +435,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
             isActivate: true,
             timeLimitBeforeAutomaticApproval: 90 days
         });
-        resBool = ruleConditionalTransfer.validateTransfer(
+        resBool = ruleConditionalTransfer.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
@@ -444,7 +444,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         ruleConditionalTransfer.setAutomaticApproval(automaticApproval_);
 
-        resBool = ruleConditionalTransfer.validateTransfer(
+        resBool = ruleConditionalTransfer.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
@@ -453,14 +453,14 @@ contract CMTATIntegrationShare is Test, HelperContract {
         // Arrange
         _createTransferRequestShare();
 
-        resBool = ruleConditionalTransfer.validateTransfer(
+        resBool = ruleConditionalTransfer.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
         );
         assertFalse(resBool);
 
-        resBool = CMTAT_CONTRACT.validateTransfer(
+        resBool = CMTAT_CONTRACT.canTransfer(
             ADDRESS1,
             ADDRESS2,
             defaultValue
@@ -472,7 +472,7 @@ contract CMTATIntegrationShare is Test, HelperContract {
         vm.prank(ADDRESS1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.CMTAT_InvalidTransfer.selector,
+                RuleEngine_InvalidTransfer.selector,
                 ADDRESS1,
                 ADDRESS2,
                 defaultValue

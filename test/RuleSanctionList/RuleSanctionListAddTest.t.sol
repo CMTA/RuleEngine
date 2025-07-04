@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 import "../utils/SanctionListOracle.sol";
-
+import {RuleSanctionList, SanctionsList} from "src/rules/validation/RuleSanctionList.sol";
 /**
  * @title General functions of the ruleSanctionList
  */

@@ -8,6 +8,7 @@ abstract contract RuleEngineInvariantStorage {
     error RuleEngine_RuleDoNotMatch();
     error RuleEngine_AdminWithAddressZeroNotAllowed();
     error RuleEngine_ArrayIsEmpty();
+    error RuleEngine_InvalidTransfer(address from, address to, uint256 value);
 
     /// @notice Generate when a rule is added
     event AddRule(address indexed rule);

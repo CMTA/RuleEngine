@@ -132,7 +132,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
 
         // Assert2
         // false because the ruleWhitelist is still present
-        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
         assertFalse(resBool);
     }
 
@@ -148,7 +148,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
             abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
         );
 
-        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert1
         assertFalse(resCallBool);
@@ -157,7 +157,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
 
         // Assert2
         // false because the ruleWhitelist is still present
-        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
         assertFalse(resBool);
     }
 
