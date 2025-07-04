@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "CMTAT/CMTAT_STANDALONE.sol";
+import "CMTAT/deployment/CMTATStandalone.sol";
 import "../HelperContract.sol";
 import "src/RuleEngine.sol";
 
@@ -50,7 +50,7 @@ contract CMTATIntegration is Test, HelperContract {
         // Arrange
         /*vm.prank(ADDRESS1);
         vm.expectRevert(
-        abi.encodeWithSelector(Errors.CMTAT_InvalidTransfer.selector, ADDRESS1, ADDRESS2, 21));   */
+        abi.encodeWithSelector(RuleEngine_InvalidTransfer.selector, ADDRESS1, ADDRESS2, 21));   */
         // Act
         vm.prank(ADDRESS1);
         CMTAT_CONTRACT.transfer(ADDRESS2, 21);
@@ -65,7 +65,7 @@ contract CMTATIntegration is Test, HelperContract {
         vm.prank(ADDRESS1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.CMTAT_InvalidTransfer.selector,
+                RuleEngine_InvalidTransfer.selector,
                 ADDRESS1,
                 ADDRESS2,
                 amount
@@ -84,7 +84,7 @@ contract CMTATIntegration is Test, HelperContract {
         vm.prank(ADDRESS1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.CMTAT_InvalidTransfer.selector,
+                RuleEngine_InvalidTransfer.selector,
                 ADDRESS1,
                 ADDRESS2,
                 amount
@@ -113,7 +113,7 @@ contract CMTATIntegration is Test, HelperContract {
         vm.prank(ADDRESS1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.CMTAT_InvalidTransfer.selector,
+                RuleEngine_InvalidTransfer.selector,
                 ADDRESS1,
                 ADDRESS2,
                 amount
@@ -240,7 +240,7 @@ contract CMTATIntegration is Test, HelperContract {
         // Act
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.CMTAT_InvalidTransfer.selector,
+                RuleEngine_InvalidTransfer.selector,
                 ZERO_ADDRESS,
                 ADDRESS1,
                 amount

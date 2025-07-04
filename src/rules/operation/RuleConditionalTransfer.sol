@@ -8,7 +8,7 @@ import "./../../modules/MetaTxModuleStandalone.sol";
 import "./abstract/RuleConditionalTransferInvariantStorage.sol";
 import "./abstract/RuleConditionalTransferOperator.sol";
 import "../validation/abstract/RuleValidateTransfer.sol";
-import "CMTAT/interfaces/engine/IRuleEngine.sol";
+import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 
 /**
  * @title RuleConditionalTransfer
@@ -226,6 +226,21 @@ contract RuleConditionalTransfer is
         } else {
             return CODE_TRANSFER_REQUEST_NOT_APPROVED;
         }
+    }
+
+        /**
+     * @notice Check if the transfer is valid
+     * @param _from the origin address
+     * @param _to the destination address
+     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     **/
+    function detectTransferRestrictionFrom(
+        address /* spender*/,
+        address _from,
+        address _to,
+        uint256 _amount
+    ) public view override returns (uint8) {
+        return detectTransferRestriction(_from,_to, _amount );
     }
 
     /**

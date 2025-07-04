@@ -37,4 +37,17 @@ contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
             return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
         }
     }
+
+    function detectTransferRestrictionFrom(
+        address spender,
+        address _from,
+        address _to,
+        uint256 _amount
+    ) public view override returns (uint8) {
+        if (addressIsListed(spender)) {
+            return CODE_ADDRESS_SPENDER_NOT_WHITELISTED;
+        } else {
+            return detectTransferRestriction(_from,_to,_amount);
+        }
+    }
 }

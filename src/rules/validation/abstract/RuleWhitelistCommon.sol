@@ -19,7 +19,8 @@ abstract contract RuleWhitelistCommon is
     ) external pure override returns (bool) {
         return
             _restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED ||
-            _restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED;
+            _restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED ||
+            _restrictionCode == CODE_ADDRESS_SPENDER_NOT_WHITELISTED;
     }
 
     /**
@@ -34,6 +35,8 @@ abstract contract RuleWhitelistCommon is
             return TEXT_ADDRESS_FROM_NOT_WHITELISTED;
         } else if (_restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED) {
             return TEXT_ADDRESS_TO_NOT_WHITELISTED;
+        } else if (_restrictionCode == CODE_ADDRESS_SPENDER_NOT_WHITELISTED) {
+            return TEXT_ADDRESS_SPENDER_NOT_WHITELISTED;
         } else {
             return TEXT_CODE_NOT_FOUND;
         }

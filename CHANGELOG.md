@@ -17,6 +17,19 @@ Please follow [https://changelog.md/](https://changelog.md/) conventions.
   - Update surya doc by running the 3 scripts in [./doc/script](./doc/script)
   - Update changelog
 
+
+
+## v2.1.0
+
+- Update RuleEngine to CMTAT v3.0.0-rc5
+
+- Add "partial" support of spender check introduced with CMTAT v3.0.0-rc5
+
+  - Change several functions
+    - `operateOnTransfer `-> `transferred(...)`
+
+  - Add functions `detectTransferRestrictionFrom` and `canTransferFrom`
+
 ## v2.0.5
 
 - Fix a bug present in the Conditional Transfer rule and improve the corresponding tests.

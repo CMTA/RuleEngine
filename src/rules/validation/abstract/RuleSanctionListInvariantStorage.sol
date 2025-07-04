@@ -21,9 +21,12 @@ abstract contract RuleSanctionlistInvariantStorage is
         "The sender is sanctioned";
     string constant TEXT_ADDRESS_TO_IS_SANCTIONED =
         "The recipient is sanctioned";
+    string constant TEXT_ADDRESS_SPENDER_IS_SANCTIONED =
+        "The spender is sanctioned";
 
     /* ============ Code ============ */
     // It is very important that each rule uses an unique code
     uint8 public constant CODE_ADDRESS_FROM_IS_SANCTIONED = 31;
     uint8 public constant CODE_ADDRESS_TO_IS_SANCTIONED = 32;
+    uint8 public constant CODE_ADDRESS_SPENDER_IS_SANCTIONED = 33;
 }

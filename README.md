@@ -11,9 +11,9 @@ The RuleEngine is an external contract used to apply transfer restrictions to an
 The toolchain includes the following components, where the versions are the latest ones that we tested:
 
 - Foundry [v1.9.4](https://github.com/foundry-rs/forge-std/releases/tag/v1.9.4)
-- Solidity 0.8.27 (via solc-js)
-- OpenZeppelin Contracts (submodule) [v5.0.2](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.2)
-- CMTAT [v2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1)
+- Solidity 0.8.30 (via solc-js)
+- OpenZeppelin Contracts (submodule) [v5.3.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.3.0)
+- CMTAT [v3.0.0](https://github.com/CMTA/CMTAT/releases/tag/v3.0.0)
 
 ## How to include it
 
@@ -134,7 +134,7 @@ Here a summary of the main documentation
 | Functionalities         | [doc/functionalities.pdf](./doc/functionalities.pdf) |
 | Surya report            | [doc/surya](./doc/surya/)                            |
 
-See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMTAT and ERC-1404](https://www.taurushq.com/blog/token-transfer-management-how-to-apply-restrictions-with-cmtat-and-erc-1404/)
+See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMTAT and ERC-1404](https://www.taurushq.com/blog/token-transfer-management-how-to-apply-restrictions-with-cmtat-and-erc-1404/) (CMTAT v2.4.0)
 
 ## Usage
 

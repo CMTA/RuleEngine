@@ -129,6 +129,6 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
                 TOKEN_CONTRACT_ROLE
             )
         );
-        ruleEngineMock.operateOnTransfer(ADDRESS1, ADDRESS2, 10);
+        ruleEngineMock.transferred(address(0), ADDRESS1, ADDRESS2, 10);
     }
 }

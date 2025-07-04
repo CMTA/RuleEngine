@@ -69,6 +69,23 @@ contract RuleSanctionList is
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
+
+    function detectTransferRestrictionFrom(
+        address spender,
+        address _from,
+        address _to,
+        uint256 _amount
+    ) public view override returns (uint8) {
+        if(address(sanctionsList) != address(0)){
+            if (sanctionsList.isSanctioned(spender)) {
+                return CODE_ADDRESS_SPENDER_IS_SANCTIONED;
+            } else {
+                return detectTransferRestriction(_from,_to,_amount);
+            }
+        }
+        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
     /**
      * @notice To know if the restriction code is valid for this rule or not.
      * @param _restrictionCode The target restriction code
@@ -79,7 +96,8 @@ contract RuleSanctionList is
     ) external pure override returns (bool) {
         return
             _restrictionCode == CODE_ADDRESS_FROM_IS_SANCTIONED ||
-            _restrictionCode == CODE_ADDRESS_TO_IS_SANCTIONED;
+            _restrictionCode == CODE_ADDRESS_TO_IS_SANCTIONED||
+            _restrictionCode == CODE_ADDRESS_SPENDER_IS_SANCTIONED;
     }
 
     /**
@@ -94,6 +112,8 @@ contract RuleSanctionList is
             return TEXT_ADDRESS_FROM_IS_SANCTIONED;
         } else if (_restrictionCode == CODE_ADDRESS_TO_IS_SANCTIONED) {
             return TEXT_ADDRESS_TO_IS_SANCTIONED;
+        } else if (_restrictionCode == CODE_ADDRESS_SPENDER_IS_SANCTIONED) {
+            return TEXT_ADDRESS_SPENDER_IS_SANCTIONED;
         } else {
             return TEXT_CODE_NOT_FOUND;
         }

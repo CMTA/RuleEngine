@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
-
+import "OZ/token/ERC20/IERC20.sol";
 /**
  * @title tests concerning the restrictions and validation for the transfers
  */
@@ -159,7 +159,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         assertEq(resString, "Unknown restriction code");
     }
 
-    function testValidateTransferOK() public {
+    function testcanTransferOK() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist1.addAddressToTheList(ADDRESS1);
@@ -167,7 +167,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         ruleWhitelist1.addAddressToTheList(ADDRESS2);
 
         // Act
-        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resBool, true);
@@ -175,7 +175,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // ruleEngineValidation
 
         // Act
-        resBool = ruleEngineMock.validateTransferValidation(
+        resBool = ruleEngineMock.canTransferValidation(
             ADDRESS1,
             ADDRESS2,
             20
@@ -185,9 +185,9 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         assertEq(resBool, true);
     }
 
-    function testValidateTransferRestricted() public {
+    function testcanTransferRestricted() public {
         // Act
-        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertFalse(resBool);
@@ -195,7 +195,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // ruleEngineValidation
 
         // Act
-        resBool = ruleEngineMock.validateTransferValidation(
+        resBool = ruleEngineMock.canTransferValidation(
             ADDRESS1,
             ADDRESS2,
             20

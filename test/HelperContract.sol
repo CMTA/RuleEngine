@@ -2,29 +2,30 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "CMTAT/CMTAT_STANDALONE.sol";
+import "CMTAT/deployment/CMTATStandalone.sol";
+import "CMTAT/libraries/Errors.sol";
 
-import "src/modules/RuleEngineInvariantStorage.sol";
+import {RuleEngineInvariantStorage} from "src/modules/RuleEngineInvariantStorage.sol";
 // RuleEngine
-import "src/RuleEngine.sol";
+import {RuleEngine} from "src/RuleEngine.sol";
 // RuleConditionalTransfer
-import "src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol";
-import "src/rules/operation/RuleConditionalTransfer.sol";
+import {RuleConditionalTransferInvariantStorage} from "src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol";
+import {RuleConditionalTransfer} from "src/rules/operation/RuleConditionalTransfer.sol";
 // RuleSanctionList
-import "src/rules/validation/RuleSanctionList.sol";
+import {RuleSanctionList} from "src/rules/validation/RuleSanctionList.sol";
 // RUleBlackList
-import "src/rules/validation/RuleBlacklist.sol";
+import {RuleBlacklist} from "src/rules/validation/RuleBlacklist.sol";
+import {RuleBlacklistInvariantStorage} from "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleBlacklistInvariantStorage.sol";
 // RuleWhitelist
-import "src/rules/validation/RuleWhitelist.sol";
-import "src/rules/validation/RuleWhitelistWrapper.sol";
-import "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
-import "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
+import {RuleWhitelist} from "src/rules/validation/RuleWhitelist.sol";
+import {RuleWhitelistWrapper} from "src/rules/validation/RuleWhitelistWrapper.sol";
+import {RuleWhitelistInvariantStorage} from "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
+import {RuleAddressListInvariantStorage} from "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
 
-import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
-import "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
+import {RuleSanctionlistInvariantStorage}from "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
 // Rule interface
-import "src/interfaces/IRuleValidation.sol";
-import "src/interfaces/IRuleOperation.sol";
+import {IRuleValidation} from "src/interfaces/IRuleValidation.sol";
+import {IRuleOperation} from "src/interfaces/IRuleOperation.sol";
 
 // utils
 import "./utils/CMTATDeployment.sol";
@@ -74,7 +75,7 @@ abstract contract HelperContract is
 
     // CMTAT
     CMTATDeployment cmtatDeployment;
-    CMTAT_STANDALONE CMTAT_CONTRACT;
+    CMTATStandalone CMTAT_CONTRACT;
 
     // RuleEngine Mock
     RuleEngine public ruleEngineMock;
@@ -85,7 +86,7 @@ abstract contract HelperContract is
     uint8 CODE_NONEXISTENT = 255;
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
-    string constant TEXT_TRANSFER_OK = "No restriction";
+    string constant TEXT_TRANSFER_OK = "NoRestriction";
     // Forwarder
     string ERC2771ForwarderDomain = "ERC2771ForwarderDomain";
 

@@ -5,8 +5,8 @@ pragma solidity ^0.8.20;
 import "CMTAT/interfaces/engine/IRuleEngine.sol";
 import "./modules/MetaTxModuleStandalone.sol";
 import "./modules/RuleEngineOperation.sol";
-import "./modules/RuleEngineValidation.sol";
-
+import {RuleEngineValidation} from "./modules/RuleEngineValidation.sol";
+import {IRuleValidation} from "./interfaces/IRuleValidation.sol";
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
  */
@@ -16,6 +16,7 @@ contract RuleEngine is
     RuleEngineValidation,
     MetaTxModuleStandalone
 {
+    
     /**
      * @notice
      * Get the current version of the smart contract
@@ -42,21 +43,21 @@ contract RuleEngine is
 
     /**
      * @notice Go through all the rule to know if a restriction exists on the transfer
-     * @param _from the origin address
-     * @param _to the destination address
-     * @param _amount to transfer
+     * @param from the origin address
+     * @param to the destination address
+     * @param value to transfer
      * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
      **/
     function detectTransferRestriction(
-        address _from,
-        address _to,
-        uint256 _amount
+        address from,
+        address to,
+        uint256 value
     ) public view override returns (uint8) {
         // Validation
         uint8 code = RuleEngineValidation.detectTransferRestrictionValidation(
-            _from,
-            _to,
-            _amount
+            from,
+            to,
+            value
         );
         if (code != uint8(REJECTED_CODE_BASE.TRANSFER_OK)) {
             return code;
@@ -66,7 +67,36 @@ contract RuleEngine is
         uint256 rulesLength = _rulesOperation.length;
         for (uint256 i = 0; i < rulesLength; ++i) {
             uint8 restriction = IRuleValidation(_rulesOperation[i])
-                .detectTransferRestriction(_from, _to, _amount);
+                .detectTransferRestriction(from, to, value);
+            if (restriction > 0) {
+                return restriction;
+            }
+        }
+
+        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+    function detectTransferRestrictionFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) public view override returns (uint8) {
+        // Validation
+        uint8 code = RuleEngineValidation.detectTransferRestrictionValidationFrom(spender,
+            from,
+            to,
+            value
+        );
+        if (code != uint8(REJECTED_CODE_BASE.TRANSFER_OK)) {
+            return code;
+        }
+
+        // Operation
+        uint256 rulesLength = _rulesOperation.length;
+        for (uint256 i = 0; i < rulesLength; ++i) {
+            uint8 restriction = IRuleValidation(_rulesOperation[i])
+                .detectTransferRestrictionFrom(spender,from, to, value);
             if (restriction > 0) {
                 return restriction;
             }
@@ -77,18 +107,36 @@ contract RuleEngine is
 
     /**
      * @notice Validate a transfer
-     * @param _from the origin address
-     * @param _to the destination address
-     * @param _amount to transfer
+     * @param from the origin address
+     * @param to the destination address
+     * @param value to transfer
      * @return True if the transfer is valid, false otherwise
      **/
-    function validateTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
+    function canTransfer(
+        address from,
+        address to,
+        uint256 value
     ) public view override returns (bool) {
         return
-            detectTransferRestriction(_from, _to, _amount) ==
+            detectTransferRestriction(from, to, value) ==
+            uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+       /**
+     * @notice Validate a transfer
+     * @param from the origin address
+     * @param to the destination address
+     * @param value to transfer
+     * @return True if the transfer is valid, false otherwise
+     **/
+    function canTransferFrom(
+        address /*spender*/,
+        address from,
+        address to,
+        uint256 value
+    ) public view override returns (bool) {
+        return
+            detectTransferRestriction(from, to, value) ==
             uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
@@ -130,19 +178,29 @@ contract RuleEngine is
     /*
      * @notice function protected by access control
      */
-    function operateOnTransfer(
+    function transferred(
+        address spender,
         address from,
         address to,
         uint256 amount
-    ) external override onlyRole(TOKEN_CONTRACT_ROLE) returns (bool isValid) {
-        // Validate the transfer
-        if (
-            !RuleEngineValidation.validateTransferValidation(from, to, amount)
-        ) {
-            return false;
-        }
+    ) external override onlyRole(TOKEN_CONTRACT_ROLE) {
+        // Validate transfer
+        require(RuleEngineValidation.canTransferValidation(from, to, amount),RuleEngine_InvalidTransfer(from, to, amount));
+        
         // Apply operation on RuleEngine
-        return RuleEngineOperation._operateOnTransfer(from, to, amount);
+        require(RuleEngineOperation._operateOnTransfer(from, to, amount),RuleEngine_InvalidTransfer(from, to, amount));
+    }
+
+    function transferred(
+        address from,
+        address to,
+        uint256 amount
+    ) external override onlyRole(TOKEN_CONTRACT_ROLE) {
+        // Validate transfer
+        require(RuleEngineValidation.canTransferValidation(from, to, amount),RuleEngine_InvalidTransfer(from, to, amount));
+        
+        // Apply operation on RuleEngine
+        require(RuleEngineOperation._operateOnTransfer(from, to, amount),RuleEngine_InvalidTransfer(from, to, amount));
     }
 
     /* ============ ACCESS CONTROL ============ */

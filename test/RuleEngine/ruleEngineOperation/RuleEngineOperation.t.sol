@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
 import "src/RuleEngine.sol";
-
+import "OZ/token/ERC20/IERC20.sol";
 /**
  * @title General functions of the RuleEngine
  */
@@ -134,7 +134,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
     function testCannotSetEmptyRulesT1WithEmptyTab() public {
         // Arrange
         address[] memory RuleConditionalTransferTab = new address[](0);
-        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
         assertFalse(resBool);
 
         // Act
@@ -153,7 +153,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
         // Assert
         // previous rule still present => invalid Transfer
-        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
         assertFalse(resBool);
     }
 
@@ -172,7 +172,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
             )
         );
 
-        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert1
         assertFalse(resCallBool);
@@ -181,7 +181,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
         // Assert2
         // previous rule still present => invalid Transfer
-        resBool = ruleEngineMock.validateTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
         assertFalse(resBool);
     }
 

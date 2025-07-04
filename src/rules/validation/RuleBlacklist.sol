@@ -44,6 +44,20 @@ contract RuleBlacklist is
         }
     }
 
+    function detectTransferRestrictionFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 amount
+    ) public view override returns (uint8) {
+        if(addressIsListed(spender)){
+            return  CODE_ADDRESS_SPENDER_IS_BLACKLISTED;
+        } else {
+            return detectTransferRestriction(from, to, amount);
+        }
+    }
+
+
     /**
      * @notice To know if the restriction code is valid for this rule or not.
      * @param _restrictionCode The target restriction code
@@ -54,7 +68,8 @@ contract RuleBlacklist is
     ) external pure override returns (bool) {
         return
             _restrictionCode == CODE_ADDRESS_FROM_IS_BLACKLISTED ||
-            _restrictionCode == CODE_ADDRESS_TO_IS_BLACKLISTED;
+            _restrictionCode == CODE_ADDRESS_TO_IS_BLACKLISTED 
+            || _restrictionCode == CODE_ADDRESS_SPENDER_IS_BLACKLISTED;
     }
 
     /**
@@ -69,7 +84,10 @@ contract RuleBlacklist is
             return TEXT_ADDRESS_FROM_IS_BLACKLISTED;
         } else if (_restrictionCode == CODE_ADDRESS_TO_IS_BLACKLISTED) {
             return TEXT_ADDRESS_TO_IS_BLACKLISTED;
-        } else {
+        } else if (_restrictionCode == CODE_ADDRESS_SPENDER_IS_BLACKLISTED) {
+            return TEXT_ADDRESS_SPENDER_IS_BLACKLISTED;
+        }
+        else {
             return TEXT_CODE_NOT_FOUND;
         }
     }
