@@ -145,26 +145,22 @@ abstract contract RuleEngineOperation is
 
     /**
      * @notice Go through all the rule to know if a restriction exists on the transfer
-     * @param _from the origin address
-     * @param _to the destination address
-     * @param _amount to transfer
+     * @param from the origin address
+     * @param to the destination address
+     * @param value to transfer
      **/
-    function _operateOnTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) internal returns (bool isValid) {
+    function _transferred(
+        address from,
+        address to,
+        uint256 value
+    ) internal {
         uint256 rulesLength = _rulesOperation.length;
         for (uint256 i = 0; i < rulesLength; ++i) {
-            bool result = IRuleOperation(_rulesOperation[i]).operateOnTransfer(
-                _from,
-                _to,
-                _amount
+            IRuleOperation(_rulesOperation[i]).transferred(
+                from,
+                to,
+                value
             );
-            if (!result) {
-                return false;
-            }
         }
-        return true;
     }
 }

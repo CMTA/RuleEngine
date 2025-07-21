@@ -9,14 +9,14 @@ interface IRuleValidation is IERC1404Extend, IERC7551Compliance {
      * @dev Returns true if the restriction code exists, and false otherwise.
      */
     function canReturnTransferRestrictionCode(
-        uint8 _restrictionCode
+        uint8 restrictionCode
     ) external view returns (bool);
 
     function detectTransferRestrictionFrom(
         address spender,
-        address _from,
-        address _to,
-        uint256 _amount
+        address from,
+        address to,
+        uint256 value
     ) external view override returns (uint8);
 
 }

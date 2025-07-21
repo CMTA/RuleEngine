@@ -9,20 +9,13 @@ import {RuleEngineInvariantStorage} from "src/modules/RuleEngineInvariantStorage
 // RuleEngine
 import {RuleEngine} from "src/RuleEngine.sol";
 // RuleConditionalTransfer
-import {RuleConditionalTransferInvariantStorage} from "src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol";
-import {RuleConditionalTransfer} from "src/rules/operation/RuleConditionalTransfer.sol";
-// RuleSanctionList
-import {RuleSanctionList} from "src/rules/validation/RuleSanctionList.sol";
-// RUleBlackList
-import {RuleBlacklist} from "src/rules/validation/RuleBlacklist.sol";
-import {RuleBlacklistInvariantStorage} from "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleBlacklistInvariantStorage.sol";
+import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
+import {RuleConditionalTransferLightInvariantStorage} from "src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol";
 // RuleWhitelist
-import {RuleWhitelist} from "src/rules/validation/RuleWhitelist.sol";
-import {RuleWhitelistWrapper} from "src/rules/validation/RuleWhitelistWrapper.sol";
-import {RuleWhitelistInvariantStorage} from "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
-import {RuleAddressListInvariantStorage} from "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
+import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
+import {RuleWhitelistInvariantStorage} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
+import {RuleAddressListInvariantStorage} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
 
-import {RuleSanctionlistInvariantStorage}from "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
 // Rule interface
 import {IRuleValidation} from "src/interfaces/IRuleValidation.sol";
 import {IRuleOperation} from "src/interfaces/IRuleOperation.sol";
@@ -35,11 +28,9 @@ import "./utils/CMTATDeployment.sol";
  */
 abstract contract HelperContract is
     RuleWhitelistInvariantStorage,
-    RuleBlacklistInvariantStorage,
     RuleAddressListInvariantStorage,
-    RuleSanctionlistInvariantStorage,
     RuleEngineInvariantStorage,
-    RuleConditionalTransferInvariantStorage
+    RuleConditionalTransferLightInvariantStorage
 {
     // Test result
     uint256 internal resUint256;
@@ -52,7 +43,6 @@ abstract contract HelperContract is
     address constant DEFAULT_ADMIN_ADDRESS = address(1);
     address constant WHITELIST_OPERATOR_ADDRESS = address(2);
     address constant RULE_ENGINE_OPERATOR_ADDRESS = address(3);
-    address constant SANCTIONLIST_OPERATOR_ADDRESS = address(8);
     address constant CONDITIONAL_TRANSFER_OPERATOR_ADDRESS = address(9);
     address constant ATTACKER = address(4);
     address constant ADDRESS1 = address(5);
@@ -66,12 +56,10 @@ abstract contract HelperContract is
     string constant DEFAULT_ADMIN_ROLE_HASH =
         "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-    uint256 DEFAULT_TIME_LIMIT_TO_APPROVE = 7 days;
-    uint256 DEFAULT_TIME_LIMIT_TO_TRANSFER = 7 days;
+
     // contract
-    RuleBlacklist public ruleBlacklist;
     RuleWhitelist public ruleWhitelist;
-    RuleConditionalTransfer public ruleConditionalTransfer;
+    RuleConditionalTransferLight public ruleConditionalTransferLight;
 
     // CMTAT
     CMTATDeployment cmtatDeployment;
@@ -79,6 +67,7 @@ abstract contract HelperContract is
 
     // RuleEngine Mock
     RuleEngine public ruleEngineMock;
+
 
     //bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
 

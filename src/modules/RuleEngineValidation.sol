@@ -20,20 +20,20 @@ abstract contract RuleEngineValidation is
 {
     /**
      * @notice Go through all the rule to know if a restriction exists on the transfer
-     * @param _from the origin address
-     * @param _to the destination address
-     * @param _amount to transfer
+     * @param from the origin address
+     * @param to the destination address
+     * @param value to transfer
      * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
      **/
     function detectTransferRestrictionValidation(
-        address _from,
-        address _to,
-        uint256 _amount
+        address from,
+        address to,
+        uint256 value
     ) public view override returns (uint8) {
         uint256 rulesLength = _rulesValidation.length;
         for (uint256 i = 0; i < rulesLength; ++i) {
             uint8 restriction = IRuleValidation(_rulesValidation[i])
-                .detectTransferRestriction(_from, _to, _amount);
+                .detectTransferRestriction(from, to, value);
             if (restriction > 0) {
                 return restriction;
             }
@@ -44,14 +44,14 @@ abstract contract RuleEngineValidation is
 
     function detectTransferRestrictionValidationFrom(
         address spender,
-        address _from,
-        address _to,
-        uint256 _amount
+        address from,
+        address to,
+        uint256 value
     ) public view override returns (uint8) {
         uint256 rulesLength = _rulesValidation.length;
         for (uint256 i = 0; i < rulesLength; ++i) {
             uint8 restriction = IRuleValidation(_rulesValidation[i])
-                .detectTransferRestrictionFrom(spender, _from, _to, _amount);
+                .detectTransferRestrictionFrom(spender, from, to, value);
             if (restriction > 0) {
                 return restriction;
             }
@@ -61,36 +61,36 @@ abstract contract RuleEngineValidation is
 
     /**
      * @notice Validate a transfer
-     * @param _from the origin address
-     * @param _to the destination address
-     * @param _amount to transfer
+     * @param from the origin address
+     * @param to the destination address
+     * @param value to transfer
      * @return True if the transfer is valid, false otherwise
      **/
     function canTransferValidation(
-        address _from,
-        address _to,
-        uint256 _amount
+        address from,
+        address to,
+        uint256 value
     ) public view returns (bool) {
         return
-            detectTransferRestrictionValidation(_from, _to, _amount) ==
+            detectTransferRestrictionValidation(from, to, value) ==
             uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
     /**
      * @notice Validate a transfer
-     * @param _from the origin address
-     * @param _to the destination address
-     * @param _amount to transfer
+     * @param from the origin address
+     * @param to the destination address
+     * @param value to transfer
      * @return True if the transfer is valid, false otherwise
      **/
     function canTransferValidationFrom(
         address spender,
-        address _from,
-        address _to,
-        uint256 _amount
+        address from,
+        address to,
+        uint256 value
     ) public view override returns (bool) {
         return
-            detectTransferRestrictionValidationFrom(spender, _from, _to, _amount) ==
+            detectTransferRestrictionValidationFrom(spender, from, to, value) ==
             uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK);
     }
 }

@@ -98,6 +98,32 @@ contract CMTATIntegration is Test, HelperContract {
         CMTAT_CONTRACT.transfer(ADDRESS2, amount);
     }
 
+    function testCannotTransferWithoutSpenderAddressWhitelisted() public {
+        // Arrange
+        uint256 amount = 21;
+        vm.prank(ADDRESS1);
+        CMTAT_CONTRACT.approve(ADDRESS3, amount);
+
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
+        ruleWhitelist.addAddressToTheList(ADDRESS1);
+        vm.prank(DEFAULT_ADMIN_ADDRESS);
+        ruleWhitelist.addAddressToTheList(ADDRESS2);
+
+
+
+        vm.prank(ADDRESS3);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                RuleEngine_InvalidTransfer.selector,
+                ADDRESS1,
+                ADDRESS2,
+                amount
+            )
+        );
+        // Act
+        CMTAT_CONTRACT.transferFrom(ADDRESS1, ADDRESS2, amount);
+    }
+
     function testCanMakeATransfer() public {
         // Arrange
         address[] memory whitelist = new address[](2);

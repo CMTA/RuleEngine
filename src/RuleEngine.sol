@@ -21,7 +21,7 @@ contract RuleEngine is
      * @notice
      * Get the current version of the smart contract
      */
-    string public constant VERSION = "2.0.5";
+    string public constant VERSION = "2.2.0";
 
     /**
      * @param admin Address of the contract (Access Control)
@@ -142,22 +142,22 @@ contract RuleEngine is
 
     /**
      * @notice Return the message corresponding to the code
-     * @param _restrictionCode The target restriction code
+     * @param restrictionCode The target restriction code
      * @return True if the transfer is valid, false otherwise
      **/
     function messageForTransferRestriction(
-        uint8 _restrictionCode
+        uint8 restrictionCode
     ) external view override returns (string memory) {
         // Validation
         uint256 rulesLength = _rulesValidation.length;
         for (uint256 i = 0; i < rulesLength; ++i) {
             if (
                 IRuleValidation(_rulesValidation[i])
-                    .canReturnTransferRestrictionCode(_restrictionCode)
+                    .canReturnTransferRestrictionCode(restrictionCode)
             ) {
                 return
                     IRuleValidation(_rulesValidation[i])
-                        .messageForTransferRestriction(_restrictionCode);
+                        .messageForTransferRestriction(restrictionCode);
             }
         }
         // operation
@@ -165,11 +165,11 @@ contract RuleEngine is
         for (uint256 i = 0; i < rulesLength; ++i) {
             if (
                 IRuleValidation(_rulesOperation[i])
-                    .canReturnTransferRestrictionCode(_restrictionCode)
+                    .canReturnTransferRestrictionCode(restrictionCode)
             ) {
                 return
                     IRuleValidation(_rulesOperation[i])
-                        .messageForTransferRestriction(_restrictionCode);
+                        .messageForTransferRestriction(restrictionCode);
             }
         }
         return "Unknown restriction code";
@@ -182,25 +182,25 @@ contract RuleEngine is
         address spender,
         address from,
         address to,
-        uint256 amount
-    ) external override onlyRole(TOKEN_CONTRACT_ROLE) {
+        uint256 value
+    ) public override onlyRole(TOKEN_CONTRACT_ROLE) {
         // Validate transfer
-        require(RuleEngineValidation.canTransferValidation(from, to, amount),RuleEngine_InvalidTransfer(from, to, amount));
+        require(RuleEngineValidation.canTransferValidationFrom(spender, from, to, value), RuleEngine_InvalidTransfer(from, to, value));
         
         // Apply operation on RuleEngine
-        require(RuleEngineOperation._operateOnTransfer(from, to, amount),RuleEngine_InvalidTransfer(from, to, amount));
+        RuleEngineOperation._transferred(from, to, value);
     }
 
     function transferred(
         address from,
         address to,
-        uint256 amount
-    ) external override onlyRole(TOKEN_CONTRACT_ROLE) {
+        uint256 value
+    ) public override onlyRole(TOKEN_CONTRACT_ROLE) {
         // Validate transfer
-        require(RuleEngineValidation.canTransferValidation(from, to, amount),RuleEngine_InvalidTransfer(from, to, amount));
+        require(RuleEngineValidation.canTransferValidation(from, to, value),RuleEngine_InvalidTransfer(from, to, value));
         
         // Apply operation on RuleEngine
-        require(RuleEngineOperation._operateOnTransfer(from, to, amount),RuleEngine_InvalidTransfer(from, to, amount));
+        RuleEngineOperation._transferred(from, to, value);
     }
 
     /* ============ ACCESS CONTROL ============ */

@@ -8,16 +8,16 @@ interface IRuleEngineValidation {
      *
      */
     function detectTransferRestrictionValidation(
-        address _from,
-        address _to,
-        uint256 _amount
+        address from,
+        address to,
+        uint256 value
     ) external view returns (uint8);
 
     function detectTransferRestrictionValidationFrom(
         address spender,
-        address _from,
-        address _to,
-        uint256 _amount
+        address from,
+        address to,
+        uint256 value
     ) external view returns (uint8);
 
     /**
@@ -25,9 +25,9 @@ interface IRuleEngineValidation {
      */
     function canTransferValidationFrom(
         address spender,
-        address _from,
-        address _to,
-        uint256 _amount
+        address from,
+        address to,
+        uint256 value
     ) external view returns (bool isValid);
 }
 

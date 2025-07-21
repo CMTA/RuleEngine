@@ -75,9 +75,49 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         assertEq(resUint8, 0);
     }
 
+    function testCanDetectTransferRestrictionWithSpender() public {
+        // Act
+        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(
+            ADDRESS3,
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+
+        // Assert
+        assertEq(resUint8, CODE_ADDRESS_SPENDER_NOT_WHITELISTED);
+
+        // ruleEngineValidation
+
+        // Act
+        resBool = ruleEngineMock.canTransferFrom(
+            ADDRESS3,
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+        // Assert
+        assertFalse(resBool);
+    }
+
     function testCanDetectTransferRestrictionWithFrom() public {
+        // Arrange
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        ruleWhitelist1.addAddressToTheList(ADDRESS3);
         // Act
         resUint8 = ruleEngineMock.detectTransferRestriction(
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+
+        // Assert
+        assertEq(resUint8, CODE_ADDRESS_FROM_NOT_WHITELISTED);
+
+
+        // Act
+        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(
+            ADDRESS3,
             ADDRESS1,
             ADDRESS2,
             20
@@ -97,7 +137,26 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
 
         // Assert
         assertEq(resUint8, CODE_ADDRESS_FROM_NOT_WHITELISTED);
+
+        // Act
+        resBool = ruleEngineMock.canTransferFrom(
+            ADDRESS3,
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+        // Assert
+        assertFalse(resBool);
+
+        resBool = ruleEngineMock.canTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+        // Assert
+        assertFalse(resBool);
     }
+
 
     function testCanDetectTransferRestrictionWithTo() public {
         // Arrange
@@ -125,6 +184,24 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
 
         // Assert
         assertEq(resUint8, CODE_ADDRESS_TO_NOT_WHITELISTED);
+
+        // Assert
+        resBool = ruleEngineMock.canTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+        // Assert
+        assertFalse(resBool);
+
+        resBool = ruleEngineMock.canTransferFrom(
+            ADDRESS3,
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+        // Assert
+        assertFalse(resBool);
     }
 
     function testMessageForTransferRestrictionWithValidRC() public {

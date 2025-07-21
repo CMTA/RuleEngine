@@ -21,7 +21,7 @@ While it has been designed for the CMTAT, the ruleEngine can be used with others
 
 For that, the only thing to do is to import in your contract the interface `IRuleEngine` which declares the function `operateOnTransfer`
 
-This interface can be found in [CMTAT/contracts/interfaces/engine/IRuleEngine.sol](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/interfaces/engine/IRuleEngine.sol)
+This interface can be found in [CMTAT/[...]/IRuleEngine.sol](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/interfaces/engine/IRuleEngine.sol)
 
 Before each transfer, your contract must call the function `operateOnTransfer` which is the entrypoint for the RuleEngine.
 
@@ -54,6 +54,8 @@ Before each transfer, your contract must call the function `operateOnTransfer` w
 ![uml](./doc/schema/RuleEngine.svg)
 
 ## Available Rules
+
+Rules have their own dedicated repository:
 
 The following rules are available:
 
@@ -211,7 +213,7 @@ forge coverage --report lcov
 - Generate `index.html`
 
 ```bash
-forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage
+forge coverage --no-match-coverage "(script|mocks|test)" --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage
 ```
 
 See [Solidity Coverage in VS Code with Foundry](https://mirror.xyz/devanon.eth/RrDvKPnlD-pmpuW7hQeR5wWdVjklrpOgPCOA-PJkWFU) & [Foundry forge coverage](https://www.rareskills.io/post/foundry-forge-coverage)

@@ -31,13 +31,13 @@
             <td class="headerValue">lcov.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">25</td>
-            <td class="headerCovTableEntry">25</td>
+            <td class="headerCovTableEntry">33</td>
+            <td class="headerCovTableEntry">33</td>
             <td class="headerCovTableEntryHi">100.0 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2024-12-20 10:41:14</td>
+            <td class="headerValue">2025-07-21 17:42:16</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">11</td>
@@ -49,8 +49,8 @@
             <td></td>
             <td></td>
             <td class="headerItem">Branches:</td>
-            <td class="headerCovTableEntry">2</td>
-            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntry">1</td>
             <td class="headerCovTableEntryHi">100.0 %</td>
           </tr>
           <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
@@ -94,7 +94,7 @@
 <a name="23"><span class="lineNum">      23 </span>                :            :      * Revert if one rule is a zero address or if the rule is already present</a>
 <a name="24"><span class="lineNum">      24 </span>                :            :      *</a>
 <a name="25"><span class="lineNum">      25 </span>                :            :      */</a>
-<a name="26"><span class="lineNum">      26 </span>                :            :     function setRulesOperation(</a>
+<a name="26"><span class="lineNum">      26 </span>                :<span class="lineCov">         11 :     function setRulesOperation(</span></a>
 <a name="27"><span class="lineNum">      27 </span>                :            :         address[] calldata rules_</a>
 <a name="28"><span class="lineNum">      28 </span>                :            :     ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {</a>
 <a name="29"><span class="lineNum">      29 </span>           [<span class="branchCov" title="Branch 0 was taken 10 times"> + </span>]:<span class="lineCov">         11 :         if (_rulesOperation.length &gt; 0) {</span></a>
@@ -108,7 +108,7 @@
 <a name="37"><span class="lineNum">      37 </span>                :            :      * @notice Clear all the rules of the array of rules</a>
 <a name="38"><span class="lineNum">      38 </span>                :            :      *</a>
 <a name="39"><span class="lineNum">      39 </span>                :            :      */</a>
-<a name="40"><span class="lineNum">      40 </span>                :            :     function clearRulesOperation() public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {</a>
+<a name="40"><span class="lineNum">      40 </span>                :<span class="lineCov">          4 :     function clearRulesOperation() public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {</span></a>
 <a name="41"><span class="lineNum">      41 </span>                :<span class="lineCov">          4 :         _clearRulesOperation();</span></a>
 <a name="42"><span class="lineNum">      42 </span>                :            :     }</a>
 <a name="43"><span class="lineNum">      43 </span>                :            : </a>
@@ -116,7 +116,7 @@
 <a name="45"><span class="lineNum">      45 </span>                :            :      * @notice Clear all the rules of the array of rules</a>
 <a name="46"><span class="lineNum">      46 </span>                :            :      *</a>
 <a name="47"><span class="lineNum">      47 </span>                :            :      */</a>
-<a name="48"><span class="lineNum">      48 </span>                :            :     function _clearRulesOperation() internal {</a>
+<a name="48"><span class="lineNum">      48 </span>                :<span class="lineCov">         14 :     function _clearRulesOperation() internal {</span></a>
 <a name="49"><span class="lineNum">      49 </span>                :<span class="lineCov">         14 :         uint256 index;</span></a>
 <a name="50"><span class="lineNum">      50 </span>                :            :         // we remove the last element first since it is more optimized.</a>
 <a name="51"><span class="lineNum">      51 </span>                :<span class="lineCov">         14 :         for (uint256 i = _rulesOperation.length; i &gt; 0; --i) {</span></a>
@@ -134,11 +134,11 @@
 <a name="63"><span class="lineNum">      63 </span>                :            :      * Revert if one rule is a zero address or if the rule is already present</a>
 <a name="64"><span class="lineNum">      64 </span>                :            :      *</a>
 <a name="65"><span class="lineNum">      65 </span>                :            :      */</a>
-<a name="66"><span class="lineNum">      66 </span>                :            :     function addRuleOperation(</a>
+<a name="66"><span class="lineNum">      66 </span>                :<span class="lineCov">         33 :     function addRuleOperation(</span></a>
 <a name="67"><span class="lineNum">      67 </span>                :            :         IRuleOperation rule_</a>
 <a name="68"><span class="lineNum">      68 </span>                :            :     ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {</a>
-<a name="69"><span class="lineNum">      69 </span>                :<span class="lineCov">         85 :         RuleInternal._addRule(_rulesOperation, address(rule_));</span></a>
-<a name="70"><span class="lineNum">      70 </span>                :<span class="lineCov">         83 :         emit AddRule(address(rule_));</span></a>
+<a name="69"><span class="lineNum">      69 </span>                :<span class="lineCov">         33 :         RuleInternal._addRule(_rulesOperation, address(rule_));</span></a>
+<a name="70"><span class="lineNum">      70 </span>                :<span class="lineCov">         31 :         emit AddRule(address(rule_));</span></a>
 <a name="71"><span class="lineNum">      71 </span>                :            :     }</a>
 <a name="72"><span class="lineNum">      72 </span>                :            : </a>
 <a name="73"><span class="lineNum">      73 </span>                :            :     /**</a>
@@ -151,7 +151,7 @@
 <a name="80"><span class="lineNum">      80 </span>                :            :      *</a>
 <a name="81"><span class="lineNum">      81 </span>                :            :      *</a>
 <a name="82"><span class="lineNum">      82 </span>                :            :      */</a>
-<a name="83"><span class="lineNum">      83 </span>                :            :     function removeRuleOperation(</a>
+<a name="83"><span class="lineNum">      83 </span>                :<span class="lineCov">          5 :     function removeRuleOperation(</span></a>
 <a name="84"><span class="lineNum">      84 </span>                :            :         IRuleOperation rule_,</a>
 <a name="85"><span class="lineNum">      85 </span>                :            :         uint256 index</a>
 <a name="86"><span class="lineNum">      86 </span>                :            :     ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {</a>
@@ -168,7 +168,7 @@
 <a name="97"><span class="lineNum">      97 </span>                :            :      *</a>
 <a name="98"><span class="lineNum">      98 </span>                :            :      *</a>
 <a name="99"><span class="lineNum">      99 </span>                :            :      */</a>
-<a name="100"><span class="lineNum">     100 </span>                :            :     function _removeRuleOperation(address rule_, uint256 index) internal {</a>
+<a name="100"><span class="lineNum">     100 </span>                :<span class="lineCov">         22 :     function _removeRuleOperation(address rule_, uint256 index) internal {</span></a>
 <a name="101"><span class="lineNum">     101 </span>                :<span class="lineCov">         22 :         RuleInternal._removeRule(_rulesOperation, rule_, index);</span></a>
 <a name="102"><span class="lineNum">     102 </span>                :<span class="lineCov">         21 :         emit RemoveRule(address(rule_));</span></a>
 <a name="103"><span class="lineNum">     103 </span>                :            :     }</a>
@@ -176,15 +176,15 @@
 <a name="105"><span class="lineNum">     105 </span>                :            :     /**</a>
 <a name="106"><span class="lineNum">     106 </span>                :            :      * @return The number of rules inside the array</a>
 <a name="107"><span class="lineNum">     107 </span>                :            :      */</a>
-<a name="108"><span class="lineNum">     108 </span>                :            :     function rulesCountOperation() external view override returns (uint256) {</a>
-<a name="109"><span class="lineNum">     109 </span>                :<span class="lineCov">         41 :         return _rulesOperation.length;</span></a>
+<a name="108"><span class="lineNum">     108 </span>                :<span class="lineCov">         42 :     function rulesCountOperation() external view override returns (uint256) {</span></a>
+<a name="109"><span class="lineNum">     109 </span>                :<span class="lineCov">         42 :         return _rulesOperation.length;</span></a>
 <a name="110"><span class="lineNum">     110 </span>                :            :     }</a>
 <a name="111"><span class="lineNum">     111 </span>                :            : </a>
 <a name="112"><span class="lineNum">     112 </span>                :            :     /**</a>
 <a name="113"><span class="lineNum">     113 </span>                :            :      * @notice Get the index of a rule inside the list</a>
 <a name="114"><span class="lineNum">     114 </span>                :            :      * @return index if the rule is found, _rulesOperation.length otherwise</a>
 <a name="115"><span class="lineNum">     115 </span>                :            :      */</a>
-<a name="116"><span class="lineNum">     116 </span>                :            :     function getRuleIndexOperation(</a>
+<a name="116"><span class="lineNum">     116 </span>                :<span class="lineCov">          3 :     function getRuleIndexOperation(</span></a>
 <a name="117"><span class="lineNum">     117 </span>                :            :         IRuleOperation rule_</a>
 <a name="118"><span class="lineNum">     118 </span>                :            :     ) external view returns (uint256 index) {</a>
 <a name="119"><span class="lineNum">     119 </span>                :<span class="lineCov">          3 :         return RuleInternal._getRuleIndex(_rulesOperation, address(rule_));</span></a>
@@ -195,7 +195,7 @@
 <a name="124"><span class="lineNum">     124 </span>                :            :      * @param ruleId index of the rule</a>
 <a name="125"><span class="lineNum">     125 </span>                :            :      * @return a rule address</a>
 <a name="126"><span class="lineNum">     126 </span>                :            :      */</a>
-<a name="127"><span class="lineNum">     127 </span>                :            :     function ruleOperation(</a>
+<a name="127"><span class="lineNum">     127 </span>                :<span class="lineCov">          1 :     function ruleOperation(</span></a>
 <a name="128"><span class="lineNum">     128 </span>                :            :         uint256 ruleId</a>
 <a name="129"><span class="lineNum">     129 </span>                :            :     ) external view override returns (address) {</a>
 <a name="130"><span class="lineNum">     130 </span>                :<span class="lineCov">          1 :         return _rulesOperation[ruleId];</span></a>
@@ -205,7 +205,7 @@
 <a name="134"><span class="lineNum">     134 </span>                :            :      * @notice Get all the rules</a>
 <a name="135"><span class="lineNum">     135 </span>                :            :      * @return An array of rules</a>
 <a name="136"><span class="lineNum">     136 </span>                :            :      */</a>
-<a name="137"><span class="lineNum">     137 </span>                :            :     function rulesOperation()</a>
+<a name="137"><span class="lineNum">     137 </span>                :<span class="lineCov">          5 :     function rulesOperation()</span></a>
 <a name="138"><span class="lineNum">     138 </span>                :            :         external</a>
 <a name="139"><span class="lineNum">     139 </span>                :            :         view</a>
 <a name="140"><span class="lineNum">     140 </span>                :            :         override</a>
@@ -216,29 +216,25 @@
 <a name="145"><span class="lineNum">     145 </span>                :            : </a>
 <a name="146"><span class="lineNum">     146 </span>                :            :     /**</a>
 <a name="147"><span class="lineNum">     147 </span>                :            :      * @notice Go through all the rule to know if a restriction exists on the transfer</a>
-<a name="148"><span class="lineNum">     148 </span>                :            :      * @param _from the origin address</a>
-<a name="149"><span class="lineNum">     149 </span>                :            :      * @param _to the destination address</a>
-<a name="150"><span class="lineNum">     150 </span>                :            :      * @param _amount to transfer</a>
+<a name="148"><span class="lineNum">     148 </span>                :            :      * @param from the origin address</a>
+<a name="149"><span class="lineNum">     149 </span>                :            :      * @param to the destination address</a>
+<a name="150"><span class="lineNum">     150 </span>                :            :      * @param value to transfer</a>
 <a name="151"><span class="lineNum">     151 </span>                :            :      **/</a>
-<a name="152"><span class="lineNum">     152 </span>                :            :     function _operateOnTransfer(</a>
-<a name="153"><span class="lineNum">     153 </span>                :            :         address _from,</a>
-<a name="154"><span class="lineNum">     154 </span>                :            :         address _to,</a>
-<a name="155"><span class="lineNum">     155 </span>                :            :         uint256 _amount</a>
-<a name="156"><span class="lineNum">     156 </span>                :            :     ) internal returns (bool isValid) {</a>
-<a name="157"><span class="lineNum">     157 </span>                :<span class="lineCov">         58 :         uint256 rulesLength = _rulesOperation.length;</span></a>
-<a name="158"><span class="lineNum">     158 </span>                :<span class="lineCov">         58 :         for (uint256 i = 0; i &lt; rulesLength; ++i) {</span></a>
-<a name="159"><span class="lineNum">     159 </span>                :<span class="lineCov">         50 :             bool result = IRuleOperation(_rulesOperation[i]).operateOnTransfer(</span></a>
-<a name="160"><span class="lineNum">     160 </span>                :            :                 _from,</a>
-<a name="161"><span class="lineNum">     161 </span>                :            :                 _to,</a>
-<a name="162"><span class="lineNum">     162 </span>                :            :                 _amount</a>
+<a name="152"><span class="lineNum">     152 </span>                :<span class="lineCov">          3 :     function _transferred(</span></a>
+<a name="153"><span class="lineNum">     153 </span>                :            :         address from,</a>
+<a name="154"><span class="lineNum">     154 </span>                :            :         address to,</a>
+<a name="155"><span class="lineNum">     155 </span>                :            :         uint256 value</a>
+<a name="156"><span class="lineNum">     156 </span>                :            :     ) internal {</a>
+<a name="157"><span class="lineNum">     157 </span>                :<span class="lineCov">          3 :         uint256 rulesLength = _rulesOperation.length;</span></a>
+<a name="158"><span class="lineNum">     158 </span>                :<span class="lineCov">          3 :         for (uint256 i = 0; i &lt; rulesLength; ++i) {</span></a>
+<a name="159"><span class="lineNum">     159 </span>                :<span class="lineCov">          1 :             IRuleOperation(_rulesOperation[i]).transferred(</span></a>
+<a name="160"><span class="lineNum">     160 </span>                :            :                 from,</a>
+<a name="161"><span class="lineNum">     161 </span>                :            :                 to,</a>
+<a name="162"><span class="lineNum">     162 </span>                :            :                 value</a>
 <a name="163"><span class="lineNum">     163 </span>                :            :             );</a>
-<a name="164"><span class="lineNum">     164 </span>           [<span class="branchCov" title="Branch 0 was taken 24 times"> + </span>]:<span class="lineCov">         50 :             if (!result) {</span></a>
-<a name="165"><span class="lineNum">     165 </span>                :<span class="lineCov">         24 :                 return false;</span></a>
-<a name="166"><span class="lineNum">     166 </span>                :            :             }</a>
-<a name="167"><span class="lineNum">     167 </span>                :            :         }</a>
-<a name="168"><span class="lineNum">     168 </span>                :<span class="lineCov">         34 :         return true;</span></a>
-<a name="169"><span class="lineNum">     169 </span>                :            :     }</a>
-<a name="170"><span class="lineNum">     170 </span>                :            : }</a>
+<a name="164"><span class="lineNum">     164 </span>                :            :         }</a>
+<a name="165"><span class="lineNum">     165 </span>                :            :     }</a>
+<a name="166"><span class="lineNum">     166 </span>                :            : }</a>
 </pre>
       </td>
     </tr>

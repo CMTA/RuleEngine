@@ -134,6 +134,15 @@ contract RuleEngineValidationTest is Test, HelperContract {
         // false because the ruleWhitelist is still present
         resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
         assertFalse(resBool);
+
+        resBool = ruleEngineMock.canTransferFrom(
+            ADDRESS3,
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+        // Assert
+        assertFalse(resBool);
     }
 
     function testCannotSetEmptyRulesT2() public {
@@ -158,6 +167,15 @@ contract RuleEngineValidationTest is Test, HelperContract {
         // Assert2
         // false because the ruleWhitelist is still present
         resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
+        assertFalse(resBool);
+
+        resBool = ruleEngineMock.canTransferFrom(
+            ADDRESS3,
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+        // Assert
         assertFalse(resBool);
     }
 

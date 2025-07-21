@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: UNLICENSED
 // Documentation :
 // https://book.getfoundry.sh/tutorials/solidity-scripting
@@ -6,7 +7,7 @@ pragma solidity ^0.8.17;
 import "forge-std/Script.sol";
 //import "CMTAT/CMTAT_STANDALONE.sol";
 import {RuleEngine} from "src/RuleEngine.sol";
-import {RuleWhitelist} from "src/rules/validation/RuleWhitelist.sol";
+import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
 import {ValidationModuleRuleEngine} from "CMTAT/modules/wrapper/extensions/ValidationModule/ValidationModuleRuleEngine.sol";
 
 /**
@@ -34,3 +35,4 @@ contract RuleEngineScript is Script {
         vm.stopBroadcast();
     }
 }
+

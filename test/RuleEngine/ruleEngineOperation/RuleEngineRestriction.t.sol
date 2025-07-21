@@ -12,39 +12,6 @@ import "OZ/token/ERC20/IERC20.sol";
 contract RuleEngineOperationTest is Test, HelperContract {
     uint256 defaultValue = 20;
 
-    TIME_LIMIT timeLimit_ =
-        TIME_LIMIT({
-            timeLimitToApprove: DEFAULT_TIME_LIMIT_TO_APPROVE,
-            timeLimitToTransfer: DEFAULT_TIME_LIMIT_TO_TRANSFER
-        });
-    ISSUANCE issuanceOption_ =
-        ISSUANCE({
-            authorizedMintWithoutApproval: false,
-            authorizedBurnWithoutApproval: false
-        });
-
-    AUTOMATIC_APPROVAL automaticApproval_ =
-        AUTOMATIC_APPROVAL({
-            isActivate: false,
-            timeLimitBeforeAutomaticApproval: 0
-        });
-    AUTOMATIC_TRANSFER automaticTransfer_ =
-        AUTOMATIC_TRANSFER({isActivate: false, cmtat: IERC20(address(0))});
-    OPTION options =
-        OPTION({
-            issuance: issuanceOption_,
-            timeLimit: timeLimit_,
-            automaticApproval: automaticApproval_,
-            automaticTransfer: automaticTransfer_
-        });
-
-    TransferRequestKeyElement transferRequestInput =
-        TransferRequestKeyElement({
-            from: ADDRESS1,
-            to: ADDRESS2,
-            value: defaultValue
-        });
-
     // Arrange
     function setUp() public {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -53,15 +20,13 @@ contract RuleEngineOperationTest is Test, HelperContract {
             ZERO_ADDRESS,
             ZERO_ADDRESS
         );
-        ruleConditionalTransfer = new RuleConditionalTransfer(
+        ruleConditionalTransferLight = new RuleConditionalTransferLight(
             CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-            ZERO_ADDRESS,
-            ruleEngineMock,
-            options
+            ruleEngineMock
         );
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleOperation(ruleConditionalTransfer);
+        ruleEngineMock.addRuleOperation(ruleConditionalTransferLight);
         // Arrange - Assert
         resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
@@ -70,11 +35,11 @@ contract RuleEngineOperationTest is Test, HelperContract {
     function testCanDetectTransferRestrictionOK() public {
         // Arrange
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
-        bytes32 key = keccak256(abi.encode(ADDRESS1, ADDRESS2, defaultValue));
+       
         vm.expectEmit(true, true, true, true);
-        emit transferApproved(key, ADDRESS1, ADDRESS2, defaultValue, 0);
-        ruleConditionalTransfer.createTransferRequestWithApproval(
-            transferRequestInput
+        emit TransferApproved(ADDRESS1, ADDRESS2, defaultValue, 1);
+        ruleConditionalTransferLight.approveTransfer(
+            ADDRESS1, ADDRESS2, defaultValue
         );
         // Act
         resUint8 = ruleEngineMock.detectTransferRestriction(
@@ -85,6 +50,36 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
         // Assert
         assertEq(resUint8, 0);
+
+        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(
+            address(0),
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+
+        // Assert
+        assertEq(resUint8, 0);
+
+        resBool = ruleEngineMock.canTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+
+        // Assert
+        assertEq(resBool, true );
+
+
+        resBool = ruleEngineMock.canTransferFrom(
+            ADDRESS3,
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
+        );
+
+        // Assert
+        assertEq(resBool,true);
     }
 
     function testCanDetectTransferRestrictionNotOk() public {
@@ -97,6 +92,38 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
         // Assert
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
+
+        // Act
+        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(
+            ADDRESS3,
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+
+        // Assert
+        assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
+
+        // Act
+        resBool = ruleEngineMock.canTransfer(
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+
+        // Assert
+        assertFalse(resBool);
+
+        // Act
+        resBool = ruleEngineMock.canTransferFrom(
+            ADDRESS3,
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+
+        // Assert
+        assertFalse(resBool);
     }
 
     function testMessageForTransferRestrictionNoRule() public {

@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: UNLICENSED
 // Documentation :
 // https://book.getfoundry.sh/tutorials/solidity-scripting
@@ -6,10 +7,10 @@ pragma solidity ^0.8.17;
 import "forge-std/Script.sol";
 import "../test/HelperContract.sol";
 import {RuleEngine} from "src/RuleEngine.sol";
-import {RuleWhitelist} from "src/rules/validation/RuleWhitelist.sol";
+import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
 
 /**
-@title Deploy a CMTAT, a RuleWhitelist and a RuleEngine
+* @title Deploy a CMTAT, a RuleWhitelist and a RuleEngine
 */
 contract CMTATWithRuleEngineScript is Script, HelperContract {
     function run() external {
@@ -41,3 +42,4 @@ contract CMTATWithRuleEngineScript is Script, HelperContract {
         vm.stopBroadcast();
     }
 }
+

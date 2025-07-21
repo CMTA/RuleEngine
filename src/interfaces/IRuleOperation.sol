@@ -6,9 +6,9 @@ interface IRuleOperation {
     /**
      * @dev Returns true if the transfer is valid, and false otherwise.
      */
-    function operateOnTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external returns (bool isValid);
+    function transferred(
+        address from,
+        address to,
+        uint256 value
+    ) external;
 }

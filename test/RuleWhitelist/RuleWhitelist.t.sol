@@ -131,7 +131,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         assertEq(resString, TEXT_CODE_NOT_FOUND);
     }
 
-    function testcanTransfer() public {
+    function testCanTransfer() public {
         // Arrange
         _addAddressesToTheList();
         // Act
@@ -141,6 +141,16 @@ contract RuleWhitelistTest is Test, HelperContract {
         // ADDRESS2 -> ADDRESS1
         resBool = ruleWhitelist.canTransfer(ADDRESS2, ADDRESS1, 20);
         assertEq(resBool, true);
+
+        // Spender is not whitelisted
+        resBool = ruleWhitelist.canTransferFrom(ADDRESS3, ADDRESS2, ADDRESS1, 20);
+        assertEq(resBool, false);
+
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        ruleWhitelist.addAddressToTheList(ADDRESS3); 
+
+        resBool = ruleWhitelist.canTransferFrom(ADDRESS3, ADDRESS2, ADDRESS1, 20);
+        assertEq(resBool, true);   
     }
 
     function testTransferDetectedAsInvalid() public {
