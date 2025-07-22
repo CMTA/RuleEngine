@@ -21,7 +21,7 @@ contract RuleEngine is
      * @notice
      * Get the current version of the smart contract
      */
-    string public constant VERSION = "2.2.0";
+    string public constant VERSION = "3.0.0";
 
     /**
      * @param admin Address of the contract (Access Control)
@@ -130,13 +130,13 @@ contract RuleEngine is
      * @return True if the transfer is valid, false otherwise
      **/
     function canTransferFrom(
-        address /*spender*/,
+        address spender,
         address from,
         address to,
         uint256 value
     ) public view override returns (bool) {
         return
-            detectTransferRestriction(from, to, value) ==
+            detectTransferRestrictionFrom(spender, from, to, value) ==
             uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 

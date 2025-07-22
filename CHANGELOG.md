@@ -19,6 +19,11 @@ Please follow [https://changelog.md/](https://changelog.md/) conventions.
 
 
 
+## v3.0.0-rc0
+
+- Improve test
+- Move rules contracts to a dedicated repository, only keep some rules as mock contracts for testing purpose
+
 ## v2.1.0
 
 - Update RuleEngine to CMTAT v3.0.0-rc5

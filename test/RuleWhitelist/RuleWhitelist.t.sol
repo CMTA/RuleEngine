@@ -129,6 +129,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         );
         // Assert
         assertEq(resString, TEXT_CODE_NOT_FOUND);
+
     }
 
     function testCanTransfer() public {
@@ -150,7 +151,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         ruleWhitelist.addAddressToTheList(ADDRESS3); 
 
         resBool = ruleWhitelist.canTransferFrom(ADDRESS3, ADDRESS2, ADDRESS1, 20);
-        assertEq(resBool, true);   
+        assertEq(resBool, true);  
     }
 
     function testTransferDetectedAsInvalid() public {
@@ -208,6 +209,19 @@ contract RuleWhitelistTest is Test, HelperContract {
         // Assert
         assertEq(resUint8, CODE_ADDRESS_FROM_NOT_WHITELISTED);
     }
+
+    function testDetectTransferRestrictionSpender() public {
+        // Act
+        resUint8 = ruleWhitelist.detectTransferRestrictionFrom(
+            ADDRESS3,
+            ADDRESS1,
+            ADDRESS2,
+            20
+        );
+        // Assert
+        assertEq(resUint8, CODE_ADDRESS_SPENDER_NOT_WHITELISTED);
+    }
+
 
     function testDetectTransferRestrictionTo() public {
         // Arrange
