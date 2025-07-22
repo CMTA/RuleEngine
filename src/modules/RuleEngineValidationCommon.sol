@@ -29,7 +29,7 @@ abstract contract RuleEngineValidationCommon is
      */
     function setRulesValidation(
         address[] calldata rules_
-    ) public override onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+    ) public virtual override onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         if (_rulesValidation.length > 0) {
             _clearRulesValidation();
         }
@@ -41,7 +41,7 @@ abstract contract RuleEngineValidationCommon is
      * @notice Clear all the rules of the array of rules
      *
      */
-    function clearRulesValidation() public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+    function clearRulesValidation() public virtual  onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         _clearRulesValidation();
     }
 
@@ -52,7 +52,7 @@ abstract contract RuleEngineValidationCommon is
      */
     function addRuleValidation(
         IRuleValidation rule_
-    ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+    ) public virtual  onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         RuleInternal._addRule(_rulesValidation, address(rule_));
         emit AddRule(address(rule_));
     }
@@ -70,14 +70,14 @@ abstract contract RuleEngineValidationCommon is
     function removeRuleValidation(
         IRuleValidation rule_,
         uint256 index
-    ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+    ) public virtual  onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         _removeRuleValidation(address(rule_), index);
     }
 
     /**
      * @return The number of rules inside the array
      */
-    function rulesCountValidation() external view override returns (uint256) {
+    function rulesCountValidation() public view virtual override returns (uint256) {
         return _rulesValidation.length;
     }
 
@@ -87,7 +87,7 @@ abstract contract RuleEngineValidationCommon is
      */
     function getRuleIndexValidation(
         IRuleValidation rule_
-    ) external view returns (uint256 index) {
+    ) public view virtual returns (uint256 index) {
         return RuleInternal._getRuleIndex(_rulesValidation, address(rule_));
     }
 
@@ -98,7 +98,7 @@ abstract contract RuleEngineValidationCommon is
      */
     function ruleValidation(
         uint256 ruleId
-    ) external view override returns (address) {
+    ) public view virtual override returns (address) {
         return _rulesValidation[ruleId];
     }
 
@@ -107,8 +107,9 @@ abstract contract RuleEngineValidationCommon is
      * @return An array of rules
      */
     function rulesValidation()
-        external
+        public
         view
+        virtual 
         override
         returns (address[] memory)
     {
@@ -122,7 +123,7 @@ abstract contract RuleEngineValidationCommon is
      * @notice Clear all the rules of the array of rules
      *
      */
-    function _clearRulesValidation() internal {
+    function _clearRulesValidation() internal virtual  {
         uint256 index;
         // we remove the last element first since it is more optimized.
         for (uint256 i = _rulesValidation.length; i > 0; --i) {
@@ -145,7 +146,7 @@ abstract contract RuleEngineValidationCommon is
      *
      *
      */
-    function _removeRuleValidation(address rule_, uint256 index) internal {
+    function _removeRuleValidation(address rule_, uint256 index) internal virtual {
         RuleInternal._removeRule(_rulesValidation, rule_, index);
         emit RemoveRule(address(rule_));
     }

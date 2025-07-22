@@ -11,6 +11,9 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
     // Can be shared betwen RuleOperation and RuleValidation since it is a mapping
     mapping(address => bool) _ruleIsPresent;
 
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL/PRIVATE FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
     /**
      * @notice Set all the rules, will overwrite all the previous rules. \n
      * Revert if one rule is a zero address or if the rule is already present
@@ -20,7 +23,7 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
         if (rules_.length == 0) {
             revert RuleEngine_ArrayIsEmpty();
         }
-        for (uint256 i = 0; i < rules_.length; ) {
+        for (uint256 i = 0; i < rules_.length;  ++i) {
             if (address(rules_[i]) == address(0x0)) {
                 revert RuleEngine_RuleAddressZeroNotAllowed();
             }
@@ -29,9 +32,6 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
             }
             _ruleIsPresent[rules_[i]] = true;
             emit AddRule(rules_[i]);
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -86,12 +86,9 @@ abstract contract RuleInternal is RuleEngineInvariantStorage {
         address rule_
     ) internal view returns (uint256 index) {
         uint256 rulesLength = _rules.length;
-        for (index = 0; index < rulesLength; ) {
+        for (index = 0; index < rulesLength; ++index) {
             if (_rules[index] == rule_) {
                 return index;
-            }
-            unchecked {
-                ++index;
             }
         }
         return _rules.length;

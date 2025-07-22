@@ -116,13 +116,13 @@ contract RuleEngine is
         address from,
         address to,
         uint256 value
-    ) public view override returns (bool) {
+    ) public virtual view override returns (bool) {
         return
             detectTransferRestriction(from, to, value) ==
             uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
-       /**
+    /**
      * @notice Validate a transfer
      * @param from the origin address
      * @param to the destination address
@@ -134,7 +134,7 @@ contract RuleEngine is
         address from,
         address to,
         uint256 value
-    ) public view override returns (bool) {
+    ) public virtual view override returns (bool) {
         return
             detectTransferRestrictionFrom(spender, from, to, value) ==
             uint8(REJECTED_CODE_BASE.TRANSFER_OK);
@@ -147,7 +147,7 @@ contract RuleEngine is
      **/
     function messageForTransferRestriction(
         uint8 restrictionCode
-    ) external view override returns (string memory) {
+    ) public virtual view override returns (string memory) {
         // Validation
         uint256 rulesLength = _rulesValidation.length;
         for (uint256 i = 0; i < rulesLength; ++i) {
@@ -183,7 +183,7 @@ contract RuleEngine is
         address from,
         address to,
         uint256 value
-    ) public override onlyRole(TOKEN_CONTRACT_ROLE) {
+    ) public virtual override onlyRole(TOKEN_CONTRACT_ROLE) {
         // Validate transfer
         require(RuleEngineValidation.canTransferValidationFrom(spender, from, to, value), RuleEngine_InvalidTransfer(from, to, value));
         
@@ -195,7 +195,7 @@ contract RuleEngine is
         address from,
         address to,
         uint256 value
-    ) public override onlyRole(TOKEN_CONTRACT_ROLE) {
+    ) public virtual override onlyRole(TOKEN_CONTRACT_ROLE) {
         // Validate transfer
         require(RuleEngineValidation.canTransferValidation(from, to, value),RuleEngine_InvalidTransfer(from, to, value));
         
@@ -214,8 +214,9 @@ contract RuleEngine is
         // The Default Admin has all roles
         if (AccessControl.hasRole(DEFAULT_ADMIN_ROLE, account)) {
             return true;
+        } else {
+            return AccessControl.hasRole(role, account);
         }
-        return AccessControl.hasRole(role, account);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -228,6 +229,7 @@ contract RuleEngine is
     function _msgSender()
         internal
         view
+        virtual 
         override(ERC2771Context, Context)
         returns (address sender)
     {
@@ -240,6 +242,7 @@ contract RuleEngine is
     function _msgData()
         internal
         view
+        virtual 
         override(ERC2771Context, Context)
         returns (bytes calldata)
     {
@@ -252,6 +255,7 @@ contract RuleEngine is
     function _contextSuffixLength()
         internal
         view
+        virtual 
         override(ERC2771Context, Context)
         returns (uint256)
     {

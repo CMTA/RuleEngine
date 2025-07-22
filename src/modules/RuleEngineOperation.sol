@@ -25,7 +25,7 @@ abstract contract RuleEngineOperation is
      */
     function setRulesOperation(
         address[] calldata rules_
-    ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+    ) public virtual onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         if (_rulesOperation.length > 0) {
             _clearRulesOperation();
         }
@@ -37,27 +37,11 @@ abstract contract RuleEngineOperation is
      * @notice Clear all the rules of the array of rules
      *
      */
-    function clearRulesOperation() public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+    function clearRulesOperation() public virtual onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         _clearRulesOperation();
     }
 
-    /**
-     * @notice Clear all the rules of the array of rules
-     *
-     */
-    function _clearRulesOperation() internal {
-        uint256 index;
-        // we remove the last element first since it is more optimized.
-        for (uint256 i = _rulesOperation.length; i > 0; --i) {
-            unchecked {
-                // don't underflow since i > 0
-                index = i - 1;
-            }
-            _removeRuleOperation(_rulesOperation[index], index);
-        }
-        emit ClearRules(_rulesOperation);
-    }
-
+    
     /**
      * @notice Add a rule to the array of rules
      * Revert if one rule is a zero address or if the rule is already present
@@ -65,7 +49,7 @@ abstract contract RuleEngineOperation is
      */
     function addRuleOperation(
         IRuleOperation rule_
-    ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+    ) public virtual onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         RuleInternal._addRule(_rulesOperation, address(rule_));
         emit AddRule(address(rule_));
     }
@@ -83,8 +67,93 @@ abstract contract RuleEngineOperation is
     function removeRuleOperation(
         IRuleOperation rule_,
         uint256 index
-    ) public onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+    ) public virtual onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         _removeRuleOperation(address(rule_), index);
+    }
+
+ 
+    /**
+     * @return The number of rules inside the array
+     */
+    function rulesCountOperation() public view virtual override returns (uint256) {
+        return _rulesOperation.length;
+    }
+
+    /**
+     * @notice Get the index of a rule inside the list
+     * @return index if the rule is found, _rulesOperation.length otherwise
+     */
+    function getRuleIndexOperation(
+        IRuleOperation rule_
+    ) public view virtual returns (uint256 index) {
+        return RuleInternal._getRuleIndex(_rulesOperation, address(rule_));
+    }
+
+    /**
+     * @notice Get the rule at the position specified by ruleId
+     * @param ruleId index of the rule
+     * @return a rule address
+     */
+    function ruleOperation(
+        uint256 ruleId
+    ) public view virtual override returns (address) {
+        return _rulesOperation[ruleId];
+    }
+
+    /**
+     * @notice Get all the rules
+     * @return An array of rules
+     */
+    function rulesOperation()
+        public
+        view
+        virtual
+        override
+        returns (address[] memory)
+    {
+        return _rulesOperation;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL/PRIVATE FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+    /**
+     * @notice Clear all the rules of the array of rules
+     *
+     */
+    function _clearRulesOperation() internal virtual {
+        uint256 index;
+        // we remove the last element first since it is more optimized.
+        for (uint256 i = _rulesOperation.length; i > 0; --i) {
+            unchecked {
+                // don't underflow since i > 0
+                index = i - 1;
+            }
+            _removeRuleOperation(_rulesOperation[index], index);
+        }
+        emit ClearRules(_rulesOperation);
+    }
+
+
+    /**
+     * @notice Go through all the rule to know if a restriction exists on the transfer
+     * @param from the origin address
+     * @param to the destination address
+     * @param value to transfer
+     **/
+    function _transferred(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual{
+        uint256 rulesLength = _rulesOperation.length;
+        for (uint256 i = 0; i < rulesLength; ++i) {
+            IRuleOperation(_rulesOperation[i]).transferred(
+                from,
+                to,
+                value
+            );
+        }
     }
 
     /**
@@ -97,70 +166,8 @@ abstract contract RuleEngineOperation is
      *
      *
      */
-    function _removeRuleOperation(address rule_, uint256 index) internal {
+    function _removeRuleOperation(address rule_, uint256 index) internal virtual {
         RuleInternal._removeRule(_rulesOperation, rule_, index);
         emit RemoveRule(address(rule_));
-    }
-
-    /**
-     * @return The number of rules inside the array
-     */
-    function rulesCountOperation() external view override returns (uint256) {
-        return _rulesOperation.length;
-    }
-
-    /**
-     * @notice Get the index of a rule inside the list
-     * @return index if the rule is found, _rulesOperation.length otherwise
-     */
-    function getRuleIndexOperation(
-        IRuleOperation rule_
-    ) external view returns (uint256 index) {
-        return RuleInternal._getRuleIndex(_rulesOperation, address(rule_));
-    }
-
-    /**
-     * @notice Get the rule at the position specified by ruleId
-     * @param ruleId index of the rule
-     * @return a rule address
-     */
-    function ruleOperation(
-        uint256 ruleId
-    ) external view override returns (address) {
-        return _rulesOperation[ruleId];
-    }
-
-    /**
-     * @notice Get all the rules
-     * @return An array of rules
-     */
-    function rulesOperation()
-        external
-        view
-        override
-        returns (address[] memory)
-    {
-        return _rulesOperation;
-    }
-
-    /**
-     * @notice Go through all the rule to know if a restriction exists on the transfer
-     * @param from the origin address
-     * @param to the destination address
-     * @param value to transfer
-     **/
-    function _transferred(
-        address from,
-        address to,
-        uint256 value
-    ) internal {
-        uint256 rulesLength = _rulesOperation.length;
-        for (uint256 i = 0; i < rulesLength; ++i) {
-            IRuleOperation(_rulesOperation[i]).transferred(
-                from,
-                to,
-                value
-            );
-        }
     }
 }

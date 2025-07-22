@@ -29,7 +29,7 @@ abstract contract RuleEngineValidation is
         address from,
         address to,
         uint256 value
-    ) public view override returns (uint8) {
+    ) public view virtual override returns (uint8) {
         uint256 rulesLength = _rulesValidation.length;
         for (uint256 i = 0; i < rulesLength; ++i) {
             uint8 restriction = IRuleValidation(_rulesValidation[i])
@@ -47,7 +47,7 @@ abstract contract RuleEngineValidation is
         address from,
         address to,
         uint256 value
-    ) public view override returns (uint8) {
+    ) public view virtual override returns (uint8) {
         uint256 rulesLength = _rulesValidation.length;
         for (uint256 i = 0; i < rulesLength; ++i) {
             uint8 restriction = IRuleValidation(_rulesValidation[i])
@@ -70,7 +70,7 @@ abstract contract RuleEngineValidation is
         address from,
         address to,
         uint256 value
-    ) public view returns (bool) {
+    ) public view virtual returns (bool) {
         return
             detectTransferRestrictionValidation(from, to, value) ==
             uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK);
@@ -88,7 +88,7 @@ abstract contract RuleEngineValidation is
         address from,
         address to,
         uint256 value
-    ) public view override returns (bool) {
+    ) public view virtual override returns (bool) {
         return
             detectTransferRestrictionValidationFrom(spender, from, to, value) ==
             uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK);
