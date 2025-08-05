@@ -64,9 +64,9 @@ contract RuleEngine is
         }
 
         // Operation
-        uint256 rulesLength = _rulesOperation.length;
+        uint256 rulesLength =  rulesCountOperation();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRuleValidation(_rulesOperation[i])
+            uint8 restriction = IRuleValidation(ruleOperation(i))
                 .detectTransferRestriction(from, to, value);
             if (restriction > 0) {
                 return restriction;
@@ -93,9 +93,9 @@ contract RuleEngine is
         }
 
         // Operation
-        uint256 rulesLength = _rulesOperation.length;
+        uint256 rulesLength =  rulesCountOperation();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRuleValidation(_rulesOperation[i])
+            uint8 restriction = IRuleValidation(ruleOperation(i))
                 .detectTransferRestrictionFrom(spender,from, to, value);
             if (restriction > 0) {
                 return restriction;
@@ -149,26 +149,26 @@ contract RuleEngine is
         uint8 restrictionCode
     ) public virtual view override returns (string memory) {
         // Validation
-        uint256 rulesLength = _rulesValidation.length;
+        uint256 rulesLength = rulesCountValidation();
         for (uint256 i = 0; i < rulesLength; ++i) {
             if (
-                IRuleValidation(_rulesValidation[i])
+                IRuleValidation(ruleValidation(i))
                     .canReturnTransferRestrictionCode(restrictionCode)
             ) {
                 return
-                    IRuleValidation(_rulesValidation[i])
+                    IRuleValidation(ruleValidation(i))
                         .messageForTransferRestriction(restrictionCode);
             }
         }
         // operation
-        rulesLength = _rulesOperation.length;
+        rulesLength =  rulesCountOperation();
         for (uint256 i = 0; i < rulesLength; ++i) {
             if (
-                IRuleValidation(_rulesOperation[i])
+                IRuleValidation(ruleOperation(i))
                     .canReturnTransferRestrictionCode(restrictionCode)
             ) {
                 return
-                    IRuleValidation(_rulesOperation[i])
+                    IRuleValidation(ruleOperation(i))
                         .messageForTransferRestriction(restrictionCode);
             }
         }

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
-
+import "OZ/utils/structs/EnumerableSet.sol";
 pragma solidity ^0.8.20;
 
 abstract contract RuleEngineInvariantStorage {
+     using EnumerableSet for EnumerableSet.AddressSet;
     error RuleEngine_RuleAddressZeroNotAllowed();
     error RuleEngine_RuleAlreadyExists();
     error RuleEngine_RuleDoNotMatch();
@@ -15,7 +16,7 @@ abstract contract RuleEngineInvariantStorage {
     /// @notice Generate when a rule is removed
     event RemoveRule(address indexed rule);
     /// @notice Generate when all the rules are cleared
-    event ClearRules(address[] rulesRemoved);
+    event ClearRules();
 
     /// @notice Role to manage the ruleEngine
     bytes32 public constant RULE_ENGINE_OPERATOR_ROLE =

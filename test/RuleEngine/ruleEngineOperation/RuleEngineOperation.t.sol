@@ -302,7 +302,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
         // Arrange
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight, 0);
+        ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight);
 
         // Act
         vm.expectEmit(true, false, false, false);
@@ -316,7 +316,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
         assertEq(resUint256, 1);
     }
 
-    function testCanRemoveNonExistantRule() public {
+    function testCannotRemoveNonExistantRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
@@ -327,7 +327,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
         // Act
         vm.expectRevert(RuleEngine_RuleDoNotMatch.selector);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight1, 0);
+        ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight1);
 
         // Assert
         resUint256 = ruleEngineMock.rulesCountOperation();
@@ -348,7 +348,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
         vm.expectEmit(true, false, false, false);
         emit RemoveRule(address(ruleConditionalTransferLight1));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight1, 1);
+        ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight1);
 
         // Assert
         resUint256 = ruleEngineMock.rulesCountOperation();
@@ -369,7 +369,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
         vm.expectEmit(true, false, false, false);
         emit RemoveRule(address(ruleConditionalTransferLight));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight, 0);
+        ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight);
 
         // Assert
         resUint256 = ruleEngineMock.rulesCountOperation();
@@ -399,7 +399,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
         vm.expectEmit(true, false, false, false);
         emit RemoveRule(address(ruleConditionalTransferLight1));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight1, 1);
+        ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight1);
 
         // Assert
         address[] memory _rules = ruleEngineMock.rulesOperation();
@@ -551,7 +551,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
         assertEq(resCallBool, true);
 
         // Act
-        uint256 index1 = ruleEngineMock.getRuleIndexOperation(
+       /* uint256 index1 = ruleEngineMock.getRuleIndexOperation(
             ruleConditionalTransferLight1
         );
         uint256 index2 = ruleEngineMock.getRuleIndexOperation(
@@ -565,6 +565,6 @@ contract RuleEngineOperationTest is Test, HelperContract {
         // Assert
         assertEq(index1, 0);
         assertEq(index2, 1);
-        assertEq(index3, ruleConditionalTransferLightTab.length);
+        assertEq(index3, ruleConditionalTransferLightTab.length);*/
     }
 }

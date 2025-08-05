@@ -2,21 +2,35 @@
 
 pragma solidity ^0.8.20;
 
-import "./RuleInternal.sol";
 import "../interfaces/IRuleEngineOperation.sol";
 import "../interfaces/IRuleOperation.sol";
 import "OZ/access/AccessControl.sol";
-
+import "./RuleEngineInvariantStorage.sol";
 /**
  * @title Implementation of a ruleEngine defined by the CMTAT
  */
 abstract contract RuleEngineOperation is
     AccessControl,
-    RuleInternal,
+    RuleEngineInvariantStorage,
     IRuleEngineOperation
 {
+       
     /// @dev Array of rules
-    address[] internal _rulesOperation;
+    //address[] internal _rulesOperation;
+    // Add the library methods
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    // Declare a set state variable
+    EnumerableSet.AddressSet internal _rulesOperation;
+
+    function _checkRule(address rule_) internal{
+          if (rule_ == address(0x0)) {
+                revert RuleEngine_RuleAddressZeroNotAllowed();
+            }
+        if (_rulesOperation.contains(rule_)) {
+            revert RuleEngine_RuleAlreadyExists();
+        }
+    }
 
     /**
      * @notice Set all the rules, will overwrite all the previous rules. \n
@@ -26,11 +40,18 @@ abstract contract RuleEngineOperation is
     function setRulesOperation(
         address[] calldata rules_
     ) public virtual onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
-        if (_rulesOperation.length > 0) {
+        if (rules_.length == 0) {
+            revert RuleEngine_ArrayIsEmpty();
+        }
+        if (_rulesOperation.length() > 0) {
             _clearRulesOperation();
         }
-        _setRules(rules_);
-        _rulesOperation = rules_;
+        for(uint256 i = 0; i < rules_.length; ++i){
+           _checkRule(address(rules_[i]));
+            _rulesOperation.add(address(rules_[i]));
+            emit AddRule(rules_[i]);
+        }
+       
     }
 
     /**
@@ -50,7 +71,8 @@ abstract contract RuleEngineOperation is
     function addRuleOperation(
         IRuleOperation rule_
     ) public virtual onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
-        RuleInternal._addRule(_rulesOperation, address(rule_));
+        _checkRule(address(rule_));
+        _rulesOperation.add(address(rule_));
         emit AddRule(address(rule_));
     }
 
@@ -58,17 +80,16 @@ abstract contract RuleEngineOperation is
      * @notice Remove a rule from the array of rules
      * Revert if the rule found at the specified index does not match the rule in argument
      * @param rule_ address of the target rule
-     * @param index the position inside the array of rule
      * @dev To reduce the array size, the last rule is moved to the location occupied
      * by the rule to remove
      *
      *
      */
     function removeRuleOperation(
-        IRuleOperation rule_,
-        uint256 index
+        IRuleOperation rule_
     ) public virtual onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
-        _removeRuleOperation(address(rule_), index);
+        require(rulesOperationIsPresent(rule_), RuleEngine_RuleDoNotMatch());
+        _removeRuleOperation(address(rule_));
     }
 
  
@@ -76,18 +97,13 @@ abstract contract RuleEngineOperation is
      * @return The number of rules inside the array
      */
     function rulesCountOperation() public view virtual override returns (uint256) {
-        return _rulesOperation.length;
+        return _rulesOperation.length();
     }
 
-    /**
-     * @notice Get the index of a rule inside the list
-     * @return index if the rule is found, _rulesOperation.length otherwise
-     */
-    function getRuleIndexOperation(
-        IRuleOperation rule_
-    ) public view virtual returns (uint256 index) {
-        return RuleInternal._getRuleIndex(_rulesOperation, address(rule_));
+    function rulesOperationIsPresent(IRuleOperation rule_) public view virtual returns (bool){
+        return _rulesOperation.contains(address(rule_));
     }
+
 
     /**
      * @notice Get the rule at the position specified by ruleId
@@ -97,7 +113,7 @@ abstract contract RuleEngineOperation is
     function ruleOperation(
         uint256 ruleId
     ) public view virtual override returns (address) {
-        return _rulesOperation[ruleId];
+        return _rulesOperation.at(ruleId);
     }
 
     /**
@@ -111,7 +127,7 @@ abstract contract RuleEngineOperation is
         override
         returns (address[] memory)
     {
-        return _rulesOperation;
+        return _rulesOperation.values();
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -122,16 +138,10 @@ abstract contract RuleEngineOperation is
      *
      */
     function _clearRulesOperation() internal virtual {
-        uint256 index;
         // we remove the last element first since it is more optimized.
-        for (uint256 i = _rulesOperation.length; i > 0; --i) {
-            unchecked {
-                // don't underflow since i > 0
-                index = i - 1;
-            }
-            _removeRuleOperation(_rulesOperation[index], index);
-        }
-        emit ClearRules(_rulesOperation);
+
+        emit ClearRules();
+        _rulesOperation.clear();
     }
 
 
@@ -146,9 +156,9 @@ abstract contract RuleEngineOperation is
         address to,
         uint256 value
     ) internal virtual{
-        uint256 rulesLength = _rulesOperation.length;
+        uint256 rulesLength = _rulesOperation.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            IRuleOperation(_rulesOperation[i]).transferred(
+            IRuleOperation(_rulesOperation.at(i)).transferred(
                 from,
                 to,
                 value
@@ -160,14 +170,13 @@ abstract contract RuleEngineOperation is
      * @notice Remove a rule from the array of rules
      * Revert if the rule found at the specified index does not match the rule in argument
      * @param rule_ address of the target rule
-     * @param index the position inside the array of rule
      * @dev To reduce the array size, the last rule is moved to the location occupied
      * by the rule to remove
      *
      *
      */
-    function _removeRuleOperation(address rule_, uint256 index) internal virtual {
-        RuleInternal._removeRule(_rulesOperation, rule_, index);
+    function _removeRuleOperation(address rule_) internal virtual {
+        _rulesOperation.remove(rule_);
         emit RemoveRule(address(rule_));
     }
 }

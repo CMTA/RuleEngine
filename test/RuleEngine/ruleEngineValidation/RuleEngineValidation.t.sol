@@ -312,7 +312,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
 
         // Arrange
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleValidation(ruleWhitelist, 0);
+        ruleEngineMock.removeRuleValidation(ruleWhitelist);
 
         // Act
         vm.expectEmit(true, false, false, false);
@@ -337,7 +337,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
         // Act
         vm.expectRevert(RuleEngine_RuleDoNotMatch.selector);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleValidation(ruleWhitelist1, 0);
+        ruleEngineMock.removeRuleValidation(ruleWhitelist1);
 
         // Assert
         resUint256 = ruleEngineMock.rulesCountValidation();
@@ -358,7 +358,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
         vm.expectEmit(true, false, false, false);
         emit RemoveRule(address(ruleWhitelist1));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleValidation(ruleWhitelist1, 1);
+        ruleEngineMock.removeRuleValidation(ruleWhitelist1);
 
         // Assert
         resUint256 = ruleEngineMock.rulesCountValidation();
@@ -379,7 +379,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
         vm.expectEmit(true, false, false, false);
         emit RemoveRule(address(ruleWhitelist));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleValidation(ruleWhitelist, 0);
+        ruleEngineMock.removeRuleValidation(ruleWhitelist);
 
         // Assert
         resUint256 = ruleEngineMock.rulesCountValidation();
@@ -409,7 +409,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
         vm.expectEmit(true, false, false, false);
         emit RemoveRule(address(ruleWhitelist1));
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.removeRuleValidation(ruleWhitelist1, 1);
+        ruleEngineMock.removeRuleValidation(ruleWhitelist1);
 
         // Assert
         address[] memory _rules = ruleEngineMock.rulesValidation();
@@ -533,7 +533,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
         assertEq(resCallBool, true);
 
         // Act
-        uint256 index1 = ruleEngineMock.getRuleIndexValidation(ruleWhitelist1);
+       /* uint256 index1 = ruleEngineMock.getRuleIndexValidation(ruleWhitelist1);
         uint256 index2 = ruleEngineMock.getRuleIndexValidation(ruleWhitelist2);
         // Length of the list because ruleWhitelist is not in the list
         uint256 index3 = ruleEngineMock.getRuleIndexValidation(ruleWhitelist);
@@ -541,7 +541,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
         // Assert
         assertEq(index1, 0);
         assertEq(index2, 1);
-        assertEq(index3, ruleWhitelistTab.length);
+        assertEq(index3, ruleWhitelistTab.length);*/
     }
 
     function testMessageForTransferRestrictionWithUnknownRestrictionCodeAndNoRuless()

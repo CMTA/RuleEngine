@@ -3,7 +3,6 @@
 pragma solidity ^0.8.20;
 
 import "OZ/access/AccessControl.sol";
-import "./RuleInternal.sol";
 import "./RuleEngineValidationCommon.sol";
 import "../interfaces/IRuleEngineValidation.sol";
 import "../interfaces/IRuleValidation.sol";
@@ -14,7 +13,6 @@ import "CMTAT/interfaces/tokenization/draft-IERC1404.sol";
  */
 abstract contract RuleEngineValidation is
     AccessControl,
-    RuleInternal,
     RuleEngineValidationCommon,
     IRuleEngineValidation
 {
@@ -30,9 +28,10 @@ abstract contract RuleEngineValidation is
         address to,
         uint256 value
     ) public view virtual override returns (uint8) {
-        uint256 rulesLength = _rulesValidation.length;
+        //uint256 rulesLength = _rulesValidation.length();
+        uint256 rulesLength = rulesCountValidation();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRuleValidation(_rulesValidation[i])
+            uint8 restriction = IRuleValidation(ruleValidation(i))
                 .detectTransferRestriction(from, to, value);
             if (restriction > 0) {
                 return restriction;
@@ -48,9 +47,9 @@ abstract contract RuleEngineValidation is
         address to,
         uint256 value
     ) public view virtual override returns (uint8) {
-        uint256 rulesLength = _rulesValidation.length;
+        uint256 rulesLength = rulesCountValidation();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRuleValidation(_rulesValidation[i])
+            uint8 restriction = IRuleValidation(ruleValidation(i))
                 .detectTransferRestrictionFrom(spender, from, to, value);
             if (restriction > 0) {
                 return restriction;

@@ -21,22 +21,20 @@ contract RuleOperationRevert is AccessControl,  RuleValidateTransfer,
      * @notice Called when a transfer occurs. Decrements approval count if allowed.
      * @dev `spender` is part of the interface but unused.
      */
-    function transferred(address from, address to, uint256 value) public {
+    function transferred(address /*from*/, address /* to */, uint256 /* value */) public pure {
         revert RuleConditionalTransferLight_InvalidTransfer();
     }
 
 
     /**
      * @notice Check if the transfer is valid
-     * @param from the origin address
-     * @param to the destination address
      * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
      **/
     function detectTransferRestriction(
-        address from,
-        address to,
-        uint256 value
-    ) public view override returns (uint8) {
+        address /* from */,
+        address /* to */,
+        uint256 /* value */
+    ) public pure override returns (uint8) {
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
@@ -52,7 +50,7 @@ contract RuleOperationRevert is AccessControl,  RuleValidateTransfer,
         address from,
         address to,
         uint256 value
-    ) public view override returns (uint8) {
+    ) public pure override returns (uint8) {
         return detectTransferRestriction(from,to, value );
     }
 
@@ -69,11 +67,10 @@ contract RuleOperationRevert is AccessControl,  RuleValidateTransfer,
 
     /**
      * @notice Return the corresponding message
-     * @param restrictionCode The target restriction code
      * @return true if the transfer is valid, false otherwise
      **/
     function messageForTransferRestriction(
-        uint8 restrictionCode
+        uint8 /* restrictionCode */
     ) external pure override returns (string memory) {
         return TEXT_CODE_NOT_FOUND;
     }

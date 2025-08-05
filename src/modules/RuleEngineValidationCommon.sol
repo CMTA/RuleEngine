@@ -3,20 +3,35 @@
 pragma solidity ^0.8.20;
 
 import "OZ/access/AccessControl.sol";
-import "./RuleInternal.sol";
 import "../interfaces/IRuleEngineValidation.sol";
 import "../interfaces/IRuleValidation.sol";
-
+import "OZ/utils/structs/EnumerableSet.sol";
+import "./RuleEngineInvariantStorage.sol";
 /**
  * @title Implementation of a ruleEngine defined by the CMTAT
  */
 abstract contract RuleEngineValidationCommon is
     AccessControl,
-    RuleInternal,
-    IRuleEngineValidationCommon
+    IRuleEngineValidationCommon,
+    RuleEngineInvariantStorage
 {
+    // Add the library methods
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    // Declare a set state variable
+    EnumerableSet.AddressSet internal _rulesValidation;
     /// @dev Array of rules
-    address[] internal _rulesValidation;
+    //address[] internal _rulesValidation;
+
+
+     function _checkRuleValidation(address rule_) internal virtual{
+         if (rule_ == address(0x0)) {
+                revert RuleEngine_RuleAddressZeroNotAllowed();
+            }
+            if (_rulesValidation.contains(rule_)) {
+                revert RuleEngine_RuleAlreadyExists();
+            }
+    }
 
     /*//////////////////////////////////////////////////////////////
                            PUBLIC/EXTERNAL FUNCTIONS
@@ -30,11 +45,22 @@ abstract contract RuleEngineValidationCommon is
     function setRulesValidation(
         address[] calldata rules_
     ) public virtual override onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
-        if (_rulesValidation.length > 0) {
+        if (rules_.length == 0) {
+            revert RuleEngine_ArrayIsEmpty();
+        }
+        uint256 rulesLength = _rulesValidation.length();
+        if ( rulesLength > 0) {
             _clearRulesValidation();
         }
-        _setRules(rules_);
-        _rulesValidation = rules_;
+        for(uint256 i = 0; i < rules_.length; ++i){
+            _checkRuleValidation(address(rules_[i]));
+            _rulesValidation.add(address(rules_[i]));
+            emit AddRule(rules_[i]);
+        }
+    }
+
+    function rulesValidationIsPresent(IRuleValidation rule_) public view virtual returns (bool){
+        return _rulesValidation.contains(address(rule_));
     }
 
     /**
@@ -53,7 +79,8 @@ abstract contract RuleEngineValidationCommon is
     function addRuleValidation(
         IRuleValidation rule_
     ) public virtual  onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
-        RuleInternal._addRule(_rulesValidation, address(rule_));
+         _checkRuleValidation(address(rule_));
+        _rulesValidation.add(address(rule_));
         emit AddRule(address(rule_));
     }
 
@@ -61,35 +88,36 @@ abstract contract RuleEngineValidationCommon is
      * @notice Remove a rule from the array of rules
      * Revert if the rule found at the specified index does not match the rule in argument
      * @param rule_ address of the target rule
-     * @param index the position inside the array of rule
      * @dev To reduce the array size, the last rule is moved to the location occupied
      * by the rule to remove
      *
      *
      */
     function removeRuleValidation(
-        IRuleValidation rule_,
-        uint256 index
+        IRuleValidation rule_
     ) public virtual  onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
-        _removeRuleValidation(address(rule_), index);
+         require(rulesValidationIsPresent(rule_), RuleEngine_RuleDoNotMatch());
+        _removeRuleValidation(address(rule_));
     }
 
     /**
      * @return The number of rules inside the array
      */
     function rulesCountValidation() public view virtual override returns (uint256) {
-        return _rulesValidation.length;
+        return _rulesValidation.length();
     }
+
+
 
     /**
      * @notice Get the index of a rule inside the list
      * @return index if the rule is found, _rulesValidation.length otherwise
      */
-    function getRuleIndexValidation(
+   /* function getRuleIndexValidation(
         IRuleValidation rule_
     ) public view virtual returns (uint256 index) {
         return RuleInternal._getRuleIndex(_rulesValidation, address(rule_));
-    }
+    }*/
 
     /**
      * @notice Get the rule at the position specified by ruleId
@@ -99,8 +127,9 @@ abstract contract RuleEngineValidationCommon is
     function ruleValidation(
         uint256 ruleId
     ) public view virtual override returns (address) {
-        return _rulesValidation[ruleId];
+        return _rulesValidation.at(ruleId);
     }
+
 
     /**
      * @notice Get all the rules
@@ -113,7 +142,7 @@ abstract contract RuleEngineValidationCommon is
         override
         returns (address[] memory)
     {
-        return _rulesValidation;
+        return _rulesValidation.values();
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -124,30 +153,22 @@ abstract contract RuleEngineValidationCommon is
      *
      */
     function _clearRulesValidation() internal virtual  {
-        uint256 index;
-        // we remove the last element first since it is more optimized.
-        for (uint256 i = _rulesValidation.length; i > 0; --i) {
-            unchecked {
-                // don't underflow since i > 0
-                index = i - 1;
-            }
-            _removeRuleValidation(_rulesValidation[index], index);
-        }
-        emit ClearRules(_rulesValidation);
+        emit ClearRules();
+        // O(N)
+       _rulesValidation.clear();
     }
 
     /**
      * @notice Remove a rule from the array of rules
      * Revert if the rule found at the specified index does not match the rule in argument
      * @param rule_ address of the target rule
-     * @param index the position inside the array of rule
      * @dev To reduce the array size, the last rule is moved to the location occupied
      * by the rule to remove
      *
      *
      */
-    function _removeRuleValidation(address rule_, uint256 index) internal virtual {
-        RuleInternal._removeRule(_rulesValidation, rule_, index);
+    function _removeRuleValidation(address rule_) internal virtual {
+        _rulesValidation.remove(rule_);
         emit RemoveRule(address(rule_));
     }
 }

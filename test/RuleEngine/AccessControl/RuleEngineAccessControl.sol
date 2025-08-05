@@ -113,7 +113,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
                 RULE_ENGINE_OPERATOR_ROLE
             )
         );
-        ruleEngineMock.removeRuleValidation(ruleWhitelist, 0);
+        ruleEngineMock.removeRuleValidation(ruleWhitelist);
 
         // Assert
         resUint256 = ruleEngineMock.rulesCountValidation();
