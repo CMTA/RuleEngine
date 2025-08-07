@@ -2,10 +2,15 @@
 
 pragma solidity ^0.8.20;
 
-import "CMTAT/interfaces/engine/IRuleEngine.sol";
-import "./modules/MetaTxModuleStandalone.sol";
-import "./modules/RuleEngineOperation.sol";
-import {RuleEngineValidation} from "./modules/RuleEngineValidation.sol";
+// OpenZeppelin
+import {AccessControl} from "OZ/access/AccessControl.sol";
+import {Context} from "OZ/utils/Context.sol";
+// CMTAT
+import {IRuleEngine}from "CMTAT/interfaces/engine/IRuleEngine.sol";
+import {MetaTxModuleStandalone, ERC2771Context} from "./modules/MetaTxModuleStandalone.sol";
+// Other
+import {RuleEngineOperation} from "./modules/RuleEngineOperation.sol";
+import {RuleEngineValidationRead, RuleEngineValidation} from "./modules/RuleEngineValidationRead.sol";
 import {IRuleValidation} from "./interfaces/IRuleValidation.sol";
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
@@ -13,7 +18,7 @@ import {IRuleValidation} from "./interfaces/IRuleValidation.sol";
 contract RuleEngine is
     IRuleEngine,
     RuleEngineOperation,
-    RuleEngineValidation,
+    RuleEngineValidationRead,
     MetaTxModuleStandalone
 {
     
@@ -41,6 +46,36 @@ contract RuleEngine is
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
+    /* ============ State functions ============ */
+    /*
+     * @notice function protected by access control
+     */
+    function transferred(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) public virtual override onlyRole(TOKEN_CONTRACT_ROLE) {
+        // Validate transfer
+        require(RuleEngineValidationRead.canTransferValidationFrom(spender, from, to, value), RuleEngine_InvalidTransfer(from, to, value));
+        
+        // Apply operation on RuleEngine
+        RuleEngineOperation._transferred(from, to, value);
+    }
+
+    function transferred(
+        address from,
+        address to,
+        uint256 value
+    ) public virtual override onlyRole(TOKEN_CONTRACT_ROLE) {
+        // Validate transfer
+        require(RuleEngineValidationRead.canTransferValidation(from, to, value),RuleEngine_InvalidTransfer(from, to, value));
+        
+        // Apply operation on RuleEngine
+        RuleEngineOperation._transferred(from, to, value);
+    }
+
+    /* ============ View functions ============ */
     /**
      * @notice Go through all the rule to know if a restriction exists on the transfer
      * @param from the origin address
@@ -54,7 +89,7 @@ contract RuleEngine is
         uint256 value
     ) public view override returns (uint8) {
         // Validation
-        uint8 code = RuleEngineValidation.detectTransferRestrictionValidation(
+        uint8 code = RuleEngineValidationRead.detectTransferRestrictionValidation(
             from,
             to,
             value
@@ -83,7 +118,7 @@ contract RuleEngine is
         uint256 value
     ) public view override returns (uint8) {
         // Validation
-        uint8 code = RuleEngineValidation.detectTransferRestrictionValidationFrom(spender,
+        uint8 code = RuleEngineValidationRead.detectTransferRestrictionValidationFrom(spender,
             from,
             to,
             value
@@ -173,34 +208,6 @@ contract RuleEngine is
             }
         }
         return "Unknown restriction code";
-    }
-
-    /*
-     * @notice function protected by access control
-     */
-    function transferred(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) public virtual override onlyRole(TOKEN_CONTRACT_ROLE) {
-        // Validate transfer
-        require(RuleEngineValidation.canTransferValidationFrom(spender, from, to, value), RuleEngine_InvalidTransfer(from, to, value));
-        
-        // Apply operation on RuleEngine
-        RuleEngineOperation._transferred(from, to, value);
-    }
-
-    function transferred(
-        address from,
-        address to,
-        uint256 value
-    ) public virtual override onlyRole(TOKEN_CONTRACT_ROLE) {
-        // Validate transfer
-        require(RuleEngineValidation.canTransferValidation(from, to, value),RuleEngine_InvalidTransfer(from, to, value));
-        
-        // Apply operation on RuleEngine
-        RuleEngineOperation._transferred(from, to, value);
     }
 
     /* ============ ACCESS CONTROL ============ */

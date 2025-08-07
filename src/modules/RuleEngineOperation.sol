@@ -2,12 +2,15 @@
 
 pragma solidity ^0.8.20;
 
-import "../interfaces/IRuleEngineOperation.sol";
-import "../interfaces/IRuleOperation.sol";
-import "OZ/access/AccessControl.sol";
-import "./RuleEngineInvariantStorage.sol";
+// OpenZeppelin
+import {EnumerableSet} from "OZ/utils/structs/EnumerableSet.sol";
+import {AccessControl}  from "OZ/access/AccessControl.sol";
+// Other
+import {IRuleEngineOperation} from "../interfaces/IRuleEngineOperation.sol";
+import {IRuleOperation} from "../interfaces/IRuleOperation.sol";
+import {RuleEngineInvariantStorage} from "./RuleEngineInvariantStorage.sol";
 /**
- * @title Implementation of a ruleEngine defined by the CMTAT
+ * @title RuleEngine - Operation part
  */
 abstract contract RuleEngineOperation is
     AccessControl,
@@ -23,15 +26,7 @@ abstract contract RuleEngineOperation is
     // Declare a set state variable
     EnumerableSet.AddressSet internal _rulesOperation;
 
-    function _checkRule(address rule_) internal{
-          if (rule_ == address(0x0)) {
-                revert RuleEngine_RuleAddressZeroNotAllowed();
-            }
-        if (_rulesOperation.contains(rule_)) {
-            revert RuleEngine_RuleAlreadyExists();
-        }
-    }
-
+    /* ============ State functions ============ */
     /**
      * @notice Set all the rules, will overwrite all the previous rules. \n
      * Revert if one rule is a zero address or if the rule is already present
@@ -92,7 +87,7 @@ abstract contract RuleEngineOperation is
         _removeRuleOperation(address(rule_));
     }
 
- 
+    /* ============ View functions ============ */
     /**
      * @return The number of rules inside the array
      */
@@ -178,5 +173,14 @@ abstract contract RuleEngineOperation is
     function _removeRuleOperation(address rule_) internal virtual {
         _rulesOperation.remove(rule_);
         emit RemoveRule(address(rule_));
+    }
+
+    function _checkRule(address rule_) internal{
+          if (rule_ == address(0x0)) {
+                revert RuleEngine_RuleAddressZeroNotAllowed();
+            }
+        if (_rulesOperation.contains(rule_)) {
+            revert RuleEngine_RuleAlreadyExists();
+        }
     }
 }

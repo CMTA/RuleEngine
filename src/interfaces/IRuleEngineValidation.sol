@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-interface IRuleEngineValidation {
+interface IRuleEngineValidationRead {
     /**
      * @dev See ERC-1404
      *
@@ -31,7 +31,7 @@ interface IRuleEngineValidation {
     ) external view returns (bool isValid);
 }
 
-interface IRuleEngineValidationCommon {
+interface IRuleEngineValidation {
     /**
      * @dev define the rules, the precedent rules will be overwritten
      */

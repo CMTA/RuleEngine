@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
-import "OZ/utils/structs/EnumerableSet.sol";
+
 pragma solidity ^0.8.20;
 
 abstract contract RuleEngineInvariantStorage {
-     using EnumerableSet for EnumerableSet.AddressSet;
     error RuleEngine_RuleAddressZeroNotAllowed();
     error RuleEngine_RuleAlreadyExists();
     error RuleEngine_RuleDoNotMatch();
