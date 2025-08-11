@@ -8,6 +8,7 @@ import {Context} from "OZ/utils/Context.sol";
 // CMTAT
 import {IRuleEngine}from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {MetaTxModuleStandalone, ERC2771Context} from "./modules/MetaTxModuleStandalone.sol";
+import {ERC3643Compliance, IERC3643Compliance} from "./modules/ERC3643Compliance.sol";
 // Other
 import {RuleEngineOperation} from "./modules/RuleEngineOperation.sol";
 import {RuleEngineValidationRead, RuleEngineValidation} from "./modules/RuleEngineValidationRead.sol";
@@ -19,7 +20,8 @@ contract RuleEngine is
     IRuleEngine,
     RuleEngineOperation,
     RuleEngineValidationRead,
-    MetaTxModuleStandalone
+    MetaTxModuleStandalone,
+    ERC3643Compliance
 {
     
     /**
@@ -41,7 +43,7 @@ contract RuleEngine is
             revert RuleEngine_AdminWithAddressZeroNotAllowed();
         }
         if (tokenContract != address(0)) {
-            _grantRole(TOKEN_CONTRACT_ROLE, tokenContract);
+           _bindToken(tokenContract);
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
@@ -55,20 +57,46 @@ contract RuleEngine is
         address from,
         address to,
         uint256 value
-    ) public virtual override onlyRole(TOKEN_CONTRACT_ROLE) {
+    ) public virtual override onlyBoundToken {
         // Validate transfer
         require(RuleEngineValidationRead.canTransferValidationFrom(spender, from, to, value), RuleEngine_InvalidTransfer(from, to, value));
         
         // Apply operation on RuleEngine
         RuleEngineOperation._transferred(from, to, value);
     }
-
+    /**
+    * @dev ERC-3643 function transferred
+    */
     function transferred(
         address from,
         address to,
         uint256 value
-    ) public virtual override onlyRole(TOKEN_CONTRACT_ROLE) {
-        // Validate transfer
+    ) public virtual override onlyBoundToken {
+       _transferred(from, to, value);
+    }
+
+    /// @inheritdoc IERC3643Compliance
+    function created(address to, uint256 value) public virtual override onlyBoundToken{
+       _transferred(address(0), to, value);
+    }
+
+    /// @inheritdoc IERC3643Compliance
+    function destroyed(address from, uint256 value) public virtual override onlyBoundToken {
+        _transferred(from, address(0), value);
+    }
+
+    /**
+     * @notice Go through all the rule to know if a restriction exists on the transfer
+     * @param from the origin address
+     * @param to the destination address
+     * @param value to transfer
+     **/
+    function _transferred(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual override(RuleEngineOperation){
+         // Validate transfer
         require(RuleEngineValidationRead.canTransferValidation(from, to, value),RuleEngine_InvalidTransfer(from, to, value));
         
         // Apply operation on RuleEngine

@@ -123,13 +123,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
     function testCannotAttackerOperateOnTransfer() public {
         // Act
         vm.prank(ATTACKER);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ATTACKER,
-                TOKEN_CONTRACT_ROLE
-            )
-        );
+        vm.expectRevert(ERC3643Compliance.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngineMock.transferred(address(0), ADDRESS1, ADDRESS2, 10);
     }
 }

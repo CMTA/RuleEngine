@@ -26,6 +26,10 @@ abstract contract RuleEngineOperation is
     // Declare a set state variable
     EnumerableSet.AddressSet internal _rulesOperation;
 
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC/EXTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+
     /* ============ State functions ============ */
     /**
      * @notice Set all the rules, will overwrite all the previous rules. \n

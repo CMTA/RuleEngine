@@ -2,9 +2,86 @@
 
 # RuleEngine
 
-This repository includes the RuleEngine contract for the [CMTAT](https://github.com/CMTA/CMTAT) token. 
+This repository includes the RuleEngine contract for [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens. 
 
-The RuleEngine is an external contract used to apply transfer restrictions to another contract, initially the CMTAT. Acting as a controller, it can call different contract rules and apply these rules on each transfer.
+The RuleEngine is an external contract used to apply transfer restrictions to another contract, such as CMTAT and ERC-3643 tokens. Acting as a controller, it can call different contract rules and apply these rules on each transfer.
+
+## Interface
+
+### CMTAT
+
+The RuleEngine base interface is defined in CMTAT reposotiry.
+
+![surya_inheritance_IRuleEngine.sol](./doc/schema/surya_inheritance_IRuleEngine.sol.png)
+
+It inherits from several others interace:
+
+- IERC1404 which contains ERC-1404 related functions
+
+```solidity
+    function detectTransferRestriction(
+        address from,
+        address to,
+        uint256 value
+    ) external view returns (uint8);
+
+    function messageForTransferRestriction(
+        uint8 restrictionCode
+    ) external view returns (string memory);
+```
+
+
+
+```
+enum REJECTED_CODE_BASE {
+        TRANSFER_OK,
+        TRANSFER_REJECTED_DEACTIVATED,
+        TRANSFER_REJECTED_PAUSED,
+        TRANSFER_REJECTED_FROM_FROZEN,
+        TRANSFER_REJECTED_TO_FROZEN,
+        TRANSFER_REJECTED_SPENDER_FROZEN,
+        TRANSFER_REJECTED_FROM_INSUFFICIENT_ACTIVE_BALANCE
+    }
+
+    function detectTransferRestrictionFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) external view returns (uint8);
+```
+
+
+
+- IERC7551Compliance which includes function related to ERC-7551:
+
+```
+ function canTransferFrom(address spender,address from,address to,uint256 value)  external view returns (bool);
+```
+
+
+
+- canTransfer
+
+```
+ function canTransfer(address from,address to,uint256 value) external view returns (bool isValid);
+```
+
+
+
+- IERC3643IComplianceContract
+
+```
+ function transferred(address from, address to, uint256 value) external;
+```
+
+
+
+### ERC-3643
+
+
+
+
 
 ## Dependencies
 
@@ -55,17 +132,17 @@ Before each transfer, your contract must call the function `operateOnTransfer` w
 
 ## Available Rules
 
-Rules have their own dedicated repository:
+Rules have their own dedicated repository: [github.com/CMTA/Rules](https://github.com/CMTA/Rules)
 
 The following rules are available:
 
-| Rule                                                         | Type           | Description                                                  | Doc                                                          |
-| ------------------------------------------------------------ | -------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [RuleWhitelist](src/rules/validation/RuleWhitelist.sol)      | RuleValidation | This rule can be used to restrict transfers from/to only addresses inside a whitelist. | [RuleWhitelist.md](./doc/technical/RuleWhitelist.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleWhitelist.sol.md) |
-| [RuleWhitelistWrapper](src/rules/validation/RuleWhitelistWrapper.sol) | RuleValidation | This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators. | [RuleWhitelistWrapper.md](./doc/technical/RuleWhitelistWrapper.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleWhitelistWrapper.sol.md) |
-| [RuleBlacklist](src/rules/validation/RuleBlacklist.sol)      | RuleValidation | This rule can be used to forbid transfer from/to addresses in the blacklist | [RuleBlacklist.md](./doc/technical/RuleBlacklist.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleBlacklist.sol.md) |
-| [RuleSanctionList](src/rules/validation/RuleSanctionList.sol) | RuleValidation | The purpose of this contract is to use the oracle contract from Chainalysis to forbid transfer from/to an address  included in a sanctions designation (US, EU, or UN). | [RuleSanctionList.md](./doc/technical/RuleSanctionList.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleSanctionList.sol.md) |
-| [RuleConditionalTransfer](src/rules/operation/RuleConditionalTransfer.sol) | RuleOperation  | This page describes a Conditional Transfer implementation. This rule requires that transfers have to be approved before being executed by the token holders. | [RuleConditionalTransfer.md](./doc/technical/RuleConditionalTransfer.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleConditionalTransfer.sol.md) |
+| Rule                                                         | Type<br />[Validation/Operation] | Audit planned                     | Description                                                  | Doc                                                          |
+| ------------------------------------------------------------ | -------------------------------- | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [RuleWhitelist](src/rules/validation/RuleWhitelist.sol)      | RuleValidation                   | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a whitelist. | [RuleWhitelist.md](./doc/technical/RuleWhitelist.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleWhitelist.sol.md) |
+| [RuleWhitelistWrapper](src/rules/validation/RuleWhitelistWrapper.sol) | RuleValidation                   | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators. | [RuleWhitelistWrapper.md](./doc/technical/RuleWhitelistWrapper.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleWhitelistWrapper.sol.md) |
+| [RuleBlacklist](src/rules/validation/RuleBlacklist.sol)      | RuleValidation                   | &#x2611;                          | This rule can be used to forbid transfer from/to addresses in the blacklist | [RuleBlacklist.md](./doc/technical/RuleBlacklist.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleBlacklist.sol.md) |
+| [RuleSanctionList](src/rules/validation/RuleSanctionList.sol) | RuleValidation                   | &#x2611;                          | The purpose of this contract is to use the oracle contract from Chainalysis to forbid transfer from/to an address  included in a sanctions designation (US, EU, or UN). | [RuleSanctionList.md](./doc/technical/RuleSanctionList.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleSanctionList.sol.md) |
+| [RuleConditionalTransfer](src/rules/operation/RuleConditionalTransfer.sol) | RuleOperation                    | &#x2612;<br />(experimental rule) | This page describes a Conditional Transfer implementation. This rule requires that transfers have to be approved before being executed by the token holders. | [RuleConditionalTransfer.md](./doc/technical/RuleConditionalTransfer.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleConditionalTransfer.sol.md) |
 
 
 

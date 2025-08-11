@@ -17,6 +17,9 @@ abstract contract RuleEngineValidationRead is
     IRuleEngineValidationRead
 {
 
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC/EXTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
     /* ============ View functions ============ */
     /**
      * @notice Go through all the rule to know if a restriction exists on the transfer
