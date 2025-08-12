@@ -2,8 +2,13 @@
 
 pragma solidity ^0.8.20;
 
+/* ==== OpenZeppelin === */
 import "OZ/access/AccessControl.sol";
+
+/* ==== Modules === */
 import {RuleEngineValidation} from "./RuleEngineValidation.sol";
+
+/* ==== Interface and other library === */
 import {IRuleEngineValidationRead} from "../interfaces/IRuleEngineValidation.sol";
 import {IRuleValidation} from "../interfaces/IRuleValidation.sol";
 import {IERC1404, IERC1404Extend} from "CMTAT/interfaces/tokenization/draft-IERC1404.sol";

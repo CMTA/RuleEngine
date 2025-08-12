@@ -9,9 +9,9 @@ import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvarian
 import {RuleEngineInvariantStorageCommon} from "src/modules/library/RuleEngineInvariantStorageCommon.sol";
 // RuleEngine
 import {RuleEngine} from "src/RuleEngine.sol";
-import {RuleEngineValidation} from "src/RuleEngine.sol";
-import {RuleEngineOperation} from "src/RuleEngine.sol";
-import {ERC3643Compliance} from "src/RuleEngine.sol";
+import {RuleEngineValidation} from "src/RuleEngineBase.sol";
+import {RuleEngineOperation} from "src/RuleEngineBase.sol";
+import {ERC3643Compliance} from "src/RuleEngineBase.sol";
 // RuleConditionalTransfer
 import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
 import {RuleConditionalTransferLightInvariantStorage} from "src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol";

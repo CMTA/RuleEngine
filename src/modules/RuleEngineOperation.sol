@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.20;
 
-// OpenZeppelin
+/* ==== OpenZeppelin === */
 import {EnumerableSet} from "OZ/utils/structs/EnumerableSet.sol";
 import {AccessControl}  from "OZ/access/AccessControl.sol";
-// Other
+/* ==== Interface and other library === */
 import {IRuleEngineOperation} from "../interfaces/IRuleEngineOperation.sol";
 import {IRuleOperation} from "../interfaces/IRuleOperation.sol";
 import {RuleEngineInvariantStorageCommon} from "./library/RuleEngineInvariantStorageCommon.sol";

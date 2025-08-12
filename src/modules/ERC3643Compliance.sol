@@ -2,9 +2,11 @@
 
 pragma solidity ^0.8.20;
 
-import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
+/* ==== OpenZeppelin === */
 import {AccessControl}  from "OZ/access/AccessControl.sol";
-import "OZ/utils/structs/EnumerableSet.sol";
+import {EnumerableSet} from "OZ/utils/structs/EnumerableSet.sol";
+/* ==== Interface and other library === */
+import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
 abstract contract ERC3643Compliance is IERC3643Compliance, AccessControl {
     bytes32 public constant COMPLIANCE_MANAGER_ROLE = keccak256("COMPLIANCE_MANAGER_ROLE");
     // Add the library methods
