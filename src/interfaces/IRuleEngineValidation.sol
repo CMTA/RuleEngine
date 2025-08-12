@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.20;
 
+import {IRuleValidation} from "./IRuleValidation.sol";
 interface IRuleEngineValidationRead {
     /**
      * @dev See ERC-1404
@@ -35,20 +36,57 @@ interface IRuleEngineValidation {
     /**
      * @dev define the rules, the precedent rules will be overwritten
      */
-    function setRulesValidation(address[] calldata rules_) external;
+    function setRulesValidation(IRuleValidation[] calldata rules_) external;
 
-    /**
-     * @dev return the number of rules
+   /**
+     * @return The number of rules inside the array
      */
     function rulesCountValidation() external view returns (uint256);
 
-    /**
-     * @dev return the rule at the index specified by ruleId
+   /**
+     * @notice Get the rule at the position specified by ruleId
+     * @param ruleId index of the rule
+     * @return a rule address
      */
     function ruleValidation(uint256 ruleId) external view returns (address);
 
     /**
-     * @dev return all the rules
+     * @notice Get all the rules
+     * @return An array of rules
      */
     function rulesValidation() external view returns (address[] memory);
+
+    /**
+     * @notice Remove a rule from the array of rules
+     * Revert if the rule found at the specified index does not match the rule in argument
+     * @param rule_ address of the target rule
+     * @dev To reduce the array size, the last rule is moved to the location occupied
+     * by the rule to remove
+     *
+     *
+     */
+    function removeRuleValidation(
+        IRuleValidation rule_
+    ) external;
+
+    /**
+     * @notice Clear all the rules of the array of rules
+     *
+     */
+    function clearRulesValidation() external;
+
+    /**
+     * @notice Add a rule to the array of rules
+     * @dev Revert if one rule is a zero address or if the rule is already present
+     *
+     */
+    function addRuleValidation(
+        IRuleValidation rule_
+    ) external;
+
+    /**
+     * @notice Check if a rule is present
+     *
+     */
+    function rulesValidationIsPresent(IRuleValidation rule_) external returns (bool);
 }

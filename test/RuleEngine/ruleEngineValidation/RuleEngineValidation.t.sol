@@ -3,12 +3,12 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
-import "src/RuleEngine.sol";
 
 /**
  * @title General functions of the RuleEngine
  */
 contract RuleEngineValidationTest is Test, HelperContract {
+   IRuleValidation[] ruleWhitelistTab = new IRuleValidation[](2);
     // Arrange
     function setUp() public {
         ruleWhitelist = new RuleWhitelist(
@@ -41,14 +41,13 @@ contract RuleEngineValidationTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        ruleWhitelistTab[0] = IRuleValidation(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRuleValidation(ruleWhitelist2);
         // Act
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleWhitelist1));
+        emit RuleEngineValidation.AddRuleValidation(ruleWhitelist1);
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleWhitelist2));
+        emit RuleEngineValidation.AddRuleValidation(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
@@ -67,9 +66,8 @@ contract RuleEngineValidationTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(ruleWhitelist1);
-        ruleWhitelistTab[1] = address(ruleWhitelist1);
+        ruleWhitelistTab[0] = ruleWhitelist1;
+        ruleWhitelistTab[1] = ruleWhitelist1;
 
         // Act
         vm.expectRevert(RuleEngine_RuleAlreadyExists.selector);
@@ -94,8 +92,8 @@ contract RuleEngineValidationTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](1);
-        ruleWhitelistTab[0] = address(ruleWhitelist1);
+        ruleWhitelistTab = new IRuleValidation[](1);
+        ruleWhitelistTab[0] = ruleWhitelist1;
 
         // Arrange
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -117,7 +115,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
 
     function testCannotSetEmptyRulesT1() public {
         // Arrange
-        address[] memory ruleWhitelistTab = new address[](0);
+        ruleWhitelistTab = new IRuleValidation[](0);
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -147,7 +145,6 @@ contract RuleEngineValidationTest is Test, HelperContract {
 
     function testCannotSetEmptyRulesT2() public {
         // Arrange
-        address[] memory ruleWhitelistTab = new address[](2);
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -191,9 +188,8 @@ contract RuleEngineValidationTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        ruleWhitelistTab[0] = IRuleValidation(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRuleValidation(ruleWhitelist2);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
@@ -206,6 +202,8 @@ contract RuleEngineValidationTest is Test, HelperContract {
         assertEq(resUint256, 2);
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RuleEngineValidation.ClearRulesValidation();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.clearRulesValidation();
 
@@ -226,9 +224,8 @@ contract RuleEngineValidationTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        ruleWhitelistTab[0] = IRuleValidation(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRuleValidation(ruleWhitelist2);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
@@ -236,6 +233,8 @@ contract RuleEngineValidationTest is Test, HelperContract {
         );
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RuleEngineValidation.ClearRulesValidation();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.clearRulesValidation();
 
@@ -252,6 +251,8 @@ contract RuleEngineValidationTest is Test, HelperContract {
         // Arrange before assert
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RuleEngineValidation.ClearRulesValidation();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.clearRulesValidation();
         resUint256 = ruleEngineMock.rulesCountValidation();
@@ -259,7 +260,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
 
         // Can add previous rule again
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleWhitelist1));
+        emit RuleEngineValidation.AddRuleValidation(ruleWhitelist1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleValidation(ruleWhitelist1);
     }
@@ -274,7 +275,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleWhitelist1));
+        emit RuleEngineValidation.AddRuleValidation(ruleWhitelist1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleValidation(ruleWhitelist1);
 
@@ -316,7 +317,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleWhitelist));
+        emit RuleEngineValidation.AddRuleValidation(ruleWhitelist);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleValidation(ruleWhitelist);
 
@@ -356,7 +357,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RemoveRule(address(ruleWhitelist1));
+        emit RuleEngineValidation.RemoveRuleValidation(ruleWhitelist1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRuleValidation(ruleWhitelist1);
 
@@ -377,7 +378,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RemoveRule(address(ruleWhitelist));
+        emit RuleEngineValidation.RemoveRuleValidation(ruleWhitelist);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRuleValidation(ruleWhitelist);
 
@@ -407,7 +408,7 @@ contract RuleEngineValidationTest is Test, HelperContract {
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RemoveRule(address(ruleWhitelist1));
+        emit RuleEngineValidation.RemoveRuleValidation(ruleWhitelist1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRuleValidation(ruleWhitelist1);
 
@@ -437,9 +438,8 @@ contract RuleEngineValidationTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        ruleWhitelistTab[0] = IRuleValidation(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRuleValidation(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
@@ -465,9 +465,8 @@ contract RuleEngineValidationTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        ruleWhitelistTab[0] = IRuleValidation(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRuleValidation(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
@@ -492,9 +491,8 @@ contract RuleEngineValidationTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        ruleWhitelistTab[0] = IRuleValidation(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRuleValidation(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
@@ -522,9 +520,8 @@ contract RuleEngineValidationTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(IRuleValidation(ruleWhitelist1));
-        ruleWhitelistTab[1] = address(IRuleValidation(ruleWhitelist2));
+        ruleWhitelistTab[0] = IRuleValidation(ruleWhitelist1);
+        ruleWhitelistTab[1] = IRuleValidation(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)

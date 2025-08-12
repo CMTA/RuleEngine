@@ -4,8 +4,6 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import "CMTAT/mocks/MinimalForwarderMock.sol";
-import "src/RuleEngine.sol";
-import "src/RuleEngine.sol";
 
 /**
  * @title General functions of the RuleEngine

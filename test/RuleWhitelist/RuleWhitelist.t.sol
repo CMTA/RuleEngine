@@ -3,8 +3,6 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
-import "src/RuleEngine.sol";
-
 /**
  * @title General functions of the RuleWhitelist
  */

@@ -8,18 +8,25 @@ import "OZ/utils/structs/EnumerableSet.sol";
 // Other
 import {IRuleEngineValidation} from "../interfaces/IRuleEngineValidation.sol";
 import {IRuleValidation} from "../interfaces/IRuleValidation.sol";
-import {RuleEngineInvariantStorage} from "./RuleEngineInvariantStorage.sol";
+import {RuleEngineInvariantStorageCommon} from "./library/RuleEngineInvariantStorageCommon.sol";
 
 abstract contract RuleEngineValidation is
     AccessControl,
     IRuleEngineValidation,
-    RuleEngineInvariantStorage
+    RuleEngineInvariantStorageCommon
 {
     // Add the library methods
     using EnumerableSet for EnumerableSet.AddressSet;
 
     // Declare a set state variable
     EnumerableSet.AddressSet internal _rulesValidation;
+
+     /// @notice Generate when a rule is added
+    event AddRuleValidation(IRuleValidation indexed rule);
+    /// @notice Generate when a rule is removed
+    event RemoveRuleValidation(IRuleValidation indexed rule);
+    /// @notice Generate when all the rules are cleared
+    event ClearRulesValidation();
 
     /*//////////////////////////////////////////////////////////////
                            PUBLIC/EXTERNAL FUNCTIONS
@@ -32,8 +39,8 @@ abstract contract RuleEngineValidation is
      *
      */
     function setRulesValidation(
-        address[] calldata rules_
-    ) public virtual override onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+        IRuleValidation[] calldata rules_
+    ) public virtual override(IRuleEngineValidation) onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         if (rules_.length == 0) {
             revert RuleEngine_ArrayIsEmpty();
         }
@@ -44,87 +51,60 @@ abstract contract RuleEngineValidation is
         for(uint256 i = 0; i < rules_.length; ++i){
             _checkRuleValidation(address(rules_[i]));
             _rulesValidation.add(address(rules_[i]));
-            emit AddRule(rules_[i]);
+            emit AddRuleValidation(rules_[i]);
         }
     }
 
 
-    /**
-     * @notice Clear all the rules of the array of rules
-     *
-     */
-    function clearRulesValidation() public virtual  onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+
+    function clearRulesValidation() public virtual override(IRuleEngineValidation) onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         _clearRulesValidation();
     }
 
-    /**
-     * @notice Add a rule to the array of rules
-     * @dev Revert if one rule is a zero address or if the rule is already present
-     *
-     */
+
     function addRuleValidation(
         IRuleValidation rule_
-    ) public virtual  onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+    ) public virtual override(IRuleEngineValidation) onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
          _checkRuleValidation(address(rule_));
         _rulesValidation.add(address(rule_));
-        emit AddRule(address(rule_));
+        emit AddRuleValidation(rule_);
     }
 
-    /**
-     * @notice Remove a rule from the array of rules
-     * Revert if the rule found at the specified index does not match the rule in argument
-     * @param rule_ address of the target rule
-     * @dev To reduce the array size, the last rule is moved to the location occupied
-     * by the rule to remove
-     *
-     *
-     */
+
     function removeRuleValidation(
         IRuleValidation rule_
-    ) public virtual  onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
+    ) public virtual override(IRuleEngineValidation)  onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
          require(rulesValidationIsPresent(rule_), RuleEngine_RuleDoNotMatch());
-        _removeRuleValidation(address(rule_));
+        _removeRuleValidation(rule_);
     }
 
     /* ============ View functions ============ */
 
-    /**
-     * @notice Check if a rule is present
-     *
-     */
-    function rulesValidationIsPresent(IRuleValidation rule_) public view virtual returns (bool){
+
+    function rulesValidationIsPresent(IRuleValidation rule_) public view virtual override(IRuleEngineValidation) returns (bool){
         return _rulesValidation.contains(address(rule_));
     }
 
 
-    /**
-     * @return The number of rules inside the array
-     */
-    function rulesCountValidation() public view virtual override returns (uint256) {
+ 
+    function rulesCountValidation() public view virtual override(IRuleEngineValidation) returns (uint256) {
         return _rulesValidation.length();
     }
 
-    /**
-     * @notice Get the rule at the position specified by ruleId
-     * @param ruleId index of the rule
-     * @return a rule address
-     */
+ 
     function ruleValidation(
         uint256 ruleId
-    ) public view virtual override returns (address) {
+    ) public view virtual override(IRuleEngineValidation) returns (address) {
         return _rulesValidation.at(ruleId);
     }
 
 
-    /**
-     * @notice Get all the rules
-     * @return An array of rules
-     */
+
     function rulesValidation()
         public
         view
         virtual 
-        override
+        override(IRuleEngineValidation)
         returns (address[] memory)
     {
         return _rulesValidation.values();
@@ -138,7 +118,7 @@ abstract contract RuleEngineValidation is
      *
      */
     function _clearRulesValidation() internal virtual  {
-        emit ClearRules();
+        emit ClearRulesValidation();
         // O(N)
        _rulesValidation.clear();
     }
@@ -152,9 +132,9 @@ abstract contract RuleEngineValidation is
      *
      *
      */
-    function _removeRuleValidation(address rule_) internal virtual {
-        _rulesValidation.remove(rule_);
-        emit RemoveRule(address(rule_));
+    function _removeRuleValidation(IRuleValidation rule_) internal virtual {
+        _rulesValidation.remove(address(rule_));
+        emit RemoveRuleValidation(rule_);
     }
 
     function _checkRuleValidation(address rule_) internal virtual{

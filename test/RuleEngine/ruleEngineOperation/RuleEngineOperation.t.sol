@@ -3,13 +3,12 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
-import "src/RuleEngine.sol";
 import "OZ/token/ERC20/IERC20.sol";
 /**
  * @title General functions of the RuleEngine
  */
 contract RuleEngineOperationTest is Test, HelperContract {
-   
+  IRuleOperation[] ruleConditionalTransferLightTab  = new IRuleOperation[](2);
     // Arrange
     function setUp() public {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -28,6 +27,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
         // Arrange - Assert
         resUint256 = ruleEngineMock.rulesCountOperation();
         assertEq(resUint256, 1);
+
     }
 
     function testCanSetRulesOperation() public {
@@ -42,18 +42,13 @@ contract RuleEngineOperationTest is Test, HelperContract {
                 CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
                 ruleEngineMock
             );
-        address[] memory ruleConditionalTransferLightTab = new address[](2);
-        ruleConditionalTransferLightTab[0] = address(
-            IRuleOperation(ruleConditionalTransferLight1)
-        );
-        ruleConditionalTransferLightTab[1] = address(
-            IRuleOperation(ruleConditionalTransferLight2)
-        );
+        ruleConditionalTransferLightTab[0] = IRuleOperation(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRuleOperation(ruleConditionalTransferLight2);
         // Act
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleConditionalTransferLight1));
+        emit RuleEngineOperation.AddRuleOperation(ruleConditionalTransferLight1);
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleConditionalTransferLight2));
+        emit RuleEngineOperation.AddRuleOperation(ruleConditionalTransferLight2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(
@@ -75,9 +70,8 @@ contract RuleEngineOperationTest is Test, HelperContract {
                 CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
                 ruleEngineMock
             );
-        address[] memory ruleConditionalTransferLightTab = new address[](2);
-        ruleConditionalTransferLightTab[0] = address(ruleConditionalTransferLight1);
-        ruleConditionalTransferLightTab[1] = address(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[0] = ruleConditionalTransferLight1;
+        ruleConditionalTransferLightTab[1] = ruleConditionalTransferLight1;
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -100,7 +94,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
     function testCannotSetEmptyRulesT1WithEmptyTab() public {
         // Arrange
-        address[] memory ruleConditionalTransferLightTab = new address[](0);
+        ruleConditionalTransferLightTab = new IRuleOperation[](0);
         resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
         assertFalse(resBool);
 
@@ -126,7 +120,6 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
     function testCannotSetEmptyRulesT2WithZeroAddress() public {
         // Arrange
-        address[] memory ruleConditionalTransferLightTab = new address[](2);
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -164,13 +157,8 @@ contract RuleEngineOperationTest is Test, HelperContract {
                 CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
                 ruleEngineMock
             );
-        address[] memory ruleConditionalTransferLightTab = new address[](2);
-        ruleConditionalTransferLightTab[0] = address(
-            IRuleOperation(ruleConditionalTransferLight1)
-        );
-        ruleConditionalTransferLightTab[1] = address(
-            IRuleOperation(ruleConditionalTransferLight2)
-        );
+        ruleConditionalTransferLightTab[0] = IRuleOperation(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRuleOperation(ruleConditionalTransferLight2);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
@@ -186,6 +174,8 @@ contract RuleEngineOperationTest is Test, HelperContract {
         assertEq(resUint256, 2);
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RuleEngineOperation.ClearRulesOperation();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.clearRulesOperation();
 
@@ -206,13 +196,8 @@ contract RuleEngineOperationTest is Test, HelperContract {
                 CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
                 ruleEngineMock
             );
-        address[] memory ruleConditionalTransferLightTab = new address[](2);
-        ruleConditionalTransferLightTab[0] = address(
-            IRuleOperation(ruleConditionalTransferLight1)
-        );
-        ruleConditionalTransferLightTab[1] = address(
-            IRuleOperation(ruleConditionalTransferLight2)
-        );
+        ruleConditionalTransferLightTab[0] = IRuleOperation(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRuleOperation(ruleConditionalTransferLight2);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
@@ -223,6 +208,8 @@ contract RuleEngineOperationTest is Test, HelperContract {
         );
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RuleEngineOperation.ClearRulesOperation();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.clearRulesOperation();
 
@@ -242,6 +229,8 @@ contract RuleEngineOperationTest is Test, HelperContract {
         // Arrange before assert
 
         // Act
+        vm.expectEmit(true, false, false, false);
+        emit RuleEngineOperation.ClearRulesOperation();
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.clearRulesOperation();
         resUint256 = ruleEngineMock.rulesCountOperation();
@@ -249,7 +238,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
         // Can add previous rule again
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleConditionalTransferLight1));
+        emit RuleEngineOperation.AddRuleOperation(ruleConditionalTransferLight1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleOperation(ruleConditionalTransferLight1);
     }
@@ -264,7 +253,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleConditionalTransferLight1));
+        emit RuleEngineOperation.AddRuleOperation(ruleConditionalTransferLight1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleOperation(ruleConditionalTransferLight1);
 
@@ -306,7 +295,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit AddRule(address(ruleConditionalTransferLight));
+        emit RuleEngineOperation.AddRuleOperation(ruleConditionalTransferLight);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRuleOperation(ruleConditionalTransferLight);
 
@@ -346,7 +335,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RemoveRule(address(ruleConditionalTransferLight1));
+        emit RuleEngineOperation.RemoveRuleOperation(ruleConditionalTransferLight1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight1);
 
@@ -367,7 +356,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RemoveRule(address(ruleConditionalTransferLight));
+        emit RuleEngineOperation.RemoveRuleOperation(ruleConditionalTransferLight);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight);
 
@@ -397,7 +386,7 @@ contract RuleEngineOperationTest is Test, HelperContract {
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RemoveRule(address(ruleConditionalTransferLight1));
+        emit RuleEngineOperation.RemoveRuleOperation(ruleConditionalTransferLight1);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRuleOperation(ruleConditionalTransferLight1);
 
@@ -427,13 +416,8 @@ contract RuleEngineOperationTest is Test, HelperContract {
                 CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
                 ruleEngineMock
             );
-        address[] memory ruleConditionalTransferLightTab = new address[](2);
-        ruleConditionalTransferLightTab[0] = address(
-            IRuleOperation(ruleConditionalTransferLight1)
-        );
-        ruleConditionalTransferLightTab[1] = address(
-            IRuleOperation(ruleConditionalTransferLight2)
-        );
+        ruleConditionalTransferLightTab[0] = IRuleOperation(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRuleOperation(ruleConditionalTransferLight2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(
@@ -462,13 +446,8 @@ contract RuleEngineOperationTest is Test, HelperContract {
                 CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
                 ruleEngineMock
             );
-        address[] memory ruleConditionalTransferLightTab = new address[](2);
-        ruleConditionalTransferLightTab[0] = address(
-            IRuleOperation(ruleConditionalTransferLight1)
-        );
-        ruleConditionalTransferLightTab[1] = address(
-            IRuleOperation(ruleConditionalTransferLight2)
-        );
+        ruleConditionalTransferLightTab[0] = IRuleOperation(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRuleOperation(ruleConditionalTransferLight2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(
@@ -496,13 +475,8 @@ contract RuleEngineOperationTest is Test, HelperContract {
                 CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
                 ruleEngineMock
             );
-        address[] memory ruleConditionalTransferLightTab = new address[](2);
-        ruleConditionalTransferLightTab[0] = address(
-            IRuleOperation(ruleConditionalTransferLight1)
-        );
-        ruleConditionalTransferLightTab[1] = address(
-            IRuleOperation(ruleConditionalTransferLight2)
-        );
+        ruleConditionalTransferLightTab[0] = IRuleOperation(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRuleOperation(ruleConditionalTransferLight2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(
@@ -533,13 +507,9 @@ contract RuleEngineOperationTest is Test, HelperContract {
                 CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
                 ruleEngineMock
             );
-        address[] memory ruleConditionalTransferLightTab = new address[](2);
-        ruleConditionalTransferLightTab[0] = address(
-            IRuleOperation(ruleConditionalTransferLight1)
-        );
-        ruleConditionalTransferLightTab[1] = address(
-            IRuleOperation(ruleConditionalTransferLight2)
-        );
+        ruleConditionalTransferLightTab[0] = IRuleOperation(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = 
+            IRuleOperation(ruleConditionalTransferLight2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool resCallBool, ) = address(ruleEngineMock).call(
             abi.encodeCall(

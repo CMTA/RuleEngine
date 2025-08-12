@@ -13,6 +13,7 @@ import {ERC3643Compliance, IERC3643Compliance} from "./modules/ERC3643Compliance
 import {RuleEngineOperation} from "./modules/RuleEngineOperation.sol";
 import {RuleEngineValidationRead, RuleEngineValidation} from "./modules/RuleEngineValidationRead.sol";
 import {IRuleValidation} from "./interfaces/IRuleValidation.sol";
+import {RuleEngineInvariantStorage} from "./modules/library/RuleEngineInvariantStorage.sol";
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
  */
@@ -21,7 +22,8 @@ contract RuleEngine is
     RuleEngineOperation,
     RuleEngineValidationRead,
     MetaTxModuleStandalone,
-    ERC3643Compliance
+    ERC3643Compliance,
+    RuleEngineInvariantStorage
 {
     
     /**

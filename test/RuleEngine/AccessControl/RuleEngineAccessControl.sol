@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
-import "src/RuleEngine.sol";
 
 /**
  * @title Tests on the Access Control
@@ -46,9 +45,9 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](2);
-        ruleWhitelistTab[0] = address(ruleWhitelist1);
-        ruleWhitelistTab[1] = address(ruleWhitelist2);
+        IRuleValidation[] memory ruleWhitelistTab = new IRuleValidation[](2);
+        ruleWhitelistTab[0] = ruleWhitelist1;
+        ruleWhitelistTab[1] = ruleWhitelist2;
 
         // Act
         vm.prank(ATTACKER);

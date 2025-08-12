@@ -5,9 +5,13 @@ import "forge-std/Test.sol";
 import "CMTAT/deployment/CMTATStandalone.sol";
 import "CMTAT/libraries/Errors.sol";
 
-import {RuleEngineInvariantStorage} from "src/modules/RuleEngineInvariantStorage.sol";
+import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
+import {RuleEngineInvariantStorageCommon} from "src/modules/library/RuleEngineInvariantStorageCommon.sol";
 // RuleEngine
 import {RuleEngine} from "src/RuleEngine.sol";
+import {RuleEngineValidation} from "src/RuleEngine.sol";
+import {RuleEngineOperation} from "src/RuleEngine.sol";
+import {ERC3643Compliance} from "src/RuleEngine.sol";
 // RuleConditionalTransfer
 import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
 import {RuleConditionalTransferLightInvariantStorage} from "src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol";
@@ -30,7 +34,8 @@ abstract contract HelperContract is
     RuleWhitelistInvariantStorage,
     RuleAddressListInvariantStorage,
     RuleEngineInvariantStorage,
-    RuleConditionalTransferLightInvariantStorage
+    RuleConditionalTransferLightInvariantStorage,
+    RuleEngineInvariantStorageCommon
 {
     // Test result
     uint256 internal resUint256;

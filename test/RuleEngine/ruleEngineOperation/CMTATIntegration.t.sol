@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "CMTAT/deployment/CMTATStandalone.sol";
 import "../../HelperContract.sol";
-import "src/RuleEngine.sol";
 import "OZ/token/ERC20/IERC20.sol";
 /**
  * @title General functions of the RuleEngine

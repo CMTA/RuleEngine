@@ -8,22 +8,28 @@ import {AccessControl}  from "OZ/access/AccessControl.sol";
 // Other
 import {IRuleEngineOperation} from "../interfaces/IRuleEngineOperation.sol";
 import {IRuleOperation} from "../interfaces/IRuleOperation.sol";
-import {RuleEngineInvariantStorage} from "./RuleEngineInvariantStorage.sol";
+import {RuleEngineInvariantStorageCommon} from "./library/RuleEngineInvariantStorageCommon.sol";
 /**
  * @title RuleEngine - Operation part
  */
 abstract contract RuleEngineOperation is
     AccessControl,
-    RuleEngineInvariantStorage,
+    RuleEngineInvariantStorageCommon,
     IRuleEngineOperation
 {
-       
-    /// @dev Array of rules
-    //address[] internal _rulesOperation;
     // Add the library methods
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    /// @notice Generate when a rule is added
+    event AddRuleOperation(IRuleOperation indexed rule);
+    /// @notice Generate when a rule is removed
+    event RemoveRuleOperation(IRuleOperation indexed rule);
+    /// @notice Generate when all the rules are cleared
+    event ClearRulesOperation();
+    
+
     // Declare a set state variable
+    /// @dev Array of rules
     EnumerableSet.AddressSet internal _rulesOperation;
 
     /*//////////////////////////////////////////////////////////////
@@ -37,7 +43,7 @@ abstract contract RuleEngineOperation is
      *
      */
     function setRulesOperation(
-        address[] calldata rules_
+        IRuleOperation[] calldata rules_
     ) public virtual onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         if (rules_.length == 0) {
             revert RuleEngine_ArrayIsEmpty();
@@ -48,7 +54,7 @@ abstract contract RuleEngineOperation is
         for(uint256 i = 0; i < rules_.length; ++i){
            _checkRule(address(rules_[i]));
             _rulesOperation.add(address(rules_[i]));
-            emit AddRule(rules_[i]);
+            emit AddRuleOperation(rules_[i]);
         }
        
     }
@@ -72,7 +78,7 @@ abstract contract RuleEngineOperation is
     ) public virtual onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         _checkRule(address(rule_));
         _rulesOperation.add(address(rule_));
-        emit AddRule(address(rule_));
+        emit AddRuleOperation(rule_);
     }
 
     /**
@@ -88,7 +94,7 @@ abstract contract RuleEngineOperation is
         IRuleOperation rule_
     ) public virtual onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         require(rulesOperationIsPresent(rule_), RuleEngine_RuleDoNotMatch());
-        _removeRuleOperation(address(rule_));
+        _removeRuleOperation(rule_);
     }
 
     /* ============ View functions ============ */
@@ -139,7 +145,7 @@ abstract contract RuleEngineOperation is
     function _clearRulesOperation() internal virtual {
         // we remove the last element first since it is more optimized.
 
-        emit ClearRules();
+        emit ClearRulesOperation();
         _rulesOperation.clear();
     }
 
@@ -174,9 +180,9 @@ abstract contract RuleEngineOperation is
      *
      *
      */
-    function _removeRuleOperation(address rule_) internal virtual {
-        _rulesOperation.remove(rule_);
-        emit RemoveRule(address(rule_));
+    function _removeRuleOperation(IRuleOperation rule_) internal virtual {
+        _rulesOperation.remove(address(rule_));
+        emit RemoveRuleOperation(rule_);
     }
 
     function _checkRule(address rule_) internal{

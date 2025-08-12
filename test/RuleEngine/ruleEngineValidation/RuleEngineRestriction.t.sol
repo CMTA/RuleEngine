@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
-import "src/RuleEngine.sol";
 import "OZ/token/ERC20/IERC20.sol";
 /**
  * @title tests concerning the restrictions and validation for the transfers
@@ -34,8 +33,8 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        address[] memory ruleWhitelistTab = new address[](1);
-        ruleWhitelistTab[0] = address(ruleWhitelist1);
+        IRuleValidation[] memory ruleWhitelistTab = new IRuleValidation[](1);
+        ruleWhitelistTab[0] = ruleWhitelist1;
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         (bool success, ) = address(ruleEngineMock).call(
             abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)

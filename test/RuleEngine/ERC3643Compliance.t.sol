@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
-import "../../src/RuleEngine.sol"; // your concrete contract inheriting ERC3643Compliance
 import {IERC3643Compliance} from "../../src/interfaces/IERC3643Compliance.sol";
 import {ERC3643Compliance} from "../../src/modules/ERC3643Compliance.sol";
 // Minimal mock ERC-3643 token to simulate calls to RuleEngine

@@ -2,13 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-interface IRuleOperation {
-    /**
-     * @dev Returns true if the transfer is valid, and false otherwise.
-     */
-    function transferred(
-        address from,
-        address to,
-        uint256 value
-    ) external;
+import {IERC3643IComplianceContract} from "CMTAT/interfaces/tokenization/IERC3643Partial.sol";
+
+interface IRuleOperation is IERC3643IComplianceContract {
 }
