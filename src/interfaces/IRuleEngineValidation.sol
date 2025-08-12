@@ -34,8 +34,11 @@ interface IRuleEngineValidationRead {
 }
 
 interface IRuleEngineValidation {
-    /**
-     * @dev define the rules, the precedent rules will be overwritten
+     /**
+     * @notice Set all the rules, will overwrite all the previous rules. \n
+     * Revert if one rule is a zero address or if the rule is already present
+     * @dev take address[] instead of IRuleEngineValidation[] since it is not possible to cast IRuleEngineValidation[] -> address[]
+     *
      */
     function setRulesValidation(IRuleValidation[] calldata rules_) external;
 
@@ -89,5 +92,5 @@ interface IRuleEngineValidation {
      * @notice Check if a rule is present
      *
      */
-    function rulesValidationIsPresent(IRuleValidation rule_) external returns (bool);
+    function ruleValidationIsPresent(IRuleValidation rule_) external returns (bool);
 }

@@ -59,12 +59,16 @@ interface IRuleEngineOperation {
      * @notice Remove a rule from the array of rules
      * Revert if the rule found at the specified index does not match the rule in argument
      * @param rule_ address of the target rule
-     * @dev To reduce the array size, the last rule is moved to the location occupied
-     * by the rule to remove
      *
      *
      */
     function removeRuleOperation(
         IRuleOperation rule_
     ) external;
+
+     /**
+     * @notice Check if a rule is present
+     *
+     */
+    function ruleOperationIsPresent(IRuleOperation rule_) external returns (bool);
 }

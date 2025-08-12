@@ -15,12 +15,13 @@ abstract contract RuleEngineValidation is
     IRuleEngineValidation,
     RuleEngineInvariantStorageCommon
 {
-    // Add the library methods
+    /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    // Declare a set state variable
+    /* ==== State Variables === */
     EnumerableSet.AddressSet internal _rulesValidation;
 
+    /* ============ Events ============ */
      /// @notice Generate when a rule is added
     event AddRuleValidation(IRuleValidation indexed rule);
     /// @notice Generate when a rule is removed
@@ -32,12 +33,10 @@ abstract contract RuleEngineValidation is
                            PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
     /* ============ State functions ============ */
+
     /**
-     * @notice Set all the rules, will overwrite all the previous rules. \n
-     * Revert if one rule is a zero address or if the rule is already present
-     * @dev take address[] instead of IRuleEngineValidation[] since it is not possible to cast IRuleEngineValidation[] -> address[]
-     *
-     */
+    * @inheritdoc IRuleEngineValidation
+    */
     function setRulesValidation(
         IRuleValidation[] calldata rules_
     ) public virtual override(IRuleEngineValidation) onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
@@ -56,12 +55,17 @@ abstract contract RuleEngineValidation is
     }
 
 
-
+    /**
+    * @inheritdoc IRuleEngineValidation
+    */
     function clearRulesValidation() public virtual override(IRuleEngineValidation) onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
         _clearRulesValidation();
     }
 
 
+    /**
+    * @inheritdoc IRuleEngineValidation
+    */
     function addRuleValidation(
         IRuleValidation rule_
     ) public virtual override(IRuleEngineValidation) onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
@@ -71,27 +75,37 @@ abstract contract RuleEngineValidation is
     }
 
 
+    /**
+    * @inheritdoc IRuleEngineValidation
+    */
     function removeRuleValidation(
         IRuleValidation rule_
     ) public virtual override(IRuleEngineValidation)  onlyRole(RULE_ENGINE_OPERATOR_ROLE) {
-         require(rulesValidationIsPresent(rule_), RuleEngine_RuleDoNotMatch());
+         require(_rulesValidation.contains(address(rule_)), RuleEngine_RuleDoNotMatch());
         _removeRuleValidation(rule_);
     }
 
     /* ============ View functions ============ */
 
 
-    function rulesValidationIsPresent(IRuleValidation rule_) public view virtual override(IRuleEngineValidation) returns (bool){
+    /**
+    * @inheritdoc IRuleEngineValidation
+    */
+    function ruleValidationIsPresent(IRuleValidation rule_) public view virtual override(IRuleEngineValidation) returns (bool){
         return _rulesValidation.contains(address(rule_));
     }
 
-
- 
+    /**
+    * @inheritdoc IRuleEngineValidation
+    */
     function rulesCountValidation() public view virtual override(IRuleEngineValidation) returns (uint256) {
         return _rulesValidation.length();
     }
 
- 
+    
+    /**
+    * @inheritdoc IRuleEngineValidation
+    */
     function ruleValidation(
         uint256 ruleId
     ) public view virtual override(IRuleEngineValidation) returns (address) {
@@ -99,7 +113,9 @@ abstract contract RuleEngineValidation is
     }
 
 
-
+    /**
+    * @inheritdoc IRuleEngineValidation
+    */
     function rulesValidation()
         public
         view

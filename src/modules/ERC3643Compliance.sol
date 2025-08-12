@@ -8,19 +8,22 @@ import {EnumerableSet} from "OZ/utils/structs/EnumerableSet.sol";
 /* ==== Interface and other library === */
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
 abstract contract ERC3643Compliance is IERC3643Compliance, AccessControl {
-    bytes32 public constant COMPLIANCE_MANAGER_ROLE = keccak256("COMPLIANCE_MANAGER_ROLE");
-    // Add the library methods
+    /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
-    // Errors
+    /* ==== State Variables === */
+    // Token binding tracking
+    EnumerableSet.AddressSet private _boundTokens;
+    // Access Control
+    bytes32 public constant COMPLIANCE_MANAGER_ROLE = keccak256("COMPLIANCE_MANAGER_ROLE");
+
+    /* ==== Errors === */
     error RuleEngine_ERC3643Compliance_NotComplianceManager();
     error RuleEngine_ERC3643Compliance_InvalidTokenAddress();
     error RuleEngine_ERC3643Compliance_TokenAlreadyBound();
     error RuleEngine_ERC3643Compliance_TokenNotBound();
     error RuleEngine_ERC3643Compliance_UnauthorizedCaller();
 
-    // Token binding tracking
-    EnumerableSet.AddressSet private _boundTokens;
-
+    /* ==== Modifier === */
     modifier onlyBoundToken() {
     if (!_boundTokens.contains(_msgSender())) {
         revert RuleEngine_ERC3643Compliance_UnauthorizedCaller();

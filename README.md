@@ -6,33 +6,85 @@ This repository includes the RuleEngine contract for [CMTAT](https://github.com/
 
 The RuleEngine is an external contract used to apply transfer restrictions to another contract, such as CMTAT and ERC-3643 tokens. Acting as a controller, it can call different contract rules and apply these rules on each transfer.
 
+## Motivation
+
+Why use a dedicated contract with rules instead of implementing it directly in CMTAT or ERC-3643 tokens?
+
+1. Flexibility: These different features are not standard and common to all tokens. From an implementation perspective, using a rule engine with custom rules allows for each issuer or contract user to decide which rules to apply.
+2. Code efficiency: The CMTAT token (and generally also all ERC-3643 tokens) is currently "heavy," meaning its contract code size is close to the maximum limit. This makes it challenging to add new features directly inside the CMTAT contract.
+3. Reusability: 
+   - We can use the RuleEngine inside other contracts besides CMTAT. For instance, the RuleEngine has been used it in [our contract to distribute dividends](https://www.taurushq.com/blog/equity-tokenization-how-to-pay-dividend-on-chain-using-cmtat/). 
+   - A same deployed `RuleEngine`can also be used with several different tokens if the rules allowed it, which is the case for all validation rule.
+
+## How it works
+
+This diagram illustrates how a transfer of CMTAT with a RuleEngine works:
+
+ ![Engine-RuleEngine.drawio](./doc/schema/Engine-RuleEngine.drawio.png)
+
+1. The token holders initiate a transfer transaction on CMTAT contract.
+2. The validation module inside the CMTAT calls the ERC-3643 function `transferred` from the RuleEngine if set with the following parameters inside: `from, to, value`.
+3. The Rule Engine calls each rule separately.
+4. If the rule returns the value 0, the RuleEngine considers the transfer authorized. If one rule returns a different value, the RuleEngine considers the transfer as not authorized and the transaction is directly reverted (no return value) stopping the transfer.
+
+## How to include it
+
+While the RuleEngine has been designed for CMTAT and ERC-3643 tokens, it can be used with other contracts to apply transfer restrictions.
+
+For that, the only thing to do is to import in your contract the interface `IRuleEngine`(CMTAT) or `IERC3643Compliance`(ERC-3643), which declares the corresponding functions to call by the token contract. This interface can be found [here](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/interfaces/engine/IRuleEngine.sol).
+
+### CMTAT
+
+Before each transfer, the CMTAT calls the function `transferred` which is the entrypoint for the RuleEngine.
+
+For example, CMTAT defines the interaction with the RuleEngine inside a specific module, [ValidationModuleRuleEngine](https://github.com/CMTA/CMTAT/blob/master/contracts/modules/wrapper/extensions/ValidationModule/ValidationModuleRuleEngine.sol) and [CMTATBaseRuleEngine](https://github.com/CMTA/CMTAT/blob/master/contracts/modules/1_CMTATBaseRuleEngine.sol).
+
+- ValidationModuleRuleEngine
+- CMTATBaseRuleEngine
+
+ 
+
+This function `_transferred` is called before each transfer/burn/mint through the internal function `_checkTransferred` defined in [CMTAT_BASE](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/modules/CMTAT_BASE.sol#L198).
+
+### ERC-3643
+
+The ERC-3643 defines several functions used as entrypoint for an ERC-3643 token.
+
+They are the following
+
+```solidity
+  // compliance check and state update
+  function canTransfer(address from, address to, uint256 value) external view returns (bool);
+  function transferred(address from, address to, uint256 value) external;
+  function created(address to, uint256 value) external;
+  function destroyed(address from, uint256 value) external;
+```
+
 ## Interface
 
 ### CMTAT
 
-The RuleEngine base interface is defined in CMTAT reposotiry.
+The RuleEngine base interface is defined in CMTAT repository.
 
 ![surya_inheritance_IRuleEngine.sol](./doc/schema/surya_inheritance_IRuleEngine.sol.png)
 
 It inherits from several others interace:
 
-- IERC1404 which contains ERC-1404 related functions
+
 
 ```solidity
-    function detectTransferRestriction(
-        address from,
-        address to,
-        uint256 value
-    ) external view returns (uint8);
+// IRuleEngine
+function transferred(address spender, address from, address to, uint256 value) 
+external;
 
-    function messageForTransferRestriction(
-        uint8 restrictionCode
-    ) external view returns (string memory);
-```
+// IERC-1404
+function detectTransferRestriction(address from,address to,uint256 value) 
+external view returns (uint8);
 
-
-
-```
+function messageForTransferRestriction(uint8 restrictionCode) 
+external view returns (string memory);
+    
+// IERC-1404Extend    
 enum REJECTED_CODE_BASE {
         TRANSFER_OK,
         TRANSFER_REJECTED_DEACTIVATED,
@@ -43,45 +95,79 @@ enum REJECTED_CODE_BASE {
         TRANSFER_REJECTED_FROM_INSUFFICIENT_ACTIVE_BALANCE
     }
 
-    function detectTransferRestrictionFrom(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) external view returns (uint8);
-```
+function detectTransferRestrictionFrom(address spender,address from,address to,uint256 value) 
+external view returns (uint8);
+   
+ 
+// IERC7551Compliance
+function canTransferFrom(address spender,address from,address to,uint256 value)
+external view returns (bool);
 
 
+// IER3643ComplianceRead
+function canTransfer(address from,address to,uint256 value) 
+external view returns (bool isValid);
 
-- IERC7551Compliance which includes function related to ERC-7551:
-
-```
- function canTransferFrom(address spender,address from,address to,uint256 value)  external view returns (bool);
-```
-
-
-
-- canTransfer
-
-```
- function canTransfer(address from,address to,uint256 value) external view returns (bool isValid);
-```
-
-
-
-- IERC3643IComplianceContract
-
-```
- function transferred(address from, address to, uint256 value) external;
+// IERC3643IComplianceContract
+function transferred(address from, address to, uint256 value) 
+external;
 ```
 
 
 
 ### ERC-3643
 
+The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is defined in [IERC3643Compliance.sol](src/interfaces/IERC3643Compliance.sol).
 
 
 
+
+
+
+
+A specific module implements this interface for the RuleEngine: [ERC3643Compliance.sol](src/modules/ERC3643Compliance.sol)
+
+
+
+
+
+### Contracts Description Table
+
+### Access Control (RBAC)
+
+CMTAT uses a RBAC access control by using the contract `AccessControl`from OpenZeppelin.
+
+Each module defines the roles useful to restrict its functions.
+
+The `AccessControlModule`which is used by all base and deployment contracts override the OpenZeppelin function `hasRole`to give by default all the roles to the `admin`.
+
+See also [docs.openzeppelin.com - AccessControl](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl)
+
+#### Role list
+
+Here is the list of roles and their 32 bytes identifier.
+
+|                           | Defined in                       | 32 bytes identifier                                          |
+| ------------------------- | -------------------------------- | ------------------------------------------------------------ |
+| DEFAULT_ADMIN_ROLE        | OpenZeppelin<br />AccessControl  | 0x0000000000000000000000000000000000000000000000000000000000000000 |
+| **Modules**               |                                  |                                                              |
+| COMPLIANCE_MANAGER_ROLE   | ERC3643Compliance                |                                                              |
+| RULE_ENGINE_OPERATOR_ROLE | RuleEngineInvariantStorageCommon |                                                              |
+
+
+
+#### Role by modules
+
+Here a summary tab for each restricted functions defined in a module
+For function signatures,  struct arguments are represented with their corresponding native type.
+
+|                      | Function signature | Visibility [public/external] | Input variables (Function arguments) | Output variables<br />(return value) | Role Required |
+| -------------------- | ------------------ | ---------------------------- | ------------------------------------ | ------------------------------------ | ------------- |
+| **Modules**          |                    |                              |                                      |                                      |               |
+| RuleEngineOperation  |                    |                              |                                      |                                      |               |
+|                      | ``                 | public                       | ``                                   | -                                    |               |
+|                      | ``                 | public                       | ``                                   | -                                    |               |
+| RuleEngineValidation |                    |                              |                                      |                                      |               |
 
 ## Dependencies
 
@@ -157,18 +243,23 @@ If we need a new on, we just issue a new one, and set inside the CMTAT token (or
 
 ### Urgency mechanism
 
-- Pause
+### Pause
 
-There are no functionalities to put in pause the contracts.
+There are no functionalities to put in pause the contracts. 
 
-* Kill / Deactivate the contracts
+The RuleEngine can be removed from the main token contract by calling the dedicated function
+
+- CMTAT v3.0.0: `setRuleEngine(address ruleEngine)`
+- ERC-3643 token: `setCompliance(address _compliance)`
+
+### Kill / Deactivate the contracts
 
 There are no functionalities to kill/deactivate the contracts.
 
+Similar to the pause functionality, the RuleEngine can be directly removed from the main token contract
+
 
 ### Gasless support (ERC-2771)
-
-> The gasless integration was not part of the audit performed by ABDK on the version [1.0.1](https://github.com/CMTA/RuleEngine/releases/tag/1.0.1)
 
 The RuleEngine contracts and the other rules support client-side gasless transactions using the [Gas Station Network](https://docs.opengsn.org/#the-problem) (GSN) pattern, the main open standard for transfering fee payment to another account than that of the transaction issuer. The contract uses the OpenZeppelin contract `ERC2771Context`, which allows a contract to get the original client with `_msgSender()` instead of the fee payer given by `msg.sender` .
 
