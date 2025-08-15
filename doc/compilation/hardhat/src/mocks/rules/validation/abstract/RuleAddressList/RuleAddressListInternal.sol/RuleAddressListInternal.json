@@ -1,0 +1,21 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "RuleAddressListInternal",
+  "sourceName": "src/mocks/rules/validation/abstract/RuleAddressList/RuleAddressListInternal.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "Rulelist_AddressAlreadylisted",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Rulelist_AddressNotPresent",
+      "type": "error"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -1,0 +1,16 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "RuleEngineInvariantStorage",
+  "sourceName": "src/modules/library/RuleEngineInvariantStorage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "RuleEngine_AdminWithAddressZeroNotAllowed",
+      "type": "error"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

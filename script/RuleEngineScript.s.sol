@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MPL-2.0
+
 // Documentation :
 // https://book.getfoundry.sh/tutorials/solidity-scripting
 pragma solidity ^0.8.17;
 
 import "forge-std/Script.sol";
-//import "CMTAT/CMTAT_STANDALONE.sol";
 import {RuleEngine} from "src/RuleEngine.sol";
-import {RuleWhitelist} from "src/rules/validation/RuleWhitelist.sol";
+import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
 import {ValidationModuleRuleEngine} from "CMTAT/modules/wrapper/extensions/ValidationModule/ValidationModuleRuleEngine.sol";
 
 /**
@@ -25,10 +25,13 @@ contract RuleEngineScript is Script {
         // ruleEngine
         RuleEngine RULE_ENGINE = new RuleEngine(ADMIN, address(0), address(0));
         console.log("RuleEngine: ", address(RULE_ENGINE));
-        RULE_ENGINE.addRuleValidation(ruleWhitelist);
+        RULE_ENGINE.addRule(ruleWhitelist);
         // Configure the new ruleEngine for CMTAT
         (bool success, ) = address(CMTAT_Address).call(
-            abi.encodeCall(ValidationModuleRuleEngine.setRuleEngine, RULE_ENGINE)
+            abi.encodeCall(
+                ValidationModuleRuleEngine.setRuleEngine,
+                RULE_ENGINE
+            )
         );
         require(success);
         vm.stopBroadcast();

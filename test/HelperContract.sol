@@ -5,27 +5,23 @@ import "forge-std/Test.sol";
 import "CMTAT/deployment/CMTATStandalone.sol";
 import "CMTAT/libraries/Errors.sol";
 
-import {RuleEngineInvariantStorage} from "src/modules/RuleEngineInvariantStorage.sol";
+import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
+import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 // RuleEngine
 import {RuleEngine} from "src/RuleEngine.sol";
+import {RulesManagementModule} from "src/RuleEngineBase.sol";
+import {ERC3643ComplianceModule} from "src/RuleEngineBase.sol";
 // RuleConditionalTransfer
-import {RuleConditionalTransferInvariantStorage} from "src/rules/operation/abstract/RuleConditionalTransferInvariantStorage.sol";
-import {RuleConditionalTransfer} from "src/rules/operation/RuleConditionalTransfer.sol";
-// RuleSanctionList
-import {RuleSanctionList} from "src/rules/validation/RuleSanctionList.sol";
-// RUleBlackList
-import {RuleBlacklist} from "src/rules/validation/RuleBlacklist.sol";
-import {RuleBlacklistInvariantStorage} from "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleBlacklistInvariantStorage.sol";
+import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
+import {RuleConditionalTransferLightInvariantStorage} from "src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol";
 // RuleWhitelist
-import {RuleWhitelist} from "src/rules/validation/RuleWhitelist.sol";
-import {RuleWhitelistWrapper} from "src/rules/validation/RuleWhitelistWrapper.sol";
-import {RuleWhitelistInvariantStorage} from "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
-import {RuleAddressListInvariantStorage} from "src/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
+import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
+import {RuleWhitelistInvariantStorage} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
+import {RuleAddressListInvariantStorage} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
 
-import {RuleSanctionlistInvariantStorage}from "src/rules/validation/abstract/RuleSanctionListInvariantStorage.sol";
 // Rule interface
-import {IRuleValidation} from "src/interfaces/IRuleValidation.sol";
-import {IRuleOperation} from "src/interfaces/IRuleOperation.sol";
+
+import {IRule} from "src/interfaces/IRule.sol";
 
 // utils
 import "./utils/CMTATDeployment.sol";
@@ -35,11 +31,10 @@ import "./utils/CMTATDeployment.sol";
  */
 abstract contract HelperContract is
     RuleWhitelistInvariantStorage,
-    RuleBlacklistInvariantStorage,
     RuleAddressListInvariantStorage,
-    RuleSanctionlistInvariantStorage,
     RuleEngineInvariantStorage,
-    RuleConditionalTransferInvariantStorage
+    RuleConditionalTransferLightInvariantStorage,
+    RulesManagementModuleInvariantStorage
 {
     // Test result
     uint256 internal resUint256;
@@ -47,12 +42,12 @@ abstract contract HelperContract is
     bool internal resBool;
     bool internal resCallBool;
     string internal resString;
+    address internal resAddr;
     // EOA to perform tests
     address constant ZERO_ADDRESS = address(0);
     address constant DEFAULT_ADMIN_ADDRESS = address(1);
     address constant WHITELIST_OPERATOR_ADDRESS = address(2);
     address constant RULE_ENGINE_OPERATOR_ADDRESS = address(3);
-    address constant SANCTIONLIST_OPERATOR_ADDRESS = address(8);
     address constant CONDITIONAL_TRANSFER_OPERATOR_ADDRESS = address(9);
     address constant ATTACKER = address(4);
     address constant ADDRESS1 = address(5);
@@ -66,12 +61,9 @@ abstract contract HelperContract is
     string constant DEFAULT_ADMIN_ROLE_HASH =
         "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-    uint256 DEFAULT_TIME_LIMIT_TO_APPROVE = 7 days;
-    uint256 DEFAULT_TIME_LIMIT_TO_TRANSFER = 7 days;
     // contract
-    RuleBlacklist public ruleBlacklist;
     RuleWhitelist public ruleWhitelist;
-    RuleConditionalTransfer public ruleConditionalTransfer;
+    RuleConditionalTransferLight public ruleConditionalTransferLight;
 
     // CMTAT
     CMTATDeployment cmtatDeployment;
