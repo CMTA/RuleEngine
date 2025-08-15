@@ -1053,7 +1053,7 @@ Checks whether a specific rule is currently configured.
 
 ### Vulnerability disclosure
 
-Please see [SECURITY.md](./SECURITY.md).
+Please see [SECURITY.md](https://github.com/CMTA/CMTAT/blob/master/SECURITY.md) (CMTAT main repository).
 
 The contracts have been audited by [ABDKConsulting](https://www.abdk.consulting/), a globally recognized firm specialized in smart contracts' security.
 
