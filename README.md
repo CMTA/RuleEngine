@@ -213,8 +213,8 @@ It is set in the constructor when the contract is deployed.
 | ----------------------- | -------------------------------- | ------------------------------------------------------------ |
 | DEFAULT_ADMIN_ROLE      | OpenZeppelin<br />AccessControl  | 0x0000000000000000000000000000000000000000000000000000000000000000 |
 | **Modules**             |                                  |                                                              |
-| COMPLIANCE_MANAGER_ROLE | ERC3643Compliance                | e5c50d0927e06141e032cb9a67e1d7092dc85c0b0825191f7e1cede600028568 |
-| RULES_MANAGEMENT_ROLE   | RuleEngineInvariantStorageCommon | ea5f4eb72290e50c32abd6c23e45de3d8300b3286e1cbc2e293114b92e034e5e |
+| COMPLIANCE_MANAGER_ROLE | ERC3643Compliance                | 0xe5c50d0927e06141e032cb9a67e1d7092dc85c0b0825191f7e1cede600028568 |
+| RULES_MANAGEMENT_ROLE   | RuleEngineInvariantStorageCommon | 0xea5f4eb72290e50c32abd6c23e45de3d8300b3286e1cbc2e293114b92e034e5e |
 
 
 
