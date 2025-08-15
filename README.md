@@ -6,9 +6,13 @@ This repository includes the RuleEngine contract for [CMTAT](https://github.com/
 
 The RuleEngine is an external contract used to apply transfer restrictions to another contract, such as CMTAT and ERC-3643 tokens. Acting as a controller, it can call different contract rules and apply these rules on each transfer.
 
+[TOC]
+
+
+
 ## Motivation
 
-Why use a dedicated contract with rules instead of implementing it directly in CMTAT or ERC-3643 tokens?
+- Why use a dedicated contract with rules instead of implementing it directly in CMTAT or [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens?
 
 1. Flexibility: These different features are not standard and common to all tokens. From an implementation perspective, using a rule engine with custom rules allows for each issuer or contract user to decide which rules to apply.
 2. Code efficiency: The CMTAT token (and generally also all ERC-3643 tokens) is currently "heavy," meaning its contract code size is close to the maximum limit. This makes it challenging to add new features directly inside the CMTAT contract.
@@ -18,59 +22,96 @@ Why use a dedicated contract with rules instead of implementing it directly in C
 
 ## How it works
 
-This diagram illustrates how a transfer of CMTAT with a RuleEngine works:
+This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a RuleEngine works:
 
- ![Engine-RuleEngine.drawio](./doc/schema/Engine-RuleEngine.drawio.png)
+![RuleEngine.drawio](./doc/schema/RuleEngine.drawio.png)
 
-1. The token holders initiate a transfer transaction on CMTAT contract.
-2. The validation module inside the CMTAT calls the ERC-3643 function `transferred` from the RuleEngine if set with the following parameters inside: `from, to, value`.
-3. The Rule Engine calls each rule separately.
-4. If the rule returns the value 0, the RuleEngine considers the transfer authorized. If one rule returns a different value, the RuleEngine considers the transfer as not authorized and the transaction is directly reverted (no return value) stopping the transfer.
+ 
+
+1. The token holders initiate a transfer transaction on the token contract.
+2. The transfer function inside the token calls the ERC-3643 function `transferred` from the RuleEngine with the following parameters inside: `from, to, value`.
+3. The Rule Engine calls each rule separately. If the transfer is not authorized by the rule, the rule must directly revert (no return value).
+
+### How to set it
+
+#### CMTAT v3.0.0
+
+CMTAT provides the following function to set a RuleEngine inside a CMTAT token:
+
+```solidity
+ setRuleEngine(IRuleEngine ruleEngine_) 
+```
+
+This function is defined in the extension module `ValidationModuleRuleEngine`
+
+### ERC-3643 token
+
+[ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) defined the following function in the standard interface to set a compliance contract
+
+```solidity
+setCompliance(address _compliance)
+```
+
+
 
 ## How to include it
 
 While the RuleEngine has been designed for CMTAT and ERC-3643 tokens, it can be used with other contracts to apply transfer restrictions.
 
-For that, the only thing to do is to import in your contract the interface `IRuleEngine`(CMTAT) or `IERC3643Compliance`(ERC-3643), which declares the corresponding functions to call by the token contract. This interface can be found [here](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/interfaces/engine/IRuleEngine.sol).
+For that, the only thing to do is to import in your contract the interface `IRuleEngine`(CMTAT) or `IERC3643Compliance` (ERC-3643), which declares the corresponding functions to call by the token contract. This interface can be found [here](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/interfaces/engine/IRuleEngine.sol).
 
-### CMTAT
+### Like CMTAT
 
-Before each transfer, the CMTAT calls the function `transferred` which is the entrypoint for the RuleEngine.
+Before each ERC-20 transfer, the CMTAT calls the function `transferred` which is the entrypoint for the RuleEngine.
+
+```solidity
+function transferred(address from,address to,uint256 value)
+```
+
+If you want to apply restriction on the spender address, you have to call the `transferred` function which takes the spender argument in your ERC-20  function `transferFrom`.
+
+```solidity
+function transferred(address spender,address from,address to,uint256 value)
+```
 
 For example, CMTAT defines the interaction with the RuleEngine inside a specific module, [ValidationModuleRuleEngine](https://github.com/CMTA/CMTAT/blob/master/contracts/modules/wrapper/extensions/ValidationModule/ValidationModuleRuleEngine.sol) and [CMTATBaseRuleEngine](https://github.com/CMTA/CMTAT/blob/master/contracts/modules/1_CMTATBaseRuleEngine.sol).
 
 - ValidationModuleRuleEngine
+
+![transferred](./doc/other/CMTAT/transferred.png)
+
 - CMTATBaseRuleEngine
 
- 
+![checkTransferred](./doc/other/CMTAT/checkTransferred.png)
 
 This function `_transferred` is called before each transfer/burn/mint through the internal function `_checkTransferred` defined in [CMTAT_BASE](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/modules/CMTAT_BASE.sol#L198).
 
-### ERC-3643
+### Like ERC-3643
 
 The ERC-3643 defines several functions used as entrypoint for an ERC-3643 token.
 
-They are the following
+They are the following:
 
 ```solidity
-  // compliance check and state update
-  function canTransfer(address from, address to, uint256 value) external view returns (bool);
-  function transferred(address from, address to, uint256 value) external;
-  function created(address to, uint256 value) external;
-  function destroyed(address from, uint256 value) external;
+// read-only function
+function canTransfer(address from, address to, uint256 value) external view returns (bool);
+// ERC-20 transfer
+function transferred(address from, address to, uint256 value) external;
+// mint
+function created(address to, uint256 value) external;
+// burn
+function destroyed(address from, uint256 value) external;
 ```
 
 ## Interface
 
 ### CMTAT
 
-The RuleEngine base interface is defined in CMTAT repository.
+The `RuleEngine` base interface is defined in CMTAT repository.
 
-![surya_inheritance_IRuleEngine.sol](./doc/schema/surya_inheritance_IRuleEngine.sol.png)
+![cmtat_surya_inheritance_IRuleEngine.sol](./doc/schema/cmtat_surya_inheritance_IRuleEngine.sol.png)
 
-It inherits from several others interace:
-
-
+It inherits from several others interface: `IERC1404Extend`, `IERC7551Compliance`, `IERC3643ComplianceContract`
 
 ```solidity
 // IRuleEngine
@@ -121,13 +162,20 @@ The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is 
 
 
 
-
-
-
-
 A specific module implements this interface for the RuleEngine: [ERC3643Compliance.sol](src/modules/ERC3643Compliance.sol)
 
+![ERC3643ComplianceModuleUML](./doc/schema/vscode-uml/ERC3643ComplianceModuleUML.png)
 
+## Technical
+
+### Dependencies
+
+The toolchain includes the following components, where the versions are the latest ones that we tested:
+
+- Foundry (forge-std) [v1.10.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.10.0)
+- Solidity [0.8.30](https://docs.soliditylang.org/en/v0.8.30/) (via solc-js)
+- OpenZeppelin Contracts (submodule) [v5.4.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.4.0)
+- CMTAT [v3.0.0-rc7](https://github.com/CMTA/CMTAT/releases/tag/v3.0.0-rc7)
 
 
 
@@ -147,12 +195,25 @@ See also [docs.openzeppelin.com - AccessControl](https://docs.openzeppelin.com/c
 
 Here is the list of roles and their 32 bytes identifier.
 
-|                           | Defined in                       | 32 bytes identifier                                          |
-| ------------------------- | -------------------------------- | ------------------------------------------------------------ |
-| DEFAULT_ADMIN_ROLE        | OpenZeppelin<br />AccessControl  | 0x0000000000000000000000000000000000000000000000000000000000000000 |
-| **Modules**               |                                  |                                                              |
-| COMPLIANCE_MANAGER_ROLE   | ERC3643Compliance                |                                                              |
-| RULE_ENGINE_OPERATOR_ROLE | RuleEngineInvariantStorageCommon |                                                              |
+The default admin is the address put in argument(`admin`) inside the constructor. 
+
+It is set in the constructor when the contract is deployed.
+
+|                         | Defined in                       | 32 bytes identifier                                          |
+| ----------------------- | -------------------------------- | ------------------------------------------------------------ |
+| DEFAULT_ADMIN_ROLE      | OpenZeppelin<br />AccessControl  | 0x0000000000000000000000000000000000000000000000000000000000000000 |
+| **Modules**             |                                  |                                                              |
+| COMPLIANCE_MANAGER_ROLE | ERC3643Compliance                | e5c50d0927e06141e032cb9a67e1d7092dc85c0b0825191f7e1cede600028568 |
+| RULES_MANAGEMENT_ROLE   | RuleEngineInvariantStorageCommon | ea5f4eb72290e50c32abd6c23e45de3d8300b3286e1cbc2e293114b92e034e5e |
+
+
+
+#### Schema
+
+Here a schema of the Access Control.
+![alt text](./doc/security/accessControl/access-control-RuleEngine.png)
+
+
 
 
 
@@ -164,99 +225,57 @@ For function signatures,  struct arguments are represented with their correspond
 |                      | Function signature | Visibility [public/external] | Input variables (Function arguments) | Output variables<br />(return value) | Role Required |
 | -------------------- | ------------------ | ---------------------------- | ------------------------------------ | ------------------------------------ | ------------- |
 | **Modules**          |                    |                              |                                      |                                      |               |
-| RuleEngineOperation  |                    |                              |                                      |                                      |               |
-|                      | ``                 | public                       | ``                                   | -                                    |               |
-|                      | ``                 | public                       | ``                                   | -                                    |               |
-| RuleEngineValidation |                    |                              |                                      |                                      |               |
+| RulesManagementModule |                    |                              |                                      |                                      |               |
+|                      | `setRules(address[] rules_)`                                 | public                       | `IRule[] rules_`                                         | -                                    | RULES_MANAGEMENT_ROLE     |
+|                         | `clearRules()`                                               | public                              | - |-|RULES_MANAGEMENT_ROLE|
+|                         | `addRule(address rule_)`                                     | public | `IRule rule_` |-|RULES_MANAGEMENT_ROLE|
+|                         | `removeRule(address rule_)`                                  | public | `IRule rule_` |-|RULES_MANAGEMENT_ROLE|
+| ERC3643ComplianceModule |  |                              |                                      |                                      |               |
+|  | `bindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE |
+|  | `unbindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE |
+| RuleEngineBase |  | | | | |
+|  | `transferred(address from,address to,uint256 value)` | public | `address from,address to, uint256 value` | - | onlyBoundToken (modifier) |
+|  | `transferred(address spender,address from,address to,uint256 value)` | public | `address spender,address from,address to, uint256 value` | - | onlyBoundToken (modifier) |
 
-## Dependencies
 
-The toolchain includes the following components, where the versions are the latest ones that we tested:
-
-- Foundry [v1.9.4](https://github.com/foundry-rs/forge-std/releases/tag/v1.9.4)
-- Solidity 0.8.30 (via solc-js)
-- OpenZeppelin Contracts (submodule) [v5.3.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.3.0)
-- CMTAT [v3.0.0](https://github.com/CMTA/CMTAT/releases/tag/v3.0.0)
-
-## How to include it
-
-While it has been designed for the CMTAT, the ruleEngine can be used with others contracts to apply restriction on transfer.
-
-For that, the only thing to do is to import in your contract the interface `IRuleEngine` which declares the function `operateOnTransfer`
-
-This interface can be found in [CMTAT/[...]/IRuleEngine.sol](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/interfaces/engine/IRuleEngine.sol)
-
-Before each transfer, your contract must call the function `operateOnTransfer` which is the entrypoint for the RuleEngine.
-
-## Schema
-
-![Engine-RuleEngine.drawio](./doc/schema/Engine-RuleEngine.drawio.png)
 
 ### UML
 
-#### Global
-
-> npm run-script uml
->
-> No longer works, generate the following error: RangeError: Maximum call stack size exceeded
-
-![uml](./doc/schema/classDiagram.svg)
+![RuleEngineUML](./doc/schema/vscode-uml/RuleEngineUML.png)
 
 
 
-#### RuleEngine
 
-> npm run-script uml:ruleEngine
->
-> No longer works, instead:
->
-> forge flatten src/RuleEngine.sol -o RuleEngine.sol
->
-> npx sol2uml class RuleEngine.sol
 
-![uml](./doc/schema/RuleEngine.svg)
+### Graph
 
-## Available Rules
+
+
+![surya_graph_RuleEngine](./doc/schema/surya/surya_graph/surya_graph_RuleEngine.sol.png)
+
+## Functionality
+
+Several functionalities are not implemented because it makes more sense to directly implement them in the token smart contract
+
+The RuleEngine can be removed from the main token contract by calling these dedicated functions
+
+- CMTAT v3.0.0: `setRuleEngine(address ruleEngine)`
+- ERC-3643 token: `setCompliance(address _compliance)`
+
+### Available Rules
 
 Rules have their own dedicated repository: [github.com/CMTA/Rules](https://github.com/CMTA/Rules)
 
 The following rules are available:
 
-| Rule                                                         | Type<br />[Validation/Operation] | Audit planned                     | Description                                                  | Doc                                                          |
-| ------------------------------------------------------------ | -------------------------------- | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [RuleWhitelist](src/rules/validation/RuleWhitelist.sol)      | RuleValidation                   | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a whitelist. | [RuleWhitelist.md](./doc/technical/RuleWhitelist.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleWhitelist.sol.md) |
-| [RuleWhitelistWrapper](src/rules/validation/RuleWhitelistWrapper.sol) | RuleValidation                   | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators. | [RuleWhitelistWrapper.md](./doc/technical/RuleWhitelistWrapper.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleWhitelistWrapper.sol.md) |
-| [RuleBlacklist](src/rules/validation/RuleBlacklist.sol)      | RuleValidation                   | &#x2611;                          | This rule can be used to forbid transfer from/to addresses in the blacklist | [RuleBlacklist.md](./doc/technical/RuleBlacklist.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleBlacklist.sol.md) |
-| [RuleSanctionList](src/rules/validation/RuleSanctionList.sol) | RuleValidation                   | &#x2611;                          | The purpose of this contract is to use the oracle contract from Chainalysis to forbid transfer from/to an address  included in a sanctions designation (US, EU, or UN). | [RuleSanctionList.md](./doc/technical/RuleSanctionList.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleSanctionList.sol.md) |
-| [RuleConditionalTransfer](src/rules/operation/RuleConditionalTransfer.sol) | RuleOperation                    | &#x2612;<br />(experimental rule) | This page describes a Conditional Transfer implementation. This rule requires that transfers have to be approved before being executed by the token holders. | [RuleConditionalTransfer.md](./doc/technical/RuleConditionalTransfer.md)<br />[surya-report](./doc/surya/surya_report/surya_report_RuleConditionalTransfer.sol.md) |
+| Rule                    | Type<br />[ready-only / read-write] | Audit planned                     | Description                                                  |
+| ----------------------- | ----------------------------------- | --------------------------------- | ------------------------------------------------------------ |
+| RuleWhitelist           | Ready-only                          | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a whitelist. |
+| RuleWhitelistWrapper    | Ready-only                          | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators. |
+| RuleBlacklist           | Ready-only                          | &#x2611;                          | This rule can be used to forbid transfer from/to addresses in the blacklist |
+| RuleSanctionList        | Ready-only                          | &#x2611;                          | The purpose of this contract is to use the oracle contract from Chainalysis to forbid transfer from/to an address  included in a sanctions designation (US, EU, or UN). |
+| RuleConditionalTransfer | Ready-Write                         | &#x2612;<br />(experimental rule) | This rule requires that transfers have to be approved before being executed by the token holders. |
 
-
-
-
-
-## Functionality
-
-### Upgradeable
-
-The Rule Engine and the other rules are not upgradeable. The reason is the following:
-If we need a new on, we just issue a new one, and set inside the CMTAT token (or the RuleEngine for the rules) to use the new. 
-
-### Urgency mechanism
-
-### Pause
-
-There are no functionalities to put in pause the contracts. 
-
-The RuleEngine can be removed from the main token contract by calling the dedicated function
-
-- CMTAT v3.0.0: `setRuleEngine(address ruleEngine)`
-- ERC-3643 token: `setCompliance(address _compliance)`
-
-### Kill / Deactivate the contracts
-
-There are no functionalities to kill/deactivate the contracts.
-
-Similar to the pause functionality, the RuleEngine can be directly removed from the main token contract
 
 
 ### Gasless support (ERC-2771)
@@ -266,6 +285,568 @@ The RuleEngine contracts and the other rules support client-side gasless transac
 At deployment, the parameter  `forwarder` inside the contract constructor has to be set  with the defined address of the forwarder. Please note that the forwarder can not be changed after deployment.
 
 Please see the OpenGSN [documentation](https://docs.opengsn.org/contracts/#receiving-a-relayed-call) for more details on what is done to support GSN in the contract.
+
+### Upgradeable
+
+A proxy architecture (upgradeable) increases the code complexity as well as the runtime gas cost for each transaction. This is why the RuleEngine is not upgradeable.
+
+Moreover, in a proxy architecture, each new implementation must be compatible (storage) with the precedent implementation, which can reduce the ability to improve the code.
+
+In case you use the same RuleEngine for several different tokens, unfortunately, you will have to update the address of the RuleEngine set in each token contract separately. 
+
+### Urgency mechanism
+
+#### Pause
+
+There are no functionalities to put in pause the RuleEngine. 
+
+The RuleEngine can be removed from the main token contract by calling the dedicated functions to manage the RuleEngine
+
+#### Kill / Deactivate the contracts
+
+There are no functionalities to kill/deactivate the contracts.
+
+Similar to the pause functionality, the RuleEngine can be directly removed from the main token contract.
+
+## Ethereum API
+
+### RuleEngineBase
+
+![RuleEngineBaseUML](./doc/schema/vscode-uml/RuleEngineBaseUML.png)
+
+#### IRuleEngine
+
+![IRuleEngineUML](./doc/schema/vscode-uml/IRuleEngineUML.png)
+
+##### transferred(address spender, address from, address to, uint256 value)
+
+Function called whenever tokens are transferred from one wallet to another.
+
+Must revert if the transfer is invalid.
+ Same name as ERC-3643 but with an additional `spender` parameter.
+ This function can be used to update state variables of the RuleEngine contract.
+ Can only be called by the token contract bound to the RuleEngine.
+
+**Input Parameters:**
+
+| Name    | Type    | Description                                    |
+| ------- | ------- | ---------------------------------------------- |
+| spender | address | The spender address initiating the transfer.   |
+| from    | address | The token holder address.                      |
+| to      | address | The receiver address.                          |
+| value   | uint256 | The amount of tokens involved in the transfer. |
+
+#### IERC7551Compliance
+
+![IERC7551ComplianceUML](./doc/schema/vscode-uml/IERC7551ComplianceUML.png)
+
+##### canTransferFrom(address spender, address from, address to, uint256 value) -> bool
+
+Checks if `spender` can transfer `value` tokens from `from` to `to` under compliance rules.
+
+Does not check balances or access rights (Access Control).
+
+**Input Parameters:**
+
+| Name    | Type    | Description                          |
+| ------- | ------- | ------------------------------------ |
+| spender | address | The address performing the transfer. |
+| from    | address | The source address.                  |
+| to      | address | The destination address.             |
+| value   | uint256 | The number of tokens to transfer.    |
+
+
+
+**Return Values:**
+
+| Type | Description                                |
+| ---- | ------------------------------------------ |
+| bool | True if the transfer complies with policy. |
+
+#### IERC3643ComplianceRead
+
+![IERC3643ComplianceReadUML](./doc/schema/vscode-uml/IERC3643ComplianceReadUML.png)
+
+------
+
+##### canTransfer(address from, address to, uint256 value) -> bool
+
+Returns true if the transfer is valid, and false otherwise.
+
+Does not check balances or access rights (Access Control).
+
+**Input Parameters:**
+
+| Name  | Type    | Description                       |
+| ----- | ------- | --------------------------------- |
+| from  | address | The source address.               |
+| to    | address | The destination address.          |
+| value | uint256 | The number of tokens to transfer. |
+
+
+
+**Return Values:**
+
+| Type | Description                                     |
+| ---- | ----------------------------------------------- |
+| bool | True if the transfer is valid, false otherwise. |
+
+#### IERC3643IComplianceContract
+
+![IERC3643IComplianceContractUML](./doc/schema/vscode-uml/IERC3643IComplianceContractUML.png)
+
+------
+
+##### transferred(address from, address to, uint256 value)
+
+Updates the compliance contract state whenever tokens are transferred.
+
+Can only be called by the token contract bound to this compliance logic.
+ This function can be used to update internal state variables.
+
+**Input Parameters:**
+
+| Name  | Type    | Description                                    |
+| ----- | ------- | ---------------------------------------------- |
+| from  | address | The address of the sender.                     |
+| to    | address | The address of the receiver.                   |
+| value | uint256 | The number of tokens involved in the transfer. |
+
+#### IERC1404
+
+![IERC1404UML](./doc/schema/vscode-uml/IERC1404UML.png)
+
+------
+
+##### detectTransferRestriction(address from, address to, uint256 value) -> uint8
+
+Returns a uint8 code to indicate if a transfer is restricted or not.
+
+Implements the restriction logic of {ERC-1404}.
+ Examples of restriction logic include:
+
+- checking if the recipient is whitelisted,
+- checking if the sender’s tokens are frozen during a lock-up period, etc.
+
+**Input Parameters:**
+
+| Name  | Type    | Description                       |
+| ----- | ------- | --------------------------------- |
+| from  | address | The source address.               |
+| to    | address | The destination address.          |
+| value | uint256 | The number of tokens to transfer. |
+
+
+
+**Return Values:**
+
+| Type  | Description                                            |
+| ----- | ------------------------------------------------------ |
+| uint8 | Restriction code (0 means the transfer is authorized). |
+
+
+
+------
+
+##### messageForTransferRestriction(uint8 restrictionCode) -> string
+
+Returns a human-readable explanation for a transfer restriction code.
+
+Implements {ERC-1404} standard message accessor.
+
+**Input Parameters:**
+
+| Name            | Type  | Description                        |
+| --------------- | ----- | ---------------------------------- |
+| restrictionCode | uint8 | The restriction code to interpret. |
+
+
+
+**Return Values:**
+
+| Type   | Description                                          |
+| ------ | ---------------------------------------------------- |
+| string | A message describing why the transfer is restricted. |
+
+
+
+------
+
+#### IERC1404Extend
+
+![IERC1404ExtendUML](./doc/schema/vscode-uml/IERC1404ExtendUML.png)
+
+##### enum REJECTED_CODE_BASE
+
+Error codes for transfer restrictions.
+ Codes `6–9` are reserved for future CMTAT ruleEngine extensions.
+
+| Name                                               | Value | Description                                                  |
+| -------------------------------------------------- | ----- | ------------------------------------------------------------ |
+| TRANSFER_OK                                        | 0     | Transfer authorized.                                         |
+| TRANSFER_REJECTED_PAUSED                           | 1     | Transfer rejected because the token is paused.               |
+| TRANSFER_REJECTED_FROM_FROZEN                      | 2     | Transfer rejected because the sender’s address is frozen.    |
+| TRANSFER_REJECTED_TO_FROZEN                        | 3     | Transfer rejected because the recipient’s address is frozen. |
+| TRANSFER_REJECTED_SPENDER_FROZEN                   | 4     | Transfer rejected because the spender’s address is frozen.   |
+| TRANSFER_REJECTED_FROM_INSUFFICIENT_ACTIVE_BALANCE | 5     | Transfer rejected because the sender does not have enough active (unfrozen) balance. |
+
+
+
+------
+
+##### detectTransferRestrictionFrom(address spender, address from, address to, uint256 value) -> uint8
+
+Returns a uint8 code to indicate if a transfer is restricted or not.
+
+This is an extension of {ERC-1404} with an additional `spender` parameter to enforce restriction logic on delegated transfers.
+ Examples of restriction logic include:
+
+- verifying if the recipient is whitelisted,
+- verifying if tokens are locked for either sender or spender, etc.
+
+**Input Parameters:**
+
+| Name    | Type    | Description                                                  |
+| ------- | ------- | ------------------------------------------------------------ |
+| spender | address | The address initiating the transfer (for delegated transfers). |
+| from    | address | The source address.                                          |
+| to      | address | The destination address.                                     |
+| value   | uint256 | The number of tokens to transfer.                            |
+
+
+
+**Return Values:**
+
+| Type  | Description                                            |
+| ----- | ------------------------------------------------------ |
+| uint8 | Restriction code (0 means the transfer is authorized). |
+
+
+
+------
+
+### VersionModule
+
+![VersionModuleUML](./doc/schema/vscode-uml/VersionModuleUML.png)
+
+#### version()
+
+```solidity
+function version() external view returns (string memory version_);
+```
+
+```solidity
+function version() 
+public view virtual override(IERC3643Base) 
+returns (string memory version_)
+```
+
+ **Description**
+
+Returns the current version of the token contract.
+Useful for identifying which version of the smart contract is deployed and in use. 
+
+**Return**
+
+| Name       | Type   | Description                                                  |
+| ---------- | ------ | ------------------------------------------------------------ |
+| `version_` | string | The version string of the token implementation (e.g., "1.0.0"). |
+
+
+
+### ERC3643ComplianceModule
+
+![ERC3643ComplianceModuleUML](./doc/schema/vscode-uml/ERC3643ComplianceModuleUML.png)
+
+#### Events
+
+##### TokenBound(address token)
+
+Emitted when a token is successfully bound to the compliance contract.
+
+**Event Parameters:**
+
+| Name  | Type    | Description                              |
+| ----- | ------- | ---------------------------------------- |
+| token | address | The address of the token that was bound. |
+
+
+
+------
+
+##### TokenUnbound(address token)
+
+Emitted when a token is successfully unbound from the compliance contract.
+
+**Event Parameters:**
+
+| Name  | Type    | Description                                |
+| ----- | ------- | ------------------------------------------ |
+| token | address | The address of the token that was unbound. |
+
+
+
+------
+
+#### Functions
+
+##### bindToken(address token)
+
+Associates a token contract with this compliance contract.
+
+The compliance contract may restrict operations on the bound token according to its internal compliance logic.
+ Reverts if the token is already bound.
+
+**Input Parameters:**
+
+| Name  | Type    | Description                       |
+| ----- | ------- | --------------------------------- |
+| token | address | The address of the token to bind. |
+
+
+
+------
+
+##### unbindToken(address token)
+
+Removes the association of a token contract from this compliance contract.
+
+Reverts if the token is not currently bound.
+
+**Input Parameters:**
+
+| Name  | Type    | Description                         |
+| ----- | ------- | ----------------------------------- |
+| token | address | The address of the token to unbind. |
+
+
+
+------
+
+##### isTokenBound(address token) -> bool
+
+Checks whether a token is currently bound to this compliance contract.
+
+**Input Parameters:**
+
+| Name  | Type    | Description                  |
+| ----- | ------- | ---------------------------- |
+| token | address | The token address to verify. |
+
+
+
+**Return Values:**
+
+| Type | Description                                  |
+| ---- | -------------------------------------------- |
+| bool | True if the token is bound, false otherwise. |
+
+
+
+------
+
+#####  getTokenBound() -> address
+
+Returns the single token currently bound to this compliance contract.
+
+If multiple tokens are supported, consider using `getTokenBounds()`.
+
+**Return Values:**
+
+| Type    | Description                               |
+| ------- | ----------------------------------------- |
+| address | The address of the currently bound token. |
+
+
+
+------
+
+##### getTokenBounds() -> address[]
+
+Returns all tokens currently bound to this compliance contract.
+
+This is a view-only function and does not modify state.
+ This function is not part of the original ERC-3643 specification.
+
+**Return Values:**
+
+| Type      | Description                                     |
+| --------- | ----------------------------------------------- |
+| address[] | An array of addresses of bound token contracts. |
+
+
+
+------
+
+##### created(address to, uint256 value)
+
+Updates the compliance contract state when tokens are created (minted).
+
+Called by the token contract when new tokens are issued to an account.
+ Reverts if the minting does not comply with the rules.
+
+**Input Parameters:**
+
+| Name  | Type    | Description                              |
+| ----- | ------- | ---------------------------------------- |
+| to    | address | The address receiving the minted tokens. |
+| value | uint256 | The number of tokens created.            |
+
+
+
+------
+
+##### destroyed(address from, uint256 value)
+
+Updates the compliance contract state when tokens are destroyed (burned).
+
+Called by the token contract when tokens are redeemed or burned.
+ Reverts if the burning does not comply with the rules.
+
+**Input Parameters:**
+
+| Name  | Type    | Description                                   |
+| ----- | ------- | --------------------------------------------- |
+| from  | address | The address whose tokens are being destroyed. |
+| value | uint256 | The number of tokens destroyed.               |
+
+
+
+### RulesManagementModule
+
+![RuleManagementModuleUML](./doc/schema/vscode-uml/RuleManagementModuleUML.png)
+
+#### setRules(IRule[] rules_)
+
+Defines the complete list of rules for the rule engine.
+
+Any previously configured rules are completely replaced.
+ Rules must be deployed contracts implementing the expected `IRule` interface.
+ Reverts if any rule address is zero or if duplicates are detected.
+
+**Input Parameters:**
+
+| Name   | Type    | Description                                                  |
+| ------ | ------- | ------------------------------------------------------------ |
+| rules_ | IRule[] | The array of IRule contracts to configure as the active rules. |
+
+
+
+------
+
+#### rulesCount() -> uint256
+
+Returns the total number of currently configured rules.
+
+Equivalent to the length of the internal rules array.
+
+**Return Values:**
+
+| Type    | Description                 |
+| ------- | --------------------------- |
+| uint256 | The number of active rules. |
+
+
+
+------
+
+#### rule(uint256 ruleId) -> address
+
+Retrieves the rule address at a specific index.
+
+Reverts if `ruleId` is out of bounds.
+
+**Input Parameters:**
+
+| Name   | Type    | Description                                 |
+| ------ | ------- | ------------------------------------------- |
+| ruleId | uint256 | The index of the desired rule in the array. |
+
+
+
+**Return Values:**
+
+| Type    | Description                                      |
+| ------- | ------------------------------------------------ |
+| address | The address of the corresponding IRule contract. |
+
+
+
+------
+
+#### rules() -> address[]
+
+Returns the full list of currently configured rules.
+
+This is a view-only function and does not modify state.
+
+**Return Values:**
+
+| Type      | Description                                             |
+| --------- | ------------------------------------------------------- |
+| address[] | An array containing all active rule contract addresses. |
+
+
+
+------
+
+#### clearRules() 
+
+Removes all configured rules.
+
+After calling this function, no rules will remain set.
+
+------
+
+#### addRule(IRule rule_) 
+
+Adds a new rule to the current rule set.
+
+Reverts if the rule address is zero or already exists in the set.
+
+**Input Parameters:**
+
+| Name  | Type  | Description                |
+| ----- | ----- | -------------------------- |
+| rule_ | IRule | The IRule contract to add. |
+
+
+
+------
+
+#### removeRule(IRule rule_)
+
+Removes a specific rule from the current rule set.
+
+Reverts if the provided rule is not found or does not match the stored rule at its index.
+
+**Input Parameters:**
+
+| Name  | Type  | Description                   |
+| ----- | ----- | ----------------------------- |
+| rule_ | IRule | The IRule contract to remove. |
+
+
+
+------
+
+#### containsRule(IRule rule_) -> bool
+
+Checks whether a specific rule is currently configured.
+
+**Input Parameters:**
+
+| Name  | Type  | Description                                 |
+| ----- | ----- | ------------------------------------------- |
+| rule_ | IRule | The IRule contract to check for membership. |
+
+
+
+**Return Values:**
+
+| Type | Description                                   |
+| ---- | --------------------------------------------- |
+| bool | True if the rule is present, false otherwise. |
 
 ## Audit
 
@@ -285,26 +866,42 @@ The final report is available in [ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf](https://g
 
 ### Tools
 
-You will find the report performed with [Slither](https://github.com/crytic/slither) in
+#### Slither
+
+Here is the list of report performed with [Slither](https://github.com/crytic/slither)
 
 | Version | File                                                         |
 | ------- | ------------------------------------------------------------ |
 | latest  | [slither-report.md](./doc/security/audits/tools/slither-report.md) |
 
+```bash
+slither .  --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" > slither-report.md
+```
 
+
+
+#### Aderyn
+
+Here is the list of report performed with [Aderyn](https://github.com/Cyfrin/aderyn)
+
+```bash
+aderyn -x mocks --output aderyn-report.md
+```
+
+| Version | File                                                         |
+| ------- | ------------------------------------------------------------ |
+| latest  | [aderyn-report.md](./doc/security/audits/tools/aderyn-report.md) |
 
 ## Documentation
 
 Here a summary of the main documentation
 
-| Document                | Link/Files                                           |
-| ----------------------- | ---------------------------------------------------- |
-| Technical documentation | [doc/technical/](./doc/technical/)                   |
-| Toolchain               | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md)               |
-| Functionalities         | [doc/functionalities.pdf](./doc/functionalities.pdf) |
-| Surya report            | [doc/surya](./doc/surya/)                            |
+| Document     | Link/Files                              |
+| ------------ | --------------------------------------- |
+| Toolchain    | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md)  |
+| Surya report | [doc/schema/surya](./doc/schema/surya/) |
 
-See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMTAT and ERC-1404](https://www.taurushq.com/blog/token-transfer-management-how-to-apply-restrictions-with-cmtat-and-erc-1404/) (CMTAT v2.4.0)
+See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMTAT and ERC-1404](https://www.taurushq.com/blog/token-transfer-management-how-to-apply-restrictions-with-cmtat-and-erc-1404/) (RuleEngine v2.02 and CMTAT v2.4.0)
 
 ## Usage
 
@@ -333,8 +930,6 @@ forge update
 ```
 
 See also the command's [documentation](https://book.getfoundry.sh/reference/forge/forge-update).
-
-
 
 ### Compilation
 
@@ -387,7 +982,7 @@ forge coverage --no-match-coverage "(script|mocks|test)" --report lcov && genhtm
 See [Solidity Coverage in VS Code with Foundry](https://mirror.xyz/devanon.eth/RrDvKPnlD-pmpuW7hQeR5wWdVjklrpOgPCOA-PJkWFU) & [Foundry forge coverage](https://www.rareskills.io/post/foundry-forge-coverage)
 
 ### Deployment
-The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/deploy-commands) 
+The official documentation is available in the Foundry [website](https://getfoundry.sh/forge/deploying) 
 #### Script
 
 > This documentation has been written for the version v1.0.2
@@ -407,13 +1002,27 @@ CMTAT with RuleEngine
 ```bash
 forge script script/CMTATWithRuleEngineScript.s.sol:CMTATWithRuleEngineScript --rpc-url=$RPC_URL  --broadcast --verify -vvv
 ```
-Value of YOUR_RPC_URL with a local instance of anvil : [127.0.0.1:8545](http://127.0.0.1:8545)
+
+
+- Value of YOUR_RPC_URL with a local instance of anvil : [127.0.0.1:8545](http://127.0.0.1:8545)
+
+```bash
+forge script script/CMTATWithRuleEngineScript.s.sol:CMTATWithRuleEngineScript --rpc-url=127.0.0.1:8545  --broadcast --verify -vvv
+```
 
 Only RuleEngine with a Whitelist contract
 
 ```bash
 forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  --broadcast --verify -vvv
 ```
+
+- With anvil
+
+```bash
+forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=127.0.0.1:8545  --broadcast --verify -vvv
+```
+
+
 
 ## Intellectual property
 

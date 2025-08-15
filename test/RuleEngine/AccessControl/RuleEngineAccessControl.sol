@@ -24,16 +24,16 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
             ZERO_ADDRESS,
             ZERO_ADDRESS
         );
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock.addRuleValidation(ruleWhitelist);
+        ruleEngineMock.addRule(ruleWhitelist);
         // Arrange - Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
-    function testCannotAttackerSetRulesValidation() public {
+    function testCannotAttackerSetRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
@@ -45,7 +45,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
             WHITELIST_OPERATOR_ADDRESS,
             ZERO_ADDRESS
         );
-        IRuleValidation[] memory ruleWhitelistTab = new IRuleValidation[](2);
+        IRule[] memory ruleWhitelistTab = new IRule[](2);
         ruleWhitelistTab[0] = ruleWhitelist1;
         ruleWhitelistTab[1] = ruleWhitelist2;
 
@@ -55,16 +55,16 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
             abi.encodeWithSelector(
                 AccessControlUnauthorizedAccount.selector,
                 ATTACKER,
-                RULE_ENGINE_OPERATOR_ROLE
+                RULES_MANAGEMENT_ROLE
             )
         );
         (bool success, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRulesValidation, ruleWhitelistTab)
+            abi.encodeCall(ruleEngineMock.setRules, ruleWhitelistTab)
         );
 
         // Assert
         assertEq(success, true);
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -75,13 +75,13 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
             abi.encodeWithSelector(
                 AccessControlUnauthorizedAccount.selector,
                 ATTACKER,
-                RULE_ENGINE_OPERATOR_ROLE
+                RULES_MANAGEMENT_ROLE
             )
         );
-        ruleEngineMock.clearRulesValidation();
+        ruleEngineMock.clearRules();
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -92,13 +92,13 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
             abi.encodeWithSelector(
                 AccessControlUnauthorizedAccount.selector,
                 ATTACKER,
-                RULE_ENGINE_OPERATOR_ROLE
+                RULES_MANAGEMENT_ROLE
             )
         );
-        ruleEngineMock.addRuleValidation(ruleWhitelist);
+        ruleEngineMock.addRule(ruleWhitelist);
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
@@ -109,20 +109,20 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
             abi.encodeWithSelector(
                 AccessControlUnauthorizedAccount.selector,
                 ATTACKER,
-                RULE_ENGINE_OPERATOR_ROLE
+                RULES_MANAGEMENT_ROLE
             )
         );
-        ruleEngineMock.removeRuleValidation(ruleWhitelist);
+        ruleEngineMock.removeRule(ruleWhitelist);
 
         // Assert
-        resUint256 = ruleEngineMock.rulesCountValidation();
+        resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
     }
 
     function testCannotAttackerOperateOnTransfer() public {
         // Act
         vm.prank(ATTACKER);
-        vm.expectRevert(ERC3643Compliance.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngineMock.transferred(address(0), ADDRESS1, ADDRESS2, 10);
     }
 }

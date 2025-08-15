@@ -2,18 +2,15 @@
 pragma solidity ^0.8.20;
 
 import "OZ/access/AccessControl.sol";
-import "../../../interfaces/IRuleOperation.sol";
-import "../validation/abstract/RuleValidateTransfer.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {RuleConditionalTransferLightInvariantStorage} from "./abstract/RuleConditionalTransferLightInvariantStorage.sol";
-
+import {IRule} from "../../../interfaces/IRule.sol";
 /**
  * @title TransferApprovalRule
  * @dev Requires operator approval for each ERC20 transfer.
  *      Same transfer (from, to, value) can be approved multiple times.
  */
-contract RuleConditionalTransferLight is AccessControl,  RuleValidateTransfer, RuleConditionalTransferLightInvariantStorage,
-    IRuleOperation {
+contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferLightInvariantStorage, IRule {
     // Mapping from transfer hash to approval count
     mapping(bytes32 => uint256) public approvalCounts;
 
@@ -60,6 +57,11 @@ contract RuleConditionalTransferLight is AccessControl,  RuleValidateTransfer, R
         emit TransferExecuted(from, to, value, approvalCounts[transferHash]);
     }
 
+    function transferred(address /* spender */, address from, address to, uint256 value) public {
+        transferred(from, to, value);
+    }
+
+
 
     /**
      * @notice Check if the transfer is valid
@@ -96,6 +98,8 @@ contract RuleConditionalTransferLight is AccessControl,  RuleValidateTransfer, R
         return detectTransferRestriction(from,to, value );
     }
 
+     
+
     /**
      * @notice To know if the restriction code is valid for this rule or not.
      * @param restrictionCode The target restriction code
@@ -120,6 +124,33 @@ contract RuleConditionalTransferLight is AccessControl,  RuleValidateTransfer, R
         } else {
             return TEXT_CODE_NOT_FOUND;
         }
+    }
+
+    /**
+     * @notice Validate a transfer
+     * @param _from the origin address
+     * @param _to the destination address
+     * @param _amount to transfer
+     * @return isValid => true if the transfer is valid, false otherwise
+     **/
+    function canTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) public view override returns (bool isValid) {
+        return
+            detectTransferRestriction(_from, _to, _amount) ==
+            uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+    function canTransferFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) public view virtual override returns (bool) {
+        return detectTransferRestrictionFrom(spender, from, to, value)  ==
+            uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
 }

@@ -27,12 +27,24 @@ contract RuleEngineTest is Test, HelperContract {
 
         // assert
         resBool = ruleEngineMock.hasRole(
-            RULE_ENGINE_OPERATOR_ROLE,
+            RULES_MANAGEMENT_ROLE,
             RULE_ENGINE_OPERATOR_ADDRESS
         );
         assertEq(resBool, true);
         resBool = ruleEngineMock.isTrustedForwarder(address(forwarder));
         assertEq(resBool, true);
+    }
+
+    function testHasRightVersion() public {
+        // Act
+        ruleEngineMock = new RuleEngine(
+            RULE_ENGINE_OPERATOR_ADDRESS,
+            address(0x0),
+            ZERO_ADDRESS
+        );
+
+        // Assert
+        assertEq(ruleEngineMock.version(), "3.0.0");
     }
 
     function testCannotDeployContractifAdminAddressIsZero() public {

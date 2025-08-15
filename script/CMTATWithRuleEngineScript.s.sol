@@ -1,5 +1,6 @@
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MPL-2.0
+
 // Documentation :
 // https://book.getfoundry.sh/tutorials/solidity-scripting
 pragma solidity ^0.8.17;
@@ -36,7 +37,7 @@ contract CMTATWithRuleEngineScript is Script, HelperContract {
             address(CMTAT_CONTRACT)
         );
         console.log("RuleEngine : ", address(RULE_ENGINE));
-        RULE_ENGINE.addRuleValidation(ruleWhitelist);
+        RULE_ENGINE.addRule(ruleWhitelist);
         CMTAT_CONTRACT.setRuleEngine(RULE_ENGINE);
 
         vm.stopBroadcast();

@@ -98,15 +98,6 @@ To generate  graphs with Surya, you can run the following command
 npm run-script surya:graph
 ```
 
-OR
-
-- RuleWhitelist
-
-```bash
- npx surya graph  src/RuleWhitelist.sol | dot -Tpng > surya_graph_Whitelist.png
-```
-- RuleEngine
-
 ```bash
 npx surya graph  src/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png
 ```

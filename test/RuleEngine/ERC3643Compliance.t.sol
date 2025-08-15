@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import {IERC3643Compliance} from "../../src/interfaces/IERC3643Compliance.sol";
-import {ERC3643Compliance} from "../../src/modules/ERC3643Compliance.sol";
+import {ERC3643ComplianceModule} from "../../src/modules/ERC3643ComplianceModule.sol";
 // Minimal mock ERC-3643 token to simulate calls to RuleEngine
 contract ERC3643MockToken {
     IERC3643Compliance public ruleEngine;
@@ -140,17 +140,17 @@ contract RuleEngineTest is Test, HelperContract {
     }
 
     function testCannotCreatedIfNotBound() public {
-        vm.expectRevert(ERC3643Compliance.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngine.created(user1, 100);
     }
 
     function testCannotDestroyedIfNotBound() public {
-        vm.expectRevert(ERC3643Compliance.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngine.destroyed(user2, 50);
     }
 
     function testCannotTransferredIfNotBound() public {
-        vm.expectRevert(ERC3643Compliance.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngine.transferred(user1, user2, 200);
     }
 }

@@ -6,12 +6,11 @@ import "CMTAT/deployment/CMTATStandalone.sol";
 import "CMTAT/libraries/Errors.sol";
 
 import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
-import {RuleEngineInvariantStorageCommon} from "src/modules/library/RuleEngineInvariantStorageCommon.sol";
+import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 // RuleEngine
 import {RuleEngine} from "src/RuleEngine.sol";
-import {RuleEngineValidation} from "src/RuleEngineBase.sol";
-import {RuleEngineOperation} from "src/RuleEngineBase.sol";
-import {ERC3643Compliance} from "src/RuleEngineBase.sol";
+import {RulesManagementModule} from "src/RuleEngineBase.sol";
+import {ERC3643ComplianceModule} from "src/RuleEngineBase.sol";
 // RuleConditionalTransfer
 import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
 import {RuleConditionalTransferLightInvariantStorage} from "src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol";
@@ -21,8 +20,8 @@ import {RuleWhitelistInvariantStorage} from "src/mocks/rules/validation/abstract
 import {RuleAddressListInvariantStorage} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
 
 // Rule interface
-import {IRuleValidation} from "src/interfaces/IRuleValidation.sol";
-import {IRuleOperation} from "src/interfaces/IRuleOperation.sol";
+
+import {IRule} from "src/interfaces/IRule.sol";
 
 // utils
 import "./utils/CMTATDeployment.sol";
@@ -35,7 +34,7 @@ abstract contract HelperContract is
     RuleAddressListInvariantStorage,
     RuleEngineInvariantStorage,
     RuleConditionalTransferLightInvariantStorage,
-    RuleEngineInvariantStorageCommon
+    RulesManagementModuleInvariantStorage
 {
     // Test result
     uint256 internal resUint256;

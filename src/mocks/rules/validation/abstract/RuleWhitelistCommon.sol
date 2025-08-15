@@ -3,11 +3,9 @@
 pragma solidity ^0.8.20;
 
 import "./RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
-import "./RuleValidateTransfer.sol";
-
+import {IRule} from "../../../../interfaces/IRule.sol";
 abstract contract RuleWhitelistCommon is
-    RuleValidateTransfer,
-    RuleWhitelistInvariantStorage
+    RuleWhitelistInvariantStorage, IRule
 {
     /**
      * @notice To know if the restriction code is valid for this rule or not
