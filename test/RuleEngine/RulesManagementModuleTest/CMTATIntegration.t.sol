@@ -5,14 +5,16 @@ import "forge-std/Test.sol";
 import "CMTAT/deployment/CMTATStandalone.sol";
 import "../../HelperContract.sol";
 import "OZ/token/ERC20/IERC20.sol";
+
 /**
  * @title General functions of the RuleEngine
  */
 contract RuleEngineCMTATIntegrationTest is Test, HelperContract {
     uint256 defaultValue = 20;
+
     // Arrange
     function setUp() public {
-         // global arrange
+        // global arrange
         cmtatDeployment = new CMTATDeployment();
         CMTAT_CONTRACT = cmtatDeployment.cmtat();
 
@@ -47,11 +49,13 @@ contract RuleEngineCMTATIntegrationTest is Test, HelperContract {
     function testCanDetectTransferRestrictionOK() public {
         // Arrange
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
-       
+
         vm.expectEmit(true, true, true, true);
         emit TransferApproved(ADDRESS1, ADDRESS2, defaultValue, 1);
         ruleConditionalTransferLight.approveTransfer(
-            ADDRESS1, ADDRESS2, defaultValue
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
         );
         // Act
         // RuleEngine
@@ -95,15 +99,10 @@ contract RuleEngineCMTATIntegrationTest is Test, HelperContract {
         assertEq(resUint8, 0);
 
         // RuleEngine
-        resBool = ruleEngineMock.canTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
-        assertEq(resBool, true );
-
+        assertEq(resBool, true);
 
         resBool = ruleEngineMock.canTransferFrom(
             ADDRESS3,
@@ -113,18 +112,13 @@ contract RuleEngineCMTATIntegrationTest is Test, HelperContract {
         );
 
         // Assert
-        assertEq(resBool,true);
+        assertEq(resBool, true);
 
         // CMTAT
-        resBool = CMTAT_CONTRACT.canTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resBool = CMTAT_CONTRACT.canTransfer(ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
-        assertEq(resBool, true );
-
+        assertEq(resBool, true);
 
         resBool = CMTAT_CONTRACT.canTransferFrom(
             ADDRESS3,
@@ -134,8 +128,7 @@ contract RuleEngineCMTATIntegrationTest is Test, HelperContract {
         );
 
         // Assert
-        assertEq(resBool,true);
-
+        assertEq(resBool, true);
     }
 
     function testCanDetectTransferRestrictionNotOk() public {
@@ -182,21 +175,13 @@ contract RuleEngineCMTATIntegrationTest is Test, HelperContract {
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
 
         // Act
-        resBool = ruleEngineMock.canTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertFalse(resBool);
 
         // CMTAT
-        resBool = CMTAT_CONTRACT.canTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = CMTAT_CONTRACT.canTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertFalse(resBool);
@@ -227,19 +212,22 @@ contract RuleEngineCMTATIntegrationTest is Test, HelperContract {
     function testCanPerfromATransfer() public {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         ruleConditionalTransferLight.approveTransfer(
-            ADDRESS1, ADDRESS2, defaultValue
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
         );
         vm.prank(ADDRESS1);
         CMTAT_CONTRACT.transfer(ADDRESS2, defaultValue);
 
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         ruleConditionalTransferLight.approveTransfer(
-            ADDRESS1, ADDRESS2, defaultValue
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
         );
         vm.prank(ADDRESS1);
         CMTAT_CONTRACT.approve(ADDRESS3, defaultValue);
         vm.prank(ADDRESS3);
         CMTAT_CONTRACT.transferFrom(ADDRESS1, ADDRESS2, defaultValue);
     }
-  
 }

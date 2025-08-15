@@ -9,7 +9,13 @@ import "./abstract/RuleWhitelistCommon.sol";
  * @title a whitelist manager
  */
 contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
-    error RuleWhitelist_InvalidTransfer(address from, address to, uint256 value, uint8 code);
+    error RuleWhitelist_InvalidTransfer(
+        address from,
+        address to,
+        uint256 value,
+        uint8 code
+    );
+
     /**
      * @param admin Address of the contract (Access Control)
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
@@ -19,7 +25,7 @@ contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
         address forwarderIrrevocable
     ) RuleAddressList(admin, forwarderIrrevocable) {}
 
-        /**
+    /**
      * @notice Validate a transfer
      * @param _from the origin address
      * @param _to the destination address
@@ -42,7 +48,8 @@ contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
         address to,
         uint256 value
     ) public view virtual override returns (bool) {
-        return detectTransferRestrictionFrom(spender, from, to, value)  ==
+        return
+            detectTransferRestrictionFrom(spender, from, to, value) ==
             uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
@@ -75,19 +82,28 @@ contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
         if (!addressIsListed(spender)) {
             return CODE_ADDRESS_SPENDER_NOT_WHITELISTED;
         } else {
-            return detectTransferRestriction(from,to,value);
+            return detectTransferRestriction(from, to, value);
         }
     }
 
     function transferred(address from, address to, uint256 value) public view {
-        uint8 code = detectTransferRestriction(from,to,value);
-        require(code == uint8(REJECTED_CODE_BASE.TRANSFER_OK), RuleWhitelist_InvalidTransfer(from, to, value,code));
+        uint8 code = detectTransferRestriction(from, to, value);
+        require(
+            code == uint8(REJECTED_CODE_BASE.TRANSFER_OK),
+            RuleWhitelist_InvalidTransfer(from, to, value, code)
+        );
     }
 
-    function transferred(address spender, address from, address to, uint256 value) public view {
-        uint8 code = detectTransferRestrictionFrom(spender, from,to,value);
-        require(code == uint8(REJECTED_CODE_BASE.TRANSFER_OK), RuleWhitelist_InvalidTransfer(from, to, value,code));
+    function transferred(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) public view {
+        uint8 code = detectTransferRestrictionFrom(spender, from, to, value);
+        require(
+            code == uint8(REJECTED_CODE_BASE.TRANSFER_OK),
+            RuleWhitelist_InvalidTransfer(from, to, value, code)
+        );
     }
-
-
 }

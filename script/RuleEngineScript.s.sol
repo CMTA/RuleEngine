@@ -28,10 +28,12 @@ contract RuleEngineScript is Script {
         RULE_ENGINE.addRule(ruleWhitelist);
         // Configure the new ruleEngine for CMTAT
         (bool success, ) = address(CMTAT_Address).call(
-            abi.encodeCall(ValidationModuleRuleEngine.setRuleEngine, RULE_ENGINE)
+            abi.encodeCall(
+                ValidationModuleRuleEngine.setRuleEngine,
+                RULE_ENGINE
+            )
         );
         require(success);
         vm.stopBroadcast();
     }
 }
-

@@ -25,6 +25,16 @@ abstract contract RuleConditionalTransferLightInvariantStorage is
     error TransferNotApproved();
 
     /* ============ Events ============ */
-    event TransferApproved(address indexed from, address indexed to, uint256 value, uint256 count);
-    event TransferExecuted(address indexed from, address indexed to, uint256 value, uint256 remaining);
+    event TransferApproved(
+        address indexed from,
+        address indexed to,
+        uint256 value,
+        uint256 count
+    );
+    event TransferExecuted(
+        address indexed from,
+        address indexed to,
+        uint256 value,
+        uint256 remaining
+    );
 }

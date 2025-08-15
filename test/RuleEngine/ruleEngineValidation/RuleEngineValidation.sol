@@ -8,7 +8,8 @@ import "../../HelperContract.sol";
  * @title General functions of the RuleEngine
  */
 contract RuleEngineTest is Test, HelperContract {
-   IRule[] ruleWhitelistTab = new IRule[](2);
+    IRule[] ruleWhitelistTab = new IRule[](2);
+
     // Arrange
     function setUp() public {
         ruleWhitelist = new RuleWhitelist(
@@ -67,7 +68,9 @@ contract RuleEngineTest is Test, HelperContract {
         ruleWhitelistTab[1] = ruleWhitelist1;
 
         // Act
-        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAlreadyExists.selector);
+        vm.expectRevert(
+            RuleEngine_RulesManagementModule_RuleAlreadyExists.selector
+        );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.setRules(ruleWhitelistTab);
         // Assert
@@ -107,7 +110,11 @@ contract RuleEngineTest is Test, HelperContract {
 
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        vm.expectRevert(RulesManagementModuleInvariantStorage.RuleEngine_RulesManagementModule_ArrayIsEmpty.selector);
+        vm.expectRevert(
+            RulesManagementModuleInvariantStorage
+                .RuleEngine_RulesManagementModule_ArrayIsEmpty
+                .selector
+        );
         ruleEngineMock.setRules(ruleWhitelistTab);
 
         // Assert
@@ -133,7 +140,11 @@ contract RuleEngineTest is Test, HelperContract {
         ruleWhitelistTab = new IRule[](0);
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        vm.expectRevert(RulesManagementModuleInvariantStorage.RuleEngine_RulesManagementModule_ArrayIsEmpty.selector);
+        vm.expectRevert(
+            RulesManagementModuleInvariantStorage
+                .RuleEngine_RulesManagementModule_ArrayIsEmpty
+                .selector
+        );
 
         ruleEngineMock.setRules(ruleWhitelistTab);
 
@@ -260,7 +271,9 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testCannotAddRuleZeroAddress() public {
         // Act
-        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed.selector);
+        vm.expectRevert(
+            RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed.selector
+        );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(IRule(address(0x0)));
 
@@ -271,7 +284,9 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testCannotAddARuleAlreadyPresent() public {
         // Act
-        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAlreadyExists.selector);
+        vm.expectRevert(
+            RuleEngine_RulesManagementModule_RuleAlreadyExists.selector
+        );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
 
@@ -310,7 +325,9 @@ contract RuleEngineTest is Test, HelperContract {
         );
 
         // Act
-        vm.expectRevert(RuleEngine_RulesManagementModule_RuleDoNotMatch.selector);
+        vm.expectRevert(
+            RuleEngine_RulesManagementModule_RuleDoNotMatch.selector
+        );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.removeRule(ruleWhitelist1);
 
@@ -439,7 +456,6 @@ contract RuleEngineTest is Test, HelperContract {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.setRules(ruleWhitelistTab);
 
-
         // Act
         address rule = ruleEngineMock.rule(0);
 
@@ -461,7 +477,6 @@ contract RuleEngineTest is Test, HelperContract {
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.setRules(ruleWhitelistTab);
-
 
         // Act
         address[] memory rules = ruleEngineMock.rules();
@@ -489,7 +504,7 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngineMock.setRules(ruleWhitelistTab);
 
         // Act
-       /* uint256 index1 = ruleEngineMock.getRuleIndex(ruleWhitelist1);
+        /* uint256 index1 = ruleEngineMock.getRuleIndex(ruleWhitelist1);
         uint256 index2 = ruleEngineMock.getRuleIndex(ruleWhitelist2);
         // Length of the list because ruleWhitelist is not in the list
         uint256 index3 = ruleEngineMock.getRuleIndex(ruleWhitelist);

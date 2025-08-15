@@ -35,9 +35,9 @@ contract RuleEngineTest is Test, HelperContract {
         assertEq(resBool, true);
     }
 
-    function testReturnZeroAddressForRule() public{
+    function testReturnZeroAddressForRule() public {
         // Arrange
-          ruleEngineMock = new RuleEngine(
+        ruleEngineMock = new RuleEngine(
             RULE_ENGINE_OPERATOR_ADDRESS,
             address(0x0),
             ZERO_ADDRESS
@@ -45,7 +45,7 @@ contract RuleEngineTest is Test, HelperContract {
         // Act
         resAddr = ruleEngineMock.rule(0);
         // Assert
-        assertEq(resAddr , ZERO_ADDRESS);
+        assertEq(resAddr, ZERO_ADDRESS);
     }
 
     function testHasRightVersion() public {

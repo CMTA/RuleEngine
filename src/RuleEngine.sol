@@ -8,13 +8,11 @@ import {Context} from "OZ/utils/Context.sol";
 import {ERC2771ModuleStandalone, ERC2771Context} from "./modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */
 import {RuleEngineBase} from "./RuleEngineBase.sol";
+
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
  */
-contract RuleEngine is
-    ERC2771ModuleStandalone,
-    RuleEngineBase
-{
+contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase {
     /**
      * @param admin Address of the contract (Access Control)
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
@@ -28,7 +26,7 @@ contract RuleEngine is
             revert RuleEngine_AdminWithAddressZeroNotAllowed();
         }
         if (tokenContract != address(0)) {
-           _bindToken(tokenContract);
+            _bindToken(tokenContract);
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
@@ -43,7 +41,7 @@ contract RuleEngine is
     function _msgSender()
         internal
         view
-        virtual 
+        virtual
         override(ERC2771Context, Context)
         returns (address sender)
     {
@@ -56,7 +54,7 @@ contract RuleEngine is
     function _msgData()
         internal
         view
-        virtual 
+        virtual
         override(ERC2771Context, Context)
         returns (bytes calldata)
     {
@@ -69,7 +67,7 @@ contract RuleEngine is
     function _contextSuffixLength()
         internal
         view
-        virtual 
+        virtual
         override(ERC2771Context, Context)
         returns (uint256)
     {

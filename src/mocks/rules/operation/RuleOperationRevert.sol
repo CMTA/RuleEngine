@@ -4,29 +4,41 @@ pragma solidity ^0.8.20;
 import "OZ/access/AccessControl.sol";
 import "../validation/abstract/RuleCommonInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
+
 /**
  * @title TransferApprovalRule
  * @dev Requires operator approval for each ERC20 transfer.
  *      Same transfer (from, to, value) can be approved multiple times.
  */
-contract RuleOperationRevert is AccessControl,  IRule,
-    RuleCommonInvariantStorage{
-
+contract RuleOperationRevert is
+    AccessControl,
+    IRule,
+    RuleCommonInvariantStorage
+{
     error RuleConditionalTransferLight_InvalidTransfer();
     // It is very important that each rule uses an unique code
     uint8 public constant CODE_TRANSFER_REQUEST_NOT_APPROVED = 71;
+
     /**
      * @notice Called when a transfer occurs. Decrements approval count if allowed.
      * @dev `spender` is part of the interface but unused.
      */
-    function transferred(address /*from*/, address /* to */, uint256 /* value */) public pure {
+    function transferred(
+        address /*from*/,
+        address /* to */,
+        uint256 /* value */
+    ) public pure {
         revert RuleConditionalTransferLight_InvalidTransfer();
     }
 
-    function transferred(address /* spender */, address /*from*/, address /* to */, uint256 /* value */) public pure {
+    function transferred(
+        address /* spender */,
+        address /*from*/,
+        address /* to */,
+        uint256 /* value */
+    ) public pure {
         revert RuleConditionalTransferLight_InvalidTransfer();
     }
-
 
     /**
      * @notice Check if the transfer is valid
@@ -40,7 +52,6 @@ contract RuleOperationRevert is AccessControl,  IRule,
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
-
     /**
      * @notice Check if the transfer is valid
      * @param from the origin address
@@ -53,7 +64,7 @@ contract RuleOperationRevert is AccessControl,  IRule,
         address to,
         uint256 value
     ) public pure override returns (uint8) {
-        return detectTransferRestriction(from,to, value );
+        return detectTransferRestriction(from, to, value);
     }
 
     /**
@@ -77,7 +88,7 @@ contract RuleOperationRevert is AccessControl,  IRule,
         return TEXT_CODE_NOT_FOUND;
     }
 
-           /**
+    /**
      * @notice Validate a transfer
      * @param _from the origin address
      * @param _to the destination address
@@ -100,7 +111,8 @@ contract RuleOperationRevert is AccessControl,  IRule,
         address to,
         uint256 value
     ) public view virtual override returns (bool) {
-        return detectTransferRestrictionFrom(spender, from, to, value)  ==
+        return
+            detectTransferRestrictionFrom(spender, from, to, value) ==
             uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 }

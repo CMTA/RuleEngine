@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
+
 /**
  * @title General functions of the RuleWhitelist
  */
@@ -127,7 +128,6 @@ contract RuleWhitelistTest is Test, HelperContract {
         );
         // Assert
         assertEq(resString, TEXT_CODE_NOT_FOUND);
-
     }
 
     function testCanTransfer() public {
@@ -142,14 +142,24 @@ contract RuleWhitelistTest is Test, HelperContract {
         assertEq(resBool, true);
 
         // Spender is not whitelisted
-        resBool = ruleWhitelist.canTransferFrom(ADDRESS3, ADDRESS2, ADDRESS1, 20);
+        resBool = ruleWhitelist.canTransferFrom(
+            ADDRESS3,
+            ADDRESS2,
+            ADDRESS1,
+            20
+        );
         assertEq(resBool, false);
 
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist.addAddressToTheList(ADDRESS3); 
+        ruleWhitelist.addAddressToTheList(ADDRESS3);
 
-        resBool = ruleWhitelist.canTransferFrom(ADDRESS3, ADDRESS2, ADDRESS1, 20);
-        assertEq(resBool, true);  
+        resBool = ruleWhitelist.canTransferFrom(
+            ADDRESS3,
+            ADDRESS2,
+            ADDRESS1,
+            20
+        );
+        assertEq(resBool, true);
     }
 
     function testTransferDetectedAsInvalid() public {
@@ -219,7 +229,6 @@ contract RuleWhitelistTest is Test, HelperContract {
         // Assert
         assertEq(resUint8, CODE_ADDRESS_SPENDER_NOT_WHITELISTED);
     }
-
 
     function testDetectTransferRestrictionTo() public {
         // Arrange

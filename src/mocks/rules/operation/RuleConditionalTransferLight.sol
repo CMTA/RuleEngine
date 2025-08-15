@@ -5,16 +5,19 @@ import "OZ/access/AccessControl.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {RuleConditionalTransferLightInvariantStorage} from "./abstract/RuleConditionalTransferLightInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
+
 /**
  * @title TransferApprovalRule
  * @dev Requires operator approval for each ERC20 transfer.
  *      Same transfer (from, to, value) can be approved multiple times.
  */
-contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferLightInvariantStorage, IRule {
+contract RuleConditionalTransferLight is
+    AccessControl,
+    RuleConditionalTransferLightInvariantStorage,
+    IRule
+{
     // Mapping from transfer hash to approval count
     mapping(bytes32 => uint256) public approvalCounts;
-
-
 
     constructor(address admin, IRuleEngine ruleEngineContract) {
         require(admin != address(0), "Invalid operator");
@@ -29,7 +32,11 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
     /**
      * @notice Approve a specific transfer. Can be approved multiple times.
      */
-    function approveTransfer(address from, address to, uint256 value)public onlyRole(OPERATOR_ROLE) {
+    function approveTransfer(
+        address from,
+        address to,
+        uint256 value
+    ) public onlyRole(OPERATOR_ROLE) {
         bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
         approvalCounts[transferHash] += 1;
         emit TransferApproved(from, to, value, approvalCounts[transferHash]);
@@ -38,7 +45,11 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
     /**
      * @notice Returns number of times a transfer is approved.
      */
-    function approvedCount(address from, address to, uint256 value) public view returns (uint256) {
+    function approvedCount(
+        address from,
+        address to,
+        uint256 value
+    ) public view returns (uint256) {
         bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
         return approvalCounts[transferHash];
     }
@@ -57,11 +68,14 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
         emit TransferExecuted(from, to, value, approvalCounts[transferHash]);
     }
 
-    function transferred(address /* spender */, address from, address to, uint256 value) public {
+    function transferred(
+        address /* spender */,
+        address from,
+        address to,
+        uint256 value
+    ) public {
         transferred(from, to, value);
     }
-
-
 
     /**
      * @notice Check if the transfer is valid
@@ -82,7 +96,6 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
-
     /**
      * @notice Check if the transfer is valid
      * @param from the origin address
@@ -95,10 +108,8 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
         address to,
         uint256 value
     ) public view override returns (uint8) {
-        return detectTransferRestriction(from,to, value );
+        return detectTransferRestriction(from, to, value);
     }
-
-     
 
     /**
      * @notice To know if the restriction code is valid for this rule or not.
@@ -149,8 +160,8 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
         address to,
         uint256 value
     ) public view virtual override returns (bool) {
-        return detectTransferRestrictionFrom(spender, from, to, value)  ==
+        return
+            detectTransferRestrictionFrom(spender, from, to, value) ==
             uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
-
 }

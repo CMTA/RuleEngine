@@ -61,7 +61,6 @@ abstract contract HelperContract is
     string constant DEFAULT_ADMIN_ROLE_HASH =
         "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-
     // contract
     RuleWhitelist public ruleWhitelist;
     RuleConditionalTransferLight public ruleConditionalTransferLight;
@@ -72,7 +71,6 @@ abstract contract HelperContract is
 
     // RuleEngine Mock
     RuleEngine public ruleEngineMock;
-
 
     //bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
 

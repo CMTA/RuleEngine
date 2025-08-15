@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
@@ -122,7 +121,11 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
     function testCannotAttackerOperateOnTransfer() public {
         // Act
         vm.prank(ATTACKER);
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModule
+                .RuleEngine_ERC3643Compliance_UnauthorizedCaller
+                .selector
+        );
         ruleEngineMock.transferred(address(0), ADDRESS1, ADDRESS2, 10);
     }
 }

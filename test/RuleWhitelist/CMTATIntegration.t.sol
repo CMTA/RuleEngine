@@ -36,7 +36,6 @@ contract CMTATIntegration is Test, HelperContract {
         // Assert
         assertEq(ruleEngineMock.containsRule(ruleWhitelist), true);
 
-
         // CMTAT
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT.mint(ADDRESS1, ADDRESS1_BALANCE_INIT);
@@ -44,7 +43,7 @@ contract CMTATIntegration is Test, HelperContract {
         CMTAT_CONTRACT.mint(ADDRESS2, ADDRESS2_BALANCE_INIT);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT.mint(ADDRESS3, ADDRESS3_BALANCE_INIT);
-       
+
         // We set the Rule Engine
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         CMTAT_CONTRACT.setRuleEngine(ruleEngineMock);
@@ -225,17 +224,11 @@ contract CMTATIntegration is Test, HelperContract {
         assertEq(message1, TEXT_ADDRESS_TO_NOT_WHITELISTED);
 
         // res1
-        res1 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            11
-        );
+        res1 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 11);
         // Assert
         assertEq(res1, CODE_ADDRESS_TO_NOT_WHITELISTED);
 
-        message1 = ruleEngineMock.messageForTransferRestriction(
-            res1
-        );
+        message1 = ruleEngineMock.messageForTransferRestriction(res1);
 
         // Assert
         assertEq(message1, TEXT_ADDRESS_TO_NOT_WHITELISTED);
@@ -259,19 +252,12 @@ contract CMTATIntegration is Test, HelperContract {
         // Assert
         assertEq(message1, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
 
-
         // RuleEngine
-        res1 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            11
-        );
+        res1 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 11);
         // Assert
         assertEq(res1, CODE_ADDRESS_FROM_NOT_WHITELISTED);
 
-        message1 = ruleEngineMock.messageForTransferRestriction(
-            res1
-        );
+        message1 = ruleEngineMock.messageForTransferRestriction(res1);
 
         // Assert
         assertEq(message1, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
@@ -373,7 +359,6 @@ contract CMTATIntegration is Test, HelperContract {
         // Assert
         assertEq(message1, TEXT_ADDRESS_SPENDER_NOT_WHITELISTED);
     }
-
 
     function testCanMint() public {
         // Arrange

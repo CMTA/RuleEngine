@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MPL-2.0
 
 // Documentation :
@@ -11,8 +10,8 @@ import {RuleEngine} from "src/RuleEngine.sol";
 import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
 
 /**
-* @title Deploy a CMTAT, a RuleWhitelist and a RuleEngine
-*/
+ * @title Deploy a CMTAT, a RuleWhitelist and a RuleEngine
+ */
 contract CMTATWithRuleEngineScript is Script, HelperContract {
     function run() external {
         // Get env variable
@@ -43,4 +42,3 @@ contract CMTATWithRuleEngineScript is Script, HelperContract {
         vm.stopBroadcast();
     }
 }
-

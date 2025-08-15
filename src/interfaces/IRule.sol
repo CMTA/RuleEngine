@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 
 /* ==== CMTAT === */
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
+
 /* ==== Interfaces === */
 
 interface IRule is IRuleEngine {

@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
 import "OZ/token/ERC20/IERC20.sol";
+
 /**
  * @title tests concerning the restrictions and  for the transfers
  */
@@ -113,7 +114,6 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // Assert
         assertEq(resUint8, CODE_ADDRESS_FROM_NOT_WHITELISTED);
 
-
         // Act
         resUint8 = ruleEngineMock.detectTransferRestrictionFrom(
             ADDRESS3,
@@ -147,15 +147,10 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // Assert
         assertFalse(resBool);
 
-        resBool = ruleEngineMock.canTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
         // Assert
         assertFalse(resBool);
     }
-
 
     function testCanDetectTransferRestrictionWithTo() public {
         // Arrange
@@ -185,11 +180,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         assertEq(resUint8, CODE_ADDRESS_TO_NOT_WHITELISTED);
 
         // Assert
-        resBool = ruleEngineMock.canTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
         // Assert
         assertFalse(resBool);
 
@@ -251,11 +242,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // ruleEngine
 
         // Act
-        resBool = ruleEngineMock.canTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resBool, true);
@@ -271,11 +258,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // ruleEngine
 
         // Act
-        resBool = ruleEngineMock.canTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertFalse(resBool);

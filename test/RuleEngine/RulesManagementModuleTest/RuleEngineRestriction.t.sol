@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../../HelperContract.sol";
 import "OZ/token/ERC20/IERC20.sol";
+
 //ADmin, forwarder irrect /RuleEngine
 /**
  * @title General functions of the RuleEngine
@@ -34,11 +35,13 @@ contract RuleEngineTest is Test, HelperContract {
     function testCanDetectTransferRestrictionOK() public {
         // Arrange
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
-       
+
         vm.expectEmit(true, true, true, true);
         emit TransferApproved(ADDRESS1, ADDRESS2, defaultValue, 1);
         ruleConditionalTransferLight.approveTransfer(
-            ADDRESS1, ADDRESS2, defaultValue
+            ADDRESS1,
+            ADDRESS2,
+            defaultValue
         );
         // Act
         resUint8 = ruleEngineMock.detectTransferRestriction(
@@ -60,15 +63,10 @@ contract RuleEngineTest is Test, HelperContract {
         // Assert
         assertEq(resUint8, 0);
 
-        resBool = ruleEngineMock.canTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
-        assertEq(resBool, true );
-
+        assertEq(resBool, true);
 
         resBool = ruleEngineMock.canTransferFrom(
             ADDRESS3,
@@ -78,7 +76,7 @@ contract RuleEngineTest is Test, HelperContract {
         );
 
         // Assert
-        assertEq(resBool,true);
+        assertEq(resBool, true);
     }
 
     function testCanDetectTransferRestrictionNotOk() public {
@@ -104,11 +102,7 @@ contract RuleEngineTest is Test, HelperContract {
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
 
         // Act
-        resBool = ruleEngineMock.canTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertFalse(resBool);

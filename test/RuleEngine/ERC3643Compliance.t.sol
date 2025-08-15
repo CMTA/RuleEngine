@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import {IERC3643Compliance} from "../../src/interfaces/IERC3643Compliance.sol";
 import {ERC3643ComplianceModule} from "../../src/modules/ERC3643ComplianceModule.sol";
+
 // Minimal mock ERC-3643 token to simulate calls to RuleEngine
 contract ERC3643MockToken {
     IERC3643Compliance public ruleEngine;
@@ -21,7 +22,11 @@ contract ERC3643MockToken {
         ruleEngine.destroyed(from, amount);
     }
 
-    function simulateTransferred(address from, address to, uint256 amount) external {
+    function simulateTransferred(
+        address from,
+        address to,
+        uint256 amount
+    ) external {
         ruleEngine.transferred(from, to, amount);
     }
 }
@@ -46,7 +51,6 @@ contract RuleEngineTest is Test, HelperContract {
         token2 = new ERC3643MockToken(address(ruleEngine));
         token3 = new ERC3643MockToken(address(ruleEngine));
 
-   
         vm.startPrank(admin);
         ruleEngine.grantRole(ruleEngine.COMPLIANCE_MANAGER_ROLE(), operator);
         vm.stopPrank();
@@ -55,7 +59,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testBindToken() public {
         // Expect events for each bound token
         vm.startPrank(operator);
-        
+
         vm.expectEmit(true, false, false, true);
         emit IERC3643Compliance.TokenBound(address(token1));
         ruleEngine.bindToken(address(token1));
@@ -94,7 +98,6 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngine.bindToken(address(token1));
         ruleEngine.bindToken(address(token2));
         ruleEngine.bindToken(address(token3));
-       
 
         // Expect events for each unbind
         vm.expectEmit(true, false, false, true);
@@ -140,14 +143,21 @@ contract RuleEngineTest is Test, HelperContract {
     }
 
     function testCannotBoundIfInvalidAddress() public {
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModule
+                .RuleEngine_ERC3643Compliance_InvalidTokenAddress
+                .selector
+        );
         vm.prank(admin);
         ruleEngine.bindToken(address(ZERO_ADDRESS));
     }
-    
 
     function testCannotUnBoundIfTokenIsNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_TokenNotBound.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModule
+                .RuleEngine_ERC3643Compliance_TokenNotBound
+                .selector
+        );
         vm.prank(admin);
         ruleEngine.unbindToken(address(0x100));
     }
@@ -156,25 +166,41 @@ contract RuleEngineTest is Test, HelperContract {
         // Arrange
         vm.prank(admin);
         ruleEngine.bindToken(address(0x1));
-        
+
         // Assert
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_TokenAlreadyBound.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModule
+                .RuleEngine_ERC3643Compliance_TokenAlreadyBound
+                .selector
+        );
         vm.prank(admin);
         ruleEngine.bindToken(address(0x1));
     }
 
     function testCannotCreatedIfNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModule
+                .RuleEngine_ERC3643Compliance_UnauthorizedCaller
+                .selector
+        );
         ruleEngine.created(user1, 100);
     }
 
     function testCannotDestroyedIfNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModule
+                .RuleEngine_ERC3643Compliance_UnauthorizedCaller
+                .selector
+        );
         ruleEngine.destroyed(user2, 50);
     }
 
     function testCannotTransferredIfNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModule
+                .RuleEngine_ERC3643Compliance_UnauthorizedCaller
+                .selector
+        );
         ruleEngine.transferred(user1, user2, 200);
     }
 }

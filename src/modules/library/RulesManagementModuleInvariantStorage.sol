@@ -12,23 +12,22 @@ abstract contract RulesManagementModuleInvariantStorage {
     error RuleEngine_RulesManagementModule_ArrayIsEmpty();
     error RuleEngine_RulesManagementModule_OperationNotSuccessful();
 
-
     /* ============ Events ============ */
     /**
-    * @notice Emitted when a new rule is added to the rule set.
-    * @param rule The address of the rule contract that was added.
-    */
+     * @notice Emitted when a new rule is added to the rule set.
+     * @param rule The address of the rule contract that was added.
+     */
     event AddRule(IRule indexed rule);
-    
-    /** 
-    * @notice Emitted when a rule is removed from the rule set.
-    * @param rule The address of the rule contract that was removed.
-    */
+
+    /**
+     * @notice Emitted when a rule is removed from the rule set.
+     * @param rule The address of the rule contract that was removed.
+     */
     event RemoveRule(IRule indexed rule);
-    
-    /** 
-    * @notice Emitted when all rules are cleared from the rule set.
-    */ 
+
+    /**
+     * @notice Emitted when all rules are cleared from the rule set.
+     */
     event ClearRules();
 
     /* ==== Constant === */
