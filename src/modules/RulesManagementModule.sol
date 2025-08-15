@@ -101,7 +101,13 @@ abstract contract RulesManagementModule is
     function rule(
         uint256 ruleId
     ) public view virtual override(IRulesManagementModule) returns (address) {
-        return _rules.at(ruleId);
+        if(ruleId < _rules.length()){
+            // Note that there are no guarantees on the ordering of values inside the array, 
+            // and it may change when more values are added or removed.
+            return _rules.at(ruleId);
+        } else {
+            return address(0);
+        }
     }
 
     /**

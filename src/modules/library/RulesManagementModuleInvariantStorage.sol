@@ -14,11 +14,21 @@ abstract contract RulesManagementModuleInvariantStorage {
 
 
     /* ============ Events ============ */
-    /// @notice Generate when a rule is added
+    /**
+    * @notice Emitted when a new rule is added to the rule set.
+    * @param rule The address of the rule contract that was added.
+    */
     event AddRule(IRule indexed rule);
-    /// @notice Generate when a rule is removed
+    
+    /** 
+    * @notice Emitted when a rule is removed from the rule set.
+    * @param rule The address of the rule contract that was removed.
+    */
     event RemoveRule(IRule indexed rule);
-    /// @notice Generate when all the rules are cleared
+    
+    /** 
+    * @notice Emitted when all rules are cleared from the rule set.
+    */ 
     event ClearRules();
 
     /* ==== Constant === */

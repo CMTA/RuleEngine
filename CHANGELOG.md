@@ -17,7 +17,19 @@ Please follow [https://changelog.md/](https://changelog.md/) conventions.
   - Update surya doc by running the 3 scripts in [./doc/script](./doc/script)
   - Update changelog
 
+## v3.0.0-rc1
 
+- Rule contracts, requires to perform compliance check, have now their own dedicated [GitHub repository](https://github.com/CMTA/Rules). It means that these contract will be developed and audited separately from the `RuleEngine`. This provides more flexibility and makes it easier to manage audits.
+
+- There is now only one type of rule (read-write rules). Before that:
+  - First RuleEngine version (audited) had only one type of rule, read-only (whitelist, blacklist)
+  - A second RuleEngine version (not audited) had two types of rules: operation (read-write) and validation (read-only).  A read-write rule is typically a ConditionalTransfer check which require each transfer must be pre-approved.
+- Implement ERC-3643 compliance interface, which means that the RuleEngine can be also used with an ERC-3643 token to perform supplementary compliance check on transfer.
+- Technical: 
+  - Use [EnumerableSet](https://docs.openzeppelin.com/contracts/5.x/api/utils#EnumerableSet) from OpenZeppelin to store rules, which reduce the whole contract code size.
+  - Rename several abstract contract
+    - `RuleEngineOperation`-> `RulesManagementModule`
+    - `MetaTxModuleStandalone` -> `ERC2771ModuleStandalone`
 
 ## v3.0.0-rc0
 
@@ -131,4 +143,4 @@ Whitelist
 - Improve integration test with CMTAT    
 
 ## 1.0.0 - 20221114
-- 🎉 first release!
+- 🎉 first release!<

@@ -139,6 +139,30 @@ contract RuleEngineTest is Test, HelperContract {
         vm.stopPrank();
     }
 
+    function testCannotBoundIfInvalidAddress() public {
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.prank(admin);
+        ruleEngine.bindToken(address(ZERO_ADDRESS));
+    }
+    
+
+    function testCannotUnBoundIfTokenIsNotBound() public {
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_TokenNotBound.selector);
+        vm.prank(admin);
+        ruleEngine.unbindToken(address(0x100));
+    }
+
+    function testCannotBoundIfTokenIsAlreadyBound() public {
+        // Arrange
+        vm.prank(admin);
+        ruleEngine.bindToken(address(0x1));
+        
+        // Assert
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_TokenAlreadyBound.selector);
+        vm.prank(admin);
+        ruleEngine.bindToken(address(0x1));
+    }
+
     function testCannotCreatedIfNotBound() public {
         vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngine.created(user1, 100);

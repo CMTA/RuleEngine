@@ -1,0 +1,15 @@
+//SPDX-License-Identifier: MPL-2.0
+
+pragma solidity ^0.8.20;
+
+/* ==== OpenZeppelin === */
+import {ERC2771Context} from "OZ/metatx/ERC2771Context.sol";
+
+/**
+ * @dev Meta transaction (gasless) module.
+ */
+abstract contract ERC2771ModuleStandalone is ERC2771Context {
+    constructor(address trustedForwarder) ERC2771Context(trustedForwarder) {
+        // Nothing to do
+    }
+}

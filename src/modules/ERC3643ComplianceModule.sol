@@ -47,13 +47,15 @@ abstract contract ERC3643ComplianceModule is IERC3643Compliance, AccessControl {
     }
 
     /// @inheritdoc IERC3643Compliance
-    function isTokenBound(address token) public view override returns (bool) {
+    function isTokenBound(address token) public view virtual override returns (bool) {
         return _boundTokens.contains(token);
     }
 
     /// @inheritdoc IERC3643Compliance
-    function getTokenBound() public view override returns (address) {
+    function getTokenBound() public view virtual override returns (address) {
         if(_boundTokens.length() > 0){
+            // Note that there are no guarantees on the ordering of values inside the array, 
+            // and it may change when more values are added or removed.
             return _boundTokens.at(0);
         } else {
             return address(0);

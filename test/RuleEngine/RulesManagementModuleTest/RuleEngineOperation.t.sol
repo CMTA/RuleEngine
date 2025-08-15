@@ -103,12 +103,9 @@ contract RulesManagementModuleInvariantStorageTest is Test, HelperContract {
         // Arrange
         ruleConditionalTransferLightTab = new IRule[](0);
         // Act
-        // TODO
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         vm.expectRevert(RulesManagementModuleInvariantStorage.RuleEngine_RulesManagementModule_ArrayIsEmpty.selector);
         ruleEngineMock.setRules(ruleConditionalTransferLightTab);
-
-        resBool = ruleEngineMock.canTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert1
         resUint256 = ruleEngineMock.rulesCount();
@@ -137,8 +134,13 @@ contract RulesManagementModuleInvariantStorageTest is Test, HelperContract {
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.setRules(ruleConditionalTransferLightTab);
-        // TODO
-        ruleEngineMock.rules();
+        address[] memory rulesResult = ruleEngineMock.rules();
+        if((rulesResult[0] != address(ruleConditionalTransferLight1)) || (rulesResult[0] != address(ruleConditionalTransferLight1))){
+            revert("Invalid array storage 1");
+        } 
+        if((rulesResult[1] != address(ruleConditionalTransferLight2)) || (rulesResult[1] != address(ruleConditionalTransferLight2))){
+            revert("Invalid array storage 2");
+        } 
         // Assert - Arrange
         resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 2);

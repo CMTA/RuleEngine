@@ -1,0 +1,121 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IRulesManagementModule",
+  "sourceName": "src/interfaces/IRulesManagementModule.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IRule",
+          "name": "rule_",
+          "type": "address"
+        }
+      ],
+      "name": "addRule",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "clearRules",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IRule",
+          "name": "rule_",
+          "type": "address"
+        }
+      ],
+      "name": "containsRule",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "exists",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IRule",
+          "name": "rule_",
+          "type": "address"
+        }
+      ],
+      "name": "removeRule",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "ruleId",
+          "type": "uint256"
+        }
+      ],
+      "name": "rule",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "ruleAddress",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rules",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "ruleAddresses",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rulesCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "numberOfrules",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IRule[]",
+          "name": "rules_",
+          "type": "address[]"
+        }
+      ],
+      "name": "setRules",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

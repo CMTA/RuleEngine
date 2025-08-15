@@ -1,0 +1,81 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "RulesManagementModuleInvariantStorage",
+  "sourceName": "src/modules/library/RulesManagementModuleInvariantStorage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "RuleEngine_RulesManagementModule_ArrayIsEmpty",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RuleEngine_RulesManagementModule_OperationNotSuccessful",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RuleEngine_RulesManagementModule_RuleAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RuleEngine_RulesManagementModule_RuleDoNotMatch",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "contract IRule",
+          "name": "rule",
+          "type": "address"
+        }
+      ],
+      "name": "AddRule",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "ClearRules",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "contract IRule",
+          "name": "rule",
+          "type": "address"
+        }
+      ],
+      "name": "RemoveRule",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "RULES_MANAGEMENT_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

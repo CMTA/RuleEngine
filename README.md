@@ -14,11 +14,25 @@ The RuleEngine is an external contract used to apply transfer restrictions to an
 
 - Why use a dedicated contract with rules instead of implementing it directly in CMTAT or [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens?
 
-1. Flexibility: These different features are not standard and common to all tokens. From an implementation perspective, using a rule engine with custom rules allows for each issuer or contract user to decide which rules to apply.
-2. Code efficiency: The CMTAT token (and generally also all ERC-3643 tokens) is currently "heavy," meaning its contract code size is close to the maximum limit. This makes it challenging to add new features directly inside the CMTAT contract.
-3. Reusability: 
-   - We can use the RuleEngine inside other contracts besides CMTAT. For instance, the RuleEngine has been used it in [our contract to distribute dividends](https://www.taurushq.com/blog/equity-tokenization-how-to-pay-dividend-on-chain-using-cmtat/). 
-   - A same deployed `RuleEngine`can also be used with several different tokens if the rules allowed it, which is the case for all validation rule.
+There are several reasons to do this:
+
+- Flexibility: These different features are not standard and common to all tokens. From an implementation perspective, using a rule engine with custom rules allows for each issuer or contract user to decide which rules to apply.
+
+- Code efficiency: The CMTAT token (and generally also all ERC-3643 tokens) is currently "heavy," meaning its contract code size is close to the maximum limit. This makes it challenging to add new features directly inside the token contract.
+
+- Reusability: 
+
+  - We can use the RuleEngine inside other contracts besides CMTAT. For instance, the RuleEngine has been used it in [our contract to distribute dividends](https://www.taurushq.com/blog/equity-tokenization-how-to-pay-dividend-on-chain-using-cmtat/). 
+
+  - A same deployed `RuleEngine`can also be used with several different tokens if the rules allowed it, which is the case for all ready-only rule.
+
+Why use this `RuleEngine` contract instead of setting directly the `rule` in the token contract?
+
+- Using a RuleEngine allows to call several different rules. For example, a blacklist rule to allow the issuer to manage its own list of blacklisted addresses and a sanctionlist rule to use the [Chainalysis oracle for sanctions screening](https://go.chainalysis.com/chainalysis-oracle-docs.html) to forbid transfers from addresses listed in sanctions designations by organizations such as the US, EU, or UN.
+
+When the use of `RuleEngine` may not be appropriate?
+
+If you plan to call only one rule (e.g a whitelist rule), it could make sense to directly set the rule in the token contract instead of using a RuleEngine. This will simplify configuration and reduce runtime gas costs.
 
 ## How it works
 
@@ -44,7 +58,7 @@ CMTAT provides the following function to set a RuleEngine inside a CMTAT token:
 
 This function is defined in the extension module `ValidationModuleRuleEngine`
 
-### ERC-3643 token
+#### ERC-3643 token
 
 [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) defined the following function in the standard interface to set a compliance contract
 
@@ -187,7 +201,7 @@ CMTAT uses a RBAC access control by using the contract `AccessControl`from OpenZ
 
 Each module defines the roles useful to restrict its functions.
 
-The `AccessControlModule`which is used by all base and deployment contracts override the OpenZeppelin function `hasRole`to give by default all the roles to the `admin`.
+The `AccessControlModule` which is used by all base and deployment contracts override the OpenZeppelin function `hasRole` to give by default all the roles to the `admin`.
 
 See also [docs.openzeppelin.com - AccessControl](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl)
 
@@ -280,11 +294,21 @@ The following rules are available:
 
 ### Gasless support (ERC-2771)
 
-The RuleEngine contracts and the other rules support client-side gasless transactions using the [Gas Station Network](https://docs.opengsn.org/#the-problem) (GSN) pattern, the main open standard for transfering fee payment to another account than that of the transaction issuer. The contract uses the OpenZeppelin contract `ERC2771Context`, which allows a contract to get the original client with `_msgSender()` instead of the fee payer given by `msg.sender` .
+![ERC2771ModuleUML](./doc/schema/vscode-uml/ERC2771ModuleUML.png)
 
-At deployment, the parameter  `forwarder` inside the contract constructor has to be set  with the defined address of the forwarder. Please note that the forwarder can not be changed after deployment.
+The RuleEngine supports client-side gasless transactions using the standard [ERC-2771](https://eips.ethereum.org/EIPS/eip-2771).
 
-Please see the OpenGSN [documentation](https://docs.opengsn.org/contracts/#receiving-a-relayed-call) for more details on what is done to support GSN in the contract.
+The contract uses the OpenZeppelin contract `ERC2771ContextUpgradeable`, which allows a contract to get the original client with `_msgSender()` instead of the feepayer given by `msg.sender`.
+
+At deployment, the parameter  `forwarder` inside the RuleEngine contract constructor has to be set  with the defined address of the forwarder. 
+
+After deployment, the forwarder is immutable and can not be changed.
+
+References:
+
+- [OpenZeppelin Meta Transactions](https://docs.openzeppelin.com/contracts/5.x/api/metatx)
+
+- OpenGSN has deployed several forwarders, see their [documentation](https://docs.opengsn.org/contracts/#receiving-a-relayed-call) to see some examples.
 
 ### Upgradeable
 
@@ -319,6 +343,12 @@ Similar to the pause functionality, the RuleEngine can be directly removed from 
 ![IRuleEngineUML](./doc/schema/vscode-uml/IRuleEngineUML.png)
 
 ##### transferred(address spender, address from, address to, uint256 value)
+
+```solidity
+function transferred(address spender,address from,address to,uint256 value) 
+public virtual override(IRuleEngine) 
+onlyBoundToken
+```
 
 Function called whenever tokens are transferred from one wallet to another.
 
@@ -399,6 +429,12 @@ Does not check balances or access rights (Access Control).
 
 ##### transferred(address from, address to, uint256 value)
 
+```solidity
+function transferred(address from,address to,uint256 value) 
+public virtual override(IERC3643IComplianceContract) 
+onlyBoundToken
+```
+
 Updates the compliance contract state whenever tokens are transferred.
 
 Can only be called by the token contract bound to this compliance logic.
@@ -411,6 +447,58 @@ Can only be called by the token contract bound to this compliance logic.
 | from  | address | The address of the sender.                     |
 | to    | address | The address of the receiver.                   |
 | value | uint256 | The number of tokens involved in the transfer. |
+
+
+
+#### IERC3643Compliance
+
+------
+
+##### created(address to, uint256 value)
+
+```solidity
+function created(address to, uint256 value) 
+public virtual override(IERC3643Compliance) 
+onlyBoundToken
+```
+
+Updates the compliance contract state when tokens are created (minted).
+
+Called by the token contract when new tokens are issued to an account.
+ Reverts if the minting does not comply with the rules.
+
+**Input Parameters:**
+
+| Name  | Type    | Description                              |
+| ----- | ------- | ---------------------------------------- |
+| to    | address | The address receiving the minted tokens. |
+| value | uint256 | The number of tokens created.            |
+
+
+
+------
+
+##### destroyed(address from, uint256 value)
+
+```solidity
+function destroyed(address from, uint256 value) 
+public virtual override(IERC3643Compliance) 
+onlyBoundToken 
+```
+
+Updates the compliance contract state when tokens are destroyed (burned).
+
+Called by the token contract when tokens are redeemed or burned.
+ Reverts if the burning does not comply with the rules.
+
+**Input Parameters:**
+
+| Name  | Type    | Description                                   |
+| ----- | ------- | --------------------------------------------- |
+| from  | address | The address whose tokens are being destroyed. |
+| value | uint256 | The number of tokens destroyed.               |
+
+
 
 #### IERC1404
 
@@ -562,6 +650,10 @@ Useful for identifying which version of the smart contract is deployed and in us
 
 ##### TokenBound(address token)
 
+```solidity
+event TokenBound(address token)
+```
+
 Emitted when a token is successfully bound to the compliance contract.
 
 **Event Parameters:**
@@ -575,6 +667,10 @@ Emitted when a token is successfully bound to the compliance contract.
 ------
 
 ##### TokenUnbound(address token)
+
+```solidity
+event TokenUnbound(address token)
+```
 
 Emitted when a token is successfully unbound from the compliance contract.
 
@@ -591,6 +687,12 @@ Emitted when a token is successfully unbound from the compliance contract.
 #### Functions
 
 ##### bindToken(address token)
+
+```solidity
+function bindToken(address token) 
+public override virtual 
+onlyRole(COMPLIANCE_MANAGER_ROLE)
+```
 
 Associates a token contract with this compliance contract.
 
@@ -609,6 +711,12 @@ The compliance contract may restrict operations on the bound token according to 
 
 ##### unbindToken(address token)
 
+```solidity
+function unbindToken(address token) 
+public override virtual 
+onlyRole(COMPLIANCE_MANAGER_ROLE)
+```
+
 Removes the association of a token contract from this compliance contract.
 
 Reverts if the token is not currently bound.
@@ -624,6 +732,12 @@ Reverts if the token is not currently bound.
 ------
 
 ##### isTokenBound(address token) -> bool
+
+```solidity
+function isTokenBound(address token) 
+public view virtual override 
+returns (bool)
+```
 
 Checks whether a token is currently bound to this compliance contract.
 
@@ -647,9 +761,17 @@ Checks whether a token is currently bound to this compliance contract.
 
 #####  getTokenBound() -> address
 
+```solidity
+function getTokenBound() 
+public view virtual override 
+returns (address)
+```
+
 Returns the single token currently bound to this compliance contract.
 
 If multiple tokens are supported, consider using `getTokenBounds()`.
+
+Note that there are no guarantees on the ordering of values inside the array, and it may change when more values are added or removed.
 
 **Return Values:**
 
@@ -663,10 +785,20 @@ If multiple tokens are supported, consider using `getTokenBounds()`.
 
 ##### getTokenBounds() -> address[]
 
+```solidity
+function getTokenBounds() 
+public view override 
+returns (address[] memory)
+```
+
 Returns all tokens currently bound to this compliance contract.
 
 This is a view-only function and does not modify state.
- This function is not part of the original ERC-3643 specification.
+This function is not part of the original ERC-3643 specification.
+
+This operation will copy the entire storage to memory, which can be quite expensive. 
+
+This is designed to mostly be used by view accessors that are queried without any gas fees.
 
 **Return Values:**
 
@@ -676,53 +808,71 @@ This is a view-only function and does not modify state.
 
 
 
-------
-
-##### created(address to, uint256 value)
-
-Updates the compliance contract state when tokens are created (minted).
-
-Called by the token contract when new tokens are issued to an account.
- Reverts if the minting does not comply with the rules.
-
-**Input Parameters:**
-
-| Name  | Type    | Description                              |
-| ----- | ------- | ---------------------------------------- |
-| to    | address | The address receiving the minted tokens. |
-| value | uint256 | The number of tokens created.            |
-
-
-
-------
-
-##### destroyed(address from, uint256 value)
-
-Updates the compliance contract state when tokens are destroyed (burned).
-
-Called by the token contract when tokens are redeemed or burned.
- Reverts if the burning does not comply with the rules.
-
-**Input Parameters:**
-
-| Name  | Type    | Description                                   |
-| ----- | ------- | --------------------------------------------- |
-| from  | address | The address whose tokens are being destroyed. |
-| value | uint256 | The number of tokens destroyed.               |
-
-
-
 ### RulesManagementModule
 
 ![RuleManagementModuleUML](./doc/schema/vscode-uml/RuleManagementModuleUML.png)
 
-#### setRules(IRule[] rules_)
+#### Events
+
+#### event AddRule(address rule)
+
+```solidity
+event AddRule(IRule indexed rule)
+```
+
+Emitted when a new rule is added to the rule set.
+
+**Event Parameters:**
+
+| Name | Type  | Description                                      |
+| ---- | ----- | ------------------------------------------------ |
+| rule | IRule | The address of the rule contract that was added. |
+
+------
+
+#### event RemoveRule(address rule)
+
+```solidity
+event RemoveRule(IRule indexed rule)
+```
+
+Emitted when a rule is removed from the rule set.
+
+**Event Parameters:**
+
+| Name | Type  | Description                                        |
+| ---- | ----- | -------------------------------------------------- |
+| rule | IRule | The address of the rule contract that was removed. |
+
+------
+
+#### event ClearRules()
+
+```solidity
+event ClearRules()
+```
+
+Emitted when all rules are cleared from the rule set.
+
+This event has no parameters.
+
+#### Functions
+
+##### setRules(address[] rules_)
+
+```solidity
+function setRules(IRule[] calldata rules_) 
+public virtual override(IRulesManagementModule) 
+onlyRole(RULES_MANAGEMENT_ROLE)
+```
 
 Defines the complete list of rules for the rule engine.
 
 Any previously configured rules are completely replaced.
  Rules must be deployed contracts implementing the expected `IRule` interface.
  Reverts if any rule address is zero or if duplicates are detected.
+
+This function calls _clearRules if at least one rule is still configured
 
 **Input Parameters:**
 
@@ -734,7 +884,13 @@ Any previously configured rules are completely replaced.
 
 ------
 
-#### rulesCount() -> uint256
+##### rulesCount() -> uint256
+
+```solidity
+function rulesCount() 
+public view virtual override(IRulesManagementModule) 
+returns (uint256)
+```
 
 Returns the total number of currently configured rules.
 
@@ -750,11 +906,19 @@ Equivalent to the length of the internal rules array.
 
 ------
 
-#### rule(uint256 ruleId) -> address
+##### rule(uint256 ruleId) -> address
+
+```solidity
+function rule(uint256 ruleId) 
+public view virtual override(IRulesManagementModule) 
+returns (address)
+```
 
 Retrieves the rule address at a specific index.
 
-Reverts if `ruleId` is out of bounds.
+Return the`zero address` is out of bounds.
+
+Note that there are no guarantees on the ordering of values inside the array, and it may change when more values are added or removed.
 
 **Input Parameters:**
 
@@ -774,11 +938,21 @@ Reverts if `ruleId` is out of bounds.
 
 ------
 
-#### rules() -> address[]
+##### rules() -> address[]
+
+```solidity
+function rules()
+public view virtual override(IRulesManagementModule)
+returns (address[] memory)
+```
 
 Returns the full list of currently configured rules.
 
 This is a view-only function and does not modify state.
+
+This operation will copy the entire storage to memory, which can be quite expensive. 
+
+This is designed to mostly be used by view accessors that are queried without any gas fees.
 
 **Return Values:**
 
@@ -790,15 +964,29 @@ This is a view-only function and does not modify state.
 
 ------
 
-#### clearRules() 
+##### clearRules() 
+
+```solidity
+function clearRules() 
+public virtual override(IRulesManagementModule) 
+onlyRole(RULES_MANAGEMENT_ROLE)
+```
 
 Removes all configured rules.
 
 After calling this function, no rules will remain set.
 
+Developers should keep in mind that this function has an unbounded cost and using it may render the function uncallable if the set grows to the point where clearing it consumes too much gas to fit in a block.
+
 ------
 
-#### addRule(IRule rule_) 
+##### addRule(address rule_) 
+
+```solidity
+function addRule(IRule rule_) 
+public virtual override(IRulesManagementModule) 
+onlyRole(RULES_MANAGEMENT_ROLE)
+```
 
 Adds a new rule to the current rule set.
 
@@ -814,7 +1002,14 @@ Reverts if the rule address is zero or already exists in the set.
 
 ------
 
-#### removeRule(IRule rule_)
+##### removeRule(address rule_)
+
+```solidity
+ function removeRule(IRule rule_) 
+ public virtual 
+ override(IRulesManagementModule) 
+ onlyRole(RULES_MANAGEMENT_ROLE)
+```
 
 Removes a specific rule from the current rule set.
 
@@ -830,7 +1025,13 @@ Reverts if the provided rule is not found or does not match the stored rule at i
 
 ------
 
-#### containsRule(IRule rule_) -> bool
+##### containsRule(address rule_) -> bool
+
+```solidity
+function containsRule(IRule rule_) 
+public view virtual override(IRulesManagementModule) 
+returns (bool)
+```
 
 Checks whether a specific rule is currently configured.
 
@@ -848,11 +1049,17 @@ Checks whether a specific rule is currently configured.
 | ---- | --------------------------------------------- |
 | bool | True if the rule is present, false otherwise. |
 
-## Audit
+## Security
+
+### Vulnerability disclosure
+
+Please see [SECURITY.md](./SECURITY.md).
 
 The contracts have been audited by [ABDKConsulting](https://www.abdk.consulting/), a globally recognized firm specialized in smart contracts' security.
 
-### First Audit - March 2022
+### Audit
+
+#### First Audit - March 2022
 
 Fixed version : [v1.0.2](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2)
 
@@ -903,9 +1110,25 @@ Here a summary of the main documentation
 
 See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMTAT and ERC-1404](https://www.taurushq.com/blog/token-transfer-management-how-to-apply-restrictions-with-cmtat-and-erc-1404/) (RuleEngine v2.02 and CMTAT v2.4.0)
 
-## Usage
+## Toolchains and Usage
 
 *Explain how it works.*
+
+### Configuration
+
+Here are the settings for [Hardhat](https://hardhat.org) and [Foundry](https://getfoundry.sh).
+
+- `hardhat.config.js`
+  - Solidity [v0.8.30](https://docs.soliditylang.org/en/v0.8.30/)
+  - EVM version: Prague (Pectra upgrade)
+  - Optimizer: true, 200 runs
+
+- `foundry.toml`
+  - Solidity [v0.8.30](https://docs.soliditylang.org/en/v0.8.30/)
+  - EVM version: Prague (Pectra upgrade)
+  - Optimizer: true, 200 runs
+
+
 
 
 ### Toolchain installation
@@ -937,11 +1160,17 @@ The official documentation is available in the Foundry [website](https://book.ge
 ```
  forge build --contracts src/RuleEngine.sol
 ```
-```
- forge build --contracts src/RuleWhiteList.sol
+### Contract size
+
+```bash
+ forge compile --sizes
 ```
 
+
+![contract-size](./doc/compilation/contract-size.png)
+
 ### Testing
+
 You can run the tests with
 
 ```bash
@@ -963,6 +1192,11 @@ forge test --gas-report
 See also the test framework's [official documentation](https://book.getfoundry.sh/forge/tests), and that of the [test commands](https://book.getfoundry.sh/reference/forge/test-commands).
 
 ### Coverage
+
+A code coverage is available in [index.html](./doc/coverage/coverage/index.html).
+
+![code-coverage](./doc/coverage/code-coverage.png)
+
 * Perform a code coverage
 ```
 forge coverage
@@ -1022,8 +1256,42 @@ forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  
 forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=127.0.0.1:8545  --broadcast --verify -vvv
 ```
 
+### Solidity style guideline
 
+RuleEngine follows the [solidity style guideline](https://docs.soliditylang.org/en/latest/style-guide.html) and the [natspec format](https://docs.soliditylang.org/en/latest/natspec-format.html) for comments
+
+- Orders of Functions
+
+Functions are grouped according to their visibility and ordered:
+
+```
+1. constructor
+
+2. receive function (if exists)
+
+3. fallback function (if exists)
+
+4. external
+
+5. public
+
+6. internal
+
+7. private
+```
+
+Within a grouping, place the `view` and `pure` functions last
+
+- Function declaration
+
+```
+1. Visibility
+2. Mutability
+3. Virtual
+4. Override
+5. Custom modifiers
+```
 
 ## Intellectual property
 
-The code is copyright (c) Capital Market and Technology Association, 2018-2024, and is released under [Mozilla Public License 2.0](https://github.com/CMTA/CMTAT/blob/master/LICENSE.md).
+The code is copyright (c) Capital Market and Technology Association, 2022-2025, and is released under [Mozilla Public License 2.0](https://github.com/CMTA/CMTAT/blob/master/LICENSE.md).

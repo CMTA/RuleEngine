@@ -3,7 +3,7 @@
 pragma solidity ^0.8.20;
 
 import "OZ/access/AccessControl.sol";
-import "../../../../../modules/MetaTxModuleStandalone.sol";
+import "../../../../../modules/ERC2771ModuleStandalone.sol";
 import "./RuleAddressListInternal.sol";
 import "./invariantStorage/RuleAddressListInvariantStorage.sol";
 
@@ -13,7 +13,7 @@ import "./invariantStorage/RuleAddressListInvariantStorage.sol";
 
 abstract contract RuleAddressList is
     AccessControl,
-    MetaTxModuleStandalone,
+    ERC2771ModuleStandalone,
     RuleAddressListInternal,
     RuleAddressListInvariantStorage
 {
@@ -27,7 +27,7 @@ abstract contract RuleAddressList is
     constructor(
         address admin,
         address forwarderIrrevocable
-    ) MetaTxModuleStandalone(forwarderIrrevocable) {
+    ) ERC2771ModuleStandalone(forwarderIrrevocable) {
         if (admin == address(0)) {
             revert RuleAddressList_AdminWithAddressZeroNotAllowed();
         }
@@ -139,7 +139,7 @@ abstract contract RuleAddressList is
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     * @dev This surcharge is not necessary if you do not use the ERC2771Module
      */
     function _msgSender()
         internal
@@ -151,7 +151,7 @@ abstract contract RuleAddressList is
     }
 
     /**
-     * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     * @dev This surcharge is not necessary if you do not use the ERC2771Module
      */
     function _msgData()
         internal
@@ -163,7 +163,7 @@ abstract contract RuleAddressList is
     }
 
     /**
-     * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     * @dev This surcharge is not necessary if you do not use the ERC2771Module
      */
     function _contextSuffixLength()
         internal

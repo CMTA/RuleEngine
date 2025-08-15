@@ -74,21 +74,29 @@ npm run-script uml:test
 
 Or only specified contracts
 
-RuleEngine
-
 ```
 npx sol2uml class -i -c src/RuleEngine.sol
 ```
 
-Whitelist
-
-```
-npx sol2uml class src/Whitelist.sol
-```
-
 The related component can be installed with `npm install` (see [package.json](./package.json)). 
 
+> To avoid the error "Maximum call stack size exceeded", you can flatten the contract before
+>
+> forge flatten src/RuleEngine.sol > RuleEngineFlatten.sol
+
 ### [Surya](https://github.com/ConsenSys/surya)
+
+To generate documentation with surya, you can call the three bash scripts in `doc/script`
+
+| Task                 | Script                        |
+| -------------------- | ----------------------------- |
+| Generate graph       | `script_surya_graph.sh`       |
+| Generate inheritance | `script_surya_inheritance.sh` |
+| Generate report      | `script_surya_report.sh`      |
+
+In the report, the path for the different files are indicated in absolute. You have to remove the part which correspond to your local filesystem.
+
+
 
 #### Graph
 

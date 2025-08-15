@@ -24,18 +24,24 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      * @dev The compliance contract may restrict operations on the bound token
      *      according to the compliance logic. 
      *      Reverts if the token is already bound.
+     *      Complexity: O(1).
      * @param token The address of the token to bind.
      */
     function bindToken(address token) external;
     /**
      * @notice Removes the association of a token contract from this compliance contract.
      * @dev Reverts if the token is not currently bound.
+     * Complexity: O(1).
      * @param token The address of the token to unbind.
      */
     function unbindToken(address token) external;
 
     /**
      * @notice Checks whether a token is currently bound to this compliance contract.
+     * @dev 
+     * Complexity: O(1).
+     * Note that there are no guarantees on the ordering of values inside the array, 
+     * and it may change when more values are added or removed.
      * @param token The token address to verify.
      * @return isBound True if the token is bound, false otherwise.
      */
@@ -51,6 +57,8 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      * @notice Returns all tokens currently bound to this compliance contract.
      * @dev This is a view-only function and does not modify state.
      * This function is not part of the original ERC-3643 specification
+     * This operation will copy the entire storage to memory, which can be quite expensive. 
+     * This is designed to mostly be used by view accessors that are queried without any gas fees.
      * @return tokens An array of addresses of bound token contracts.
      */
     function getTokenBounds() external view returns (address[] memory tokens);

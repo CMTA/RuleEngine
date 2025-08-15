@@ -42,6 +42,7 @@ abstract contract HelperContract is
     bool internal resBool;
     bool internal resCallBool;
     string internal resString;
+    address internal resAddr;
     // EOA to perform tests
     address constant ZERO_ADDRESS = address(0);
     address constant DEFAULT_ADMIN_ADDRESS = address(1);

@@ -5,14 +5,14 @@ pragma solidity ^0.8.20;
 /* ==== OpenZeppelin === */
 import {Context} from "OZ/utils/Context.sol";
 /* ==== Modules === */
-import {MetaTxModuleStandalone, ERC2771Context} from "./modules/MetaTxModuleStandalone.sol";
+import {ERC2771ModuleStandalone, ERC2771Context} from "./modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */
 import {RuleEngineBase} from "./RuleEngineBase.sol";
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
  */
 contract RuleEngine is
-    MetaTxModuleStandalone,
+    ERC2771ModuleStandalone,
     RuleEngineBase
 {
     /**
@@ -23,7 +23,7 @@ contract RuleEngine is
         address admin,
         address forwarderIrrevocable,
         address tokenContract
-    ) MetaTxModuleStandalone(forwarderIrrevocable) {
+    ) ERC2771ModuleStandalone(forwarderIrrevocable) {
         if (admin == address(0)) {
             revert RuleEngine_AdminWithAddressZeroNotAllowed();
         }
