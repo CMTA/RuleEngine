@@ -6,10 +6,6 @@ This repository includes the RuleEngine contract for [CMTAT](https://github.com/
 
 The RuleEngine is an external contract used to apply transfer restrictions to another contract, such as CMTAT and ERC-3643 tokens. Acting as a controller, it can call different contract rules and apply these rules on each transfer.
 
-[TOC]
-
-
-
 ## Motivation
 
 - Why use a dedicated contract with rules instead of implementing it directly in CMTAT or [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens?
