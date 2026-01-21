@@ -1,4 +1,4 @@
-> This project is not audited
+> This project has not undergone an audit and is provided as-is without any warranties.
 
 # RuleEngine
 
@@ -20,15 +20,15 @@ There are several reasons to do this:
 
 - Reusability: 
 
-  - We can use the RuleEngine inside other contracts besides CMTAT. For instance, the RuleEngine has been used it in [our contract to distribute dividends](https://www.taurushq.com/blog/equity-tokenization-how-to-pay-dividend-on-chain-using-cmtat/). 
+  - The RuleEngine can be used inside other contracts besides CMTAT. For instance, the RuleEngine has been used in [our contract to distribute dividends](https://www.taurushq.com/blog/equity-tokenization-how-to-pay-dividend-on-chain-using-cmtat/). 
 
-  - A same deployed `RuleEngine`can also be used with several different tokens if the rules allowed it, which is the case for all ready-only rule.
+  - A same deployed `RuleEngine` can also be used with several different tokens if the rules allowed it, which is the case for all ready-only rule.
 
-Why use this `RuleEngine` contract instead of setting directly the `rule` in the token contract?
+Why use this `RuleEngine` contract instead of setting the `rule` directly in the token contract?
 
-- Using a RuleEngine allows to call several different rules. For example, a blacklist rule to allow the issuer to manage its own list of blacklisted addresses and a sanctionlist rule to use the [Chainalysis oracle for sanctions screening](https://go.chainalysis.com/chainalysis-oracle-docs.html) to forbid transfers from addresses listed in sanctions designations by organizations such as the US, EU, or UN.
+- Using a RuleEngine allows to call several different rules. For example, a blacklist rule to allow the issuer to manage its own list of blacklisted addresses and a sanctionlist rule to use the [Chainalysis oracle for sanctions screening](https://go.chainalysis.com/chainalysis-oracle-docs.html) to forbid transfers from addresses listed in sanctions designations published by organizations such as the US, EU, or UN.
 
-When the use of `RuleEngine` may not be appropriate?
+When may the use of `RuleEngine` not be appropriate?
 
 - If you plan to call only one rule (e.g a whitelist rule), it could make sense to directly set the rule in the token contract instead of using a RuleEngine. This will simplify configuration and reduce runtime gas costs.
 
@@ -80,7 +80,7 @@ Before each ERC-20 transfer, the CMTAT calls the function `transferred` which is
 function transferred(address from,address to,uint256 value)
 ```
 
-If you want to apply restriction on the spender address, you have to call the `transferred` function which takes the spender argument in your ERC-20  function `transferFrom`.
+If you want to apply restrictions on the spender address, you have to call the `transferred` function which takes the spender argument in your ERC-20  function `transferFrom`.
 
 ```solidity
 function transferred(address spender,address from,address to,uint256 value)
@@ -100,7 +100,7 @@ This function `_transferred` is called before each transfer/burn/mint through th
 
 ### Like ERC-3643
 
-The ERC-3643 defines several functions used as entrypoint for an ERC-3643 token.
+The ERC-3643 defines several functions used as entrypoints for an ERC-3643 token.
 
 As for CMTAT, the main entrypoint is `transferred` which must be called for each ERC-20 transfer.
 
@@ -123,11 +123,11 @@ function destroyed(address from, uint256 value) external;
 
 ### CMTAT
 
-The `RuleEngine` base interface is defined in CMTAT repository.
+The `RuleEngine` base interface is defined in the CMTAT repository.
 
 ![cmtat_surya_inheritance_IRuleEngine.sol](./doc/schema/cmtat_surya_inheritance_IRuleEngine.sol.png)
 
-It inherits from several others interface: `IERC1404Extend`, `IERC7551Compliance`, `IERC3643ComplianceContract`
+It inherits from several others interfaces: `IERC1404Extend`, `IERC7551Compliance`, `IERC3643ComplianceContract`
 
 ```solidity
 // IRuleEngine
@@ -220,7 +220,7 @@ It is set in the constructor when the contract is deployed.
 
 #### Schema
 
-Here a schema of the Access Control.
+Here is a schema of the Access Control.
 ![alt text](./doc/security/accessControl/access-control-RuleEngine.png)
 
 
@@ -229,7 +229,7 @@ Here a schema of the Access Control.
 
 #### Role by modules
 
-Here a summary tab for each restricted functions defined in a module
+Here is a summary tab for each restricted function defined in a module
 For function signatures,  struct arguments are represented with their corresponding native type.
 
 |                      | Function signature | Visibility [public/external] | Input variables (Function arguments) | Output variables<br />(return value) | Role Required |
@@ -261,7 +261,7 @@ Here is the UML of the main contract:
 
 ### Graph
 
-
+Here is the surya graph of the main contract:
 
 ![surya_graph_RuleEngine](./doc/schema/surya/surya_graph/surya_graph_RuleEngine.sol.png)
 
@@ -282,11 +282,11 @@ The following rules are available:
 
 | Rule                    | Type<br />[ready-only / read-write] | Audit planned                     | Description                                                  |
 | ----------------------- | ----------------------------------- | --------------------------------- | ------------------------------------------------------------ |
-| RuleWhitelist           | Ready-only                          | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a whitelist. |
-| RuleWhitelistWrapper    | Ready-only                          | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators. |
-| RuleBlacklist           | Ready-only                          | &#x2611;                          | This rule can be used to forbid transfer from/to addresses in the blacklist |
-| RuleSanctionList        | Ready-only                          | &#x2611;                          | The purpose of this contract is to use the oracle contract from Chainalysis to forbid transfer from/to an address  included in a sanctions designation (US, EU, or UN). |
-| RuleConditionalTransfer | Ready-Write                         | &#x2612;<br />(experimental rule) | This rule requires that transfers have to be approved before being executed by the token holders. |
+| RuleWhitelist           | Read-only                           | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a whitelist. |
+| RuleWhitelistWrapper    | Read-only                           | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators. |
+| RuleBlacklist           | Read-only                           | &#x2611;                          | This rule can be used to forbid transfer from/to addresses in the blacklist |
+| RuleSanctionList        | Read-only                           | &#x2611;                          | The purpose of this contract is to use the oracle contract from Chainalysis to forbid transfer from/to an address  included in a sanctions designation (US, EU, or UN). |
+| RuleConditionalTransfer | Read-Write                          | &#x2612;<br />(experimental rule) | This rule requires that transfers have to be approved before being executed by the token holders. |
 
 
 
@@ -306,7 +306,7 @@ References:
 
 - [OpenZeppelin Meta Transactions](https://docs.openzeppelin.com/contracts/5.x/api/metatx)
 
-- OpenGSN has deployed several forwarders, see their [documentation](https://docs.opengsn.org/contracts/#receiving-a-relayed-call) to see some examples.
+- OpenGSN has deployed several forwarders, see their [documentation](https://docs.opengsn.org/contracts/#receiving-a-relayed-call) for examples.
 
 ### Upgradeable
 
@@ -320,7 +320,7 @@ In case you use the same RuleEngine for several different tokens, unfortunately,
 
 #### Pause
 
-There are no functionalities to put in pause the RuleEngine. 
+There are no functionalities to put the RuleEngine in pause . 
 
 The RuleEngine can be removed from the main token contract by calling the dedicated functions to manage the RuleEngine
 
@@ -967,7 +967,7 @@ returns (address)
 
 Retrieves the rule address at a specific index.
 
-Return the`zero address` is out of bounds.
+Return the `zero address` if out of bounds.
 
 Note that there are no guarantees on the ordering of values inside the array, and it may change when more values are added or removed.
 
