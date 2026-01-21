@@ -18,6 +18,11 @@ abstract contract RulesManagementModule is
     RulesManagementModuleInvariantStorage,
     IRulesManagementModule
 {
+    modifier onlyRulesManager() {
+        _onlyRulesManager();
+        _;
+    }
+
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -40,7 +45,7 @@ abstract contract RulesManagementModule is
         public
         virtual
         override(IRulesManagementModule)
-        onlyRole(RULES_MANAGEMENT_ROLE)
+        onlyRulesManager
     {
         if (rules_.length == 0) {
             revert RuleEngine_RulesManagementModule_ArrayIsEmpty();
@@ -66,7 +71,7 @@ abstract contract RulesManagementModule is
         public
         virtual
         override(IRulesManagementModule)
-        onlyRole(RULES_MANAGEMENT_ROLE)
+        onlyRulesManager
     {
         _clearRules();
     }
@@ -80,7 +85,7 @@ abstract contract RulesManagementModule is
         public
         virtual
         override(IRulesManagementModule)
-        onlyRole(RULES_MANAGEMENT_ROLE)
+        onlyRulesManager
     {
         _checkRule(address(rule_));
         require(
@@ -99,7 +104,7 @@ abstract contract RulesManagementModule is
         public
         virtual
         override(IRulesManagementModule)
-        onlyRole(RULES_MANAGEMENT_ROLE)
+        onlyRulesManager
     {
         require(
             _rules.contains(address(rule_)),
@@ -237,4 +242,6 @@ abstract contract RulesManagementModule is
             IRule(_rules.at(i)).transferred(spender, from, to, value);
         }
     }
+
+function _onlyRulesManager() internal virtual;
 }

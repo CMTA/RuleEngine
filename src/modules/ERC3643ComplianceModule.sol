@@ -3,18 +3,19 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-import {AccessControl} from "OZ/access/AccessControl.sol";
 import {EnumerableSet} from "OZ/utils/structs/EnumerableSet.sol";
+import {Context} from "OZ/utils/Context.sol";
 /* ==== Interface and other library === */
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
 
-abstract contract ERC3643ComplianceModule is IERC3643Compliance, AccessControl {
+abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
     /* ==== State Variables === */
     // Token binding tracking
     EnumerableSet.AddressSet private _boundTokens;
     // Access Control
+    // Will not be present in the final bytecode if not used
     bytes32 public constant COMPLIANCE_MANAGER_ROLE =
         keccak256("COMPLIANCE_MANAGER_ROLE");
 
@@ -33,6 +34,12 @@ abstract contract ERC3643ComplianceModule is IERC3643Compliance, AccessControl {
         _;
     }
 
+    modifier onlyComplianceManager() {
+        _onlyComplianceManager();
+        _;
+    }
+
+
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/public FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -41,14 +48,14 @@ abstract contract ERC3643ComplianceModule is IERC3643Compliance, AccessControl {
     /// @inheritdoc IERC3643Compliance
     function bindToken(
         address token
-    ) public virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {
+    ) public virtual override onlyComplianceManager {
         _bindToken(token);
     }
 
     /// @inheritdoc IERC3643Compliance
     function unbindToken(
         address token
-    ) public virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {
+    ) public virtual override onlyComplianceManager {
         _unbindToken(token);
     }
 
@@ -109,4 +116,6 @@ abstract contract ERC3643ComplianceModule is IERC3643Compliance, AccessControl {
         );
         emit TokenBound(token);
     }
+
+    function _onlyComplianceManager() internal virtual;
 }

@@ -3,9 +3,9 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-import {AccessControl} from "OZ/access/AccessControl.sol";
+
 /* ==== CMTAT === */
-import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
+import {IRuleEngine, IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {IERC1404, IERC1404Extend} from "CMTAT/interfaces/tokenization/draft-IERC1404.sol";
 import {IERC3643ComplianceRead, IERC3643IComplianceContract} from "CMTAT/interfaces/tokenization/IERC3643Partial.sol";
 import {IERC7551Compliance} from "CMTAT/interfaces/tokenization/draft-IERC7551.sol";
@@ -27,7 +27,7 @@ abstract contract RuleEngineBase is
     RulesManagementModule,
     ERC3643ComplianceModule,
     RuleEngineInvariantStorage,
-    IRuleEngine
+    IRuleEngineERC1404
 {
     /* ============ State functions ============ */
     /*
@@ -82,19 +82,8 @@ abstract contract RuleEngineBase is
         address from,
         address to,
         uint256 value
-    ) public view virtual override returns (uint8) {
-        uint256 rulesLength = rulesCount();
-        for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRule(rule(i)).detectTransferRestriction(
-                from,
-                to,
-                value
-            );
-            if (restriction > 0) {
-                return restriction;
-            }
-        }
-        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    ) public view virtual override(IERC1404) returns (uint8) {
+        return _detectTransferRestriction(from, to, value);
     }
 
     /**
@@ -106,20 +95,7 @@ abstract contract RuleEngineBase is
         address to,
         uint256 value
     ) public view virtual override(IERC1404Extend) returns (uint8) {
-        uint256 rulesLength = rulesCount();
-        for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRule(rule(i)).detectTransferRestrictionFrom(
-                spender,
-                from,
-                to,
-                value
-            );
-            if (restriction > 0) {
-                return restriction;
-            }
-        }
-
-        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+        return _detectTransferRestrictionFrom(spender, from, to, value);
     }
 
     /**
@@ -128,19 +104,7 @@ abstract contract RuleEngineBase is
     function messageForTransferRestriction(
         uint8 restrictionCode
     ) public view virtual override(IERC1404) returns (string memory) {
-        //
-        uint256 rulesLength = rulesCount();
-        for (uint256 i = 0; i < rulesLength; ++i) {
-            if (
-                IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)
-            ) {
-                return
-                    IRule(rule(i)).messageForTransferRestriction(
-                        restrictionCode
-                    );
-            }
-        }
-        return "Unknown restriction code";
+        return _messageForTransferRestriction(restrictionCode);
     }
 
     /**
@@ -170,19 +134,67 @@ abstract contract RuleEngineBase is
             uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
-    /* ============ ACCESS CONTROL ============ */
-    /**
-     * @notice Returns `true` if `account` has been granted `role`.
-     * @dev The Default Admin has all roles
-     */
-    function hasRole(
-        bytes32 role,
-        address account
-    ) public view virtual override(AccessControl) returns (bool) {
-        if (AccessControl.hasRole(DEFAULT_ADMIN_ROLE, account)) {
-            return true;
-        } else {
-            return AccessControl.hasRole(role, account);
+
+
+
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL/PRIVATE FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+    function _detectTransferRestriction(
+        address from,
+        address to,
+        uint256 value
+    ) internal view virtual returns (uint8) {
+        uint256 rulesLength = rulesCount();
+        for (uint256 i = 0; i < rulesLength; ++i) {
+            uint8 restriction = IRule(rule(i)).detectTransferRestriction(
+                from,
+                to,
+                value
+            );
+            if (restriction > 0) {
+                return restriction;
+            }
         }
+        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+    function _detectTransferRestrictionFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) internal view virtual returns (uint8) {
+        uint256 rulesLength = rulesCount();
+        for (uint256 i = 0; i < rulesLength; ++i) {
+            uint8 restriction = IRule(rule(i)).detectTransferRestrictionFrom(
+                spender,
+                from,
+                to,
+                value
+            );
+            if (restriction > 0) {
+                return restriction;
+            }
+        }
+        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+    function _messageForTransferRestriction(
+        uint8 restrictionCode
+    ) internal view virtual returns (string memory) {
+        //
+        uint256 rulesLength = rulesCount();
+        for (uint256 i = 0; i < rulesLength; ++i) {
+            if (
+                IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)
+            ) {
+                return
+                    IRule(rule(i)).messageForTransferRestriction(
+                        restrictionCode
+                    );
+            }
+        }
+        return "Unknown restriction code";
     }
 }

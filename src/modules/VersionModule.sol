@@ -3,9 +3,9 @@
 pragma solidity ^0.8.20;
 
 /* ==== CMTAT === */
-import {IERC3643Base} from "CMTAT/interfaces/tokenization/IERC3643Partial.sol";
+import {IERC3643Version} from "CMTAT/interfaces/tokenization/IERC3643Partial.sol";
 
-abstract contract VersionModule is IERC3643Base {
+abstract contract VersionModule is IERC3643Version {
     /* ============ State Variables ============ */
     /**
      * @dev
@@ -18,13 +18,13 @@ abstract contract VersionModule is IERC3643Base {
                             PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
     /**
-     * @inheritdoc IERC3643Base
+     * @inheritdoc IERC3643Version
      */
     function version()
         public
         view
         virtual
-        override(IERC3643Base)
+        override(IERC3643Version)
         returns (string memory version_)
     {
         return VERSION;

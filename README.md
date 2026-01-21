@@ -1,10 +1,12 @@
-> To use the ruleEngine and the different rules, we recommend the latest audited version, from the [Releases](https://github.com/CMTA/CMTAT/releases) page. Currently, it is the version [v1.0.2](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2)
+> This project is not audited
 
 # RuleEngine
 
 This repository includes the RuleEngine contract for [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens. 
 
 The RuleEngine is an external contract used to apply transfer restrictions to another contract, such as CMTAT and ERC-3643 tokens. Acting as a controller, it can call different contract rules and apply these rules on each transfer.
+
+[TOC]
 
 ## Motivation
 
@@ -28,7 +30,7 @@ Why use this `RuleEngine` contract instead of setting directly the `rule` in the
 
 When the use of `RuleEngine` may not be appropriate?
 
-If you plan to call only one rule (e.g a whitelist rule), it could make sense to directly set the rule in the token contract instead of using a RuleEngine. This will simplify configuration and reduce runtime gas costs.
+- If you plan to call only one rule (e.g a whitelist rule), it could make sense to directly set the rule in the token contract instead of using a RuleEngine. This will simplify configuration and reduce runtime gas costs.
 
 ## How it works
 
@@ -49,7 +51,7 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 CMTAT provides the following function to set a RuleEngine inside a CMTAT token:
 
 ```solidity
- setRuleEngine(IRuleEngine ruleEngine_) 
+setRuleEngine(IRuleEngine ruleEngine_) 
 ```
 
 This function is defined in the extension module `ValidationModuleRuleEngine`
@@ -99,6 +101,10 @@ This function `_transferred` is called before each transfer/burn/mint through th
 ### Like ERC-3643
 
 The ERC-3643 defines several functions used as entrypoint for an ERC-3643 token.
+
+As for CMTAT, the main entrypoint is `transferred` which must be called for each ERC-20 transfer.
+
+Contrary to CMTAT, ERC-3643 does not apply restriction on the spender address (`transferFrom`).
 
 They are the following:
 
@@ -170,8 +176,6 @@ external;
 
 The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is defined in [IERC3643Compliance.sol](src/interfaces/IERC3643Compliance.sol).
 
-
-
 A specific module implements this interface for the RuleEngine: [ERC3643Compliance.sol](src/modules/ERC3643Compliance.sol)
 
 ![ERC3643ComplianceModuleUML](./doc/schema/vscode-uml/ERC3643ComplianceModuleUML.png)
@@ -186,10 +190,6 @@ The toolchain includes the following components, where the versions are the late
 - Solidity [0.8.30](https://docs.soliditylang.org/en/v0.8.30/) (via solc-js)
 - OpenZeppelin Contracts (submodule) [v5.4.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.4.0)
 - CMTAT [v3.0.0-rc7](https://github.com/CMTA/CMTAT/releases/tag/v3.0.0-rc7)
-
-
-
-### Contracts Description Table
 
 ### Access Control (RBAC)
 
@@ -250,6 +250,8 @@ For function signatures,  struct arguments are represented with their correspond
 
 
 ### UML
+
+Here is the UML of the main contract:
 
 ![RuleEngineUML](./doc/schema/vscode-uml/RuleEngineUML.png)
 
@@ -333,6 +335,33 @@ Similar to the pause functionality, the RuleEngine can be directly removed from 
 ### RuleEngineBase
 
 ![RuleEngineBaseUML](./doc/schema/vscode-uml/RuleEngineBaseUML.png)
+
+#### Contracts Description Table
+
+
+|      Contract      |             Type              |                            Bases                             |                |                |
+| :----------------: | :---------------------------: | :----------------------------------------------------------: | :------------: | :------------: |
+|         └          |       **Function Name**       |                        **Visibility**                        | **Mutability** | **Modifiers**  |
+|                    |                               |                                                              |                |                |
+| **RuleEngineBase** |        Implementation         | VersionModule, RulesManagementModule, ERC3643ComplianceModule, RuleEngineInvariantStorage, IRuleEngine |                |                |
+|         └          |          transferred          |                           Public ❗️                           |       🛑        | onlyBoundToken |
+|         └          |          transferred          |                           Public ❗️                           |       🛑        | onlyBoundToken |
+|         └          |            created            |                           Public ❗️                           |       🛑        | onlyBoundToken |
+|         └          |           destroyed           |                           Public ❗️                           |       🛑        | onlyBoundToken |
+|         └          |   detectTransferRestriction   |                           Public ❗️                           |                |      NO❗️       |
+|         └          | detectTransferRestrictionFrom |                           Public ❗️                           |                |      NO❗️       |
+|         └          |          canTransfer          |                           Public ❗️                           |                |      NO❗️       |
+|         └          |        canTransferFrom        |                           Public ❗️                           |                |      NO❗️       |
+|         └          | messageForTransferRestriction |                           Public ❗️                           |                |      NO❗️       |
+|         └          |            hasRole            |                           Public ❗️                           |                |      NO❗️       |
+
+
+##### Legend
+
+| Symbol | Meaning                   |
+| :----: | ------------------------- |
+|   🛑    | Function can modify state |
+|   💵    | Function is payable       |
 
 #### IRuleEngine
 
@@ -613,6 +642,16 @@ This is an extension of {ERC-1404} with an additional `spender` parameter to enf
 
 ![VersionModuleUML](./doc/schema/vscode-uml/VersionModuleUML.png)
 
+#### Contracts Description Table
+
+
+|     Contract      |       Type        |     Bases      |                |               |
+| :---------------: | :---------------: | :------------: | :------------: | :-----------: |
+|         └         | **Function Name** | **Visibility** | **Mutability** | **Modifiers** |
+|                   |                   |                |                |               |
+| **VersionModule** |  Implementation   |  IERC3643Base  |                |               |
+|         └         |      version      |    Public ❗️    |                |      NO❗️      |
+
 #### version()
 
 ```solidity
@@ -641,6 +680,22 @@ Useful for identifying which version of the smart contract is deployed and in us
 ### ERC3643ComplianceModule
 
 ![ERC3643ComplianceModuleUML](./doc/schema/vscode-uml/ERC3643ComplianceModuleUML.png)
+
+#### Contracts Description Table
+
+
+|          Contract           |       Type        |               Bases               |                |               |
+| :-------------------------: | :---------------: | :-------------------------------: | :------------: | :-----------: |
+|              └              | **Function Name** |          **Visibility**           | **Mutability** | **Modifiers** |
+|                             |                   |                                   |                |               |
+| **ERC3643ComplianceModule** |  Implementation   | IERC3643Compliance, AccessControl |                |               |
+|              └              |     bindToken     |             Public ❗️              |       🛑        |   onlyRole    |
+|              └              |    unbindToken    |             Public ❗️              |       🛑        |   onlyRole    |
+|              └              |   isTokenBound    |             Public ❗️              |                |      NO❗️      |
+|              └              |   getTokenBound   |            External ❗️             |                |      NO❗️      |
+|              └              |  getTokenBounds   |            External ❗️             |                |      NO❗️      |
+|              └              |   _unbindToken    |            Internal 🔒             |       🛑        |               |
+|              └              |    _bindToken     |            Internal 🔒             |       🛑        |               |
 
 #### Events
 
@@ -810,7 +865,7 @@ This is designed to mostly be used by view accessors that are queried without an
 
 #### Events
 
-#### event AddRule(address rule)
+##### event AddRule(address rule)
 
 ```solidity
 event AddRule(IRule indexed rule)
@@ -826,7 +881,7 @@ Emitted when a new rule is added to the rule set.
 
 ------
 
-#### event RemoveRule(address rule)
+##### event RemoveRule(address rule)
 
 ```solidity
 event RemoveRule(IRule indexed rule)
@@ -842,7 +897,7 @@ Emitted when a rule is removed from the rule set.
 
 ------
 
-#### event ClearRules()
+##### event ClearRules()
 
 ```solidity
 event ClearRules()
@@ -1063,8 +1118,6 @@ The first audit was performed by ABDK on the version [1.0.1](https://github.com/
 
 The release [v1.0.2](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2) contains the different fixes and improvements related to this audit.
 
-The temporary report is available in [Taurus. Audit 3.3.CollectedIssues.ods](doc/audits/Taurus.Audit3.3.CollectedIssues.ods) 
-
 The final report is available in [ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf](https://github.com/CMTA/CMTAT/blob/master/doc/audits/ABDK_CMTA_CMTATRuleEngine_v_1_0/ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf).
 
 ### Tools
@@ -1149,6 +1202,17 @@ forge update
 ```
 
 See also the command's [documentation](https://book.getfoundry.sh/reference/forge/forge-update).
+
+#### CMTAT
+
+You also have to install OpenZeppelin inside CMTAT repository (submodule)
+
+```bash
+cd CMTAT
+npm install
+```
+
+
 
 ### Compilation
 
@@ -1290,4 +1354,4 @@ Within a grouping, place the `view` and `pure` functions last
 
 ## Intellectual property
 
-The code is copyright (c) Capital Market and Technology Association, 2022-2025, and is released under [Mozilla Public License 2.0](https://github.com/CMTA/CMTAT/blob/master/LICENSE.md).
+The code is copyright (c) Capital Market and Technology Association, 2022-2026, and is released under [Mozilla Public License 2.0](https://github.com/CMTA/CMTAT/blob/master/LICENSE.md).

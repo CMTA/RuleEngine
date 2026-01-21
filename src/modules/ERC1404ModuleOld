@@ -1,0 +1,75 @@
+// SPDX-License-Identifier: MPL-2.0
+
+pragma solidity ^0.8.20;
+
+
+/* ==== CMTAT === */
+import {IERC1404Extend} from "CMTAT/interfaces/tokenization/draft-IERC1404.sol";
+
+
+/**
+ * @title Implementation of a ruleEngine as defined by the CMTAT
+ */
+abstract contract ERC1404Module 
+{
+
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL/PRIVATE FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+    function _detectTransferRestriction(
+        address from,
+        address to,
+        uint256 value
+    ) internal view virtual returns (uint8) {
+        uint256 rulesLength = rulesCount();
+        for (uint256 i = 0; i < rulesLength; ++i) {
+            uint8 restriction = IRule(rule(i)).detectTransferRestriction(
+                from,
+                to,
+                value
+            );
+            if (restriction > 0) {
+                return restriction;
+            }
+        }
+        return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+    function _detectTransferRestrictionFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) internal view virtual returns (uint8) {
+        uint256 rulesLength = rulesCount();
+        for (uint256 i = 0; i < rulesLength; ++i) {
+            uint8 restriction = IRule(rule(i)).detectTransferRestrictionFrom(
+                spender,
+                from,
+                to,
+                value
+            );
+            if (restriction > 0) {
+                return restriction;
+            }
+        }
+        return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+    function _messageForTransferRestriction(
+        uint8 restrictionCode
+    ) internal view virtual returns (string memory) {
+        uint256 rulesLength = rulesCount();
+        for (uint256 i = 0; i < rulesLength; ++i) {
+            if (
+                IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)
+            ) {
+                return
+                    IRule(rule(i)).messageForTransferRestriction(
+                        restrictionCode
+                    );
+            }
+        }
+        return "Unknown restriction code";
+    }
+}

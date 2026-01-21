@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "OZ/access/AccessControl.sol";
+
 import "../validation/abstract/RuleCommonInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
+import {ERC165, IERC165, AccessControl} from "OZ/access/AccessControl.sol";
 
 /**
  * @title TransferApprovalRule
@@ -18,6 +19,13 @@ contract RuleOperationRevert is
     error RuleConditionalTransferLight_InvalidTransfer();
     // It is very important that each rule uses an unique code
     uint8 public constant CODE_TRANSFER_REQUEST_NOT_APPROVED = 71;
+
+    bytes4 private RULE_ENGINE_INTERFACE_ID = 0x20c49ce7;
+    bytes4 private ERC1404EXTEND_INTERFACE_ID = 0x78a8de7d;
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
+        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID || super.supportsInterface(interfaceId);
+    }
 
     /**
      * @notice Called when a transfer occurs. Decrements approval count if allowed.

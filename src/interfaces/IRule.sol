@@ -3,11 +3,11 @@
 pragma solidity ^0.8.20;
 
 /* ==== CMTAT === */
-import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
+import {IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 
 /* ==== Interfaces === */
 
-interface IRule is IRuleEngine {
+interface IRule is IRuleEngineERC1404 {
     /**
      * @dev Returns true if the restriction code exists, and false otherwise.
      */

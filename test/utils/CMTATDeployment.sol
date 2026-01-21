@@ -2,7 +2,6 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "OZ/access/AccessControl.sol";
 import {ICMTATConstructor, CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {ISnapshotEngine} from "CMTAT/interfaces/engine/ISnapshotEngine.sol";
@@ -36,9 +35,7 @@ contract CMTATDeployment {
                     "CMTAT_info"
                 );
         ICMTATConstructor.Engine memory engines = ICMTATConstructor.Engine(
-            IRuleEngine(ZERO_ADDRESS),
-            ISnapshotEngine(ZERO_ADDRESS),
-            IDocumentEngine(ZERO_ADDRESS)
+            IRuleEngine(ZERO_ADDRESS)
         );
         cmtat = new CMTATStandalone(
             ZERO_ADDRESS,
