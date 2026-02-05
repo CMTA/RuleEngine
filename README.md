@@ -2,9 +2,24 @@
 
 # RuleEngine
 
-This repository includes the RuleEngine contract for [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens. 
+This repository includes the RuleEngine contracts for [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens.
 
 The RuleEngine is an external contract used to apply transfer restrictions to another contract, such as CMTAT and ERC-3643 tokens. Acting as a controller, it can call different contract rules and apply these rules on each transfer.
+
+## Contract Variants
+
+Two deployable contracts are available, differing in their access control mechanism:
+
+| Contract | Access Control | Interface | Use Case |
+|----------|---------------|-----------|----------|
+| `RuleEngine` | Role-Based (AccessControl) | RBAC roles | Multi-operator environments with granular permissions |
+| `RuleEngineOwnable` | ERC-173 Ownership | `Ownable` | Single-owner setups, simpler administration |
+
+Both contracts share the same core functionality through `RuleEngineBase` and support:
+- ERC-1404 transfer restrictions
+- ERC-3643 compliance interface
+- ERC-2771 meta-transactions (gasless)
+- Multiple token bindings
 
 [TOC]
 
@@ -22,7 +37,7 @@ There are several reasons to do this:
 
   - The RuleEngine can be used inside other contracts besides CMTAT. For instance, the RuleEngine has been used in [our contract to distribute dividends](https://www.taurushq.com/blog/equity-tokenization-how-to-pay-dividend-on-chain-using-cmtat/). 
 
-  - A same deployed `RuleEngine` can also be used with several different tokens if the rules allowed it, which is the case for all ready-only rule.
+  - A same deployed `RuleEngine` can also be used with several different tokens if the rules allow it, which is the case for all read-only rules.
 
 Why use this `RuleEngine` contract instead of setting the `rule` directly in the token contract?
 
@@ -191,23 +206,39 @@ The toolchain includes the following components, where the versions are the late
 - OpenZeppelin Contracts (submodule) [v5.4.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.4.0)
 - CMTAT [v3.0.0-rc7](https://github.com/CMTA/CMTAT/releases/tag/v3.0.0-rc7)
 
-### Access Control (RBAC)
+### Access Control
 
-CMTAT uses a RBAC access control by using the contract `AccessControl`from OpenZeppelin.
+Two access control mechanisms are available depending on which contract you deploy:
 
-Each module defines the roles useful to restrict its functions.
+#### RuleEngine (RBAC - AccessControl)
 
-The `AccessControlModule` which is used by all base and deployment contracts override the OpenZeppelin function `hasRole` to give by default all the roles to the `admin`.
+The `RuleEngine` contract uses Role-Based Access Control (RBAC) via OpenZeppelin's `AccessControl`.
+
+Each module defines the roles useful to restrict its functions. The contract overrides the OpenZeppelin function `hasRole` to give by default all the roles to the `admin`.
 
 See also [docs.openzeppelin.com - AccessControl](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl)
 
-#### Role list
+#### RuleEngineOwnable (ERC-173 Ownership)
 
-Here is the list of roles and their 32 bytes identifier.
+The `RuleEngineOwnable` contract uses [ERC-173](https://eips.ethereum.org/EIPS/eip-173) ownership via OpenZeppelin's `Ownable`.
 
-The default admin is the address put in argument(`admin`) inside the constructor. 
+All protected functions require the caller to be the contract owner. The owner can:
+- Transfer ownership to another address via `transferOwnership(address)`
+- Renounce ownership via `renounceOwnership()` (makes the contract ownerless)
+
+This is a simpler access control model suitable for single-owner deployments.
+
+See also [docs.openzeppelin.com - Ownable](https://docs.openzeppelin.com/contracts/5.x/api/access#Ownable)
+
+#### Role list (RuleEngine only)
+
+Here is the list of roles and their 32 bytes identifier for the `RuleEngine` contract.
+
+The default admin is the address put in argument (`admin`) inside the constructor.
 
 It is set in the constructor when the contract is deployed.
+
+> Note: For `RuleEngineOwnable`, all protected functions are controlled by the single `owner` address instead of roles.
 
 |                         | Defined in                       | 32 bytes identifier                                          |
 | ----------------------- | -------------------------------- | ------------------------------------------------------------ |
@@ -218,19 +249,17 @@ It is set in the constructor when the contract is deployed.
 
 
 
-#### Schema
+#### Schema (RuleEngine)
 
-Here is a schema of the Access Control.
+Here is a schema of the Access Control for `RuleEngine`.
 ![alt text](./doc/security/accessControl/access-control-RuleEngine.png)
 
+#### Role by modules (RuleEngine)
 
+Here is a summary table for each restricted function defined in a module.
+For function signatures, struct arguments are represented with their corresponding native type.
 
-
-
-#### Role by modules
-
-Here is a summary tab for each restricted function defined in a module
-For function signatures,  struct arguments are represented with their corresponding native type.
+> Note: For `RuleEngineOwnable`, replace the role requirement with `onlyOwner` for all protected functions.
 
 |                      | Function signature | Visibility [public/external] | Input variables (Function arguments) | Output variables<br />(return value) | Role Required |
 | -------------------- | ------------------ | ---------------------------- | ------------------------------------ | ------------------------------------ | ------------- |
@@ -251,9 +280,31 @@ For function signatures,  struct arguments are represented with their correspond
 
 ### UML
 
-Here is the UML of the main contract:
+Here is the UML of the main contracts:
 
+#### RuleEngine
 ![RuleEngineUML](./doc/schema/vscode-uml/RuleEngineUML.png)
+
+#### RuleEngineOwnable
+
+`RuleEngineOwnable` shares the same base functionality as `RuleEngine` but uses ERC-173 ownership instead of RBAC.
+
+```
+RuleEngineOwnable
+├── ERC2771ModuleStandalone (gasless support)
+├── RuleEngineBase (core functionality)
+│   ├── VersionModule
+│   ├── RulesManagementModule
+│   ├── ERC3643ComplianceModule
+│   └── IRuleEngineERC1404
+└── Ownable (ERC-173 access control)
+```
+
+**Key differences from RuleEngine:**
+- Constructor takes `owner_` instead of `admin`
+- All protected functions use `onlyOwner` modifier
+- Supports `transferOwnership()` and `renounceOwnership()`
+- Implements ERC-173 interface (`supportsInterface(0x7f5828d0)` returns `true`)
 
 
 
@@ -280,7 +331,7 @@ Rules have their own dedicated repository: [github.com/CMTA/Rules](https://githu
 
 The following rules are available:
 
-| Rule                    | Type<br />[ready-only / read-write] | Audit planned                     | Description                                                  |
+| Rule                    | Type<br />[read-only / read-write] | Audit planned                     | Description                                                  |
 | ----------------------- | ----------------------------------- | --------------------------------- | ------------------------------------------------------------ |
 | RuleWhitelist           | Read-only                           | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a whitelist. |
 | RuleWhitelistWrapper    | Read-only                           | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators. |
@@ -331,6 +382,40 @@ There are no functionalities to kill/deactivate the contracts.
 Similar to the pause functionality, the RuleEngine can be directly removed from the main token contract.
 
 ## Ethereum API
+
+### Contract Constructors
+
+#### RuleEngine Constructor
+
+```solidity
+constructor(
+    address admin,
+    address forwarderIrrevocable,
+    address tokenContract
+)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| admin | address | Address granted DEFAULT_ADMIN_ROLE (has all roles) |
+| forwarderIrrevocable | address | ERC-2771 trusted forwarder address (can be zero) |
+| tokenContract | address | Token to bind at deployment (can be zero) |
+
+#### RuleEngineOwnable Constructor
+
+```solidity
+constructor(
+    address owner_,
+    address forwarderIrrevocable,
+    address tokenContract
+)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| owner_ | address | Address set as contract owner (ERC-173) |
+| forwarderIrrevocable | address | ERC-2771 trusted forwarder address (can be zero) |
+| tokenContract | address | Token to bind at deployment (can be zero) |
 
 ### RuleEngineBase
 
@@ -1216,16 +1301,23 @@ npm install
 
 ### Compilation
 
-The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/build-commands) 
-```
- forge build --contracts src/RuleEngine.sol
+The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/build-commands)
+
+```bash
+# Build all contracts
+forge build
+
+# Build specific contract
+forge build --contracts src/RuleEngine.sol
+forge build --contracts src/RuleEngineOwnable.sol
 ```
 ### Contract size
 
 ```bash
- forge compile --sizes
+forge build --sizes
 ```
 
+Both `RuleEngine` and `RuleEngineOwnable` have similar bytecode sizes since they share the same base functionality. The `RuleEngineOwnable` contract is slightly smaller as `Ownable` has less overhead than `AccessControl`.
 
 ![contract-size](./doc/compilation/contract-size.png)
 
@@ -1276,18 +1368,29 @@ forge coverage --no-match-coverage "(script|mocks|test)" --report lcov && genhtm
 See [Solidity Coverage in VS Code with Foundry](https://mirror.xyz/devanon.eth/RrDvKPnlD-pmpuW7hQeR5wWdVjklrpOgPCOA-PJkWFU) & [Foundry forge coverage](https://www.rareskills.io/post/foundry-forge-coverage)
 
 ### Deployment
-The official documentation is available in the Foundry [website](https://getfoundry.sh/forge/deploying) 
+The official documentation is available in the Foundry [website](https://getfoundry.sh/forge/deploying)
+
+#### Choosing a Contract
+
+| Scenario | Recommended Contract |
+|----------|---------------------|
+| Multiple operators with different permissions | `RuleEngine` |
+| Single administrator | `RuleEngineOwnable` |
+| Integration with existing RBAC systems | `RuleEngine` |
+| Simpler deployment and management | `RuleEngineOwnable` |
+
 #### Script
 
 > This documentation has been written for the version v1.0.2
 
-To run the script for deployment, you need to create a .env file. The value for CMTAT.ADDRESS is require only to use the script **RuleEngine.s.sol**
-Warning : put your private key in a .env file is not the best secure way.
+To run the script for deployment, you need to create a .env file. The value for CMTAT_ADDRESS is required only to use the script **RuleEngine.s.sol**
+
+Warning: putting your private key in a .env file is not the most secure approach.
 
 * File .env
 ```
 PRIVATE_KEY=<YOUR_PRIVATE_KEY>
-CMTAT_ADDRESS=<CMTAT ADDDRESS
+CMTAT_ADDRESS=<CMTAT_ADDRESS>
 ```
 * Command
 
