@@ -15,7 +15,12 @@ Two deployable contracts are available, differing in their access control mechan
 | `RuleEngine` | Role-Based (AccessControl) | RBAC roles | Multi-operator environments with granular permissions |
 | `RuleEngineOwnable` | ERC-173 Ownership | `Ownable` | Single-owner setups, simpler administration |
 
+ERC-3643 compliance specification indicates the use of ERC-173.
+
+> The standard relies on ERC-173 to define contract ownership, with the owner having the responsibility of setting the Compliance parameters and binding the Compliance to a Token contract.
+
 Both contracts share the same core functionality through `RuleEngineBase` and support:
+
 - ERC-1404 transfer restrictions
 - ERC-3643 compliance interface
 - ERC-2771 meta-transactions (gasless)

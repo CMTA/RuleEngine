@@ -14,3 +14,7 @@ cache_hardhat/
 #drawio
 *.bkp
 *.dtmp
+#claude
+INSTRUCTION.md
+PLAN.md
+SUMMARY.md
