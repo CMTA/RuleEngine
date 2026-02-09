@@ -2,6 +2,9 @@
 
 pragma solidity ^0.8.20;
 
+/* ==== CMTAT === */
+import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
+import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 /* ==== OpenZeppelin === */
 import {Context} from "OZ/utils/Context.sol";
 import {Ownable} from "OZ/access/Ownable.sol";
@@ -16,8 +19,6 @@ import {RuleEngineBase} from "./RuleEngineBase.sol";
  * @title Implementation of a ruleEngine with ERC-173 Ownable access control
  */
 contract RuleEngineOwnable is ERC2771ModuleStandalone, RuleEngineBase, Ownable {
-    bytes4 private constant RULE_ENGINE_INTERFACE_ID = 0x20c49ce7;
-    bytes4 private constant ERC1404EXTEND_INTERFACE_ID = 0x78a8de7d;
     bytes4 private constant ERC173_INTERFACE_ID = 0x7f5828d0;
 
     /**
@@ -54,8 +55,8 @@ contract RuleEngineOwnable is ERC2771ModuleStandalone, RuleEngineBase, Ownable {
         bytes4 interfaceId
     ) public view virtual override(AccessControl, IERC165) returns (bool) {
         return
-            interfaceId == RULE_ENGINE_INTERFACE_ID ||
-            interfaceId == ERC1404EXTEND_INTERFACE_ID ||
+            interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID ||
+            interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID ||
             interfaceId == ERC173_INTERFACE_ID ||
             AccessControl.supportsInterface(interfaceId);
     }
