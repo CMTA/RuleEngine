@@ -1,8 +1,8 @@
 {
   "lib/CMTAT": {
     "tag": {
-      "name": "v3.2.0-rc0",
-      "rev": "012ccc409c4205da2b38f23ce21496b3486bc663"
+      "name": "v3.2.0-rc2",
+      "rev": "78e6e48e491e01e853e6490e061189875d4785ea"
     }
   },
   "lib/forge-std": {
