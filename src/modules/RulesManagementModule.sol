@@ -196,7 +196,7 @@ abstract contract RulesManagementModule is
     /**
      * @dev check if a rule is valid, revert otherwise
      */
-    function _checkRule(address rule_) internal view {
+    function _checkRule(address rule_) internal view virtual {
         if (rule_ == address(0x0)) {
             revert RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed();
         }

@@ -3,7 +3,7 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-
+import {ERC165Checker} from "OZ/utils/introspection/ERC165Checker.sol";
 /* ==== CMTAT === */
 import {IRuleEngine, IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {IERC1404, IERC1404Extend} from "CMTAT/interfaces/tokenization/draft-IERC1404.sol";
@@ -18,6 +18,7 @@ import {RulesManagementModule} from "./modules/RulesManagementModule.sol";
 /* ==== Interface and other library === */
 import {IRule} from "./interfaces/IRule.sol";
 import {RuleEngineInvariantStorage} from "./modules/library/RuleEngineInvariantStorage.sol";
+import {RuleInterfaceId} from "./modules/library/RuleInterfaceId.sol";
 
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
@@ -196,5 +197,15 @@ abstract contract RuleEngineBase is
             }
         }
         return "Unknown restriction code";
+    }
+
+    /**
+     * @dev Override to add ERC-165 interface check for the full IRule hierarchy.
+     */
+    function _checkRule(address rule_) internal view virtual override {
+        super._checkRule(rule_);
+        if (!ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)) {
+            revert RuleEngine_RulesManagementModule_RuleInvalidInterface();
+        }
     }
 }

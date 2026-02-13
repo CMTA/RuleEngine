@@ -4,9 +4,10 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../HelperContract.sol";
 import {RuleEngineExposed} from "src/mocks/RuleEngineExposed.sol";
+import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
 
 /**
- * @title Coverage tests for RuleEngine (supportsInterface, _msgData)
+ * @title Coverage tests for RuleEngine (supportsInterface, _msgData, ERC-165 rule check)
  */
 contract RuleEngineCoverageTest is Test, HelperContract {
     RuleEngineExposed public ruleEngineExposed;
@@ -59,5 +60,38 @@ contract RuleEngineCoverageTest is Test, HelperContract {
         // Should return the calldata (selector of exposedMsgData)
         assertEq(data.length, 4);
         assertEq(bytes4(data), ruleEngineExposed.exposedMsgData.selector);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                    ERC-165 RULE INTERFACE CHECK
+    //////////////////////////////////////////////////////////////*/
+
+    function testCannotAddRuleWithInvalidInterface() public {
+        RuleInvalidMock invalidRule = new RuleInvalidMock();
+
+        vm.expectRevert(
+            RuleEngine_RulesManagementModule_RuleInvalidInterface.selector
+        );
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(IRule(address(invalidRule)));
+    }
+
+    function testCannotSetRulesWithInvalidInterface() public {
+        RuleInvalidMock invalidRule = new RuleInvalidMock();
+        IRule[] memory rules_ = new IRule[](1);
+        rules_[0] = IRule(address(invalidRule));
+
+        vm.expectRevert(
+            RuleEngine_RulesManagementModule_RuleInvalidInterface.selector
+        );
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.setRules(rules_);
+    }
+
+    function testCannotAddEOAAsRule() public {
+        // EOA does not implement ERC-165
+        vm.expectRevert();
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(IRule(address(0x999)));
     }
 }

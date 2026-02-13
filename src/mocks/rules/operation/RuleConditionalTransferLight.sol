@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {RuleConditionalTransferLightInvariantStorage} from "./abstract/RuleConditionalTransferLightInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
+import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
 import {ERC165, IERC165, AccessControl} from "OZ/access/AccessControl.sol";
 
 /**
@@ -32,7 +33,7 @@ contract RuleConditionalTransferLight is
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
-        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID || super.supportsInterface(interfaceId);
+        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
     /**

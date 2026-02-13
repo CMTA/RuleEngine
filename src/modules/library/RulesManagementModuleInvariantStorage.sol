@@ -11,6 +11,7 @@ abstract contract RulesManagementModuleInvariantStorage {
     error RuleEngine_RulesManagementModule_RuleDoNotMatch();
     error RuleEngine_RulesManagementModule_ArrayIsEmpty();
     error RuleEngine_RulesManagementModule_OperationNotSuccessful();
+    error RuleEngine_RulesManagementModule_RuleInvalidInterface();
 
     /* ============ Events ============ */
     /**
