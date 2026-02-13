@@ -1258,12 +1258,12 @@ See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMT
 Here are the settings for [Hardhat](https://hardhat.org) and [Foundry](https://getfoundry.sh).
 
 - `hardhat.config.js`
-  - Solidity [v0.8.30](https://docs.soliditylang.org/en/v0.8.30/)
+  - Solidity [v0.8.33](https://docs.soliditylang.org/en/v0.8.33/)
   - EVM version: Prague (Pectra upgrade)
   - Optimizer: true, 200 runs
 
 - `foundry.toml`
-  - Solidity [v0.8.30](https://docs.soliditylang.org/en/v0.8.30/)
+  - Solidity [v0.8.33](https://docs.soliditylang.org/en/v0.8.33/)
   - EVM version: Prague (Pectra upgrade)
   - Optimizer: true, 200 runs
 
