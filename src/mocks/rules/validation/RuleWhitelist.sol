@@ -2,28 +2,32 @@
 
 pragma solidity ^0.8.20;
 
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "./abstract/RuleAddressList/RuleAddressList.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "./abstract/RuleWhitelistCommon.sol";
+import {IERC165, AccessControl} from "OZ/access/AccessControl.sol";
+import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
 
+//import {ERC165, IERC165} from "@OZ/utils/introspection/ERC165.sol";
 /**
  * @title a whitelist manager
  */
 contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
-    error RuleWhitelist_InvalidTransfer(
-        address from,
-        address to,
-        uint256 value,
-        uint8 code
-    );
+    bytes4 private constant RULE_ENGINE_INTERFACE_ID = 0x20c49ce7;
+    bytes4 private constant ERC1404EXTEND_INTERFACE_ID = 0x78a8de7d;
+    error RuleWhitelist_InvalidTransfer(address from, address to, uint256 value, uint8 code);
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
+        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID
+            || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || super.supportsInterface(interfaceId);
+    }
 
     /**
      * @param admin Address of the contract (Access Control)
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
      */
-    constructor(
-        address admin,
-        address forwarderIrrevocable
-    ) RuleAddressList(admin, forwarderIrrevocable) {}
+    constructor(address admin, address forwarderIrrevocable) RuleAddressList(admin, forwarderIrrevocable) {}
 
     /**
      * @notice Validate a transfer
@@ -31,26 +35,20 @@ contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
      * @param _to the destination address
      * @param _amount to transfer
      * @return isValid => true if the transfer is valid, false otherwise
-     **/
-    function canTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) public view override returns (bool isValid) {
-        return
-            detectTransferRestriction(_from, _to, _amount) ==
-            uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+     *
+     */
+    function canTransfer(address _from, address _to, uint256 _amount) public view override returns (bool isValid) {
+        return detectTransferRestriction(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
-    function canTransferFrom(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) public view virtual override returns (bool) {
-        return
-            detectTransferRestrictionFrom(spender, from, to, value) ==
-            uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    function canTransferFrom(address spender, address from, address to, uint256 value)
+        public
+        view
+        virtual
+        override
+        returns (bool)
+    {
+        return detectTransferRestrictionFrom(spender, from, to, value) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
     /**
@@ -58,12 +56,18 @@ contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
      * @param from the origin address
      * @param to the destination address
      * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
-     **/
+     *
+     */
     function detectTransferRestriction(
         address from,
         address to,
         uint256 /*value */
-    ) public view override returns (uint8) {
+    )
+        public
+        view
+        override
+        returns (uint8)
+    {
         if (!addressIsListed(from)) {
             return CODE_ADDRESS_FROM_NOT_WHITELISTED;
         } else if (!addressIsListed(to)) {
@@ -73,12 +77,12 @@ contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
         }
     }
 
-    function detectTransferRestrictionFrom(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) public view override returns (uint8) {
+    function detectTransferRestrictionFrom(address spender, address from, address to, uint256 value)
+        public
+        view
+        override
+        returns (uint8)
+    {
         if (!addressIsListed(spender)) {
             return CODE_ADDRESS_SPENDER_NOT_WHITELISTED;
         } else {
@@ -88,22 +92,11 @@ contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
 
     function transferred(address from, address to, uint256 value) public view {
         uint8 code = detectTransferRestriction(from, to, value);
-        require(
-            code == uint8(REJECTED_CODE_BASE.TRANSFER_OK),
-            RuleWhitelist_InvalidTransfer(from, to, value, code)
-        );
+        require(code == uint8(REJECTED_CODE_BASE.TRANSFER_OK), RuleWhitelist_InvalidTransfer(from, to, value, code));
     }
 
-    function transferred(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) public view {
+    function transferred(address spender, address from, address to, uint256 value) public view {
         uint8 code = detectTransferRestrictionFrom(spender, from, to, value);
-        require(
-            code == uint8(REJECTED_CODE_BASE.TRANSFER_OK),
-            RuleWhitelist_InvalidTransfer(from, to, value, code)
-        );
+        require(code == uint8(REJECTED_CODE_BASE.TRANSFER_OK), RuleWhitelist_InvalidTransfer(from, to, value, code));
     }
 }

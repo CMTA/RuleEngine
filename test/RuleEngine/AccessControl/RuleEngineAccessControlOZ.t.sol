@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
-import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+import {Test} from "forge-std/Test.sol";
+import {AccessControl} from "OZ/access/AccessControl.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
 
 /**
@@ -11,16 +12,9 @@ import "../../HelperContract.sol";
 contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
     // Arrange
     function setUp() public {
-        ruleWhitelist = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         resUint256 = ruleEngineMock.rulesCount();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -34,11 +28,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, false, true);
-        emit RoleGranted(
-            RULES_MANAGEMENT_ROLE,
-            ADDRESS1,
-            RULE_ENGINE_OPERATOR_ADDRESS
-        );
+        emit RoleGranted(RULES_MANAGEMENT_ROLE, ADDRESS1, RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.grantRole(RULES_MANAGEMENT_ROLE, ADDRESS1);
         // Assert
         bool res1 = ruleEngineMock.hasRole(RULES_MANAGEMENT_ROLE, ADDRESS1);
@@ -56,11 +46,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
         // Act
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, false, true);
-        emit RoleRevoked(
-            RULES_MANAGEMENT_ROLE,
-            ADDRESS1,
-            RULE_ENGINE_OPERATOR_ADDRESS
-        );
+        emit RoleRevoked(RULES_MANAGEMENT_ROLE, ADDRESS1, RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.revokeRole(RULES_MANAGEMENT_ROLE, ADDRESS1);
         // Assert
         bool res2 = ruleEngineMock.hasRole(RULES_MANAGEMENT_ROLE, ADDRESS1);
@@ -73,13 +59,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
         assertFalse(res1);
 
         // Act
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ADDRESS2,
-                DEFAULT_ADMIN_ROLE
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE));
         vm.prank(ADDRESS2);
         ruleEngineMock.grantRole(RULES_MANAGEMENT_ROLE, ADDRESS2);
         // Assert
@@ -101,13 +81,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
 
         // Act
         vm.prank(ADDRESS2);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ADDRESS2,
-                DEFAULT_ADMIN_ROLE
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE));
         ruleEngineMock.revokeRole(RULES_MANAGEMENT_ROLE, ADDRESS1);
 
         // Assert

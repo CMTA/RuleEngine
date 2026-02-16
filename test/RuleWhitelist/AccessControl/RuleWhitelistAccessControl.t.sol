@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
+
 
 /**
  * @title Tests on the Access Control
@@ -14,19 +16,12 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
     }
 
     function testCannotAttackerAddAddressToTheList() public {
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ATTACKER,
-                ADDRESS_LIST_ADD_ROLE
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, ADDRESS_LIST_ADD_ROLE)
         );
         vm.prank(ATTACKER);
         ruleWhitelist.addAddressToTheList(ADDRESS1);
@@ -48,19 +43,11 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
 
         // Act
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ATTACKER,
-                ADDRESS_LIST_ADD_ROLE
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, ADDRESS_LIST_ADD_ROLE)
         );
         vm.prank(ATTACKER);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheList(address[])",
-                whitelist
-            )
-        );
+        (resCallBool,) =
+            address(ruleWhitelist).call(abi.encodeWithSignature("addAddressesToTheList(address[])", whitelist));
 
         // Assert
         assertEq(resCallBool, true);
@@ -85,11 +72,7 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
 
         // Act
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ATTACKER,
-                ADDRESS_LIST_REMOVE_ROLE
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, ADDRESS_LIST_REMOVE_ROLE)
         );
         vm.prank(ATTACKER);
         ruleWhitelist.removeAddressFromTheList(ADDRESS1);
@@ -107,12 +90,8 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheList(address[])",
-                whitelist
-            )
-        );
+        (resCallBool,) =
+            address(ruleWhitelist).call(abi.encodeWithSignature("addAddressesToTheList(address[])", whitelist));
         assertEq(resCallBool, true);
         // Arrange - Assert
         resBool = ruleWhitelist.addressIsListed(ADDRESS1);
@@ -122,19 +101,11 @@ contract RuleWhitelistAccessControl is Test, HelperContract {
 
         // Act
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ATTACKER,
-                ADDRESS_LIST_REMOVE_ROLE
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, ADDRESS_LIST_REMOVE_ROLE)
         );
         vm.prank(ATTACKER);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "removeAddressesFromTheList(address[])",
-                whitelist
-            )
-        );
+        (resCallBool,) =
+            address(ruleWhitelist).call(abi.encodeWithSignature("removeAddressesFromTheList(address[])", whitelist));
         // Assert
         assertEq(resCallBool, true);
         resBool = ruleWhitelist.addressIsListed(ADDRESS1);

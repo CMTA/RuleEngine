@@ -3,20 +3,20 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-import {AccessControl} from "OZ/access/AccessControl.sol";
 import {EnumerableSet} from "OZ/utils/structs/EnumerableSet.sol";
+import {Context} from "OZ/utils/Context.sol";
 /* ==== Interface and other library === */
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
 
-abstract contract ERC3643ComplianceModule is IERC3643Compliance, AccessControl {
+abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
     /* ==== State Variables === */
     // Token binding tracking
     EnumerableSet.AddressSet private _boundTokens;
     // Access Control
-    bytes32 public constant COMPLIANCE_MANAGER_ROLE =
-        keccak256("COMPLIANCE_MANAGER_ROLE");
+    // Will not be present in the final bytecode if not used
+    bytes32 public constant COMPLIANCE_MANAGER_ROLE = keccak256("COMPLIANCE_MANAGER_ROLE");
 
     /* ==== Errors === */
     error RuleEngine_ERC3643Compliance_InvalidTokenAddress();
@@ -27,9 +27,12 @@ abstract contract ERC3643ComplianceModule is IERC3643Compliance, AccessControl {
 
     /* ==== Modifier === */
     modifier onlyBoundToken() {
-        if (!_boundTokens.contains(_msgSender())) {
-            revert RuleEngine_ERC3643Compliance_UnauthorizedCaller();
-        }
+        _checkBoundToken();
+        _;
+    }
+
+    modifier onlyComplianceManager() {
+        _onlyComplianceManager();
         _;
     }
 
@@ -39,23 +42,17 @@ abstract contract ERC3643ComplianceModule is IERC3643Compliance, AccessControl {
 
     /* ============ State functions ============ */
     /// @inheritdoc IERC3643Compliance
-    function bindToken(
-        address token
-    ) public virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {
+    function bindToken(address token) public virtual override onlyComplianceManager {
         _bindToken(token);
     }
 
     /// @inheritdoc IERC3643Compliance
-    function unbindToken(
-        address token
-    ) public virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {
+    function unbindToken(address token) public virtual override onlyComplianceManager {
         _unbindToken(token);
     }
 
     /// @inheritdoc IERC3643Compliance
-    function isTokenBound(
-        address token
-    ) public view virtual override returns (bool) {
+    function isTokenBound(address token) public view virtual override returns (bool) {
         return _boundTokens.contains(token);
     }
 
@@ -80,33 +77,26 @@ abstract contract ERC3643ComplianceModule is IERC3643Compliance, AccessControl {
     //////////////////////////////////////////////////////////////*/
 
     function _unbindToken(address token) internal {
-        require(
-            _boundTokens.contains(token),
-            RuleEngine_ERC3643Compliance_TokenNotBound()
-        );
+        require(_boundTokens.contains(token), RuleEngine_ERC3643Compliance_TokenNotBound());
         // Should never revert because we check if the token address is already set before
-        require(
-            _boundTokens.remove(token),
-            RuleEngine_ERC3643Compliance_OperationNotSuccessful()
-        );
+        require(_boundTokens.remove(token), RuleEngine_ERC3643Compliance_OperationNotSuccessful());
 
         emit TokenUnbound(token);
     }
 
     function _bindToken(address token) internal {
-        require(
-            token != address(0),
-            RuleEngine_ERC3643Compliance_InvalidTokenAddress()
-        );
-        require(
-            !_boundTokens.contains(token),
-            RuleEngine_ERC3643Compliance_TokenAlreadyBound()
-        );
+        require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
+        require(!_boundTokens.contains(token), RuleEngine_ERC3643Compliance_TokenAlreadyBound());
         // Should never revert because we check if the token address is already set before
-        require(
-            _boundTokens.add(token),
-            RuleEngine_ERC3643Compliance_OperationNotSuccessful()
-        );
+        require(_boundTokens.add(token), RuleEngine_ERC3643Compliance_OperationNotSuccessful());
         emit TokenBound(token);
     }
+
+    function _checkBoundToken() internal view virtual{
+        if (!_boundTokens.contains(_msgSender())) {
+            revert RuleEngine_ERC3643Compliance_UnauthorizedCaller();
+        }
+    }
+
+    function _onlyComplianceManager() internal virtual;
 }

@@ -1,0 +1,89 @@
+//SPDX-License-Identifier: MPL-2.0
+pragma solidity ^0.8.20;
+
+// forge-lint: disable-next-line(unused-import)
+import {Test} from "forge-std/Test.sol";
+import {CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
+
+import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
+import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
+// RuleEngineOwnable
+import {RuleEngineOwnable} from "src/RuleEngineOwnable.sol";
+// forge-lint: disable-next-line(unused-import)
+import {RulesManagementModule} from "src/RuleEngineBase.sol";
+// forge-lint: disable-next-line(unused-import)
+import {ERC3643ComplianceModule} from "src/RuleEngineBase.sol";
+// RuleConditionalTransfer
+import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
+import {
+    RuleConditionalTransferLightInvariantStorage
+} from "src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol";
+// RuleWhitelist
+import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
+import {
+    RuleWhitelistInvariantStorage
+} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
+import {
+    RuleAddressListInvariantStorage
+} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
+
+// Rule interface
+// forge-lint: disable-next-line(unused-import)
+import {IRule} from "src/interfaces/IRule.sol";
+
+// utils
+import {CMTATDeployment} from "./utils/CMTATDeployment.sol";
+
+/**
+ * @title Constants used by the tests for RuleEngineOwnable
+ */
+abstract contract HelperContractOwnable is
+    RuleWhitelistInvariantStorage,
+    RuleAddressListInvariantStorage,
+    RuleEngineInvariantStorage,
+    RuleConditionalTransferLightInvariantStorage,
+    RulesManagementModuleInvariantStorage
+{
+    // Test result
+    uint256 internal resUint256;
+    uint8 internal resUint8;
+    bool internal resBool;
+    bool internal resCallBool;
+    string internal resString;
+    address internal resAddr;
+    // EOA to perform tests
+    address constant ZERO_ADDRESS = address(0);
+    address constant OWNER_ADDRESS = address(1);
+    address constant WHITELIST_OPERATOR_ADDRESS = address(2);
+    address constant RULE_ENGINE_OPERATOR_ADDRESS = address(3);
+    address constant CONDITIONAL_TRANSFER_OPERATOR_ADDRESS = address(9);
+    address constant ATTACKER = address(4);
+    address constant ADDRESS1 = address(5);
+    address constant ADDRESS2 = address(6);
+    address constant ADDRESS3 = address(7);
+    address constant NEW_OWNER_ADDRESS = address(8);
+
+    // contract
+    RuleWhitelist public ruleWhitelist;
+    RuleConditionalTransferLight public ruleConditionalTransferLight;
+
+    // CMTAT
+    CMTATDeployment cmtatDeployment;
+    CMTATStandalone cmtatContract;
+
+    // RuleEngineOwnable Mock
+    RuleEngineOwnable public ruleEngineMock;
+
+    uint8 constant NO_ERROR = 0;
+    uint8 codeNonexistent = 255;
+    // Defined in CMTAT.sol
+    uint8 constant TRANSFER_OK = 0;
+    string constant TEXT_TRANSFER_OK = "NoRestriction";
+    // Forwarder
+    string ERC2771ForwarderDomain = "ERC2771ForwarderDomain";
+
+    error Rulelist_AddressAlreadylisted();
+    error Rulelist_AddressNotPresent();
+
+    constructor() {}
+}

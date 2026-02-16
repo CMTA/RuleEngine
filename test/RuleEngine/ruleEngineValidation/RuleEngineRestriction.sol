@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
-import "OZ/token/ERC20/IERC20.sol";
+
+
 
 /**
  * @title tests concerning the restrictions and  for the transfers
@@ -13,16 +15,9 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
 
     // Arrange
     function setUp() public {
-        ruleWhitelist = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
         // Arrange - Assert
@@ -30,16 +25,11 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         assertEq(resUint256, 1);
 
         // Arrange
-        ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         IRule[] memory ruleWhitelistTab = new IRule[](1);
         ruleWhitelistTab[0] = ruleWhitelist1;
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        (bool success, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRules, ruleWhitelistTab)
-        );
+        (bool success,) = address(ruleEngineMock).call(abi.encodeCall(ruleEngineMock.setRules, ruleWhitelistTab));
 
         // Arrange - Assert
         assertEq(success, true);
@@ -53,11 +43,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         ruleWhitelist1.addAddressToTheList(ADDRESS2);
 
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, 0);
@@ -65,11 +51,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // ruleEngine
 
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, 0);
@@ -77,12 +59,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
 
     function testCanDetectTransferRestrictionWithSpender() public {
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_ADDRESS_SPENDER_NOT_WHITELISTED);
@@ -90,12 +67,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // ruleEngine
 
         // Act
-        resBool = ruleEngineMock.canTransferFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = ruleEngineMock.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
         // Assert
         assertFalse(resBool);
     }
@@ -105,22 +77,13 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist1.addAddressToTheList(ADDRESS3);
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_ADDRESS_FROM_NOT_WHITELISTED);
 
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_ADDRESS_FROM_NOT_WHITELISTED);
@@ -128,22 +91,13 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // ruleEngine
 
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_ADDRESS_FROM_NOT_WHITELISTED);
 
         // Act
-        resBool = ruleEngineMock.canTransferFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = ruleEngineMock.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
         // Assert
         assertFalse(resBool);
 
@@ -158,11 +112,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         ruleWhitelist1.addAddressToTheList(ADDRESS1);
 
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_ADDRESS_TO_NOT_WHITELISTED);
@@ -170,11 +120,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // ruleEngine
 
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_ADDRESS_TO_NOT_WHITELISTED);
@@ -184,21 +130,14 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         // Assert
         assertFalse(resBool);
 
-        resBool = ruleEngineMock.canTransferFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = ruleEngineMock.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
         // Assert
         assertFalse(resBool);
     }
 
     function testMessageForTransferRestrictionWithValidRC() public {
         // Act
-        resString = ruleEngineMock.messageForTransferRestriction(
-            CODE_ADDRESS_FROM_NOT_WHITELISTED
-        );
+        resString = ruleEngineMock.messageForTransferRestriction(CODE_ADDRESS_FROM_NOT_WHITELISTED);
 
         // Assert
         assertEq(resString, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
@@ -216,9 +155,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         assertEq(resString, "Unknown restriction code");
     }
 
-    function testMessageForTransferRestrictionWithUnknownRestrictionCode()
-        public
-    {
+    function testMessageForTransferRestrictionWithUnknownRestrictionCode() public {
         // Act
         resString = ruleEngineMock.messageForTransferRestriction(50);
 

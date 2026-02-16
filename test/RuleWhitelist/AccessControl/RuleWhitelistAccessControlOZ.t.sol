@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
-import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+import {AccessControl} from "OZ/access/AccessControl.sol";
+
 
 /**
  * @title Tests on the provided functions by OpenZeppelin
@@ -12,21 +14,14 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
     }
 
     function testCanGrantRoleAsAdmin() public {
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, false, true);
-        emit RoleGranted(
-            ADDRESS_LIST_ADD_ROLE,
-            ADDRESS1,
-            WHITELIST_OPERATOR_ADDRESS
-        );
+        emit RoleGranted(ADDRESS_LIST_ADD_ROLE, ADDRESS1, WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.grantRole(ADDRESS_LIST_ADD_ROLE, ADDRESS1);
         // Assert
         bool res1 = ruleWhitelist.hasRole(ADDRESS_LIST_ADD_ROLE, ADDRESS1);
@@ -44,11 +39,7 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         vm.expectEmit(true, true, false, true);
-        emit RoleRevoked(
-            ADDRESS_LIST_ADD_ROLE,
-            ADDRESS1,
-            WHITELIST_OPERATOR_ADDRESS
-        );
+        emit RoleRevoked(ADDRESS_LIST_ADD_ROLE, ADDRESS1, WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.revokeRole(ADDRESS_LIST_ADD_ROLE, ADDRESS1);
         // Assert
         bool res2 = ruleWhitelist.hasRole(ADDRESS_LIST_ADD_ROLE, ADDRESS1);
@@ -61,13 +52,7 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
         assertFalse(res1);
 
         // Act
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ADDRESS2,
-                DEFAULT_ADMIN_ROLE
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE));
         vm.prank(ADDRESS2);
         ruleWhitelist.grantRole(ADDRESS_LIST_ADD_ROLE, ADDRESS1);
         // Assert
@@ -89,13 +74,7 @@ contract RuleWhitelistAccessControlOZ is Test, HelperContract, AccessControl {
 
         // Act
         vm.prank(ADDRESS2);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ADDRESS2,
-                DEFAULT_ADMIN_ROLE
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ADDRESS2, DEFAULT_ADMIN_ROLE));
         ruleWhitelist.revokeRole(ADDRESS_LIST_ADD_ROLE, ADDRESS1);
 
         // Assert

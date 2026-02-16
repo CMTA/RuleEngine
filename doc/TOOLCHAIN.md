@@ -16,12 +16,11 @@ This section concerns the packages installed in the section `devDependencies` of
 
 [Hardhat](https://hardhat.org/) plugin for integration with Foundry
 
-**[Ethlint](https://github.com/duaraghav8/Ethlint)**
-Solidity static analyzer.
+**[Foundry forge fmt](https://book.getfoundry.sh/reference/forge/forge-fmt)**
+Solidity code formatter integrated with the Foundry toolchain.
 
-**[prettier-plugin-solidity](https://github.com/prettier-solidity/prettier-plugin-solidity)**
-
-A [Prettier plugin](https://prettier.io/docs/en/plugins.html) for automatically formatting your [Solidity](https://github.com/ethereum/solidity) code.
+**[Foundry forge lint](https://book.getfoundry.sh/reference/forge/forge-lint)**
+Solidity linter integrated with the Foundry toolchain.
 
 #### Documentation
 
@@ -130,21 +129,21 @@ slither .  --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-s
 
 ## Code style guidelines
 
-We use the following tools to ensure consistent coding style:
+We use the following Foundry tools to ensure consistent coding style:
 
-[Prettier](https://github.com/prettier-solidity/prettier-plugin-solidity)
+**[forge fmt](https://book.getfoundry.sh/reference/forge/forge-fmt)** — Solidity formatter
 
-```
-npm run-script lint:sol:prettier 
-```
+```bash
+# Format all files
+forge fmt
 
-[Ethlint / Solium](https://github.com/duaraghav8/Ethlint)
-
-```
-npm run-script lint:sol 
-npm run-script lint:sol:fix 
-npm run-script lint:sol:test 
-npm run-script lint:sol:test:fix
+# Check formatting without modifying files
+forge fmt --check
 ```
 
-The related components can be installed with `npm install` (see [package.json](./package.json)). 
+**[forge lint](https://book.getfoundry.sh/reference/forge/forge-lint)** — Solidity linter
+
+```bash
+# Run linter on all files
+forge lint
+```

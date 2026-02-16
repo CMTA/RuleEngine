@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2025-08-15 12:12:38</td>
+            <td class="headerValue">2026-02-16 13:49:21</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">1</td>
@@ -74,25 +74,27 @@
 <a name="3"><span class="lineNum">       3 </span>                :            : pragma solidity ^0.8.20;</a>
 <a name="4"><span class="lineNum">       4 </span>                :            : </a>
 <a name="5"><span class="lineNum">       5 </span>                :            : /* ==== CMTAT === */</a>
-<a name="6"><span class="lineNum">       6 </span>                :            : import {IERC3643Base} from &quot;CMTAT/interfaces/tokenization/IERC3643Partial.sol&quot;;</a>
-<a name="7"><span class="lineNum">       7 </span>                :            : abstract contract VersionModule is IERC3643Base {</a>
-<a name="8"><span class="lineNum">       8 </span>                :            :     /* ============ State Variables ============ */</a>
-<a name="9"><span class="lineNum">       9 </span>                :            :     /** </a>
-<a name="10"><span class="lineNum">      10 </span>                :            :     * @dev </a>
-<a name="11"><span class="lineNum">      11 </span>                :            :     * Get the current version of the smart contract</a>
-<a name="12"><span class="lineNum">      12 </span>                :            :     */</a>
-<a name="13"><span class="lineNum">      13 </span>                :            :     string private constant VERSION = &quot;3.0.0&quot;;</a>
-<a name="14"><span class="lineNum">      14 </span>                :            :     /* ============ Events ============ */</a>
-<a name="15"><span class="lineNum">      15 </span>                :            :     /*//////////////////////////////////////////////////////////////</a>
-<a name="16"><span class="lineNum">      16 </span>                :            :                             PUBLIC/EXTERNAL FUNCTIONS</a>
-<a name="17"><span class="lineNum">      17 </span>                :            :     //////////////////////////////////////////////////////////////*/</a>
-<a name="18"><span class="lineNum">      18 </span>                :            :     /**</a>
-<a name="19"><span class="lineNum">      19 </span>                :            :     * @inheritdoc IERC3643Base</a>
-<a name="20"><span class="lineNum">      20 </span>                :            :     */</a>
-<a name="21"><span class="lineNum">      21 </span>                :<span class="lineCov">          1 :     function version() public view virtual override(IERC3643Base) returns (string memory version_) {</span></a>
-<a name="22"><span class="lineNum">      22 </span>                :<span class="lineCov">          1 :        return VERSION;</span></a>
-<a name="23"><span class="lineNum">      23 </span>                :            :     }</a>
-<a name="24"><span class="lineNum">      24 </span>                :            : }</a>
+<a name="6"><span class="lineNum">       6 </span>                :            : import {IERC3643Version} from &quot;CMTAT/interfaces/tokenization/IERC3643Partial.sol&quot;;</a>
+<a name="7"><span class="lineNum">       7 </span>                :            : </a>
+<a name="8"><span class="lineNum">       8 </span>                :            : abstract contract VersionModule is IERC3643Version {</a>
+<a name="9"><span class="lineNum">       9 </span>                :            :     /* ============ State Variables ============ */</a>
+<a name="10"><span class="lineNum">      10 </span>                :            :     /**</a>
+<a name="11"><span class="lineNum">      11 </span>                :            :      * @dev</a>
+<a name="12"><span class="lineNum">      12 </span>                :            :      * Get the current version of the smart contract</a>
+<a name="13"><span class="lineNum">      13 </span>                :            :      */</a>
+<a name="14"><span class="lineNum">      14 </span>                :            :     string private constant VERSION = &quot;3.0.0&quot;;</a>
+<a name="15"><span class="lineNum">      15 </span>                :            : </a>
+<a name="16"><span class="lineNum">      16 </span>                :            :     /* ============ Events ============ */</a>
+<a name="17"><span class="lineNum">      17 </span>                :            :     /*//////////////////////////////////////////////////////////////</a>
+<a name="18"><span class="lineNum">      18 </span>                :            :                             PUBLIC/EXTERNAL FUNCTIONS</a>
+<a name="19"><span class="lineNum">      19 </span>                :            :     //////////////////////////////////////////////////////////////*/</a>
+<a name="20"><span class="lineNum">      20 </span>                :            :     /**</a>
+<a name="21"><span class="lineNum">      21 </span>                :            :      * @inheritdoc IERC3643Version</a>
+<a name="22"><span class="lineNum">      22 </span>                :            :      */</a>
+<a name="23"><span class="lineNum">      23 </span>                :<span class="lineCov">          2 :     function version() public view virtual override(IERC3643Version) returns (string memory version_) {</span></a>
+<a name="24"><span class="lineNum">      24 </span>                :<span class="lineCov">          2 :         return VERSION;</span></a>
+<a name="25"><span class="lineNum">      25 </span>                :            :     }</a>
+<a name="26"><span class="lineNum">      26 </span>                :            : }</a>
 </pre>
       </td>
     </tr>

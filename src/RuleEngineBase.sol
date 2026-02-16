@@ -3,9 +3,9 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-import {AccessControl} from "OZ/access/AccessControl.sol";
+import {ERC165Checker} from "OZ/utils/introspection/ERC165Checker.sol";
 /* ==== CMTAT === */
-import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
+import {IRuleEngine, IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {IERC1404, IERC1404Extend} from "CMTAT/interfaces/tokenization/draft-IERC1404.sol";
 import {IERC3643ComplianceRead, IERC3643IComplianceContract} from "CMTAT/interfaces/tokenization/IERC3643Partial.sol";
 import {IERC7551Compliance} from "CMTAT/interfaces/tokenization/draft-IERC7551.sol";
@@ -18,6 +18,7 @@ import {RulesManagementModule} from "./modules/RulesManagementModule.sol";
 /* ==== Interface and other library === */
 import {IRule} from "./interfaces/IRule.sol";
 import {RuleEngineInvariantStorage} from "./modules/library/RuleEngineInvariantStorage.sol";
+import {RuleInterfaceId} from "./modules/library/RuleInterfaceId.sol";
 
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
@@ -27,18 +28,18 @@ abstract contract RuleEngineBase is
     RulesManagementModule,
     ERC3643ComplianceModule,
     RuleEngineInvariantStorage,
-    IRuleEngine
+    IRuleEngineERC1404
 {
     /* ============ State functions ============ */
     /*
      * @inheritdoc IRuleEngine
      */
-    function transferred(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) public virtual override(IRuleEngine) onlyBoundToken {
+    function transferred(address spender, address from, address to, uint256 value)
+        public
+        virtual
+        override(IRuleEngine)
+        onlyBoundToken
+    {
         // Apply  on RuleEngine
         RulesManagementModule._transferred(spender, from, to, value);
     }
@@ -46,27 +47,22 @@ abstract contract RuleEngineBase is
     /**
      * @inheritdoc IERC3643IComplianceContract
      */
-    function transferred(
-        address from,
-        address to,
-        uint256 value
-    ) public virtual override(IERC3643IComplianceContract) onlyBoundToken {
+    function transferred(address from, address to, uint256 value)
+        public
+        virtual
+        override(IERC3643IComplianceContract)
+        onlyBoundToken
+    {
         _transferred(from, to, value);
     }
 
     /// @inheritdoc IERC3643Compliance
-    function created(
-        address to,
-        uint256 value
-    ) public virtual override(IERC3643Compliance) onlyBoundToken {
+    function created(address to, uint256 value) public virtual override(IERC3643Compliance) onlyBoundToken {
         _transferred(address(0), to, value);
     }
 
     /// @inheritdoc IERC3643Compliance
-    function destroyed(
-        address from,
-        uint256 value
-    ) public virtual override(IERC3643Compliance) onlyBoundToken {
+    function destroyed(address from, uint256 value) public virtual override(IERC3643Compliance) onlyBoundToken {
         _transferred(from, address(0), value);
     }
 
@@ -77,112 +73,118 @@ abstract contract RuleEngineBase is
      * @param to the destination address
      * @param value to transfer
      * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK (0) if the transfer is valid
-     **/
-    function detectTransferRestriction(
-        address from,
-        address to,
-        uint256 value
-    ) public view virtual override returns (uint8) {
-        uint256 rulesLength = rulesCount();
-        for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRule(rule(i)).detectTransferRestriction(
-                from,
-                to,
-                value
-            );
-            if (restriction > 0) {
-                return restriction;
-            }
-        }
-        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+     *
+     */
+    function detectTransferRestriction(address from, address to, uint256 value)
+        public
+        view
+        virtual
+        override(IERC1404)
+        returns (uint8)
+    {
+        return _detectTransferRestriction(from, to, value);
     }
 
     /**
      * @inheritdoc IERC1404Extend
      */
-    function detectTransferRestrictionFrom(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) public view virtual override(IERC1404Extend) returns (uint8) {
-        uint256 rulesLength = rulesCount();
-        for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRule(rule(i)).detectTransferRestrictionFrom(
-                spender,
-                from,
-                to,
-                value
-            );
-            if (restriction > 0) {
-                return restriction;
-            }
-        }
-
-        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    function detectTransferRestrictionFrom(address spender, address from, address to, uint256 value)
+        public
+        view
+        virtual
+        override(IERC1404Extend)
+        returns (uint8)
+    {
+        return _detectTransferRestrictionFrom(spender, from, to, value);
     }
 
     /**
      * @inheritdoc IERC1404
      */
-    function messageForTransferRestriction(
-        uint8 restrictionCode
-    ) public view virtual override(IERC1404) returns (string memory) {
+    function messageForTransferRestriction(uint8 restrictionCode)
+        public
+        view
+        virtual
+        override(IERC1404)
+        returns (string memory)
+    {
+        return _messageForTransferRestriction(restrictionCode);
+    }
+
+    /**
+     * @inheritdoc IERC3643ComplianceRead
+     */
+    function canTransfer(address from, address to, uint256 value)
+        public
+        view
+        virtual
+        override(IERC3643ComplianceRead)
+        returns (bool)
+    {
+        return detectTransferRestriction(from, to, value) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+    /**
+     * @inheritdoc IERC7551Compliance
+     */
+    function canTransferFrom(address spender, address from, address to, uint256 value)
+        public
+        view
+        virtual
+        override(IERC7551Compliance)
+        returns (bool)
+    {
+        return detectTransferRestrictionFrom(spender, from, to, value) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL/PRIVATE FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+    function _detectTransferRestriction(address from, address to, uint256 value) internal view virtual returns (uint8) {
+        uint256 rulesLength = rulesCount();
+        for (uint256 i = 0; i < rulesLength; ++i) {
+            uint8 restriction = IRule(rule(i)).detectTransferRestriction(from, to, value);
+            if (restriction > 0) {
+                return restriction;
+            }
+        }
+        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+    function _detectTransferRestrictionFrom(address spender, address from, address to, uint256 value)
+        internal
+        view
+        virtual
+        returns (uint8)
+    {
+        uint256 rulesLength = rulesCount();
+        for (uint256 i = 0; i < rulesLength; ++i) {
+            uint8 restriction = IRule(rule(i)).detectTransferRestrictionFrom(spender, from, to, value);
+            if (restriction > 0) {
+                return restriction;
+            }
+        }
+        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+    function _messageForTransferRestriction(uint8 restrictionCode) internal view virtual returns (string memory) {
         //
         uint256 rulesLength = rulesCount();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            if (
-                IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)
-            ) {
-                return
-                    IRule(rule(i)).messageForTransferRestriction(
-                        restrictionCode
-                    );
+            if (IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)) {
+                return IRule(rule(i)).messageForTransferRestriction(restrictionCode);
             }
         }
         return "Unknown restriction code";
     }
 
     /**
-     * @inheritdoc IERC3643ComplianceRead
+     * @dev Override to add ERC-165 interface check for the full IRule hierarchy.
      */
-    function canTransfer(
-        address from,
-        address to,
-        uint256 value
-    ) public view virtual override(IERC3643ComplianceRead) returns (bool) {
-        return
-            detectTransferRestriction(from, to, value) ==
-            uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-    }
-
-    /**
-     * @inheritdoc IERC7551Compliance
-     */
-    function canTransferFrom(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) public view virtual override(IERC7551Compliance) returns (bool) {
-        return
-            detectTransferRestrictionFrom(spender, from, to, value) ==
-            uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-    }
-
-    /* ============ ACCESS CONTROL ============ */
-    /**
-     * @notice Returns `true` if `account` has been granted `role`.
-     * @dev The Default Admin has all roles
-     */
-    function hasRole(
-        bytes32 role,
-        address account
-    ) public view virtual override(AccessControl) returns (bool) {
-        if (AccessControl.hasRole(DEFAULT_ADMIN_ROLE, account)) {
-            return true;
-        } else {
-            return AccessControl.hasRole(role, account);
+    function _checkRule(address rule_) internal view virtual override {
+        super._checkRule(rule_);
+        if (!ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)) {
+            revert RuleEngine_RuleInvalidInterface();
         }
     }
 }
