@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/RulesManagementModule.sol | 01d405489c52d6b0e2feac077bfe0b4a95078119 |
+| ./modules/RulesManagementModule.sol | eeb11b9ffc70fab119916187e532b859c6b45a37 |
 
 
 ### Contracts Description Table
@@ -16,10 +16,10 @@
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
 | **RulesManagementModule** | Implementation | AccessControl, RulesManagementModuleInvariantStorage, IRulesManagementModule |||
-| └ | setRules | Public ❗️ | 🛑  | onlyRole |
-| └ | clearRules | Public ❗️ | 🛑  | onlyRole |
-| └ | addRule | Public ❗️ | 🛑  | onlyRole |
-| └ | removeRule | Public ❗️ | 🛑  | onlyRole |
+| └ | setRules | Public ❗️ | 🛑  | onlyRulesManager |
+| └ | clearRules | Public ❗️ | 🛑  | onlyRulesManager |
+| └ | addRule | Public ❗️ | 🛑  | onlyRulesManager |
+| └ | removeRule | Public ❗️ | 🛑  | onlyRulesManager |
 | └ | rulesCount | Public ❗️ |   |NO❗️ |
 | └ | containsRule | Public ❗️ |   |NO❗️ |
 | └ | rule | Public ❗️ |   |NO❗️ |
@@ -29,6 +29,7 @@
 | └ | _checkRule | Internal 🔒 |   | |
 | └ | _transferred | Internal 🔒 | 🛑  | |
 | └ | _transferred | Internal 🔒 | 🛑  | |
+| └ | _onlyRulesManager | Internal 🔒 | 🛑  | |
 
 
 ### Legend

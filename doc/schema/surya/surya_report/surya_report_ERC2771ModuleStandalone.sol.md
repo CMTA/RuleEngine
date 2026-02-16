@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/library/RuleEngineInvariantStorage.sol | 7527e9b9ec804221911c77b3f9724e7bda7a5ab8 |
+| ./modules/ERC2771ModuleStandalone.sol | 711c9961fcf6e50381cc0bfd8bcb7d9014fbfac6 |
 
 
 ### Contracts Description Table
@@ -15,7 +15,8 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleEngineInvariantStorage** | Implementation |  |||
+| **ERC2771ModuleStandalone** | Implementation | ERC2771Context |||
+| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771Context |
 
 
 ### Legend

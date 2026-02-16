@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/library/RuleEngineInvariantStorage.sol | 7527e9b9ec804221911c77b3f9724e7bda7a5ab8 |
+| ./mocks/RuleEngineExposed.sol | 74134ecee35fced78e2e03658fc9d19ffad7c284 |
 
 
 ### Contracts Description Table
@@ -15,7 +15,13 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleEngineInvariantStorage** | Implementation |  |||
+| **RuleEngineExposed** | Implementation | RuleEngine |||
+| └ | <Constructor> | Public ❗️ | 🛑  | RuleEngine |
+| └ | exposedMsgData | External ❗️ |   |NO❗️ |
+||||||
+| **RuleEngineOwnableExposed** | Implementation | RuleEngineOwnable |||
+| └ | <Constructor> | Public ❗️ | 🛑  | RuleEngineOwnable |
+| └ | exposedMsgData | External ❗️ |   |NO❗️ |
 
 
 ### Legend

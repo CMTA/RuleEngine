@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/operation/RuleConditionalTransferLight.sol | 563d9f2f21be53c588c4605313e344de5b74bf36 |
+| ./mocks/rules/operation/RuleConditionalTransferLight.sol | 800f450efe2ffe3a0ad617b93ee7bfa00eca3c9b |
 
 
 ### Contracts Description Table
@@ -17,6 +17,7 @@
 ||||||
 | **RuleConditionalTransferLight** | Implementation | AccessControl, RuleConditionalTransferLightInvariantStorage, IRule |||
 | └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
+| └ | supportsInterface | Public ❗️ |   |NO❗️ |
 | └ | approveTransfer | Public ❗️ | 🛑  | onlyRole |
 | └ | approvedCount | Public ❗️ |   |NO❗️ |
 | └ | transferred | Public ❗️ | 🛑  |NO❗️ |

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/validation/abstract/RuleAddressList/RuleAddressList.sol | 75a87c2d2af981e5c3afefb70a9fbcc13e1ba26b |
+| ./mocks/rules/validation/abstract/RuleAddressList/RuleAddressList.sol | f43b3ee11584c110d14e6decb08078e620431e76 |
 
 
 ### Contracts Description Table
@@ -15,8 +15,8 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleAddressList** | Implementation | AccessControl, MetaTxModuleStandalone, RuleAddressListInternal, RuleAddressListInvariantStorage |||
-| └ | <Constructor> | Public ❗️ | 🛑  | MetaTxModuleStandalone |
+| **RuleAddressList** | Implementation | AccessControl, ERC2771ModuleStandalone, RuleAddressListInternal, RuleAddressListInvariantStorage |||
+| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771ModuleStandalone |
 | └ | addAddressesToTheList | Public ❗️ | 🛑  | onlyRole |
 | └ | removeAddressesFromTheList | Public ❗️ | 🛑  | onlyRole |
 | └ | addAddressToTheList | Public ❗️ | 🛑  | onlyRole |

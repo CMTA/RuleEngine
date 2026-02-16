@@ -16,7 +16,7 @@ forge lint
 
 - Documentation
   - Perform a code coverage and update the files in the corresponding directory [./doc/coverage](./doc/coverage)
-  - Perform an audit with several audit tools (Mythril and Slither), update the report in the corresponding directory [./doc/security/audits/tools](./doc/security/audits/tools)
+  - Perform an audit with several audit tools (Aderyn and Slither), update the report in the corresponding directory [./doc/security/audits/tools](./doc/security/audits/tools)
   - Update surya doc by running the 3 scripts in [./doc/script](./doc/script)
   - Update changelog
 

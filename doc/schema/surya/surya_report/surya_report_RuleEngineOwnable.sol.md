@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/library/RuleEngineInvariantStorage.sol | 7527e9b9ec804221911c77b3f9724e7bda7a5ab8 |
+| ./RuleEngineOwnable.sol | ee4b074118dd5b6e5081dee278d7dbcc22f633ca |
 
 
 ### Contracts Description Table
@@ -15,7 +15,14 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleEngineInvariantStorage** | Implementation |  |||
+| **RuleEngineOwnable** | Implementation | ERC2771ModuleStandalone, RuleEngineBase, Ownable |||
+| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771ModuleStandalone Ownable |
+| └ | _onlyRulesManager | Internal 🔒 | 🛑  | onlyOwner |
+| └ | _onlyComplianceManager | Internal 🔒 | 🛑  | onlyOwner |
+| └ | supportsInterface | Public ❗️ |   |NO❗️ |
+| └ | _msgSender | Internal 🔒 |   | |
+| └ | _msgData | Internal 🔒 |   | |
+| └ | _contextSuffixLength | Internal 🔒 |   | |
 
 
 ### Legend
