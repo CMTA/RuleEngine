@@ -1,29 +1,13 @@
 {
   "scripts": {
-    "lint:sol": "npx solium -d src",
-    "lint:sol:fix": "npx solium -d src --fix",
-    "lint:sol:test": "npx solium -d test",
-    "lint:sol:test:fix": "npx solium -d test --fix",
-    "lint:sol:script": "npx solium -d script",
-    "lint:sol:script:fix": "npx solium -d script --fix",
-    "lint:sol:prettier": "npx prettier --write 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
     "uml": "npx sol2uml class src",
     "uml:ruleEngine": "npx sol2uml src contracts -b RuleEngine",
     "uml:test": "npx sol2uml class test",
     "surya:report": "npx surya mdreport surya_report_ruleEngine.md src/RuleEngine.sol",
-    "surya:graph": "npx surya graph  src/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png",
-    "docgen": "npx hardhat docgen"
+    "surya:graph": "npx surya graph  src/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-foundry": "^1.0.1",
-    "ethlint": "^1.2.5",
-    "prettier-plugin-solidity": "^1.0.0-rc.1",
-    "sol2uml": "^2.5.20",
-    "solidity-docgen": "^0.6.0-beta.35",
-    "surya": "^0.4.6"
-  },
-  "dependencies": {
-    "@openzeppelin/contracts": "^5.4.0",
-    "@openzeppelin/contracts-upgradeable": "^5.4.0"
+    "surya": "^0.4.13"
   }
 }
