@@ -23,7 +23,10 @@ interface IRuleAllFunctions {
     function detectTransferRestriction(address from, address to, uint256 value) external view returns (uint8);
     function messageForTransferRestriction(uint8 restrictionCode) external view returns (string memory);
     // From IERC1404Extend
-    function detectTransferRestrictionFrom(address spender, address from, address to, uint256 value) external view returns (uint8);
+    function detectTransferRestrictionFrom(address spender, address from, address to, uint256 value)
+        external
+        view
+        returns (uint8);
     // From IRuleEngine
     function transferred(address spender, address from, address to, uint256 value) external;
     // From IERC3643IComplianceContract
@@ -57,17 +60,21 @@ contract IRuleInterfaceIdHelper {
     }
 
     /// @notice Returns individual interface IDs from each parent interface
-    function getParentInterfaceIds() external pure returns (
-        bytes4 iRuleId,
-        bytes4 iRuleEngineERC1404Id,
-        bytes4 iRuleEngineId,
-        bytes4 iERC1404Id,
-        bytes4 iERC1404ExtendId,
-        bytes4 iERC3643ComplianceReadId,
-        bytes4 iERC3643IComplianceContractId,
-        bytes4 iERC7551ComplianceId,
-        bytes4 iERC165Id
-    ) {
+    function getParentInterfaceIds()
+        external
+        pure
+        returns (
+            bytes4 iRuleId,
+            bytes4 iRuleEngineERC1404Id,
+            bytes4 iRuleEngineId,
+            bytes4 iERC1404Id,
+            bytes4 iERC1404ExtendId,
+            bytes4 iERC3643ComplianceReadId,
+            bytes4 iERC3643IComplianceContractId,
+            bytes4 iERC7551ComplianceId,
+            bytes4 iERC165Id
+        )
+    {
         iRuleId = type(IRule).interfaceId;
         iRuleEngineERC1404Id = type(IRuleEngineERC1404).interfaceId;
         iRuleEngineId = type(IRuleEngine).interfaceId;
@@ -81,15 +88,10 @@ contract IRuleInterfaceIdHelper {
 
     /// @notice Manually computes the XOR of all function selectors and returns it
     function computeManualXOR() external pure returns (bytes4) {
-        return
-            IRule.canReturnTransferRestrictionCode.selector ^
-            IERC1404.detectTransferRestriction.selector ^
-            IERC1404.messageForTransferRestriction.selector ^
-            IERC1404Extend.detectTransferRestrictionFrom.selector ^
-            IRuleEngine.transferred.selector ^
-            IERC3643IComplianceContract.transferred.selector ^
-            IERC3643ComplianceRead.canTransfer.selector ^
-            IERC7551Compliance.canTransferFrom.selector ^
-            IERC165.supportsInterface.selector;
+        return IRule.canReturnTransferRestrictionCode.selector ^ IERC1404.detectTransferRestriction.selector
+            ^ IERC1404.messageForTransferRestriction.selector ^ IERC1404Extend.detectTransferRestrictionFrom.selector
+            ^ IRuleEngine.transferred.selector ^ IERC3643IComplianceContract.transferred.selector
+            ^ IERC3643ComplianceRead.canTransfer.selector ^ IERC7551Compliance.canTransferFrom.selector
+            ^ IERC165.supportsInterface.selector;
     }
 }

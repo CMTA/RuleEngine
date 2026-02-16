@@ -16,8 +16,7 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
     EnumerableSet.AddressSet private _boundTokens;
     // Access Control
     // Will not be present in the final bytecode if not used
-    bytes32 public constant COMPLIANCE_MANAGER_ROLE =
-        keccak256("COMPLIANCE_MANAGER_ROLE");
+    bytes32 public constant COMPLIANCE_MANAGER_ROLE = keccak256("COMPLIANCE_MANAGER_ROLE");
 
     /* ==== Errors === */
     error RuleEngine_ERC3643Compliance_InvalidTokenAddress();
@@ -39,30 +38,23 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
         _;
     }
 
-
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/public FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
     /* ============ State functions ============ */
     /// @inheritdoc IERC3643Compliance
-    function bindToken(
-        address token
-    ) public virtual override onlyComplianceManager {
+    function bindToken(address token) public virtual override onlyComplianceManager {
         _bindToken(token);
     }
 
     /// @inheritdoc IERC3643Compliance
-    function unbindToken(
-        address token
-    ) public virtual override onlyComplianceManager {
+    function unbindToken(address token) public virtual override onlyComplianceManager {
         _unbindToken(token);
     }
 
     /// @inheritdoc IERC3643Compliance
-    function isTokenBound(
-        address token
-    ) public view virtual override returns (bool) {
+    function isTokenBound(address token) public view virtual override returns (bool) {
         return _boundTokens.contains(token);
     }
 
@@ -87,33 +79,18 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
     //////////////////////////////////////////////////////////////*/
 
     function _unbindToken(address token) internal {
-        require(
-            _boundTokens.contains(token),
-            RuleEngine_ERC3643Compliance_TokenNotBound()
-        );
+        require(_boundTokens.contains(token), RuleEngine_ERC3643Compliance_TokenNotBound());
         // Should never revert because we check if the token address is already set before
-        require(
-            _boundTokens.remove(token),
-            RuleEngine_ERC3643Compliance_OperationNotSuccessful()
-        );
+        require(_boundTokens.remove(token), RuleEngine_ERC3643Compliance_OperationNotSuccessful());
 
         emit TokenUnbound(token);
     }
 
     function _bindToken(address token) internal {
-        require(
-            token != address(0),
-            RuleEngine_ERC3643Compliance_InvalidTokenAddress()
-        );
-        require(
-            !_boundTokens.contains(token),
-            RuleEngine_ERC3643Compliance_TokenAlreadyBound()
-        );
+        require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
+        require(!_boundTokens.contains(token), RuleEngine_ERC3643Compliance_TokenAlreadyBound());
         // Should never revert because we check if the token address is already set before
-        require(
-            _boundTokens.add(token),
-            RuleEngine_ERC3643Compliance_OperationNotSuccessful()
-        );
+        require(_boundTokens.add(token), RuleEngine_ERC3643Compliance_OperationNotSuccessful());
         emit TokenBound(token);
     }
 

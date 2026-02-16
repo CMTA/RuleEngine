@@ -19,16 +19,8 @@ contract RuleEngineCoverageTest is Test, HelperContract {
     bytes4 constant INVALID_ID = 0xffffffff;
 
     function setUp() public {
-        ruleEngineMock = new RuleEngine(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS
-        );
-        ruleEngineExposed = new RuleEngineExposed(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngineExposed = new RuleEngineExposed(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -69,9 +61,7 @@ contract RuleEngineCoverageTest is Test, HelperContract {
     function testCannotAddRuleWithInvalidInterface() public {
         RuleInvalidMock invalidRule = new RuleInvalidMock();
 
-        vm.expectRevert(
-            RuleEngine_RulesManagementModule_RuleInvalidInterface.selector
-        );
+        vm.expectRevert(RuleEngine_RuleInvalidInterface.selector);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(IRule(address(invalidRule)));
     }
@@ -81,16 +71,14 @@ contract RuleEngineCoverageTest is Test, HelperContract {
         IRule[] memory rules_ = new IRule[](1);
         rules_[0] = IRule(address(invalidRule));
 
-        vm.expectRevert(
-            RuleEngine_RulesManagementModule_RuleInvalidInterface.selector
-        );
+        vm.expectRevert(RuleEngine_RuleInvalidInterface.selector);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.setRules(rules_);
     }
 
     function testCannotAddEOAAsRule() public {
-        // EOA does not implement ERC-165
-        vm.expectRevert();
+        // EOA does not implement ERC-165, ERC165Checker returns false
+        vm.expectRevert(RuleEngine_RuleInvalidInterface.selector);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(IRule(address(0x999)));
     }

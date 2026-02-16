@@ -19,11 +19,7 @@ contract RuleEngineOwnableDeploymentTest is Test, HelperContractOwnable {
         forwarder.initialize(ERC2771ForwarderDomain);
 
         // Act
-        ruleEngineMock = new RuleEngineOwnable(
-            OWNER_ADDRESS,
-            address(forwarder),
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, address(forwarder), ZERO_ADDRESS);
 
         // Assert
         assertEq(ruleEngineMock.owner(), OWNER_ADDRESS);
@@ -33,11 +29,7 @@ contract RuleEngineOwnableDeploymentTest is Test, HelperContractOwnable {
 
     function testReturnZeroAddressForRule() public {
         // Arrange
-        ruleEngineMock = new RuleEngineOwnable(
-            OWNER_ADDRESS,
-            address(0x0),
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, address(0x0), ZERO_ADDRESS);
         // Act
         resAddr = ruleEngineMock.rule(0);
         // Assert
@@ -46,11 +38,7 @@ contract RuleEngineOwnableDeploymentTest is Test, HelperContractOwnable {
 
     function testHasRightVersion() public {
         // Act
-        ruleEngineMock = new RuleEngineOwnable(
-            OWNER_ADDRESS,
-            address(0x0),
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, address(0x0), ZERO_ADDRESS);
 
         // Assert
         assertEq(ruleEngineMock.version(), "3.0.0");
@@ -61,24 +49,14 @@ contract RuleEngineOwnableDeploymentTest is Test, HelperContractOwnable {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         MinimalForwarderMock forwarder = new MinimalForwarderMock();
         forwarder.initialize(ERC2771ForwarderDomain);
-        vm.expectRevert(
-            abi.encodeWithSignature("OwnableInvalidOwner(address)", ZERO_ADDRESS)
-        );
+        vm.expectRevert(abi.encodeWithSignature("OwnableInvalidOwner(address)", ZERO_ADDRESS));
         // Act
-        ruleEngineMock = new RuleEngineOwnable(
-            address(0x0),
-            address(forwarder),
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngineOwnable(address(0x0), address(forwarder), ZERO_ADDRESS);
     }
 
     function testSupportsERC173Interface() public {
         // Arrange
-        ruleEngineMock = new RuleEngineOwnable(
-            OWNER_ADDRESS,
-            address(0x0),
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, address(0x0), ZERO_ADDRESS);
 
         // Act & Assert - ERC-173 interface ID
         assertTrue(ruleEngineMock.supportsInterface(0x7f5828d0));
@@ -89,11 +67,7 @@ contract RuleEngineOwnableDeploymentTest is Test, HelperContractOwnable {
         address tokenAddress = address(0x123);
 
         // Act
-        ruleEngineMock = new RuleEngineOwnable(
-            OWNER_ADDRESS,
-            address(0x0),
-            tokenAddress
-        );
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, address(0x0), tokenAddress);
 
         // Assert
         assertTrue(ruleEngineMock.isTokenBound(tokenAddress));

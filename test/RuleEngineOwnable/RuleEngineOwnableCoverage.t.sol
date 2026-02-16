@@ -20,16 +20,8 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
     bytes4 constant INVALID_ID = 0xffffffff;
 
     function setUp() public {
-        ruleEngineMock = new RuleEngineOwnable(
-            OWNER_ADDRESS,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS
-        );
-        ruleEngineOwnableExposed = new RuleEngineOwnableExposed(
-            OWNER_ADDRESS,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngineOwnableExposed = new RuleEngineOwnableExposed(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -76,9 +68,7 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
     function testCannotAddRuleWithInvalidInterface() public {
         RuleInvalidMock invalidRule = new RuleInvalidMock();
 
-        vm.expectRevert(
-            RuleEngine_RulesManagementModule_RuleInvalidInterface.selector
-        );
+        vm.expectRevert(RuleEngine_RuleInvalidInterface.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(IRule(address(invalidRule)));
     }
@@ -88,10 +78,15 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
         IRule[] memory rules_ = new IRule[](1);
         rules_[0] = IRule(address(invalidRule));
 
-        vm.expectRevert(
-            RuleEngine_RulesManagementModule_RuleInvalidInterface.selector
-        );
+        vm.expectRevert(RuleEngine_RuleInvalidInterface.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setRules(rules_);
+    }
+
+    function testCannotAddEOAAsRule() public {
+        // EOA does not implement ERC-165, ERC165Checker returns false
+        vm.expectRevert(RuleEngine_RuleInvalidInterface.selector);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.addRule(IRule(address(0x999)));
     }
 }

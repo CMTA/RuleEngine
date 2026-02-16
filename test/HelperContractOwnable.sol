@@ -12,11 +12,17 @@ import {RulesManagementModule} from "src/RuleEngineBase.sol";
 import {ERC3643ComplianceModule} from "src/RuleEngineBase.sol";
 // RuleConditionalTransfer
 import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
-import {RuleConditionalTransferLightInvariantStorage} from "src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol";
+import {
+    RuleConditionalTransferLightInvariantStorage
+} from "src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol";
 // RuleWhitelist
 import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
-import {RuleWhitelistInvariantStorage} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
-import {RuleAddressListInvariantStorage} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
+import {
+    RuleWhitelistInvariantStorage
+} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
+import {
+    RuleAddressListInvariantStorage
+} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
 
 // Rule interface
 import {IRule} from "src/interfaces/IRule.sol";

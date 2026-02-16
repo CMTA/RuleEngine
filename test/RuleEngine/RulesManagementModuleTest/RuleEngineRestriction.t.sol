@@ -15,15 +15,9 @@ contract RuleEngineTest is Test, HelperContract {
     // Arrange
     function setUp() public {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS
-        );
-        ruleConditionalTransferLight = new RuleConditionalTransferLight(
-            CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-            ruleEngineMock
-        );
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleConditionalTransferLight =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight);
@@ -38,27 +32,14 @@ contract RuleEngineTest is Test, HelperContract {
 
         vm.expectEmit(true, true, true, true);
         emit TransferApproved(ADDRESS1, ADDRESS2, defaultValue, 1);
-        ruleConditionalTransferLight.approveTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        ruleConditionalTransferLight.approveTransfer(ADDRESS1, ADDRESS2, defaultValue);
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resUint8, 0);
 
-        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(
-            address(0),
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(address(0), ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resUint8, 0);
@@ -68,12 +49,7 @@ contract RuleEngineTest is Test, HelperContract {
         // Assert
         assertEq(resBool, true);
 
-        resBool = ruleEngineMock.canTransferFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resBool = ruleEngineMock.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resBool, true);
@@ -81,22 +57,13 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testCanDetectTransferRestrictionNotOk() public {
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
 
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
@@ -108,12 +75,7 @@ contract RuleEngineTest is Test, HelperContract {
         assertFalse(resBool);
 
         // Act
-        resBool = ruleEngineMock.canTransferFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = ruleEngineMock.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertFalse(resBool);
@@ -131,9 +93,7 @@ contract RuleEngineTest is Test, HelperContract {
         assertEq(resString, "Unknown restriction code");
     }
 
-    function testMessageForTransferRestrictionWithUnknownRestrictionCode()
-        public
-    {
+    function testMessageForTransferRestrictionWithUnknownRestrictionCode() public {
         // Act
         resString = ruleEngineMock.messageForTransferRestriction(50);
 
@@ -143,9 +103,7 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testMessageForTransferRestrictionWithValidRC() public {
         // Act
-        resString = ruleEngineMock.messageForTransferRestriction(
-            CODE_TRANSFER_REQUEST_NOT_APPROVED
-        );
+        resString = ruleEngineMock.messageForTransferRestriction(CODE_TRANSFER_REQUEST_NOT_APPROVED);
 
         // Assert
         assertEq(resString, TEXT_TRANSFER_REQUEST_NOT_APPROVED);

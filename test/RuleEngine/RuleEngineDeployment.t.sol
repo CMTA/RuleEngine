@@ -19,17 +19,10 @@ contract RuleEngineTest is Test, HelperContract {
         forwarder.initialize(ERC2771ForwarderDomain);
 
         // Act
-        ruleEngineMock = new RuleEngine(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            address(forwarder),
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, address(forwarder), ZERO_ADDRESS);
 
         // assert
-        resBool = ruleEngineMock.hasRole(
-            RULES_MANAGEMENT_ROLE,
-            RULE_ENGINE_OPERATOR_ADDRESS
-        );
+        resBool = ruleEngineMock.hasRole(RULES_MANAGEMENT_ROLE, RULE_ENGINE_OPERATOR_ADDRESS);
         assertEq(resBool, true);
         resBool = ruleEngineMock.isTrustedForwarder(address(forwarder));
         assertEq(resBool, true);
@@ -37,11 +30,7 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testReturnZeroAddressForRule() public {
         // Arrange
-        ruleEngineMock = new RuleEngine(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            address(0x0),
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, address(0x0), ZERO_ADDRESS);
         // Act
         resAddr = ruleEngineMock.rule(0);
         // Assert
@@ -50,11 +39,7 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testHasRightVersion() public {
         // Act
-        ruleEngineMock = new RuleEngine(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            address(0x0),
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, address(0x0), ZERO_ADDRESS);
 
         // Assert
         assertEq(ruleEngineMock.version(), "3.0.0");
@@ -67,10 +52,6 @@ contract RuleEngineTest is Test, HelperContract {
         forwarder.initialize(ERC2771ForwarderDomain);
         vm.expectRevert(RuleEngine_AdminWithAddressZeroNotAllowed.selector);
         // Act
-        ruleEngineMock = new RuleEngine(
-            address(0x0),
-            address(forwarder),
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngine(address(0x0), address(forwarder), ZERO_ADDRESS);
     }
 }

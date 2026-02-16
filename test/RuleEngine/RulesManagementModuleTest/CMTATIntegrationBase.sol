@@ -26,15 +26,9 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         CMTAT_CONTRACT.mint(ADDRESS2, defaultValue);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            ZERO_ADDRESS,
-            address(CMTAT_CONTRACT)
-        );
-        ruleConditionalTransferLight = new RuleConditionalTransferLight(
-            CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-            ruleEngineMock
-        );
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, address(CMTAT_CONTRACT));
+        ruleConditionalTransferLight =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight);
@@ -53,48 +47,26 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
 
         vm.expectEmit(true, true, true, true);
         emit TransferApproved(ADDRESS1, ADDRESS2, defaultValue, 1);
-        ruleConditionalTransferLight.approveTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        ruleConditionalTransferLight.approveTransfer(ADDRESS1, ADDRESS2, defaultValue);
         // Act
         // RuleEngine
-        resUint8 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resUint8, 0);
 
-        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(
-            address(0),
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(address(0), ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resUint8, 0);
 
         // CMTAT
-        resUint8 = CMTAT_CONTRACT.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resUint8 = CMTAT_CONTRACT.detectTransferRestriction(ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resUint8, 0);
 
-        resUint8 = CMTAT_CONTRACT.detectTransferRestrictionFrom(
-            address(0),
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resUint8 = CMTAT_CONTRACT.detectTransferRestrictionFrom(address(0), ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resUint8, 0);
@@ -105,12 +77,7 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         // Assert
         assertEq(resBool, true);
 
-        resBool = ruleEngineMock.canTransferFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resBool = ruleEngineMock.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resBool, true);
@@ -121,12 +88,7 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         // Assert
         assertEq(resBool, true);
 
-        resBool = CMTAT_CONTRACT.canTransferFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        resBool = CMTAT_CONTRACT.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resBool, true);
@@ -134,43 +96,25 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
 
     function testCanDetectTransferRestrictionNotOk() public {
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
 
         // CMTAT
-        resUint8 = CMTAT_CONTRACT.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = CMTAT_CONTRACT.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
 
         // Act
-        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleEngineMock.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
 
         // CMTAT
-        resUint8 = CMTAT_CONTRACT.detectTransferRestrictionFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = CMTAT_CONTRACT.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
@@ -188,23 +132,13 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         assertFalse(resBool);
 
         // Act
-        resBool = ruleEngineMock.canTransferFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = ruleEngineMock.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertFalse(resBool);
 
         // CMTAT
-        resBool = CMTAT_CONTRACT.canTransferFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resBool = CMTAT_CONTRACT.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertFalse(resBool);
@@ -212,20 +146,12 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
 
     function testCanPerfromATransfer() public {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
-        ruleConditionalTransferLight.approveTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        ruleConditionalTransferLight.approveTransfer(ADDRESS1, ADDRESS2, defaultValue);
         vm.prank(ADDRESS1);
         CMTAT_CONTRACT.transfer(ADDRESS2, defaultValue);
 
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
-        ruleConditionalTransferLight.approveTransfer(
-            ADDRESS1,
-            ADDRESS2,
-            defaultValue
-        );
+        ruleConditionalTransferLight.approveTransfer(ADDRESS1, ADDRESS2, defaultValue);
         vm.prank(ADDRESS1);
         CMTAT_CONTRACT.approve(ADDRESS3, defaultValue);
         vm.prank(ADDRESS3);

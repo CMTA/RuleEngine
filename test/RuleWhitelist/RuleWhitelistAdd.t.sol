@@ -11,10 +11,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
     }
 
     function _addAddressesToTheList() internal {
@@ -22,12 +19,8 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheList(address[])",
-                whitelist
-            )
-        );
+        (resCallBool,) =
+            address(ruleWhitelist).call(abi.encodeWithSignature("addAddressesToTheList(address[])", whitelist));
         // Assert
         resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 2);
@@ -39,9 +32,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         address[] memory addressesListInput = new address[](2);
         addressesListInput[0] = ADDRESS1;
         addressesListInput[1] = ADDRESS2;
-        bool[] memory resBools = ruleWhitelist.addressIsListedBatch(
-            addressesListInput
-        );
+        bool[] memory resBools = ruleWhitelist.addressIsListedBatch(addressesListInput);
         assertEq(resBools[0], true);
         assertEq(resBools[1], true);
         assertEq(resBools.length, 2);
@@ -58,9 +49,7 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         assertEq(resBool, true);
         address[] memory addressesListInput = new address[](1);
         addressesListInput[0] = ADDRESS1;
-        bool[] memory resBools = ruleWhitelist.addressIsListedBatch(
-            addressesListInput
-        );
+        bool[] memory resBools = ruleWhitelist.addressIsListedBatch(addressesListInput);
         assertEq(resBools[0], true);
         assertEq(resBools.length, 1);
         resUint256 = ruleWhitelist.numberListedAddress();
@@ -108,12 +97,8 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         emit AddAddressesToTheList(whitelist);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheList(address[])",
-                whitelist
-            )
-        );
+        (resCallBool,) =
+            address(ruleWhitelist).call(abi.encodeWithSignature("addAddressesToTheList(address[])", whitelist));
 
         // Assert - Main
         // Seem that call returns true even if the function is reverted
@@ -164,12 +149,8 @@ contract RuleWhitelistAddTest is Test, HelperContract {
         whitelistDuplicate[2] = ADDRESS3;
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheList(address[])",
-                whitelistDuplicate
-            )
-        );
+        (resCallBool,) = address(ruleWhitelist)
+            .call(abi.encodeWithSignature("addAddressesToTheList(address[])", whitelistDuplicate));
         // Assert
         // no change
         assertEq(resCallBool, true);

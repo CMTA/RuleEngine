@@ -9,11 +9,7 @@ import {RuleEngineOwnable} from "../RuleEngineOwnable.sol";
  * @dev Exposes internal functions for testing coverage
  */
 contract RuleEngineExposed is RuleEngine {
-    constructor(
-        address admin,
-        address forwarder,
-        address token
-    ) RuleEngine(admin, forwarder, token) {}
+    constructor(address admin, address forwarder, address token) RuleEngine(admin, forwarder, token) {}
 
     function exposedMsgData() external view returns (bytes memory) {
         return _msgData();
@@ -25,11 +21,7 @@ contract RuleEngineExposed is RuleEngine {
  * @dev Exposes internal functions for testing coverage
  */
 contract RuleEngineOwnableExposed is RuleEngineOwnable {
-    constructor(
-        address owner_,
-        address forwarder,
-        address token
-    ) RuleEngineOwnable(owner_, forwarder, token) {}
+    constructor(address owner_, address forwarder, address token) RuleEngineOwnable(owner_, forwarder, token) {}
 
     function exposedMsgData() external view returns (bytes memory) {
         return _msgData();

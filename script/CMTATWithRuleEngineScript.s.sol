@@ -24,17 +24,10 @@ contract CMTATWithRuleEngineScript is Script, HelperContract {
         CMTAT_CONTRACT = cmtatDeployment.cmtat();
         console.log("CMTAT CMTAT_CONTRACT : ", address(CMTAT_CONTRACT));
         // whitelist
-        RuleWhitelist ruleWhitelist = new RuleWhitelist(
-            ADMIN,
-            trustedForwarder
-        );
+        RuleWhitelist ruleWhitelist = new RuleWhitelist(ADMIN, trustedForwarder);
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
-        RuleEngine RULE_ENGINE = new RuleEngine(
-            ADMIN,
-            trustedForwarder,
-            address(CMTAT_CONTRACT)
-        );
+        RuleEngine RULE_ENGINE = new RuleEngine(ADMIN, trustedForwarder, address(CMTAT_CONTRACT));
         console.log("RuleEngine : ", address(RULE_ENGINE));
         RULE_ENGINE.addRule(ruleWhitelist);
         CMTAT_CONTRACT.setRuleEngine(RULE_ENGINE);

@@ -18,11 +18,7 @@ abstract contract RuleEngineOperationRevertBase is Test, HelperContract {
         CMTAT_CONTRACT = _deployCMTAT();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            ZERO_ADDRESS,
-            address(CMTAT_CONTRACT)
-        );
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, address(CMTAT_CONTRACT));
         RuleOperationRevert ruleOperationRevert = new RuleOperationRevert();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -37,11 +33,7 @@ abstract contract RuleEngineOperationRevertBase is Test, HelperContract {
 
     function testRuleEngineTransferredRevert() public {
         // Arrange
-        vm.expectRevert(
-            RuleOperationRevert
-                .RuleConditionalTransferLight_InvalidTransfer
-                .selector
-        );
+        vm.expectRevert(RuleOperationRevert.RuleConditionalTransferLight_InvalidTransfer.selector);
         // Act
         CMTAT_CONTRACT.transfer(ADDRESS2, 21);
     }

@@ -11,7 +11,6 @@ abstract contract RulesManagementModuleInvariantStorage {
     error RuleEngine_RulesManagementModule_RuleDoNotMatch();
     error RuleEngine_RulesManagementModule_ArrayIsEmpty();
     error RuleEngine_RulesManagementModule_OperationNotSuccessful();
-    error RuleEngine_RulesManagementModule_RuleInvalidInterface();
 
     /* ============ Events ============ */
     /**
@@ -34,6 +33,5 @@ abstract contract RulesManagementModuleInvariantStorage {
     /* ==== Constant === */
     /// @notice Role to manage the ruleEngine
     // Will not be present in the final bytecode if not used
-    bytes32 public constant RULES_MANAGEMENT_ROLE =
-        keccak256("RULES_MANAGEMENT_ROLE");
+    bytes32 public constant RULES_MANAGEMENT_ROLE = keccak256("RULES_MANAGEMENT_ROLE");
 }

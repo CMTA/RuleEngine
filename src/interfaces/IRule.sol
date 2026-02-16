@@ -11,7 +11,5 @@ interface IRule is IRuleEngineERC1404 {
     /**
      * @dev Returns true if the restriction code exists, and false otherwise.
      */
-    function canReturnTransferRestrictionCode(
-        uint8 restrictionCode
-    ) external view returns (bool);
+    function canReturnTransferRestrictionCode(uint8 restrictionCode) external view returns (bool);
 }

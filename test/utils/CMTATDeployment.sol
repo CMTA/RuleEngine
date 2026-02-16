@@ -17,32 +17,19 @@ contract CMTATDeployment {
 
     constructor() {
         // CMTAT
-        ICMTATConstructor.ERC20Attributes
-            memory erc20Attributes = ICMTATConstructor.ERC20Attributes(
-                "CMTA Token",
-                "CMTAT",
-                0
+        ICMTATConstructor.ERC20Attributes memory erc20Attributes =
+            ICMTATConstructor.ERC20Attributes("CMTA Token", "CMTAT", 0);
+        ICMTATConstructor.ExtraInformationAttributes memory ExtraInformationAttributes =
+            ICMTATConstructor.ExtraInformationAttributes(
+                "CMTAT_ISIN",
+                IERC1643CMTAT.DocumentInfo(
+                    "Terms", "https://cmta.ch", 0x9ff867f6592aa9d6d039e7aad6bd71f1659720cbc4dd9eae1554f6eab490098b
+                ),
+                "CMTAT_info"
             );
-        ICMTATConstructor.ExtraInformationAttributes
-            memory ExtraInformationAttributes = ICMTATConstructor
-                .ExtraInformationAttributes(
-                    "CMTAT_ISIN",
-                    IERC1643CMTAT.DocumentInfo(
-                        "Terms",
-                        "https://cmta.ch",
-                        0x9ff867f6592aa9d6d039e7aad6bd71f1659720cbc4dd9eae1554f6eab490098b
-                    ),
-                    "CMTAT_info"
-                );
-        ICMTATConstructor.Engine memory engines = ICMTATConstructor.Engine(
-            IRuleEngine(ZERO_ADDRESS)
-        );
+        ICMTATConstructor.Engine memory engines = ICMTATConstructor.Engine(IRuleEngine(ZERO_ADDRESS));
         cmtat = new CMTATStandalone(
-            ZERO_ADDRESS,
-            DEFAULT_ADMIN_ADDRESS,
-            erc20Attributes,
-            ExtraInformationAttributes,
-            engines
+            ZERO_ADDRESS, DEFAULT_ADMIN_ADDRESS, erc20Attributes, ExtraInformationAttributes, engines
         );
     }
 }

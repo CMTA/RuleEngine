@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "CMTAT/deployment/CMTATStandalone.sol";
 
-
 import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 // RuleEngine
@@ -13,11 +12,17 @@ import {RulesManagementModule} from "src/RuleEngineBase.sol";
 import {ERC3643ComplianceModule} from "src/RuleEngineBase.sol";
 // RuleConditionalTransfer
 import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
-import {RuleConditionalTransferLightInvariantStorage} from "src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol";
+import {
+    RuleConditionalTransferLightInvariantStorage
+} from "src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol";
 // RuleWhitelist
 import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
-import {RuleWhitelistInvariantStorage} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
-import {RuleAddressListInvariantStorage} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
+import {
+    RuleWhitelistInvariantStorage
+} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
+import {
+    RuleAddressListInvariantStorage
+} from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
 
 // Rule interface
 
@@ -54,12 +59,9 @@ abstract contract HelperContract is
     address constant ADDRESS2 = address(6);
     address constant ADDRESS3 = address(7);
     // role string
-    string constant RULE_ENGINE_ROLE_HASH =
-        "0x774b3c5f4a8b37a7da21d72b7f2429e4a6d49c4de0ac5f2b831a1a539d0f0fd2";
-    string constant WHITELIST_ROLE_HASH =
-        "0xdc72ed553f2544c34465af23b847953efeb813428162d767f9ba5f4013be6760";
-    string constant DEFAULT_ADMIN_ROLE_HASH =
-        "0x0000000000000000000000000000000000000000000000000000000000000000";
+    string constant RULE_ENGINE_ROLE_HASH = "0x774b3c5f4a8b37a7da21d72b7f2429e4a6d49c4de0ac5f2b831a1a539d0f0fd2";
+    string constant WHITELIST_ROLE_HASH = "0xdc72ed553f2544c34465af23b847953efeb813428162d767f9ba5f4013be6760";
+    string constant DEFAULT_ADMIN_ROLE_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
     // contract
     RuleWhitelist public ruleWhitelist;

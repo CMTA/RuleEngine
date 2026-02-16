@@ -11,10 +11,7 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
     }
 
     function _addAddressesToTheList() internal {
@@ -23,12 +20,8 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         whitelist[1] = ADDRESS2;
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         emit AddAddressesToTheList(whitelist);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheList(address[])",
-                whitelist
-            )
-        );
+        (resCallBool,) =
+            address(ruleWhitelist).call(abi.encodeWithSignature("addAddressesToTheList(address[])", whitelist));
         // Assert
         resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 2);
@@ -66,12 +59,8 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheList(address[])",
-                whitelist
-            )
-        );
+        (resCallBool,) =
+            address(ruleWhitelist).call(abi.encodeWithSignature("addAddressesToTheList(address[])", whitelist));
         assertEq(resCallBool, true);
         // Arrange - Assert
         resBool = ruleWhitelist.addressIsListed(ADDRESS1);
@@ -82,12 +71,8 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         emit RemoveAddressesFromTheList(whitelist);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "removeAddressesFromTheList(address[])",
-                whitelist
-            )
-        );
+        (resCallBool,) =
+            address(ruleWhitelist).call(abi.encodeWithSignature("removeAddressesFromTheList(address[])", whitelist));
         // Assert
         assertEq(resCallBool, true);
         resBool = ruleWhitelist.addressIsListed(ADDRESS1);
@@ -128,12 +113,8 @@ contract RuleWhitelistRemoveTest is Test, HelperContract {
         // Act
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         emit RemoveAddressesFromTheList(whitelistRemove);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "removeAddressesFromTheList(address[])",
-                whitelistRemove
-            )
-        );
+        (resCallBool,) = address(ruleWhitelist)
+            .call(abi.encodeWithSignature("removeAddressesFromTheList(address[])", whitelistRemove));
         // Assert
         assertEq(resCallBool, true);
         resBool = ruleWhitelist.addressIsListed(ADDRESS1);

@@ -13,8 +13,6 @@ abstract contract RuleAddressListInvariantStorage {
     error RuleAddressList_AdminWithAddressZeroNotAllowed();
 
     /* ============ Role ============ */
-    bytes32 public constant ADDRESS_LIST_REMOVE_ROLE =
-        keccak256("ADDRESS_LIST_REMOVE_ROLE");
-    bytes32 public constant ADDRESS_LIST_ADD_ROLE =
-        keccak256("ADDRESS_LIST_ADD_ROLE");
+    bytes32 public constant ADDRESS_LIST_REMOVE_ROLE = keccak256("ADDRESS_LIST_REMOVE_ROLE");
+    bytes32 public constant ADDRESS_LIST_ADD_ROLE = keccak256("ADDRESS_LIST_ADD_ROLE");
 }

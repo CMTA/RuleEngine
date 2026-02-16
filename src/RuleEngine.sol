@@ -22,11 +22,9 @@ contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase {
      * @param admin Address of the contract (Access Control)
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
      */
-    constructor(
-        address admin,
-        address forwarderIrrevocable,
-        address tokenContract
-    ) ERC2771ModuleStandalone(forwarderIrrevocable) {
+    constructor(address admin, address forwarderIrrevocable, address tokenContract)
+        ERC2771ModuleStandalone(forwarderIrrevocable)
+    {
         if (admin == address(0)) {
             revert RuleEngine_AdminWithAddressZeroNotAllowed();
         }
@@ -41,10 +39,7 @@ contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase {
      * @notice Returns `true` if `account` has been granted `role`.
      * @dev The Default Admin has all roles
      */
-    function hasRole(
-        bytes32 role,
-        address account
-    ) public view virtual override(AccessControl) returns (bool) {
+    function hasRole(bytes32 role, address account) public view virtual override(AccessControl) returns (bool) {
         if (AccessControl.hasRole(DEFAULT_ADMIN_ROLE, account)) {
             return true;
         } else {
@@ -54,52 +49,35 @@ contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase {
 
     /* ============ ERC-165 ============ */
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
-        return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID || AccessControl.supportsInterface(interfaceId);
+        return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
+            || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
+            || AccessControl.supportsInterface(interfaceId);
     }
 
     /*//////////////////////////////////////////////////////////////
                            ERC-2771
     //////////////////////////////////////////////////////////////*/
-    function _onlyComplianceManager() internal virtual override onlyRole(COMPLIANCE_MANAGER_ROLE){}
-    function _onlyRulesManager() internal virtual override onlyRole(RULES_MANAGEMENT_ROLE){}
-
+    function _onlyComplianceManager() internal virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {}
+    function _onlyRulesManager() internal virtual override onlyRole(RULES_MANAGEMENT_ROLE) {}
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
      */
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(ERC2771Context, Context)
-        returns (address sender)
-    {
+    function _msgSender() internal view virtual override(ERC2771Context, Context) returns (address sender) {
         return ERC2771Context._msgSender();
     }
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
      */
-    function _msgData()
-        internal
-        view
-        virtual
-        override(ERC2771Context, Context)
-        returns (bytes calldata)
-    {
+    function _msgData() internal view virtual override(ERC2771Context, Context) returns (bytes calldata) {
         return ERC2771Context._msgData();
     }
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
      */
-    function _contextSuffixLength()
-        internal
-        view
-        virtual
-        override(ERC2771Context, Context)
-        returns (uint256)
-    {
+    function _contextSuffixLength() internal view virtual override(ERC2771Context, Context) returns (uint256) {
         return ERC2771Context._contextSuffixLength();
     }
 }

@@ -19,9 +19,7 @@ abstract contract RuleAddressListInternal {
      * If one of addresses already exist, there is no change for this address. The transaction remains valid (no revert).
      * @param listTargetAddresses an array with the addresses to list
      */
-    function _addAddressesToThelist(
-        address[] calldata listTargetAddresses
-    ) internal {
+    function _addAddressesToThelist(address[] calldata listTargetAddresses) internal {
         uint256 numAddressesListLocal = numAddressesList;
         for (uint256 i = 0; i < listTargetAddresses.length; ++i) {
             if (!list[listTargetAddresses[i]]) {
@@ -38,9 +36,7 @@ abstract contract RuleAddressListInternal {
      * The transaction remains valid (no revert).
      * @param listTargetAddresses an array with the addresses to remove
      */
-    function _removeAddressesFromThelist(
-        address[] calldata listTargetAddresses
-    ) internal {
+    function _removeAddressesFromThelist(address[] calldata listTargetAddresses) internal {
         uint256 numAddressesListLocal = numAddressesList;
         for (uint256 i = 0; i < listTargetAddresses.length; ++i) {
             if (list[listTargetAddresses[i]]) {
@@ -93,9 +89,7 @@ abstract contract RuleAddressListInternal {
      * @return True if the address is listed, false otherwise
      *
      */
-    function _addressIsListed(
-        address _targetAddress
-    ) internal view returns (bool) {
+    function _addressIsListed(address _targetAddress) internal view returns (bool) {
         return list[_targetAddress];
     }
 }

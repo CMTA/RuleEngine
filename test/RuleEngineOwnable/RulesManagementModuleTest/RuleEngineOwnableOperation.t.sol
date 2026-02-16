@@ -14,85 +14,54 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
     // Arrange
     function setUp() public {
         vm.prank(OWNER_ADDRESS);
-        ruleEngineMock = new RuleEngineOwnable(
-            OWNER_ADDRESS,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS
-        );
-        ruleConditionalTransferLight = new RuleConditionalTransferLight(
-            CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-            ruleEngineMock
-        );
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleConditionalTransferLight =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
 
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight);
         // Arrange - Assert
         resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 1);
-        assertEq(
-            ruleEngineMock.containsRule(ruleConditionalTransferLight),
-            true
-        );
+        assertEq(ruleEngineMock.containsRule(ruleConditionalTransferLight), true);
     }
 
     function testCanSetRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight2 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
-        ruleConditionalTransferLightTab[0] = IRule(
-            ruleConditionalTransferLight1
-        );
-        ruleConditionalTransferLightTab[1] = IRule(
-            ruleConditionalTransferLight2
-        );
+        RuleConditionalTransferLight ruleConditionalTransferLight2 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        ruleConditionalTransferLightTab[0] = IRule(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRule(ruleConditionalTransferLight2);
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RulesManagementModuleInvariantStorage.AddRule(
-            ruleConditionalTransferLight1
-        );
+        emit RulesManagementModuleInvariantStorage.AddRule(ruleConditionalTransferLight1);
         vm.expectEmit(true, false, false, false);
-        emit RulesManagementModuleInvariantStorage.AddRule(
-            ruleConditionalTransferLight2
-        );
+        emit RulesManagementModuleInvariantStorage.AddRule(ruleConditionalTransferLight2);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setRules(ruleConditionalTransferLightTab);
         // Assert
         resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 2);
 
-        assertEq(
-            ruleEngineMock.containsRule(ruleConditionalTransferLight1),
-            true
-        );
-        assertEq(
-            ruleEngineMock.containsRule(ruleConditionalTransferLight2),
-            true
-        );
+        assertEq(ruleEngineMock.containsRule(ruleConditionalTransferLight1), true);
+        assertEq(ruleEngineMock.containsRule(ruleConditionalTransferLight2), true);
     }
 
     function testCannotSetRuleIfARuleIsAlreadyPresent() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
         ruleConditionalTransferLightTab[0] = ruleConditionalTransferLight1;
         ruleConditionalTransferLightTab[1] = ruleConditionalTransferLight1;
 
         // Act
         vm.prank(OWNER_ADDRESS);
-        vm.expectRevert(
-            RuleEngine_RulesManagementModule_RuleAlreadyExists.selector
-        );
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAlreadyExists.selector);
         ruleEngineMock.setRules(ruleConditionalTransferLightTab);
 
         // Assert
@@ -107,11 +76,7 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
         assertFalse(resBool);
 
         // Act
-        vm.expectRevert(
-            RulesManagementModuleInvariantStorage
-                .RuleEngine_RulesManagementModule_ArrayIsEmpty
-                .selector
-        );
+        vm.expectRevert(RulesManagementModuleInvariantStorage.RuleEngine_RulesManagementModule_ArrayIsEmpty.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setRules(ruleConditionalTransferLightTab);
         // Assert
@@ -129,11 +94,7 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
         ruleConditionalTransferLightTab = new IRule[](0);
         // Act
         vm.prank(OWNER_ADDRESS);
-        vm.expectRevert(
-            RulesManagementModuleInvariantStorage
-                .RuleEngine_RulesManagementModule_ArrayIsEmpty
-                .selector
-        );
+        vm.expectRevert(RulesManagementModuleInvariantStorage.RuleEngine_RulesManagementModule_ArrayIsEmpty.selector);
         ruleEngineMock.setRules(ruleConditionalTransferLightTab);
 
         // Assert1
@@ -149,48 +110,34 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
     function testCanClearRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight2 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
-        ruleConditionalTransferLightTab[0] = IRule(
-            ruleConditionalTransferLight1
-        );
-        ruleConditionalTransferLightTab[1] = IRule(
-            ruleConditionalTransferLight2
-        );
+        RuleConditionalTransferLight ruleConditionalTransferLight2 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        ruleConditionalTransferLightTab[0] = IRule(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRule(ruleConditionalTransferLight2);
 
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setRules(ruleConditionalTransferLightTab);
         address[] memory rulesResult = ruleEngineMock.rules();
         if (
-            (rulesResult[0] != address(ruleConditionalTransferLight1)) ||
             (rulesResult[0] != address(ruleConditionalTransferLight1))
+                || (rulesResult[0] != address(ruleConditionalTransferLight1))
         ) {
             revert("Invalid array storage 1");
         }
         if (
-            (rulesResult[1] != address(ruleConditionalTransferLight2)) ||
             (rulesResult[1] != address(ruleConditionalTransferLight2))
+                || (rulesResult[1] != address(ruleConditionalTransferLight2))
         ) {
             revert("Invalid array storage 2");
         }
         // Assert - Arrange
         resUint256 = ruleEngineMock.rulesCount();
         assertEq(resUint256, 2);
-        assertEq(
-            ruleEngineMock.containsRule(ruleConditionalTransferLight1),
-            true
-        );
-        assertEq(
-            ruleEngineMock.containsRule(ruleConditionalTransferLight2),
-            true
-        );
+        assertEq(ruleEngineMock.containsRule(ruleConditionalTransferLight1), true);
+        assertEq(ruleEngineMock.containsRule(ruleConditionalTransferLight2), true);
 
         // Act
         vm.expectEmit(true, false, false, false);
@@ -208,29 +155,17 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
     function testCanClearRulesAndAddAgain() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight2 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
-        ruleConditionalTransferLightTab[0] = IRule(
-            ruleConditionalTransferLight1
-        );
-        ruleConditionalTransferLightTab[1] = IRule(
-            ruleConditionalTransferLight2
-        );
+        RuleConditionalTransferLight ruleConditionalTransferLight2 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        ruleConditionalTransferLightTab[0] = IRule(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRule(ruleConditionalTransferLight2);
 
         vm.prank(OWNER_ADDRESS);
-        (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(
-                ruleEngineMock.setRules,
-                ruleConditionalTransferLightTab
-            )
-        );
+        (bool resCallBool,) =
+            address(ruleEngineMock).call(abi.encodeCall(ruleEngineMock.setRules, ruleConditionalTransferLightTab));
 
         // Act
         vm.expectEmit(true, false, false, false);
@@ -244,12 +179,8 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
 
         // Can set again the previous rules
         vm.prank(OWNER_ADDRESS);
-        (resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(
-                ruleEngineMock.setRules,
-                ruleConditionalTransferLightTab
-            )
-        );
+        (resCallBool,) =
+            address(ruleEngineMock).call(abi.encodeCall(ruleEngineMock.setRules, ruleConditionalTransferLightTab));
         assertEq(resCallBool, true);
         // Arrange before assert
 
@@ -263,9 +194,7 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
 
         // Can add previous rule again
         vm.expectEmit(true, false, false, false);
-        emit RulesManagementModuleInvariantStorage.AddRule(
-            ruleConditionalTransferLight1
-        );
+        emit RulesManagementModuleInvariantStorage.AddRule(ruleConditionalTransferLight1);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight1);
     }
@@ -273,16 +202,12 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
     function testCanAddRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RulesManagementModuleInvariantStorage.AddRule(
-            ruleConditionalTransferLight1
-        );
+        emit RulesManagementModuleInvariantStorage.AddRule(ruleConditionalTransferLight1);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight1);
 
@@ -293,9 +218,7 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
 
     function testCannotAddRuleZeroAddress() public {
         // Act
-        vm.expectRevert(
-            RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed.selector
-        );
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(IRule(address(0x0)));
 
@@ -306,9 +229,7 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
 
     function testCannotAddARuleAlreadyPresent() public {
         // Act
-        vm.expectRevert(
-            RuleEngine_RulesManagementModule_RuleAlreadyExists.selector
-        );
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAlreadyExists.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight);
 
@@ -328,9 +249,7 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RulesManagementModuleInvariantStorage.AddRule(
-            ruleConditionalTransferLight
-        );
+        emit RulesManagementModuleInvariantStorage.AddRule(ruleConditionalTransferLight);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight);
 
@@ -343,15 +262,11 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
     function testCannotRemoveNonExistantRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
 
         // Act
-        vm.expectRevert(
-            RuleEngine_RulesManagementModule_RuleDoNotMatch.selector
-        );
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleDoNotMatch.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.removeRule(ruleConditionalTransferLight1);
 
@@ -363,18 +278,14 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
     function testCanRemoveLatestRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight1);
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RulesManagementModuleInvariantStorage.RemoveRule(
-            ruleConditionalTransferLight1
-        );
+        emit RulesManagementModuleInvariantStorage.RemoveRule(ruleConditionalTransferLight1);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.removeRule(ruleConditionalTransferLight1);
 
@@ -386,18 +297,14 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
     function testCanRemoveFirstRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight1);
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RulesManagementModuleInvariantStorage.RemoveRule(
-            ruleConditionalTransferLight
-        );
+        emit RulesManagementModuleInvariantStorage.RemoveRule(ruleConditionalTransferLight);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.removeRule(ruleConditionalTransferLight);
 
@@ -410,26 +317,20 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
         // Arrange
         // First rule
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight1);
         // Second rule
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleConditionalTransferLight ruleConditionalTransferLight2 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
+        RuleConditionalTransferLight ruleConditionalTransferLight2 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight2);
 
         // Act
         vm.expectEmit(true, false, false, false);
-        emit RulesManagementModuleInvariantStorage.RemoveRule(
-            ruleConditionalTransferLight1
-        );
+        emit RulesManagementModuleInvariantStorage.RemoveRule(ruleConditionalTransferLight1);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.removeRule(ruleConditionalTransferLight1);
 
@@ -451,20 +352,12 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
         assertEq(resUint256, 1);
 
         // Arrange
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
-        RuleConditionalTransferLight ruleConditionalTransferLight2 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
-        ruleConditionalTransferLightTab[0] = IRule(
-            ruleConditionalTransferLight1
-        );
-        ruleConditionalTransferLightTab[1] = IRule(
-            ruleConditionalTransferLight2
-        );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        RuleConditionalTransferLight ruleConditionalTransferLight2 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        ruleConditionalTransferLightTab[0] = IRule(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRule(ruleConditionalTransferLight2);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setRules(ruleConditionalTransferLightTab);
 
@@ -477,20 +370,12 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
 
     function testGetRule() public {
         // Arrange
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
-        RuleConditionalTransferLight ruleConditionalTransferLight2 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
-        ruleConditionalTransferLightTab[0] = IRule(
-            ruleConditionalTransferLight1
-        );
-        ruleConditionalTransferLightTab[1] = IRule(
-            ruleConditionalTransferLight2
-        );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        RuleConditionalTransferLight ruleConditionalTransferLight2 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        ruleConditionalTransferLightTab[0] = IRule(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRule(ruleConditionalTransferLight2);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setRules(ruleConditionalTransferLightTab);
 
@@ -503,20 +388,12 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
 
     function testGetRules() public {
         // Arrange
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
-        RuleConditionalTransferLight ruleConditionalTransferLight2 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
-        ruleConditionalTransferLightTab[0] = IRule(
-            ruleConditionalTransferLight1
-        );
-        ruleConditionalTransferLightTab[1] = IRule(
-            ruleConditionalTransferLight2
-        );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        RuleConditionalTransferLight ruleConditionalTransferLight2 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        ruleConditionalTransferLightTab[0] = IRule(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRule(ruleConditionalTransferLight2);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setRules(ruleConditionalTransferLightTab);
 
@@ -526,36 +403,21 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
         // Assert
         assertEq(ruleConditionalTransferLightTab.length, rules.length);
         for (uint256 i = 0; i < rules.length; ++i) {
-            assertEq(
-                address(ruleConditionalTransferLightTab[i]),
-                address(rules[i])
-            );
+            assertEq(address(ruleConditionalTransferLightTab[i]), address(rules[i]));
         }
     }
 
     function testCanGetRuleIndex() public {
         // Arrange
-        RuleConditionalTransferLight ruleConditionalTransferLight1 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
-        RuleConditionalTransferLight ruleConditionalTransferLight2 = new RuleConditionalTransferLight(
-                CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-                ruleEngineMock
-            );
-        ruleConditionalTransferLightTab[0] = IRule(
-            ruleConditionalTransferLight1
-        );
-        ruleConditionalTransferLightTab[1] = IRule(
-            ruleConditionalTransferLight2
-        );
+        RuleConditionalTransferLight ruleConditionalTransferLight1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        RuleConditionalTransferLight ruleConditionalTransferLight2 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        ruleConditionalTransferLightTab[0] = IRule(ruleConditionalTransferLight1);
+        ruleConditionalTransferLightTab[1] = IRule(ruleConditionalTransferLight2);
         vm.prank(OWNER_ADDRESS);
-        (bool resCallBool, ) = address(ruleEngineMock).call(
-            abi.encodeCall(
-                ruleEngineMock.setRules,
-                ruleConditionalTransferLightTab
-            )
-        );
+        (bool resCallBool,) =
+            address(ruleEngineMock).call(abi.encodeCall(ruleEngineMock.setRules, ruleConditionalTransferLightTab));
         // Arrange - Assert
         assertEq(resCallBool, true);
     }

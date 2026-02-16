@@ -11,15 +11,9 @@ import {Ownable} from "OZ/access/Ownable.sol";
 contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
     // Arrange
     function setUp() public {
-        ruleEngineMock = new RuleEngineOwnable(
-            OWNER_ADDRESS,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS
-        );
-        ruleConditionalTransferLight = new RuleConditionalTransferLight(
-            CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-            ruleEngineMock
-        );
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleConditionalTransferLight =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -52,14 +46,10 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
 
     function testOwnerCanSetRules() public {
         // Arrange
-        RuleConditionalTransferLight rule1 = new RuleConditionalTransferLight(
-            CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-            ruleEngineMock
-        );
-        RuleConditionalTransferLight rule2 = new RuleConditionalTransferLight(
-            CONDITIONAL_TRANSFER_OPERATOR_ADDRESS,
-            ruleEngineMock
-        );
+        RuleConditionalTransferLight rule1 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        RuleConditionalTransferLight rule2 =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
         IRule[] memory rules = new IRule[](2);
         rules[0] = IRule(rule1);
         rules[1] = IRule(rule2);
@@ -113,12 +103,7 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
 
     function testNonOwnerCannotAddRule() public {
         // Act & Assert
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                ATTACKER
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
         vm.prank(ATTACKER);
         ruleEngineMock.addRule(ruleConditionalTransferLight);
     }
@@ -129,12 +114,7 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
         ruleEngineMock.addRule(ruleConditionalTransferLight);
 
         // Act & Assert
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                ATTACKER
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
         vm.prank(ATTACKER);
         ruleEngineMock.removeRule(ruleConditionalTransferLight);
     }
@@ -145,12 +125,7 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
         rules[0] = IRule(ruleConditionalTransferLight);
 
         // Act & Assert
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                ATTACKER
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
         vm.prank(ATTACKER);
         ruleEngineMock.setRules(rules);
     }
@@ -161,24 +136,14 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
         ruleEngineMock.addRule(ruleConditionalTransferLight);
 
         // Act & Assert
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                ATTACKER
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
         vm.prank(ATTACKER);
         ruleEngineMock.clearRules();
     }
 
     function testNonOwnerCannotBindToken() public {
         // Act & Assert
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                ATTACKER
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
         vm.prank(ATTACKER);
         ruleEngineMock.bindToken(ADDRESS1);
     }
@@ -189,12 +154,7 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
         ruleEngineMock.bindToken(ADDRESS1);
 
         // Act & Assert
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                ATTACKER
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
         vm.prank(ATTACKER);
         ruleEngineMock.unbindToken(ADDRESS1);
     }
@@ -231,24 +191,14 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
         ruleEngineMock.transferOwnership(NEW_OWNER_ADDRESS);
 
         // Act & Assert
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                OWNER_ADDRESS
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, OWNER_ADDRESS));
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight);
     }
 
     function testNonOwnerCannotTransferOwnership() public {
         // Act & Assert
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                ATTACKER
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
         vm.prank(ATTACKER);
         ruleEngineMock.transferOwnership(ATTACKER);
     }
@@ -272,24 +222,14 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
         ruleEngineMock.renounceOwnership();
 
         // Act & Assert - even previous owner cannot call
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                OWNER_ADDRESS
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, OWNER_ADDRESS));
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight);
     }
 
     function testNonOwnerCannotRenounceOwnership() public {
         // Act & Assert
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                ATTACKER
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
         vm.prank(ATTACKER);
         ruleEngineMock.renounceOwnership();
     }

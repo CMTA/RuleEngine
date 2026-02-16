@@ -26,11 +26,10 @@ contract RuleEngineOwnable is ERC2771ModuleStandalone, RuleEngineBase, Ownable {
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
      * @param tokenContract Address of the token contract to bind (can be zero address)
      */
-    constructor(
-        address owner_,
-        address forwarderIrrevocable,
-        address tokenContract
-    ) ERC2771ModuleStandalone(forwarderIrrevocable) Ownable(owner_) {
+    constructor(address owner_, address forwarderIrrevocable, address tokenContract)
+        ERC2771ModuleStandalone(forwarderIrrevocable)
+        Ownable(owner_)
+    {
         if (owner_ == address(0)) {
             revert RuleEngine_AdminWithAddressZeroNotAllowed();
         }
@@ -48,17 +47,13 @@ contract RuleEngineOwnable is ERC2771ModuleStandalone, RuleEngineBase, Ownable {
     /**
      * @dev Access control check using Ownable pattern
      */
-    function _onlyComplianceManager() internal virtual override onlyOwner{}
+    function _onlyComplianceManager() internal virtual override onlyOwner {}
 
     /* ============ ERC-165 ============ */
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(AccessControl, IERC165) returns (bool) {
-        return
-            interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID ||
-            interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID ||
-            interfaceId == ERC173_INTERFACE_ID ||
-            AccessControl.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
+        return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
+            || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID || interfaceId == ERC173_INTERFACE_ID
+            || AccessControl.supportsInterface(interfaceId);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -68,39 +63,21 @@ contract RuleEngineOwnable is ERC2771ModuleStandalone, RuleEngineBase, Ownable {
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
      */
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(ERC2771Context, Context)
-        returns (address sender)
-    {
+    function _msgSender() internal view virtual override(ERC2771Context, Context) returns (address sender) {
         return ERC2771Context._msgSender();
     }
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
      */
-    function _msgData()
-        internal
-        view
-        virtual
-        override(ERC2771Context, Context)
-        returns (bytes calldata)
-    {
+    function _msgData() internal view virtual override(ERC2771Context, Context) returns (bytes calldata) {
         return ERC2771Context._msgData();
     }
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
      */
-    function _contextSuffixLength()
-        internal
-        view
-        virtual
-        override(ERC2771Context, Context)
-        returns (uint256)
-    {
+    function _contextSuffixLength() internal view virtual override(ERC2771Context, Context) returns (uint256) {
         return ERC2771Context._contextSuffixLength();
     }
 }

@@ -13,16 +13,9 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
 
     // Arrange
     function setUp() public {
-        ruleWhitelist = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(
-            RULE_ENGINE_OPERATOR_ADDRESS,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         resUint256 = ruleEngineMock.rulesCount();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -35,15 +28,9 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
     function testCannotAttackerSetRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
+        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
+        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         IRule[] memory ruleWhitelistTab = new IRule[](2);
         ruleWhitelistTab[0] = ruleWhitelist1;
         ruleWhitelistTab[1] = ruleWhitelist2;
@@ -51,15 +38,9 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         // Act
         vm.prank(ATTACKER);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ATTACKER,
-                RULES_MANAGEMENT_ROLE
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULES_MANAGEMENT_ROLE)
         );
-        (bool success, ) = address(ruleEngineMock).call(
-            abi.encodeCall(ruleEngineMock.setRules, ruleWhitelistTab)
-        );
+        (bool success,) = address(ruleEngineMock).call(abi.encodeCall(ruleEngineMock.setRules, ruleWhitelistTab));
 
         // Assert
         assertEq(success, true);
@@ -71,11 +52,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         // Act
         vm.prank(ATTACKER);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ATTACKER,
-                RULES_MANAGEMENT_ROLE
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULES_MANAGEMENT_ROLE)
         );
         ruleEngineMock.clearRules();
 
@@ -88,11 +65,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         // Act
         vm.prank(ATTACKER);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ATTACKER,
-                RULES_MANAGEMENT_ROLE
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULES_MANAGEMENT_ROLE)
         );
         ruleEngineMock.addRule(ruleWhitelist);
 
@@ -105,11 +78,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
         // Act
         vm.prank(ATTACKER);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                ATTACKER,
-                RULES_MANAGEMENT_ROLE
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, RULES_MANAGEMENT_ROLE)
         );
         ruleEngineMock.removeRule(ruleWhitelist);
 
@@ -121,11 +90,7 @@ contract RuleEngineAccessControlTest is Test, HelperContract {
     function testCannotAttackerOperateOnTransfer() public {
         // Act
         vm.prank(ATTACKER);
-        vm.expectRevert(
-            ERC3643ComplianceModule
-                .RuleEngine_ERC3643Compliance_UnauthorizedCaller
-                .selector
-        );
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngineMock.transferred(address(0), ADDRESS1, ADDRESS2, 10);
     }
 }

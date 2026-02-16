@@ -7,11 +7,13 @@ pragma solidity ^0.8.17;
 import "forge-std/Script.sol";
 import {RuleEngine} from "src/RuleEngine.sol";
 import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
-import {ValidationModuleRuleEngine} from "CMTAT/modules/wrapper/extensions/ValidationModule/ValidationModuleRuleEngine.sol";
+import {
+    ValidationModuleRuleEngine
+} from "CMTAT/modules/wrapper/extensions/ValidationModule/ValidationModuleRuleEngine.sol";
 
 /**
-@title Deploy a RuleWhitelist and a RuleEngine. The CMTAT is considred already deployed
-*/
+ * @title Deploy a RuleWhitelist and a RuleEngine. The CMTAT is considred already deployed
+ */
 contract RuleEngineScript is Script {
     function run() external {
         // Get env variable
@@ -27,12 +29,8 @@ contract RuleEngineScript is Script {
         console.log("RuleEngine: ", address(RULE_ENGINE));
         RULE_ENGINE.addRule(ruleWhitelist);
         // Configure the new ruleEngine for CMTAT
-        (bool success, ) = address(CMTAT_Address).call(
-            abi.encodeCall(
-                ValidationModuleRuleEngine.setRuleEngine,
-                RULE_ENGINE
-            )
-        );
+        (bool success,) =
+            address(CMTAT_Address).call(abi.encodeCall(ValidationModuleRuleEngine.setRuleEngine, RULE_ENGINE));
         require(success);
         vm.stopBroadcast();
     }
