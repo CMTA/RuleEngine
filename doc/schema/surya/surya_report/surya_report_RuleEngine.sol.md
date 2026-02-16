@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./RuleEngine.sol | b4007ac9e9f570b4e102d2f29ec30efdba328e37 |
+| ./RuleEngine.sol | 570421933a0eb92cb20a4d15df6e3105a7c7ffbc |
 
 
 ### Contracts Description Table
@@ -15,8 +15,12 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleEngine** | Implementation | MetaTxModuleStandalone, RuleEngineBase |||
-| └ | <Constructor> | Public ❗️ | 🛑  | MetaTxModuleStandalone |
+| **RuleEngine** | Implementation | ERC2771ModuleStandalone, RuleEngineBase |||
+| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771ModuleStandalone |
+| └ | hasRole | Public ❗️ |   |NO❗️ |
+| └ | supportsInterface | Public ❗️ |   |NO❗️ |
+| └ | _onlyComplianceManager | Internal 🔒 | 🛑  | onlyRole |
+| └ | _onlyRulesManager | Internal 🔒 | 🛑  | onlyRole |
 | └ | _msgSender | Internal 🔒 |   | |
 | └ | _msgData | Internal 🔒 |   | |
 | └ | _contextSuffixLength | Internal 🔒 |   | |

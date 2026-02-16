@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/operation/RuleOperationRevert.sol | 1d4329d1dce3a0b4c864ebd2991ef4717da067b6 |
+| ./mocks/rules/operation/RuleOperationRevert.sol | 9109b1159f610eab9e6c8228bf69d610cd33c2c1 |
 
 
 ### Contracts Description Table
@@ -16,6 +16,7 @@
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
 | **RuleOperationRevert** | Implementation | AccessControl, IRule, RuleCommonInvariantStorage |||
+| └ | supportsInterface | Public ❗️ |   |NO❗️ |
 | └ | transferred | Public ❗️ |   |NO❗️ |
 | └ | transferred | Public ❗️ |   |NO❗️ |
 | └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |

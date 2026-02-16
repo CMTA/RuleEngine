@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
 
 /**
@@ -11,10 +12,7 @@ contract RuleWhitelistTest is Test, HelperContract {
     // Arrange
     function setUp() public {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(
-            WHITELIST_OPERATOR_ADDRESS,
-            ZERO_ADDRESS
-        );
+        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
     }
 
     function _addAddressesToTheList() internal {
@@ -22,12 +20,8 @@ contract RuleWhitelistTest is Test, HelperContract {
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheList(address[])",
-                whitelist
-            )
-        );
+        (resCallBool,) =
+            address(ruleWhitelist).call(abi.encodeWithSignature("addAddressesToTheList(address[])", whitelist));
         // Assert
         resUint256 = ruleWhitelist.numberListedAddress();
         assertEq(resUint256, 2);
@@ -90,42 +84,30 @@ contract RuleWhitelistTest is Test, HelperContract {
 
     function testCanReturnTransferRestrictionCode() public {
         // Act
-        resBool = ruleWhitelist.canReturnTransferRestrictionCode(
-            CODE_ADDRESS_FROM_NOT_WHITELISTED
-        );
+        resBool = ruleWhitelist.canReturnTransferRestrictionCode(CODE_ADDRESS_FROM_NOT_WHITELISTED);
         // Assert
         assertEq(resBool, true);
         // Act
-        resBool = ruleWhitelist.canReturnTransferRestrictionCode(
-            CODE_ADDRESS_TO_NOT_WHITELISTED
-        );
+        resBool = ruleWhitelist.canReturnTransferRestrictionCode(CODE_ADDRESS_TO_NOT_WHITELISTED);
         // Assert
         assertEq(resBool, true);
         // Act
-        resBool = ruleWhitelist.canReturnTransferRestrictionCode(
-            CODE_NONEXISTENT
-        );
+        resBool = ruleWhitelist.canReturnTransferRestrictionCode(codeNonexistent);
         // Assert
         assertFalse(resBool);
     }
 
     function testReturnTheRightMessageForAGivenCode() public {
         // Assert
-        resString = ruleWhitelist.messageForTransferRestriction(
-            CODE_ADDRESS_FROM_NOT_WHITELISTED
-        );
+        resString = ruleWhitelist.messageForTransferRestriction(CODE_ADDRESS_FROM_NOT_WHITELISTED);
         // Assert
         assertEq(resString, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
         // Act
-        resString = ruleWhitelist.messageForTransferRestriction(
-            CODE_ADDRESS_TO_NOT_WHITELISTED
-        );
+        resString = ruleWhitelist.messageForTransferRestriction(CODE_ADDRESS_TO_NOT_WHITELISTED);
         // Assert
         assertEq(resString, TEXT_ADDRESS_TO_NOT_WHITELISTED);
         // Act
-        resString = ruleWhitelist.messageForTransferRestriction(
-            CODE_NONEXISTENT
-        );
+        resString = ruleWhitelist.messageForTransferRestriction(codeNonexistent);
         // Assert
         assertEq(resString, TEXT_CODE_NOT_FOUND);
     }
@@ -142,23 +124,13 @@ contract RuleWhitelistTest is Test, HelperContract {
         assertEq(resBool, true);
 
         // Spender is not whitelisted
-        resBool = ruleWhitelist.canTransferFrom(
-            ADDRESS3,
-            ADDRESS2,
-            ADDRESS1,
-            20
-        );
+        resBool = ruleWhitelist.canTransferFrom(ADDRESS3, ADDRESS2, ADDRESS1, 20);
         assertEq(resBool, false);
 
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheList(ADDRESS3);
 
-        resBool = ruleWhitelist.canTransferFrom(
-            ADDRESS3,
-            ADDRESS2,
-            ADDRESS1,
-            20
-        );
+        resBool = ruleWhitelist.canTransferFrom(ADDRESS3, ADDRESS2, ADDRESS1, 20);
         assertEq(resBool, true);
     }
 
@@ -180,12 +152,8 @@ contract RuleWhitelistTest is Test, HelperContract {
         whitelist[0] = ADDRESS1;
         whitelist[1] = ADDRESS2;
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "addAddressesToTheList(address[])",
-                whitelist
-            )
-        );
+        (resCallBool,) =
+            address(ruleWhitelist).call(abi.encodeWithSignature("addAddressesToTheList(address[])", whitelist));
         assertEq(resCallBool, true);
         // Act
         resUint256 = ruleWhitelist.numberListedAddress();
@@ -193,12 +161,8 @@ contract RuleWhitelistTest is Test, HelperContract {
         assertEq(resUint256, 2);
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        (resCallBool, ) = address(ruleWhitelist).call(
-            abi.encodeWithSignature(
-                "removeAddressesFromTheList(address[])",
-                whitelist
-            )
-        );
+        (resCallBool,) =
+            address(ruleWhitelist).call(abi.encodeWithSignature("removeAddressesFromTheList(address[])", whitelist));
         // Arrange - Assert
         assertEq(resCallBool, true);
         // Act
@@ -209,23 +173,14 @@ contract RuleWhitelistTest is Test, HelperContract {
 
     function testDetectTransferRestrictionFrom() public {
         // Act
-        resUint8 = ruleWhitelist.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleWhitelist.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
         // Assert
         assertEq(resUint8, CODE_ADDRESS_FROM_NOT_WHITELISTED);
     }
 
     function testDetectTransferRestrictionSpender() public {
         // Act
-        resUint8 = ruleWhitelist.detectTransferRestrictionFrom(
-            ADDRESS3,
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleWhitelist.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
         // Assert
         assertEq(resUint8, CODE_ADDRESS_SPENDER_NOT_WHITELISTED);
     }
@@ -235,11 +190,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheList(ADDRESS1);
         // Act
-        resUint8 = ruleWhitelist.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleWhitelist.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
         // Assert
         assertEq(resUint8, CODE_ADDRESS_TO_NOT_WHITELISTED);
     }
@@ -251,11 +202,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
         ruleWhitelist.addAddressToTheList(ADDRESS2);
         // Act
-        resUint8 = ruleWhitelist.detectTransferRestriction(
-            ADDRESS1,
-            ADDRESS2,
-            20
-        );
+        resUint8 = ruleWhitelist.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
         // Assert
         assertEq(resUint8, NO_ERROR);
     }

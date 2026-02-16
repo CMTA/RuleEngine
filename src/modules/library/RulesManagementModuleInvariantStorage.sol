@@ -32,6 +32,6 @@ abstract contract RulesManagementModuleInvariantStorage {
 
     /* ==== Constant === */
     /// @notice Role to manage the ruleEngine
-    bytes32 public constant RULES_MANAGEMENT_ROLE =
-        keccak256("RULES_MANAGEMENT_ROLE");
+    // Will not be present in the final bytecode if not used
+    bytes32 public constant RULES_MANAGEMENT_ROLE = keccak256("RULES_MANAGEMENT_ROLE");
 }

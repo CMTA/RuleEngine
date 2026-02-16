@@ -2,16 +2,14 @@
 
 pragma solidity ^0.8.20;
 
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../../RuleCommonInvariantStorage.sol";
 
 abstract contract RuleBlacklistInvariantStorage is RuleCommonInvariantStorage {
     /* ============ String message ============ */
-    string constant TEXT_ADDRESS_FROM_IS_BLACKLISTED =
-        "The sender is blacklisted";
-    string constant TEXT_ADDRESS_TO_IS_BLACKLISTED =
-        "The recipient is blacklisted";
-    string constant TEXT_ADDRESS_SPENDER_IS_BLACKLISTED =
-        "The spender is blacklisted";
+    string constant TEXT_ADDRESS_FROM_IS_BLACKLISTED = "The sender is blacklisted";
+    string constant TEXT_ADDRESS_TO_IS_BLACKLISTED = "The recipient is blacklisted";
+    string constant TEXT_ADDRESS_SPENDER_IS_BLACKLISTED = "The spender is blacklisted";
 
     /* ============ Code ============ */
     // It is very important that each rule uses an unique code

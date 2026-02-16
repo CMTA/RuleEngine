@@ -5,10 +5,7 @@ pragma solidity ^0.8.20;
 /* ==== CMTAT === */
 import {IERC3643ComplianceRead, IERC3643IComplianceContract} from "CMTAT/interfaces/tokenization/IERC3643Partial.sol";
 
-interface IERC3643Compliance is
-    IERC3643ComplianceRead,
-    IERC3643IComplianceContract
-{
+interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContract {
     /* ============ Events ============ */
     /**
      * @notice Emitted when a token is successfully bound to the compliance contract.

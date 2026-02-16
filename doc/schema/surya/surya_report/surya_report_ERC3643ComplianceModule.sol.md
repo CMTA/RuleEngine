@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/ERC3643ComplianceModule.sol | 5d853a580045cc1107f0b4b00b012dd7a088b4be |
+| ./modules/ERC3643ComplianceModule.sol | 182aff8d18ff3f6df8e27fd9a93df1788cdb9339 |
 
 
 ### Contracts Description Table
@@ -15,14 +15,16 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **ERC3643ComplianceModule** | Implementation | IERC3643Compliance, AccessControl |||
-| └ | bindToken | Public ❗️ | 🛑  | onlyRole |
-| └ | unbindToken | Public ❗️ | 🛑  | onlyRole |
+| **ERC3643ComplianceModule** | Implementation | Context, IERC3643Compliance |||
+| └ | bindToken | Public ❗️ | 🛑  | onlyComplianceManager |
+| └ | unbindToken | Public ❗️ | 🛑  | onlyComplianceManager |
 | └ | isTokenBound | Public ❗️ |   |NO❗️ |
-| └ | getTokenBound | External ❗️ |   |NO❗️ |
-| └ | getTokenBounds | External ❗️ |   |NO❗️ |
+| └ | getTokenBound | Public ❗️ |   |NO❗️ |
+| └ | getTokenBounds | Public ❗️ |   |NO❗️ |
 | └ | _unbindToken | Internal 🔒 | 🛑  | |
 | └ | _bindToken | Internal 🔒 | 🛑  | |
+| └ | _checkBoundToken | Internal 🔒 |   | |
+| └ | _onlyComplianceManager | Internal 🔒 | 🛑  | |
 
 
 ### Legend
