@@ -30,9 +30,8 @@ contract RuleEngineOwnable is ERC2771ModuleStandalone, RuleEngineBase, Ownable {
         ERC2771ModuleStandalone(forwarderIrrevocable)
         Ownable(owner_)
     {
-        if (owner_ == address(0)) {
-            revert RuleEngine_AdminWithAddressZeroNotAllowed();
-        }
+        // Note: zero-address check for owner_ is handled by Ownable(owner_),
+        // which reverts with OwnableInvalidOwner(address(0)) before reaching here.
         if (tokenContract != address(0)) {
             _bindToken(tokenContract);
         }
