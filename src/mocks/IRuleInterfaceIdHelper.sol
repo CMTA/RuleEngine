@@ -87,6 +87,7 @@ contract IRuleInterfaceIdHelper {
     }
 
     /// @notice Manually computes the XOR of all function selectors and returns it
+    // forge-lint: disable-next-line(mixed-case-function)
     function computeManualXOR() external pure returns (bytes4) {
         return IRule.canReturnTransferRestrictionCode.selector ^ IERC1404.detectTransferRestriction.selector
             ^ IERC1404.messageForTransferRestriction.selector ^ IERC1404Extend.detectTransferRestrictionFrom.selector

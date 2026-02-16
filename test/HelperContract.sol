@@ -1,14 +1,17 @@
 //SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
-import "CMTAT/deployment/CMTATStandalone.sol";
+// forge-lint: disable-next-line(unused-import)
+import {Test} from "forge-std/Test.sol";
+import {CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
 
 import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 // RuleEngine
 import {RuleEngine} from "src/RuleEngine.sol";
+// forge-lint: disable-next-line(unused-import)
 import {RulesManagementModule} from "src/RuleEngineBase.sol";
+// forge-lint: disable-next-line(unused-import)
 import {ERC3643ComplianceModule} from "src/RuleEngineBase.sol";
 // RuleConditionalTransfer
 import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
@@ -25,11 +28,11 @@ import {
 } from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleAddressListInvariantStorage.sol";
 
 // Rule interface
-
+// forge-lint: disable-next-line(unused-import)
 import {IRule} from "src/interfaces/IRule.sol";
 
 // utils
-import "./utils/CMTATDeployment.sol";
+import {CMTATDeployment} from "./utils/CMTATDeployment.sol";
 
 /**
  * @title Constants used by the tests
@@ -69,7 +72,7 @@ abstract contract HelperContract is
 
     // CMTAT
     CMTATDeployment cmtatDeployment;
-    CMTATStandalone CMTAT_CONTRACT;
+    CMTATStandalone cmtatContract;
 
     // RuleEngine Mock
     RuleEngine public ruleEngineMock;
@@ -77,7 +80,7 @@ abstract contract HelperContract is
     //bytes32 public constant RULE_ENGINE_ROLE = keccak256("RULE_ENGINE_ROLE");
 
     uint8 constant NO_ERROR = 0;
-    uint8 CODE_NONEXISTENT = 255;
+    uint8 codeNonexistent = 255;
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
     string constant TEXT_TRANSFER_OK = "NoRestriction";

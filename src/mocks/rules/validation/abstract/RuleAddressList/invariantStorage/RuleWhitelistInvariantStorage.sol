@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.20;
 
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../../RuleCommonInvariantStorage.sol";
 
 abstract contract RuleWhitelistInvariantStorage is RuleCommonInvariantStorage {

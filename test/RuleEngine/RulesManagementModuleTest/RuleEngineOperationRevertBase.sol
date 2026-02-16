@@ -1,24 +1,26 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
-import "OZ/token/ERC20/IERC20.sol";
-import "src/mocks/rules/operation/RuleOperationRevert.sol";
+
+import {RuleOperationRevert} from "src/mocks/rules/operation/RuleOperationRevert.sol";
+
 
 /**
  * @title Base test for RuleEngine operation revert with CMTAT
  */
 abstract contract RuleEngineOperationRevertBase is Test, HelperContract {
-    function _deployCMTAT() internal virtual returns (CMTATStandalone);
+    function _deployCmtat() internal virtual returns (CMTATStandalone);
 
     // Arrange
     function setUp() public virtual {
         // CMTAT
-        CMTAT_CONTRACT = _deployCMTAT();
+        cmtatContract = _deployCmtat();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, address(CMTAT_CONTRACT));
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, address(cmtatContract));
         RuleOperationRevert ruleOperationRevert = new RuleOperationRevert();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -28,13 +30,14 @@ abstract contract RuleEngineOperationRevertBase is Test, HelperContract {
         assertEq(resUint256, 1);
 
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT.setRuleEngine(ruleEngineMock);
+        cmtatContract.setRuleEngine(ruleEngineMock);
     }
 
     function testRuleEngineTransferredRevert() public {
         // Arrange
         vm.expectRevert(RuleOperationRevert.RuleConditionalTransferLight_InvalidTransfer.selector);
         // Act
-        CMTAT_CONTRACT.transfer(ADDRESS2, 21);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        cmtatContract.transfer(ADDRESS2, 21);
     }
 }

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
-import "CMTAT/mocks/MinimalForwarderMock.sol";
+import {MinimalForwarderMock} from "CMTAT/mocks/MinimalForwarderMock.sol";
 
 /**
  * @title General functions of the RuleWhitelist

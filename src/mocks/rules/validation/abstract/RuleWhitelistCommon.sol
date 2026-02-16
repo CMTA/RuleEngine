@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.20;
 
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "./RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
 import {IRule} from "../../../../interfaces/IRule.sol";
 

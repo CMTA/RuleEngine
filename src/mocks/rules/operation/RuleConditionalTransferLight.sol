@@ -7,7 +7,7 @@ import {
 } from "./abstract/RuleConditionalTransferLightInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
-import {ERC165, IERC165, AccessControl} from "OZ/access/AccessControl.sol";
+import {IERC165, AccessControl} from "OZ/access/AccessControl.sol";
 
 /**
  * @title TransferApprovalRule
@@ -39,6 +39,7 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
      * @notice Approve a specific transfer. Can be approved multiple times.
      */
     function approveTransfer(address from, address to, uint256 value) public onlyRole(OPERATOR_ROLE) {
+        // forge-lint: disable-next-line(asm-keccak256)
         bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
         approvalCounts[transferHash] += 1;
         emit TransferApproved(from, to, value, approvalCounts[transferHash]);
@@ -48,6 +49,7 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
      * @notice Returns number of times a transfer is approved.
      */
     function approvedCount(address from, address to, uint256 value) public view returns (uint256) {
+        // forge-lint: disable-next-line(asm-keccak256)
         bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
         return approvalCounts[transferHash];
     }
@@ -57,6 +59,7 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
      * @dev `spender` is part of the interface but unused.
      */
     function transferred(address from, address to, uint256 value) public {
+        // forge-lint: disable-next-line(asm-keccak256)
         bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
         uint256 count = approvalCounts[transferHash];
 
@@ -86,6 +89,7 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
      *
      */
     function detectTransferRestriction(address from, address to, uint256 value) public view override returns (uint8) {
+        // forge-lint: disable-next-line(asm-keccak256)
         bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
         uint256 count = approvalCounts[transferHash];
         if (count == 0) {

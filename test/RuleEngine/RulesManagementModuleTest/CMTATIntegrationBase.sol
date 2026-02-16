@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
-import "CMTAT/deployment/CMTATStandalone.sol";
+import {Test} from "forge-std/Test.sol";
+import {CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
-import "OZ/token/ERC20/IERC20.sol";
+
+
 
 /**
  * @title Base integration test for RuleEngine with CMTAT
@@ -12,21 +14,21 @@ import "OZ/token/ERC20/IERC20.sol";
 abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
     uint256 defaultValue = 20;
 
-    function _deployCMTAT() internal virtual returns (CMTATStandalone);
+    function _deployCmtat() internal virtual returns (CMTATStandalone);
 
     // Arrange
     function setUp() public virtual {
         // global arrange
-        CMTAT_CONTRACT = _deployCMTAT();
+        cmtatContract = _deployCmtat();
 
         // CMTAT
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT.mint(ADDRESS1, defaultValue * 2);
+        cmtatContract.mint(ADDRESS1, defaultValue * 2);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT.mint(ADDRESS2, defaultValue);
+        cmtatContract.mint(ADDRESS2, defaultValue);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, address(CMTAT_CONTRACT));
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, address(cmtatContract));
         ruleConditionalTransferLight =
             new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
 
@@ -38,7 +40,7 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
 
         // We set the Rule Engine
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT.setRuleEngine(ruleEngineMock);
+        cmtatContract.setRuleEngine(ruleEngineMock);
     }
 
     function testCanDetectTransferRestrictionOK() public {
@@ -61,12 +63,12 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         assertEq(resUint8, 0);
 
         // CMTAT
-        resUint8 = CMTAT_CONTRACT.detectTransferRestriction(ADDRESS1, ADDRESS2, defaultValue);
+        resUint8 = cmtatContract.detectTransferRestriction(ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resUint8, 0);
 
-        resUint8 = CMTAT_CONTRACT.detectTransferRestrictionFrom(address(0), ADDRESS1, ADDRESS2, defaultValue);
+        resUint8 = cmtatContract.detectTransferRestrictionFrom(address(0), ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resUint8, 0);
@@ -83,12 +85,12 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         assertEq(resBool, true);
 
         // CMTAT
-        resBool = CMTAT_CONTRACT.canTransfer(ADDRESS1, ADDRESS2, defaultValue);
+        resBool = cmtatContract.canTransfer(ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resBool, true);
 
-        resBool = CMTAT_CONTRACT.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, defaultValue);
+        resBool = cmtatContract.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, defaultValue);
 
         // Assert
         assertEq(resBool, true);
@@ -102,7 +104,7 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
 
         // CMTAT
-        resUint8 = CMTAT_CONTRACT.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
+        resUint8 = cmtatContract.detectTransferRestriction(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
@@ -114,7 +116,7 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
 
         // CMTAT
-        resUint8 = CMTAT_CONTRACT.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
+        resUint8 = cmtatContract.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertEq(resUint8, CODE_TRANSFER_REQUEST_NOT_APPROVED);
@@ -126,7 +128,7 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         assertFalse(resBool);
 
         // CMTAT
-        resBool = CMTAT_CONTRACT.canTransfer(ADDRESS1, ADDRESS2, 20);
+        resBool = cmtatContract.canTransfer(ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertFalse(resBool);
@@ -138,7 +140,7 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         assertFalse(resBool);
 
         // CMTAT
-        resBool = CMTAT_CONTRACT.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
+        resBool = cmtatContract.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, 20);
 
         // Assert
         assertFalse(resBool);
@@ -148,13 +150,15 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         ruleConditionalTransferLight.approveTransfer(ADDRESS1, ADDRESS2, defaultValue);
         vm.prank(ADDRESS1);
-        CMTAT_CONTRACT.transfer(ADDRESS2, defaultValue);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        cmtatContract.transfer(ADDRESS2, defaultValue);
 
         vm.prank(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS);
         ruleConditionalTransferLight.approveTransfer(ADDRESS1, ADDRESS2, defaultValue);
         vm.prank(ADDRESS1);
-        CMTAT_CONTRACT.approve(ADDRESS3, defaultValue);
+        cmtatContract.approve(ADDRESS3, defaultValue);
         vm.prank(ADDRESS3);
-        CMTAT_CONTRACT.transferFrom(ADDRESS1, ADDRESS2, defaultValue);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        cmtatContract.transferFrom(ADDRESS1, ADDRESS2, defaultValue);
     }
 }

@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContractOwnable.sol";
+
 import {RuleEngineOwnableExposed} from "src/mocks/RuleEngineExposed.sol";
 import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
 
@@ -58,6 +60,7 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
         bytes memory data = ruleEngineOwnableExposed.exposedMsgData();
         // Should return the calldata (selector of exposedMsgData)
         assertEq(data.length, 4);
+        // forge-lint: disable-next-line(unsafe-typecast)
         assertEq(bytes4(data), ruleEngineOwnableExposed.exposedMsgData.selector);
     }
 

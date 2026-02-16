@@ -8,7 +8,7 @@ import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 /* ==== OpenZeppelin === */
 import {Context} from "OZ/utils/Context.sol";
 import {AccessControl} from "OZ/access/AccessControl.sol";
-import {ERC165, IERC165} from "OZ/utils/introspection/ERC165.sol";
+import {IERC165} from "OZ/utils/introspection/ERC165.sol";
 /* ==== Modules === */
 import {ERC2771ModuleStandalone, ERC2771Context} from "./modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {IRuleInterfaceIdHelper} from "src/mocks/IRuleInterfaceIdHelper.sol";
 
 /**
@@ -18,10 +18,10 @@ contract IRuleInterfaceIdTest is Test {
     function testConstantMatchesAllFunctionsXOR() public view {
         bytes4 constant_ = helper.getRuleInterfaceIdConstant();
         bytes4 allFunctionsId = helper.getIRuleAllFunctionsInterfaceId();
-        bytes4 manualXOR = helper.computeManualXOR();
+        bytes4 manualXor = helper.computeManualXOR();
 
         assertEq(constant_, allFunctionsId, "Constant should match IRuleAllFunctions interface ID");
-        assertEq(constant_, manualXOR, "Constant should match manual XOR");
+        assertEq(constant_, manualXor, "Constant should match manual XOR");
     }
 
     function testIRuleInterfaceIdIsSubsetOfAllFunctions() public view {

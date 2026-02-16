@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
-import "../../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+import {AccessControl} from "OZ/access/AccessControl.sol";
+
 
 /**
  * @title Tests on the provided functions by OpenZeppelin

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
 import {IERC3643Compliance} from "../../src/interfaces/IERC3643Compliance.sol";
 import {ERC3643ComplianceModule} from "../../src/modules/ERC3643ComplianceModule.sol";

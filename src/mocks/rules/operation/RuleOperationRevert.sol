@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../validation/abstract/RuleCommonInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
-import {ERC165, IERC165, AccessControl} from "OZ/access/AccessControl.sol";
+import {IERC165, AccessControl} from "OZ/access/AccessControl.sol";
 
 /**
  * @title TransferApprovalRule

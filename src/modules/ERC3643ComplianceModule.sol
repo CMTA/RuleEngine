@@ -27,9 +27,7 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
 
     /* ==== Modifier === */
     modifier onlyBoundToken() {
-        if (!_boundTokens.contains(_msgSender())) {
-            revert RuleEngine_ERC3643Compliance_UnauthorizedCaller();
-        }
+        _checkBoundToken();
         _;
     }
 
@@ -92,6 +90,12 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
         // Should never revert because we check if the token address is already set before
         require(_boundTokens.add(token), RuleEngine_ERC3643Compliance_OperationNotSuccessful());
         emit TokenBound(token);
+    }
+
+    function _checkBoundToken() internal view virtual{
+        if (!_boundTokens.contains(_msgSender())) {
+            revert RuleEngine_ERC3643Compliance_UnauthorizedCaller();
+        }
     }
 
     function _onlyComplianceManager() internal virtual;

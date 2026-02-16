@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContractOwnable.sol";
+
 import {Ownable} from "OZ/access/Ownable.sol";
 
 /**

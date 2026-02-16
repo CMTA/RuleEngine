@@ -1,32 +1,34 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
-import "CMTAT/deployment/CMTATStandalone.sol";
+import {Test} from "forge-std/Test.sol";
+import {CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
+
 
 /**
  * @title Base integration test with the CMTAT (whitelist)
  */
 abstract contract CMTATIntegrationBase is Test, HelperContract {
-    uint256 ADDRESS1_BALANCE_INIT = 31;
-    uint256 ADDRESS2_BALANCE_INIT = 32;
-    uint256 ADDRESS3_BALANCE_INIT = 33;
+    uint256 address1BalanceInit = 31;
+    uint256 address2BalanceInit = 32;
+    uint256 address3BalanceInit = 33;
 
-    uint256 FLAG = 5;
+    uint256 flag = 5;
 
-    function _deployCMTAT() internal virtual returns (CMTATStandalone);
+    function _deployCmtat() internal virtual returns (CMTATStandalone);
 
     // Arrange
     function setUp() public virtual {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelist = new RuleWhitelist(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
         // global arrange
-        CMTAT_CONTRACT = _deployCMTAT();
+        cmtatContract = _deployCmtat();
 
         // specific arrange
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleEngineMock = new RuleEngine(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS, address(CMTAT_CONTRACT));
+        ruleEngineMock = new RuleEngine(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS, address(cmtatContract));
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist);
 
@@ -35,27 +37,28 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
 
         // CMTAT
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT.mint(ADDRESS1, ADDRESS1_BALANCE_INIT);
+        cmtatContract.mint(ADDRESS1, address1BalanceInit);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT.mint(ADDRESS2, ADDRESS2_BALANCE_INIT);
+        cmtatContract.mint(ADDRESS2, address2BalanceInit);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT.mint(ADDRESS3, ADDRESS3_BALANCE_INIT);
+        cmtatContract.mint(ADDRESS3, address3BalanceInit);
 
         // We set the Rule Engine
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT.setRuleEngine(ruleEngineMock);
+        cmtatContract.setRuleEngine(ruleEngineMock);
     }
 
     /******* Transfer *******/
     function testCannotTransferWithoutAddressWhitelisted() public {
-        uint8 code = CMTAT_CONTRACT.detectTransferRestriction(ADDRESS1, ADDRESS2, 21);
+        uint8 code = cmtatContract.detectTransferRestriction(ADDRESS1, ADDRESS2, 21);
         // Arrange
         vm.prank(ADDRESS1);
         vm.expectRevert(
             abi.encodeWithSelector(RuleWhitelist.RuleWhitelist_InvalidTransfer.selector, ADDRESS1, ADDRESS2, 21, code)
         );
         // Act
-        CMTAT_CONTRACT.transfer(ADDRESS2, 21);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        cmtatContract.transfer(ADDRESS2, 21);
     }
 
     function testCannotTransferWithoutFromAddressWhitelisted() public {
@@ -64,7 +67,7 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelist.addAddressToTheList(ADDRESS2);
 
-        uint8 code = CMTAT_CONTRACT.detectTransferRestriction(ADDRESS1, ADDRESS2, amount);
+        uint8 code = cmtatContract.detectTransferRestriction(ADDRESS1, ADDRESS2, amount);
         vm.prank(ADDRESS1);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -72,7 +75,8 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
             )
         );
         // Act
-        CMTAT_CONTRACT.transfer(ADDRESS2, amount);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        cmtatContract.transfer(ADDRESS2, amount);
     }
 
     function testCannotTransferWithoutToAddressWhitelisted() public {
@@ -81,7 +85,7 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelist.addAddressToTheList(ADDRESS1);
 
-        uint8 code = CMTAT_CONTRACT.detectTransferRestriction(ADDRESS1, ADDRESS2, amount);
+        uint8 code = cmtatContract.detectTransferRestriction(ADDRESS1, ADDRESS2, amount);
         vm.prank(ADDRESS1);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -89,21 +93,22 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
             )
         );
         // Act
-        CMTAT_CONTRACT.transfer(ADDRESS2, amount);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        cmtatContract.transfer(ADDRESS2, amount);
     }
 
     function testCannotTransferWithoutSpenderAddressWhitelisted() public {
         // Arrange
         uint256 amount = 21;
         vm.prank(ADDRESS1);
-        CMTAT_CONTRACT.approve(ADDRESS3, amount);
+        cmtatContract.approve(ADDRESS3, amount);
 
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelist.addAddressToTheList(ADDRESS1);
         vm.prank(DEFAULT_ADMIN_ADDRESS);
         ruleWhitelist.addAddressToTheList(ADDRESS2);
 
-        uint8 code = CMTAT_CONTRACT.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, amount);
+        uint8 code = cmtatContract.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, amount);
         vm.prank(ADDRESS3);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -111,7 +116,8 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
             )
         );
         // Act
-        CMTAT_CONTRACT.transferFrom(ADDRESS1, ADDRESS2, amount);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        cmtatContract.transferFrom(ADDRESS1, ADDRESS2, amount);
     }
 
     function testCanMakeATransfer() public {
@@ -126,14 +132,15 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
         vm.prank(ADDRESS1);
 
         // Act
-        CMTAT_CONTRACT.transfer(ADDRESS2, 11);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        cmtatContract.transfer(ADDRESS2, 11);
 
         // Assert
-        resUint256 = CMTAT_CONTRACT.balanceOf(ADDRESS1);
+        resUint256 = cmtatContract.balanceOf(ADDRESS1);
         assertEq(resUint256, 20);
-        resUint256 = CMTAT_CONTRACT.balanceOf(ADDRESS2);
+        resUint256 = cmtatContract.balanceOf(ADDRESS2);
         assertEq(resUint256, 43);
-        resUint256 = CMTAT_CONTRACT.balanceOf(ADDRESS3);
+        resUint256 = cmtatContract.balanceOf(ADDRESS3);
         assertEq(resUint256, 33);
     }
 
@@ -144,10 +151,10 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
         resBool = ruleWhitelist.addressIsListed(ADDRESS2);
         // Assert
         assertEq(resBool, true);
-        uint8 res1 = CMTAT_CONTRACT.detectTransferRestriction(ADDRESS1, ADDRESS2, 11);
+        uint8 res1 = cmtatContract.detectTransferRestriction(ADDRESS1, ADDRESS2, 11);
         // Assert
         assertEq(res1, CODE_ADDRESS_FROM_NOT_WHITELISTED);
-        string memory message1 = CMTAT_CONTRACT.messageForTransferRestriction(res1);
+        string memory message1 = cmtatContract.messageForTransferRestriction(res1);
         // Assert
         assertEq(message1, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
     }
@@ -161,11 +168,11 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
         resBool = ruleWhitelist.addressIsListed(ADDRESS1);
         assertEq(resBool, true);
         // Act
-        uint8 res1 = CMTAT_CONTRACT.detectTransferRestriction(ADDRESS1, ADDRESS2, 11);
+        uint8 res1 = cmtatContract.detectTransferRestriction(ADDRESS1, ADDRESS2, 11);
         // Assert
         assertEq(res1, CODE_ADDRESS_TO_NOT_WHITELISTED);
         // Act
-        string memory message1 = CMTAT_CONTRACT.messageForTransferRestriction(res1);
+        string memory message1 = cmtatContract.messageForTransferRestriction(res1);
         // Assert
         assertEq(message1, TEXT_ADDRESS_TO_NOT_WHITELISTED);
 
@@ -182,12 +189,12 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
 
     function testDetectAndMessageWithFromAndToNotWhitelisted() public view {
         // Act
-        uint8 res1 = CMTAT_CONTRACT.detectTransferRestriction(ADDRESS1, ADDRESS2, 11);
+        uint8 res1 = cmtatContract.detectTransferRestriction(ADDRESS1, ADDRESS2, 11);
 
         // Assert
         assertEq(res1, CODE_ADDRESS_FROM_NOT_WHITELISTED);
         // Act
-        string memory message1 = CMTAT_CONTRACT.messageForTransferRestriction(res1);
+        string memory message1 = cmtatContract.messageForTransferRestriction(res1);
 
         // Assert
         assertEq(message1, TEXT_ADDRESS_FROM_NOT_WHITELISTED);
@@ -214,11 +221,11 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
             address(ruleWhitelist).call(abi.encodeWithSignature("addAddressesToTheList(address[])", whitelist));
         require(success);
         // Act
-        uint8 res1 = CMTAT_CONTRACT.detectTransferRestriction(ADDRESS1, ADDRESS2, 11);
+        uint8 res1 = cmtatContract.detectTransferRestriction(ADDRESS1, ADDRESS2, 11);
         // Assert
         assertEq(res1, TRANSFER_OK);
         // Act
-        string memory message1 = CMTAT_CONTRACT.messageForTransferRestriction(res1);
+        string memory message1 = cmtatContract.messageForTransferRestriction(res1);
         // Assert
         assertEq(message1, TEXT_TRANSFER_OK);
     }
@@ -234,7 +241,7 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
             address(ruleWhitelist).call(abi.encodeWithSignature("addAddressesToTheList(address[])", whitelist));
         require(success);
         // Act
-        uint8 res1 = CMTAT_CONTRACT.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, 11);
+        uint8 res1 = cmtatContract.detectTransferRestrictionFrom(ADDRESS3, ADDRESS1, ADDRESS2, 11);
         // Assert
         assertEq(res1, CODE_ADDRESS_SPENDER_NOT_WHITELISTED);
 
@@ -242,7 +249,7 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
         // Assert
         assertEq(res1, CODE_ADDRESS_SPENDER_NOT_WHITELISTED);
 
-        resBool = CMTAT_CONTRACT.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, 11);
+        resBool = cmtatContract.canTransferFrom(ADDRESS3, ADDRESS1, ADDRESS2, 11);
         // Assert
         assertFalse(resBool);
 
@@ -254,7 +261,7 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
         // Assert
         assertFalse(resBool);
         // Act
-        string memory message1 = CMTAT_CONTRACT.messageForTransferRestriction(res1);
+        string memory message1 = cmtatContract.messageForTransferRestriction(res1);
         // Assert
         assertEq(message1, TEXT_ADDRESS_SPENDER_NOT_WHITELISTED);
     }
@@ -272,10 +279,10 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
 
         // Act
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        CMTAT_CONTRACT.mint(ADDRESS1, 11);
+        cmtatContract.mint(ADDRESS1, 11);
 
         // Assert
-        resUint256 = CMTAT_CONTRACT.balanceOf(ADDRESS1);
-        assertEq(resUint256, ADDRESS1_BALANCE_INIT + 11);
+        resUint256 = cmtatContract.balanceOf(ADDRESS1);
+        assertEq(resUint256, address1BalanceInit + 11);
     }
 }

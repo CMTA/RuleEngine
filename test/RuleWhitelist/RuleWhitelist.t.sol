@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
 
 /**
@@ -91,7 +92,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         // Assert
         assertEq(resBool, true);
         // Act
-        resBool = ruleWhitelist.canReturnTransferRestrictionCode(CODE_NONEXISTENT);
+        resBool = ruleWhitelist.canReturnTransferRestrictionCode(codeNonexistent);
         // Assert
         assertFalse(resBool);
     }
@@ -106,7 +107,7 @@ contract RuleWhitelistTest is Test, HelperContract {
         // Assert
         assertEq(resString, TEXT_ADDRESS_TO_NOT_WHITELISTED);
         // Act
-        resString = ruleWhitelist.messageForTransferRestriction(CODE_NONEXISTENT);
+        resString = ruleWhitelist.messageForTransferRestriction(codeNonexistent);
         // Assert
         assertEq(resString, TEXT_CODE_NOT_FOUND);
     }

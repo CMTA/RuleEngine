@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MPL-2.0
 
 pragma solidity ^0.8.20;
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "OZ/token/ERC20/IERC20.sol";
 
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "../../validation/abstract/RuleCommonInvariantStorage.sol";
+// forge-lint: disable-next-line(unaliased-plain-import)
 import "src/mocks/rules/validation/RuleWhitelist.sol";
 
 abstract contract RuleConditionalTransferLightInvariantStorage is RuleCommonInvariantStorage {
