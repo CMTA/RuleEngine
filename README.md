@@ -66,6 +66,14 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 
 ### How to set it
 
+#### Compatibility
+
+| RuleEngine version                                           | Compatible Versions                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **v3.0.0-rc1**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0-rc2](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0-rc2) |
+| **v3.0.0-rc0**                                               | CMTAT ≥ v3.0.0<br />                                         |
+| **[v1.0.2.1](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2.1)** | CMTAT v2.3.0 (audited)                                       |
+
 #### CMTAT v3.0.0
 
 CMTAT provides the following function to set a RuleEngine inside a CMTAT token:
