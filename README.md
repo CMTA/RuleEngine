@@ -216,10 +216,10 @@ A specific module implements this interface for the RuleEngine: [ERC3643Complian
 
 The toolchain includes the following components, where the versions are the latest ones that we tested:
 
-- Foundry (forge-std) [v1.10.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.10.0)
-- Solidity [0.8.30](https://docs.soliditylang.org/en/v0.8.30/) (via solc-js)
-- OpenZeppelin Contracts (submodule) [v5.4.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.4.0)
-- CMTAT [v3.0.0-rc7](https://github.com/CMTA/CMTAT/releases/tag/v3.0.0-rc7)
+- Foundry (forge-std) [v1.14.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.10.0)
+- Solidity [0.8.33](https://docs.soliditylang.org/en/v0.8.33/)
+- OpenZeppelin Contracts (submodule) [v5.5.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.5.0)
+- CMTAT [v3.2.0-rc2](https://github.com/CMTA/CMTAT/releases/tag/v3.0.0-rc7)
 
 ### Access Control
 
