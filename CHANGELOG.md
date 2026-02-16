@@ -7,9 +7,12 @@ Please follow [https://changelog.md/](https://changelog.md/) conventions.
 > Before a new release, perform the following tasks
 
 - Code: Update the version name, variable VERSION
-- Run linter
+- Run formatter and linter
 
-> npm run-script lint:all:prettier
+```bash
+forge fmt
+forge lint
+```
 
 - Documentation
   - Perform a code coverage and update the files in the corresponding directory [./doc/coverage](./doc/coverage)

@@ -1293,17 +1293,6 @@ forge update
 
 See also the command's [documentation](https://book.getfoundry.sh/reference/forge/forge-update).
 
-#### CMTAT
-
-You also have to install OpenZeppelin inside CMTAT repository (submodule)
-
-```bash
-cd CMTAT
-npm install
-```
-
-
-
 ### Compilation
 
 The official documentation is available in the Foundry [website](https://book.getfoundry.sh/reference/forge/build-commands)
@@ -1323,6 +1312,8 @@ forge build --sizes
 ```
 
 Both `RuleEngine` and `RuleEngineOwnable` have similar bytecode sizes since they share the same base functionality. The `RuleEngineOwnable` contract is slightly smaller as `Ownable` has less overhead than `AccessControl`.
+
+
 
 ![contract-size](./doc/compilation/contract-size.png)
 
@@ -1427,6 +1418,21 @@ forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=127.0.0.1:
 ### Solidity style guideline
 
 RuleEngine follows the [solidity style guideline](https://docs.soliditylang.org/en/latest/style-guide.html) and the [natspec format](https://docs.soliditylang.org/en/latest/natspec-format.html) for comments
+
+#### Formatting & Linting
+
+We use Foundry's built-in formatter and linter:
+
+```bash
+# Format all Solidity files
+forge fmt
+
+# Check formatting without modifying files
+forge fmt --check
+
+# Run the Solidity linter
+forge lint
+```
 
 - Orders of Functions
 
