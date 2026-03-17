@@ -76,7 +76,7 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 
 | RuleEngine version                                           | Compatible Versions                                          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **v3.0.0-rc1**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0-rc2](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0-rc2) |
+| **v3.0.0-rc1**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
 | **v3.0.0-rc0**                                               | CMTAT ≥ v3.0.0<br />                                         |
 | **[v1.0.2.1](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2.1)** | CMTAT v2.3.0 (audited)                                       |
 
@@ -222,10 +222,10 @@ A specific module implements this interface for the RuleEngine: [ERC3643Complian
 
 The toolchain includes the following components, where the versions are the latest ones that we tested:
 
-- Foundry (forge-std) [v1.14.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.10.0)
-- Solidity [0.8.33](https://docs.soliditylang.org/en/v0.8.33/)
-- OpenZeppelin Contracts (submodule) [v5.5.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.5.0)
-- CMTAT [v3.2.0-rc2](https://github.com/CMTA/CMTAT/releases/tag/v3.0.0-rc7)
+- Foundry (forge-std) [v1.14.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.14.0)
+- Solidity [0.8.34](https://docs.soliditylang.org/en/v0.8.34/)
+- OpenZeppelin Contracts (submodule) [v5.6.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.0)
+- CMTAT [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
 
 ### Access Control
 
@@ -1298,12 +1298,12 @@ See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMT
 Here are the settings for [Hardhat](https://hardhat.org) and [Foundry](https://getfoundry.sh).
 
 - `hardhat.config.js`
-  - Solidity [v0.8.33](https://docs.soliditylang.org/en/v0.8.33/)
+  - Solidity [v0.8.34](https://docs.soliditylang.org/en/v0.8.34/)
   - EVM version: Prague (Pectra upgrade)
   - Optimizer: true, 200 runs
 
 - `foundry.toml`
-  - Solidity [v0.8.33](https://docs.soliditylang.org/en/v0.8.33/)
+  - Solidity [v0.8.34](https://docs.soliditylang.org/en/v0.8.34/)
   - EVM version: Prague (Pectra upgrade)
   - Optimizer: true, 200 runs
 
