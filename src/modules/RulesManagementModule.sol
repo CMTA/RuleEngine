@@ -44,6 +44,8 @@ abstract contract RulesManagementModule is
      * call this function directly with the new set.
      * No on-chain maximum number of rules is enforced. Operators are responsible
      * for keeping the rule set size compatible with the target chain gas limits.
+     * Security convention: rule contracts should be treated as trusted business logic,
+     * but should not also be granted {RULES_MANAGEMENT_ROLE}.
      */
     function setRules(IRule[] calldata rules_) public virtual override(IRulesManagementModule) onlyRulesManager {
         if (rules_.length == 0) {
@@ -71,6 +73,7 @@ abstract contract RulesManagementModule is
      * @inheritdoc IRulesManagementModule
      * @dev No on-chain maximum number of rules is enforced. Adding too many rules
      * can increase transfer-time gas usage because rule checks are linear in rule count.
+     * Security convention: do not grant {RULES_MANAGEMENT_ROLE} to rule contracts.
      */
     function addRule(IRule rule_) public virtual override(IRulesManagementModule) onlyRulesManager {
         _checkRule(address(rule_));
@@ -165,6 +168,8 @@ abstract contract RulesManagementModule is
      * @notice Go through all the rule to know if a restriction exists on the transfer
      * @dev Complexity is O(number of configured rules). Large rule sets can make
      * transfers too expensive on chains with lower block gas limits.
+     * Security convention: rule contracts are expected to be trusted and must not
+     * hold {RULES_MANAGEMENT_ROLE}.
      * @param from the origin address
      * @param to the destination address
      * @param value to transfer
@@ -181,6 +186,8 @@ abstract contract RulesManagementModule is
      * @notice Go through all the rule to know if a restriction exists on the transfer
      * @dev Complexity is O(number of configured rules). Large rule sets can make
      * transfers too expensive on chains with lower block gas limits.
+     * Security convention: rule contracts are expected to be trusted and must not
+     * hold {RULES_MANAGEMENT_ROLE}.
      * @param spender the spender address (transferFrom)
      * @param from the origin address
      * @param to the destination address

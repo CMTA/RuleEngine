@@ -259,6 +259,8 @@ It is set in the constructor when the contract is deployed.
 
 > Note: For `RuleEngineOwnable`, all protected functions are controlled by the single `owner` address instead of roles.
 
+> **Warning (role assignment):** Rule contracts should be treated as trusted logic components, but they should not be granted `RULES_MANAGEMENT_ROLE` (or admin privileges). Keep rule-management roles on dedicated operator/admin accounts only.
+
 |                         | Defined in                       | 32 bytes identifier                                          |
 | ----------------------- | -------------------------------- | ------------------------------------------------------------ |
 | DEFAULT_ADMIN_ROLE      | OpenZeppelin<br />AccessControl  | 0x0000000000000000000000000000000000000000000000000000000000000000 |
