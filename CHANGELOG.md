@@ -58,6 +58,7 @@ forge lint
 ### Fixed
 
 - `RuleEngineOwnable.supportsInterface` incorrectly advertised `IAccessControl` via the inherited `AccessControl.supportsInterface` fallback. Replaced with an explicit whitelist; `supportsInterface(IAccessControl)` now returns `false` as expected (Nethermind AuditAgent finding 2).
+- Remove `AccessControl` inheritance from `RulesManagementModule`; RBAC responsibilities are now explicitly held by `RuleEngine`, while the module remains access-control agnostic.
 
 ### Added
 

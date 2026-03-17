@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
 import {EnumerableSet} from "OZ/utils/structs/EnumerableSet.sol";
-import {AccessControl} from "OZ/access/AccessControl.sol";
 /* ==== Interface and other library === */
 import {IRulesManagementModule} from "../interfaces/IRulesManagementModule.sol";
 import {IRule} from "../interfaces/IRule.sol";
@@ -13,11 +12,7 @@ import {RulesManagementModuleInvariantStorage} from "./library/RulesManagementMo
 /**
  * @title RuleEngine -  part
  */
-abstract contract RulesManagementModule is
-    AccessControl,
-    RulesManagementModuleInvariantStorage,
-    IRulesManagementModule
-{
+abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage, IRulesManagementModule {
     modifier onlyRulesManager() {
         _onlyRulesManager();
         _;

@@ -236,6 +236,7 @@ Two access control mechanisms are available depending on which contract you depl
 The `RuleEngine` contract uses Role-Based Access Control (RBAC) via OpenZeppelin's `AccessControl`.
 
 Each module defines the roles useful to restrict its functions. The contract overrides the OpenZeppelin function `hasRole` to give by default all the roles to the `admin`.
+`RulesManagementModule` itself is access-control agnostic; RBAC is wired at the concrete `RuleEngine` level.
 
 See also [docs.openzeppelin.com - AccessControl](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl)
 
@@ -1256,15 +1257,20 @@ The final report is available in [ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf](https://g
 
 Here is the list of report performed with [Slither](https://github.com/crytic/slither)
 
-| Version | File                                                         |
-| ------- | ------------------------------------------------------------ |
-| latest  | [slither-report.md](./doc/security/audits/tools/slither-report.md) |
+| Version | Report | Assessment |
+| ------- | ------ | ---------- |
+| v3.0.0-rc2 | [slither-report.md](./doc/security/audits/tools/slither-report.md) | [slither-report-feedback.md](./doc/security/audits/tools/slither-report-feedback.md) |
 
 ```bash
 slither .  --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" > slither-report.md
 ```
 
+2 finding categories — 0 High · 0 Medium · 10 Low · 2 Informational
 
+| ID | Detector | Impact | Instances | Assessment |
+|----|----------|--------|-----------|------------|
+| 0–9 | `calls-loop` | Low | 10 | Accepted by design — fan-out to rule contracts is the core architecture |
+| 10–11 | `unindexed-event-address` | Informational | 2 | Accepted — adding `indexed` to `TokenBound`/`TokenUnbound` is interface-breaking |
 
 #### Aderyn
 
@@ -1274,9 +1280,21 @@ Here is the list of report performed with [Aderyn](https://github.com/Cyfrin/ade
 aderyn -x mocks --output aderyn-report.md
 ```
 
-| Version | File                                                         |
-| ------- | ------------------------------------------------------------ |
-| latest  | [aderyn-report.md](./doc/security/audits/tools/aderyn-report.md) |
+| Version | Report | Assessment |
+| ------- | ------ | ---------- |
+| v3.0.0-rc2 | [aderyn-report.md](./doc/security/audits/tools/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/aderyn-report-feedback.md) |
+
+0 High · 7 Low
+
+| ID | Finding | Instances | Assessment |
+|----|---------|-----------|------------|
+| L-1 | Centralization Risk | 6 | Accepted by design — privileged compliance tool |
+| L-2 | Unspecific Solidity Pragma | 12 | Accepted by design — intentional for library reusability |
+| L-3 | PUSH0 Opcode | 14 | Not applicable — project targets Prague EVM |
+| L-4 | Empty Block | 4 | Accepted by design — access-control hook pattern |
+| L-5 | Loop Contains `require`/`revert` | 1 | Accepted by design — `setRules` is an atomic batch operation |
+| L-6 | Costly Operations Inside Loop | 1 | Accepted — unavoidable `SSTORE` in `setRules` |
+| L-7 | Unchecked Return | 1 | Accepted — `_grantRole` return is irrelevant in constructor |
 
 ## Documentation
 

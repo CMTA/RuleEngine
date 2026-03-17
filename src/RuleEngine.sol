@@ -18,7 +18,7 @@ import {ComplianceInterfaceId} from "./modules/library/ComplianceInterfaceId.sol
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
  */
-contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase {
+contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase, AccessControl {
     /**
      * @param admin Address of the contract (Access Control)
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support

@@ -9,7 +9,6 @@ import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {Context} from "OZ/utils/Context.sol";
 import {Ownable} from "OZ/access/Ownable.sol";
 import {IERC165} from "OZ/utils/introspection/IERC165.sol";
-import {AccessControl} from "OZ/access/AccessControl.sol";
 /* ==== Modules === */
 import {ERC2771ModuleStandalone, ERC2771Context} from "./modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */
@@ -50,7 +49,7 @@ contract RuleEngineOwnable is ERC2771ModuleStandalone, RuleEngineBase, Ownable {
     function _onlyComplianceManager() internal virtual override onlyOwner {}
 
     /* ============ ERC-165 ============ */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165) returns (bool) {
         return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
             || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
             || interfaceId == ERC173_INTERFACE_ID
