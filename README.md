@@ -26,6 +26,8 @@ Both contracts share the same core functionality through `RuleEngineBase` and su
 - ERC-2771 meta-transactions (gasless)
 - Multiple token bindings
 
+> **Warning (shared engine across multiple tokens):** A "multi-tenant" setup here means one RuleEngine instance is shared by several token contracts (all bound through `bindToken`). In this setup, tokens must be equally trusted and governed together. ERC-3643 callbacks (`transferred`, `created`, `destroyed`) do not pass the token address to rules, so stateful/accounting rules are not safe for mutually untrusted tokens sharing the same engine.
+
 [TOC]
 
 ## Motivation

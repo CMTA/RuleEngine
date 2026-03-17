@@ -41,12 +41,22 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
     //////////////////////////////////////////////////////////////*/
 
     /* ============ State functions ============ */
-    /// @inheritdoc IERC3643Compliance
+    /**
+     * @inheritdoc IERC3643Compliance
+     * @dev Operator warning: "multi-tenant" means one RuleEngine is shared by
+     * multiple token contracts. In that setup, bind only tokens that are equally
+     * trusted and governed together.
+     */
     function bindToken(address token) public virtual override onlyComplianceManager {
         _bindToken(token);
     }
 
-    /// @inheritdoc IERC3643Compliance
+    /**
+     * @inheritdoc IERC3643Compliance
+     * @dev Operator warning: unbinding is an administrative operation and does not
+     * erase any state already stored by external rule contracts in a previously
+     * shared ("multi-tenant") setup.
+     */
     function unbindToken(address token) public virtual override onlyComplianceManager {
         _unbindToken(token);
     }

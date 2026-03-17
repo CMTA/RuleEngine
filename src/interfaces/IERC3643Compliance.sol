@@ -24,6 +24,11 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      * @notice Associates a token contract with this compliance contract.
      * @dev The compliance contract may restrict operations on the bound token
      *      according to the compliance logic.
+     *      Security note: a "multi-tenant" setup means multiple token contracts
+     *      share one RuleEngine instance (all are bound via {bindToken}).
+     *      In that setup, all bound tokens must be equally trusted and governed together.
+     *      ERC-3643 callbacks do not carry the token address to rules, so stateful
+     *      rules with per-address accounting are unsafe across mutually untrusted tokens.
      *      Reverts if the token is already bound.
      *      Complexity: O(1).
      * @param token The address of the token to bind.
@@ -32,7 +37,11 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
 
     /**
      * @notice Removes the association of a token contract from this compliance contract.
-     * @dev Reverts if the token is not currently bound.
+     * @dev Security note: unbinding does not retroactively isolate rule state from
+     *      previously shared multi-token operation. "Multi-tenant" means one RuleEngine
+     *      shared by multiple token contracts. Avoid multi-tenant binding unless
+     *      all tokens are equally trusted and governed together.
+     *      Reverts if the token is not currently bound.
      * Complexity: O(1).
      * @param token The address of the token to unbind.
      */
