@@ -130,7 +130,7 @@ npm run-script surya:report
 >Slither is a Solidity static analysis framework written in Python3
 
 ```bash
-slither .  --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std" > slither-report.md
+slither .  --checklist --filter-paths "openzeppelin-contracts|test|mocks|CMTAT|forge-std" > slither-report.md
 ```
 
 ### [Aderyn](https://github.com/Cyfrin/aderyn)
