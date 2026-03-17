@@ -51,8 +51,9 @@ contract RuleEngineOwnable is ERC2771ModuleStandalone, RuleEngineBase, Ownable {
     /* ============ ERC-165 ============ */
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
         return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
-            || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID || interfaceId == ERC173_INTERFACE_ID
-            || AccessControl.supportsInterface(interfaceId);
+            || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
+            || interfaceId == ERC173_INTERFACE_ID
+            || interfaceId == type(IERC165).interfaceId;
     }
 
     /*//////////////////////////////////////////////////////////////

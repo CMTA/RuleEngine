@@ -7,9 +7,10 @@ import "../HelperContractOwnable.sol";
 
 import {RuleEngineOwnableExposed} from "src/mocks/RuleEngineExposed.sol";
 import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
+import {IAccessControl} from "OZ/access/IAccessControl.sol";
 
 /**
- * @title Coverage tests for RuleEngineOwnable (supportsInterface fallback, _msgData, ERC-165 rule check)
+ * @title Coverage tests for RuleEngineOwnable (_msgData, ERC-165 rule check)
  */
 contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
     RuleEngineOwnableExposed public ruleEngineOwnableExposed;
@@ -42,13 +43,15 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
         assertTrue(ruleEngineMock.supportsInterface(ERC173_ID));
     }
 
-    function testSupportsERC165ViaAccessControlFallback() public view {
-        // This hits line 61: AccessControl.supportsInterface(interfaceId)
+    function testSupportsERC165() public view {
         assertTrue(ruleEngineMock.supportsInterface(ERC165_ID));
     }
 
+    function testDoesNotSupportIAccessControlInterface() public view {
+        assertFalse(ruleEngineMock.supportsInterface(type(IAccessControl).interfaceId));
+    }
+
     function testDoesNotSupportInvalidInterface() public view {
-        // Falls through all checks including AccessControl.supportsInterface -> false
         assertFalse(ruleEngineMock.supportsInterface(INVALID_ID));
     }
 
