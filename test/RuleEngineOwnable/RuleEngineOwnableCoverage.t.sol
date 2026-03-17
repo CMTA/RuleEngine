@@ -8,6 +8,8 @@ import "../HelperContractOwnable.sol";
 import {RuleEngineOwnableExposed} from "src/mocks/RuleEngineExposed.sol";
 import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
 import {IAccessControl} from "OZ/access/IAccessControl.sol";
+import {ICompliance} from "../mocks/ICompliance.sol";
+import {IERC7551ComplianceSubset} from "../mocks/IERC7551ComplianceSubset.sol";
 
 /**
  * @title Coverage tests for RuleEngineOwnable (_msgData, ERC-165 rule check)
@@ -41,6 +43,14 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
 
     function testSupportsERC173Interface() public view {
         assertTrue(ruleEngineMock.supportsInterface(ERC173_ID));
+    }
+
+    function testSupportsERC3643ComplianceInterface() public view {
+        assertTrue(ruleEngineMock.supportsInterface(type(ICompliance).interfaceId));
+    }
+
+    function testSupportsIERC7551ComplianceSubsetInterface() public view {
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC7551ComplianceSubset).interfaceId));
     }
 
     function testSupportsERC165() public view {

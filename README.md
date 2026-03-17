@@ -204,6 +204,8 @@ function transferred(address from, address to, uint256 value)
 external;
 ```
 
+> Note: `IERC7551Compliance` comes from `draft-IERC7551` (not final) and, in this project, is used as a subset compliance interface focused on `canTransferFrom`.
+
 
 
 ### ERC-3643
@@ -500,6 +502,8 @@ Must revert if the transfer is invalid.
 #### IERC7551Compliance
 
 ![IERC7551ComplianceUML](./doc/schema/vscode-uml/IERC7551ComplianceUML.png)
+
+> Note: ERC-7551 is draft (not final). The `IERC7551Compliance` interface used here is a subset interface exposing the compliance check `canTransferFrom`.
 
 ##### canTransferFrom(address spender, address from, address to, uint256 value) -> bool
 
