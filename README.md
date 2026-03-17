@@ -68,6 +68,8 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 
 > **Warning:** The RuleEngine iterates over all configured rules on every transfer (and on every call to `detectTransferRestriction`, `canTransfer`, etc.). Adding a large number of rules increases gas consumption for each transfer and may eventually exceed the block gas limit, effectively preventing any transfer from succeeding. There is no hard on-chain maximum rule count; administrators are responsible for sizing the rule set for their target blockchain and should keep it small. A misconfigured or gas-heavy rule can also impact all transfers.
 
+> **Warning (restriction code conventions):** Rule implementations should use unique ERC-1404 restriction codes across the rule set. If several rules intentionally share the same restriction code, they should return the exact same `messageForTransferRestriction` text for that code to avoid inconsistent operator/user feedback.
+
 ### How to set it
 
 #### Compatibility

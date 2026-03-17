@@ -167,8 +167,13 @@ abstract contract RuleEngineBase is
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
+    /**
+     * @dev This function returns the message from the first rule claiming the code.
+     * Rule designers should keep restriction codes unique across rules.
+     * If a code is shared intentionally, all rules using that code should return
+     * the same message to avoid ambiguous operator feedback.
+     */
     function _messageForTransferRestriction(uint8 restrictionCode) internal view virtual returns (string memory) {
-        //
         uint256 rulesLength = rulesCount();
         for (uint256 i = 0; i < rulesLength; ++i) {
             if (IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)) {
