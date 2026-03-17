@@ -42,6 +42,8 @@ abstract contract RulesManagementModule is
      * Reverts if `rules_` is empty. Use {clearRules} to remove all rules explicitly.
      * To transition from one non-empty set to another without an enforcement gap,
      * call this function directly with the new set.
+     * No on-chain maximum number of rules is enforced. Operators are responsible
+     * for keeping the rule set size compatible with the target chain gas limits.
      */
     function setRules(IRule[] calldata rules_) public virtual override(IRulesManagementModule) onlyRulesManager {
         if (rules_.length == 0) {
@@ -67,6 +69,8 @@ abstract contract RulesManagementModule is
 
     /**
      * @inheritdoc IRulesManagementModule
+     * @dev No on-chain maximum number of rules is enforced. Adding too many rules
+     * can increase transfer-time gas usage because rule checks are linear in rule count.
      */
     function addRule(IRule rule_) public virtual override(IRulesManagementModule) onlyRulesManager {
         _checkRule(address(rule_));
@@ -159,6 +163,8 @@ abstract contract RulesManagementModule is
 
     /**
      * @notice Go through all the rule to know if a restriction exists on the transfer
+     * @dev Complexity is O(number of configured rules). Large rule sets can make
+     * transfers too expensive on chains with lower block gas limits.
      * @param from the origin address
      * @param to the destination address
      * @param value to transfer
@@ -173,6 +179,8 @@ abstract contract RulesManagementModule is
 
     /**
      * @notice Go through all the rule to know if a restriction exists on the transfer
+     * @dev Complexity is O(number of configured rules). Large rule sets can make
+     * transfers too expensive on chains with lower block gas limits.
      * @param spender the spender address (transferFrom)
      * @param from the origin address
      * @param to the destination address
