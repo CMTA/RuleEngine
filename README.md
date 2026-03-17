@@ -1232,6 +1232,26 @@ The final report is available in [ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf](https://g
 
 ### Tools
 
+#### Nethermind AuditAgent
+
+> **Note:** This scan was performed by an AI-powered automated tool, not a formal human-led audit.
+
+| Version | Report | Assessment |
+|---------|--------|------------|
+| Scan #1 (Feb 2026) | [audit_agent_report_1_v3.0.0-rc1.pdf](./doc/security/audits/tools/nethermind-audit-agent/audit_agent_report_1_v3.0.0-rc1.pdf) | [feedback.md](./doc/security/audits/tools/nethermind-audit-agent/audit_agent_report_1_v3.0.0-rc1-feedback.md) |
+
+7 findings — 0 High · 1 Medium · 1 Low · 4 Info · 1 Best Practices
+
+| # | Severity | Finding | Status |
+|---|----------|---------|--------|
+| 1 | Medium | Cross-token rule state pollution in multi-tenant deployments | NatSpec + README warnings. Interface fix deferred (requires CMTAT coordination). |
+| 2 | Low | `RuleEngineOwnable` misreports `IAccessControl` via ERC-165 | Fixed: explicit interface whitelist + negative test added. |
+| 3 | Info | Unbounded rules loop — potential permanent DoS | NatSpec + README operator warnings (no hard cap by design). |
+| 4 | Info | Restriction code and message can come from different rules | Convention documented in NatSpec and README (no logic change by design). |
+| 5 | Info | Re-entrant rule can modify rule set during `transferred()` | NatSpec + README warning — rules must not hold `RULES_MANAGEMENT_ROLE`. |
+| 6 | Info | Missing ERC-3643 and IERC7551Compliance interface IDs | Fixed: both IDs added to `supportsInterface` in both contracts, with tests. |
+| 7 | Best Practices | `setRules` does not allow an empty array | NatSpec clarification added (behavior unchanged by design). |
+
 #### Slither
 
 Here is the list of report performed with [Slither](https://github.com/crytic/slither)
