@@ -14,14 +14,13 @@ import {AccessControl} from "OZ/access/AccessControl.sol";
 import {ERC2771ModuleStandalone, ERC2771Context} from "./modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */
 import {RuleEngineBase} from "./RuleEngineBase.sol";
+import {ComplianceInterfaceId} from "./modules/library/ComplianceInterfaceId.sol";
 
 /**
  * @title Implementation of a ruleEngine with ERC-173 Ownable access control
  */
 contract RuleEngineOwnable is ERC2771ModuleStandalone, RuleEngineBase, Ownable {
     bytes4 private constant ERC173_INTERFACE_ID = 0x7f5828d0;
-    bytes4 private constant ERC3643_COMPLIANCE_INTERFACE_ID = 0x3144991c;
-    bytes4 private constant IERC7551_COMPLIANCE_INTERFACE_ID = 0x7157797f;
 
     /**
      * @param owner_ Address of the contract owner (ERC-173)
@@ -55,8 +54,8 @@ contract RuleEngineOwnable is ERC2771ModuleStandalone, RuleEngineBase, Ownable {
         return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
             || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
             || interfaceId == ERC173_INTERFACE_ID
-            || interfaceId == ERC3643_COMPLIANCE_INTERFACE_ID
-            || interfaceId == IERC7551_COMPLIANCE_INTERFACE_ID
+            || interfaceId == ComplianceInterfaceId.ERC3643_COMPLIANCE_INTERFACE_ID
+            || interfaceId == ComplianceInterfaceId.IERC7551_COMPLIANCE_INTERFACE_ID
             || interfaceId == type(IERC165).interfaceId;
     }
 

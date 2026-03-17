@@ -13,14 +13,12 @@ import {IERC165} from "OZ/utils/introspection/ERC165.sol";
 import {ERC2771ModuleStandalone, ERC2771Context} from "./modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */
 import {RuleEngineBase} from "./RuleEngineBase.sol";
+import {ComplianceInterfaceId} from "./modules/library/ComplianceInterfaceId.sol";
 
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
  */
 contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase {
-    bytes4 private constant ERC3643_COMPLIANCE_INTERFACE_ID = 0x3144991c;
-    bytes4 private constant IERC7551_COMPLIANCE_INTERFACE_ID = 0x7157797f;
-
     /**
      * @param admin Address of the contract (Access Control)
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
@@ -54,8 +52,8 @@ contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase {
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
         return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
             || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
-            || interfaceId == ERC3643_COMPLIANCE_INTERFACE_ID
-            || interfaceId == IERC7551_COMPLIANCE_INTERFACE_ID
+            || interfaceId == ComplianceInterfaceId.ERC3643_COMPLIANCE_INTERFACE_ID
+            || interfaceId == ComplianceInterfaceId.IERC7551_COMPLIANCE_INTERFACE_ID
             || AccessControl.supportsInterface(interfaceId);
     }
 
