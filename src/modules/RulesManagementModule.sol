@@ -38,6 +38,10 @@ abstract contract RulesManagementModule is
 
     /**
      * @inheritdoc IRulesManagementModule
+     * @dev Replaces the entire rule set atomically.
+     * Reverts if `rules_` is empty. Use {clearRules} to remove all rules explicitly.
+     * To transition from one non-empty set to another without an enforcement gap,
+     * call this function directly with the new set.
      */
     function setRules(IRule[] calldata rules_) public virtual override(IRulesManagementModule) onlyRulesManager {
         if (rules_.length == 0) {
