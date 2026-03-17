@@ -125,7 +125,11 @@ npm run-script surya:report
 slither .  --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std" > slither-report.md
 ```
 
+### [Aderyn](https://github.com/Cyfrin/aderyn)
 
+```bash
+aderyn -x mocks --output aderyn-report.md
+```
 
 ## Code style guidelines
 

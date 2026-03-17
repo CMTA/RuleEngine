@@ -47,6 +47,8 @@ forge lint
 
 ## v3.0.0-rc1 - 2026-02-16
 
+Commit: `f3e27c190635e91a64215276f4757d65eb2d2b2c`
+
 ### Added
 
 - Add `RuleEngineOwnable` contract variant using ERC-173 ownership (`Ownable`) as an alternative to the RBAC-based `RuleEngine`. ERC-3643 compliance specification recommends ERC-173 for ownership.
@@ -89,7 +91,7 @@ forge lint
 
 ## v3.0.0-rc0 - 2025-08-15
 
-Commit: f3283c3b8a99089c3c6f674150831003a6bd2927
+Commit: `f3283c3b8a99089c3c6f674150831003a6bd2927`
 
 - Rule contracts, requires to perform compliance check, have now their own dedicated [GitHub repository](https://github.com/CMTA/Rules). It means that these contract will be developed and audited separately from the `RuleEngine`. This provides more flexibility and makes it easier to manage audits.
 - There is now only one type of rule (read-write rules). Before that:
