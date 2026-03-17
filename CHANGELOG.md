@@ -45,7 +45,40 @@ forge lint
   - Update surya doc by running the 3 scripts in [./doc/script](./doc/script)
   - Update changelog
 
-## v3.0.0-rc1 - 2026-02-16
+
+
+### v3.0.0-rc2 - 2026-03-17
+
+Commit: `4ef6cd5`
+
+### Fixed
+
+- `RuleEngineOwnable.supportsInterface` incorrectly advertised `IAccessControl` via the inherited `AccessControl.supportsInterface` fallback. Replaced with an explicit whitelist; `supportsInterface(IAccessControl)` now returns `false` as expected (Nethermind AuditAgent finding 2).
+
+### Added
+
+- Advertise ERC-3643 compliance interface ID (`0x3144991c`) and IERC7551Compliance subset interface ID (`0x7157797f`) in `supportsInterface` for both `RuleEngine` and `RuleEngineOwnable` (Nethermind AuditAgent finding 6).
+
+### Security
+
+- Add NatSpec and README warnings on `bindToken` / `unbindToken`: in a multi-tenant setup (multiple tokens sharing one engine), all bound tokens must be equally trusted and governed together; ERC-3643 callbacks do not carry the token address to rules (Nethermind AuditAgent finding 1).
+- Add NatSpec warnings on `addRule`, `setRules`, and `_transferred`: rule contracts must not be granted `RULES_MANAGEMENT_ROLE` or admin privileges (Nethermind AuditAgent finding 5).
+- Add NatSpec warnings on `addRule`, `setRules`, and `_transferred`: no on-chain maximum rule count is enforced; operators are responsible for sizing the rule set for the target chain gas limits (Nethermind AuditAgent finding 3).
+- Add restriction-code uniqueness convention to `IRule.canReturnTransferRestrictionCode` and `_messageForTransferRestriction`: codes must be unique across rules, or rules sharing a code must return the same message (Nethermind AuditAgent finding 4).
+- Add NatSpec on `setRules` documenting the empty-array rejection by design and referring to `clearRules` for explicit removal (Nethermind AuditAgent finding 7).
+
+### Testing
+
+- Add `testDoesNotSupportIAccessControlInterface` to `RuleEngineOwnableCoverage` asserting `IAccessControl` is not advertised.
+- Add ERC-3643 and IERC7551Compliance `supportsInterface` coverage tests to both `RuleEngineCoverage` and `RuleEngineOwnableCoverage`.
+- Add test-only mock interfaces `test/mocks/ICompliance.sol` and `test/mocks/IERC7551ComplianceSubset.sol`.
+
+### Documentation
+
+- Add Nethermind AuditAgent scan #1 report and remediation assessment (`doc/security/audits/tools/nethermind-audit-agent/`).
+- Update README Security section with Nethermind AuditAgent findings summary table.
+
+### v3.0.0-rc1 - 2026-02-16
 
 Commit: `f3e27c190635e91a64215276f4757d65eb2d2b2c`
 
