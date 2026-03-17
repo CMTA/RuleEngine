@@ -7,8 +7,8 @@ import "../HelperContract.sol";
 
 import {RuleEngineExposed} from "src/mocks/RuleEngineExposed.sol";
 import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
-import {ICompliance} from "../mocks/ICompliance.sol";
-import {IERC7551ComplianceSubset} from "../mocks/IERC7551ComplianceSubset.sol";
+import {ICompliance} from "src/mocks/ICompliance.sol";
+import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
 
 /**
  * @title Coverage tests for RuleEngine (supportsInterface, _msgData, ERC-165 rule check)
