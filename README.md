@@ -1284,6 +1284,8 @@ aderyn -x mocks --output aderyn-report.md
 | ------- | ------ | ---------- |
 | v3.0.0-rc2 | [aderyn-report.md](./doc/security/audits/tools/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/aderyn-report-feedback.md) |
 
+Report scope: 14 Solidity files, 425 nSLOC.
+
 0 High · 7 Low
 
 | ID | Finding | Instances | Assessment |
@@ -1360,8 +1362,8 @@ The official documentation is available in the Foundry [website](https://book.ge
 forge build
 
 # Build specific contract
-forge build --contracts src/RuleEngine.sol
-forge build --contracts src/RuleEngineOwnable.sol
+forge build --contracts src/deployment/RuleEngine.sol
+forge build --contracts src/deployment/RuleEngineOwnable.sol
 ```
 ### Contract size
 

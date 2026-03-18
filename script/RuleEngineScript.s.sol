@@ -5,7 +5,7 @@
 pragma solidity ^0.8.17;
 
 import {Script, console} from "forge-std/Script.sol";
-import {RuleEngine} from "src/RuleEngine.sol";
+import {RuleEngine} from "src/deployment/RuleEngine.sol";
 import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
 import {
     ValidationModuleRuleEngine
