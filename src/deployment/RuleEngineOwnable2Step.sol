@@ -2,14 +2,16 @@
 
 pragma solidity ^0.8.20;
 
+/* ==== OpenZeppelin === */
+import {Ownable2Step} from "OZ/access/Ownable2Step.sol";
 import {Ownable} from "OZ/access/Ownable.sol";
 import {Context} from "OZ/utils/Context.sol";
 import {RuleEngineOwnableShared} from "../RuleEngineOwnableShared.sol";
 
 /**
- * @title Implementation of a ruleEngine with ERC-173 Ownable access control
+ * @title Implementation of a ruleEngine with ERC-173 Ownable2Step access control
  */
-contract RuleEngineOwnable is RuleEngineOwnableShared, Ownable {
+contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
     /**
      * @param owner_ Address of the contract owner (ERC-173)
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
@@ -51,5 +53,4 @@ contract RuleEngineOwnable is RuleEngineOwnableShared, Ownable {
     function _contextSuffixLength() internal view virtual override(RuleEngineOwnableShared, Context) returns (uint256) {
         return RuleEngineOwnableShared._contextSuffixLength();
     }
-
 }
