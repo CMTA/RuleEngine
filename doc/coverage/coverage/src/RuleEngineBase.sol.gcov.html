@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2026-02-16 13:49:21</td>
+            <td class="headerValue">2026-03-18 19:08:29</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">13</td>
@@ -118,13 +118,13 @@
 <a name="47"><span class="lineNum">      47 </span>                :            :     /**</a>
 <a name="48"><span class="lineNum">      48 </span>                :            :      * @inheritdoc IERC3643IComplianceContract</a>
 <a name="49"><span class="lineNum">      49 </span>                :            :      */</a>
-<a name="50"><span class="lineNum">      50 </span>                :<span class="lineCov">         19 :     function transferred(address from, address to, uint256 value)</span></a>
+<a name="50"><span class="lineNum">      50 </span>                :<span class="lineCov">         18 :     function transferred(address from, address to, uint256 value)</span></a>
 <a name="51"><span class="lineNum">      51 </span>                :            :         public</a>
 <a name="52"><span class="lineNum">      52 </span>                :            :         virtual</a>
 <a name="53"><span class="lineNum">      53 </span>                :            :         override(IERC3643IComplianceContract)</a>
 <a name="54"><span class="lineNum">      54 </span>                :            :         onlyBoundToken</a>
 <a name="55"><span class="lineNum">      55 </span>                :            :     {</a>
-<a name="56"><span class="lineNum">      56 </span>                :<span class="lineCov">         17 :         _transferred(from, to, value);</span></a>
+<a name="56"><span class="lineNum">      56 </span>                :<span class="lineCov">         16 :         _transferred(from, to, value);</span></a>
 <a name="57"><span class="lineNum">      57 </span>                :            :     }</a>
 <a name="58"><span class="lineNum">      58 </span>                :            : </a>
 <a name="59"><span class="lineNum">      59 </span>                :            :     /// @inheritdoc IERC3643Compliance</a>
@@ -238,27 +238,32 @@
 <a name="167"><span class="lineNum">     167 </span>                :<span class="lineCov">         10 :         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);</span></a>
 <a name="168"><span class="lineNum">     168 </span>                :            :     }</a>
 <a name="169"><span class="lineNum">     169 </span>                :            : </a>
-<a name="170"><span class="lineNum">     170 </span>                :<span class="lineCov">         19 :     function _messageForTransferRestriction(uint8 restrictionCode) internal view virtual returns (string memory) {</span></a>
-<a name="171"><span class="lineNum">     171 </span>                :            :         //</a>
-<a name="172"><span class="lineNum">     172 </span>                :<span class="lineCov">         19 :         uint256 rulesLength = rulesCount();</span></a>
-<a name="173"><span class="lineNum">     173 </span>                :<span class="lineCov">         19 :         for (uint256 i = 0; i &lt; rulesLength; ++i) {</span></a>
-<a name="174"><span class="lineNum">     174 </span>           [<span class="branchCov" title="Branch 0 was taken 14 times"> + </span>]:<span class="lineCov">         16 :             if (IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)) {</span></a>
-<a name="175"><span class="lineNum">     175 </span>                :<span class="lineCov">         14 :                 return IRule(rule(i)).messageForTransferRestriction(restrictionCode);</span></a>
-<a name="176"><span class="lineNum">     176 </span>                :            :             }</a>
-<a name="177"><span class="lineNum">     177 </span>                :            :         }</a>
-<a name="178"><span class="lineNum">     178 </span>                :<span class="lineCov">          5 :         return &quot;Unknown restriction code&quot;;</span></a>
-<a name="179"><span class="lineNum">     179 </span>                :            :     }</a>
-<a name="180"><span class="lineNum">     180 </span>                :            : </a>
-<a name="181"><span class="lineNum">     181 </span>                :            :     /**</a>
-<a name="182"><span class="lineNum">     182 </span>                :            :      * @dev Override to add ERC-165 interface check for the full IRule hierarchy.</a>
-<a name="183"><span class="lineNum">     183 </span>                :            :      */</a>
-<a name="184"><span class="lineNum">     184 </span>                :<span class="lineCov">        215 :     function _checkRule(address rule_) internal view virtual override {</span></a>
-<a name="185"><span class="lineNum">     185 </span>                :<span class="lineCov">        215 :         super._checkRule(rule_);</span></a>
-<a name="186"><span class="lineNum">     186 </span>           [<span class="branchCov" title="Branch 0 was taken 6 times"> + </span>]:<span class="lineCov">        206 :         if (!ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)) {</span></a>
-<a name="187"><span class="lineNum">     187 </span>                :<span class="lineCov">          6 :             revert RuleEngine_RuleInvalidInterface();</span></a>
-<a name="188"><span class="lineNum">     188 </span>                :            :         }</a>
-<a name="189"><span class="lineNum">     189 </span>                :            :     }</a>
-<a name="190"><span class="lineNum">     190 </span>                :            : }</a>
+<a name="170"><span class="lineNum">     170 </span>                :            :     /**</a>
+<a name="171"><span class="lineNum">     171 </span>                :            :      * @dev This function returns the message from the first rule claiming the code.</a>
+<a name="172"><span class="lineNum">     172 </span>                :            :      * Rule designers should keep restriction codes unique across rules.</a>
+<a name="173"><span class="lineNum">     173 </span>                :            :      * If a code is shared intentionally, all rules using that code should return</a>
+<a name="174"><span class="lineNum">     174 </span>                :            :      * the same message to avoid ambiguous operator feedback.</a>
+<a name="175"><span class="lineNum">     175 </span>                :            :      */</a>
+<a name="176"><span class="lineNum">     176 </span>                :<span class="lineCov">         19 :     function _messageForTransferRestriction(uint8 restrictionCode) internal view virtual returns (string memory) {</span></a>
+<a name="177"><span class="lineNum">     177 </span>                :<span class="lineCov">         19 :         uint256 rulesLength = rulesCount();</span></a>
+<a name="178"><span class="lineNum">     178 </span>                :<span class="lineCov">         19 :         for (uint256 i = 0; i &lt; rulesLength; ++i) {</span></a>
+<a name="179"><span class="lineNum">     179 </span>           [<span class="branchCov" title="Branch 0 was taken 14 times"> + </span>]:<span class="lineCov">         16 :             if (IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)) {</span></a>
+<a name="180"><span class="lineNum">     180 </span>                :<span class="lineCov">         14 :                 return IRule(rule(i)).messageForTransferRestriction(restrictionCode);</span></a>
+<a name="181"><span class="lineNum">     181 </span>                :            :             }</a>
+<a name="182"><span class="lineNum">     182 </span>                :            :         }</a>
+<a name="183"><span class="lineNum">     183 </span>                :<span class="lineCov">          5 :         return &quot;Unknown restriction code&quot;;</span></a>
+<a name="184"><span class="lineNum">     184 </span>                :            :     }</a>
+<a name="185"><span class="lineNum">     185 </span>                :            : </a>
+<a name="186"><span class="lineNum">     186 </span>                :            :     /**</a>
+<a name="187"><span class="lineNum">     187 </span>                :            :      * @dev Override to add ERC-165 interface check for the full IRule hierarchy.</a>
+<a name="188"><span class="lineNum">     188 </span>                :            :      */</a>
+<a name="189"><span class="lineNum">     189 </span>                :<span class="lineCov">        217 :     function _checkRule(address rule_) internal view virtual override {</span></a>
+<a name="190"><span class="lineNum">     190 </span>                :<span class="lineCov">        217 :         super._checkRule(rule_);</span></a>
+<a name="191"><span class="lineNum">     191 </span>           [<span class="branchCov" title="Branch 0 was taken 6 times"> + </span>]:<span class="lineCov">        208 :         if (!ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)) {</span></a>
+<a name="192"><span class="lineNum">     192 </span>                :<span class="lineCov">          6 :             revert RuleEngine_RuleInvalidInterface();</span></a>
+<a name="193"><span class="lineNum">     193 </span>                :            :         }</a>
+<a name="194"><span class="lineNum">     194 </span>                :            :     }</a>
+<a name="195"><span class="lineNum">     195 </span>                :            : }</a>
 </pre>
       </td>
     </tr>
