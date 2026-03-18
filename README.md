@@ -1371,11 +1371,14 @@ forge build --contracts src/deployment/RuleEngineOwnable.sol
 forge build --sizes
 ```
 
-Both `RuleEngine` and `RuleEngineOwnable` have similar bytecode sizes since they share the same base functionality. The `RuleEngineOwnable` contract is slightly smaller as `Ownable` has less overhead than `AccessControl`.
+Latest output (`2026-03-18`) for the main RuleEngine contracts:
 
+| Contract | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
+|----------|------------------:|------------------:|--------------------:|---------------------:|
+| RuleEngine | 6,756 | 7,805 | 17,820 | 41,347 |
+| RuleEngineOwnable | 6,170 | 6,833 | 18,406 | 42,319 |
 
-
-![contract-size](./doc/compilation/contract-size.png)
+Both `RuleEngine` and `RuleEngineOwnable` remain well below the EIP-170 runtime limit. `RuleEngineOwnable` is slightly smaller because `Ownable` has less overhead than `AccessControl`.
 
 ### Testing
 

@@ -2,8 +2,8 @@
 
 **Tool:** [Aderyn](https://github.com/Cyfrin/aderyn)
 **Report file:** `aderyn-report.md`
-**Codebase version:** v3.0.0-rc2 (14 files, 431 nSLOC)
-**Assessment date:** 2026-03-17
+**Codebase version:** v3.0.0-rc2 (14 files, 425 nSLOC)
+**Assessment date:** 2026-03-18
 
 > Aderyn was run with `aderyn -x mocks`. Findings cover production source only (`src/`).
 
@@ -29,7 +29,7 @@ No High findings.
 
 ### What Aderyn reports
 
-6 instances: `_onlyComplianceManager`, `_onlyRulesManager` (both variants), `Ownable` inheritance in `RuleEngineOwnable`, and `AccessControl` in `RulesManagementModule`.
+6 instances: `AccessControl` + role-gated hooks in `RuleEngine`, and `Ownable` + owner-gated hooks in `RuleEngineOwnable`.
 
 ### Assessment
 

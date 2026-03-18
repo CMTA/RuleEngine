@@ -3,7 +3,7 @@
 **Tool:** [Slither](https://github.com/crytic/slither)
 **Report file:** `slither-report.md`
 **Codebase version:** v3.0.0-rc2
-**Assessment date:** 2026-03-17
+**Assessment date:** 2026-03-18
 
 > Slither was run with `--show-ignored-findings` suppressed; this checklist reflects only non-ignored findings.
 
@@ -26,16 +26,16 @@ Ten instances of external calls inside loops, covering every call path through t
 
 | ID | Function | Called from |
 |----|----------|-------------|
-| 0 | `_transferred(from, to, value)` | `transferred(address,address,uint256)` |
-| 1 | `_messageForTransferRestriction` — `canReturnTransferRestrictionCode` | `messageForTransferRestriction` |
-| 2 | `_detectTransferRestrictionFrom` | `detectTransferRestrictionFrom` |
+| 0 | `_messageForTransferRestriction` — `canReturnTransferRestrictionCode` | `messageForTransferRestriction` |
+| 1 | `_detectTransferRestrictionFrom` | `detectTransferRestrictionFrom` |
+| 2 | `_messageForTransferRestriction` — `messageForTransferRestriction` | `messageForTransferRestriction` |
 | 3 | `_transferred(spender, from, to, value)` | `transferred(address,address,address,uint256)` |
-| 4 | `_messageForTransferRestriction` — `messageForTransferRestriction` | `messageForTransferRestriction` |
-| 5 | `_transferred(from, to, value)` | `destroyed` |
-| 6 | `_detectTransferRestrictionFrom` | `canTransferFrom` → `detectTransferRestrictionFrom` |
-| 7 | `_detectTransferRestriction` | `detectTransferRestriction` |
-| 8 | `_detectTransferRestriction` | `canTransfer` → `detectTransferRestriction` |
-| 9 | `_transferred(from, to, value)` | `created` |
+| 4 | `_detectTransferRestrictionFrom` | `canTransferFrom` → `detectTransferRestrictionFrom` |
+| 5 | `_detectTransferRestriction` | `detectTransferRestriction` |
+| 6 | `_transferred(from, to, value)` | `created` |
+| 7 | `_detectTransferRestriction` | `canTransfer` → `detectTransferRestriction` |
+| 8 | `_transferred(from, to, value)` | `transferred(address,address,uint256)` |
+| 9 | `_transferred(from, to, value)` | `destroyed` |
 
 ### Assessment
 
