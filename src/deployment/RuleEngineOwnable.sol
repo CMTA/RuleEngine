@@ -10,10 +10,10 @@ import {Context} from "OZ/utils/Context.sol";
 import {Ownable} from "OZ/access/Ownable.sol";
 import {IERC165} from "OZ/utils/introspection/IERC165.sol";
 /* ==== Modules === */
-import {ERC2771ModuleStandalone, ERC2771Context} from "./modules/ERC2771ModuleStandalone.sol";
+import {ERC2771ModuleStandalone, ERC2771Context} from "../modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */
-import {RuleEngineBase} from "./RuleEngineBase.sol";
-import {ComplianceInterfaceId} from "./modules/library/ComplianceInterfaceId.sol";
+import {RuleEngineBase} from "../RuleEngineBase.sol";
+import {ComplianceInterfaceId} from "../modules/library/ComplianceInterfaceId.sol";
 
 /**
  * @title Implementation of a ruleEngine with ERC-173 Ownable access control

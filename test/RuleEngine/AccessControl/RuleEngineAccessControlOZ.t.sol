@@ -9,7 +9,7 @@ import "../../HelperContract.sol";
 /**
  * @title Tests on the provided functions by OpenZeppelin
  */
-contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
+contract RuleEngineTest is Test, HelperContract, AccessControl {
     // Arrange
     function setUp() public {
         ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);

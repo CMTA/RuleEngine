@@ -47,7 +47,7 @@ forge lint
 
 
 
-### v3.0.0-rc2 - 
+### v3.0.0-rc2 - 2026-03-17
 
 ### Dependencies
 
@@ -63,6 +63,7 @@ forge lint
 ### Added
 
 - Advertise ERC-3643 compliance interface ID (`0x3144991c`) and IERC7551Compliance subset interface ID (`0x7157797f`) in `supportsInterface` for both `RuleEngine` and `RuleEngineOwnable` (Nethermind AuditAgent finding 6).
+- Move deployable contracts to `src/deployment/` and rename RBAC deployable contract `RuleEngine` to `RuleEngine`.
 
 ### Security
 
@@ -76,7 +77,7 @@ forge lint
 
 - Add `testDoesNotSupportIAccessControlInterface` to `RuleEngineOwnableCoverage` asserting `IAccessControl` is not advertised.
 - Add ERC-3643 and IERC7551Compliance `supportsInterface` coverage tests to both `RuleEngineCoverage` and `RuleEngineOwnableCoverage`.
-- Add test-only mock interfaces `test/mocks/ICompliance.sol` and `test/mocks/IERC7551ComplianceSubset.sol`.
+- Add mock interfaces `src/mocks/ICompliance.sol` and `src/mocks/IERC7551ComplianceSubset.sol` used by coverage tests.
 
 ### Documentation
 

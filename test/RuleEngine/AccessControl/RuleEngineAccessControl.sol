@@ -9,7 +9,7 @@ import "../../HelperContract.sol";
 /**
  * @title Tests on the Access Control
  */
-contract RuleEngineAccessControlTest is Test, HelperContract {
+contract RuleEngineTest is Test, HelperContract {
     // Custom error openZeppelin
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
