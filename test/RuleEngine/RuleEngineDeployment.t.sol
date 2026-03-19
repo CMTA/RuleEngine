@@ -5,6 +5,12 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
 import {MinimalForwarderMock} from "CMTAT/mocks/MinimalForwarderMock.sol";
+import {IERC165} from "OZ/utils/introspection/IERC165.sol";
+import {IAccessControl} from "OZ/access/IAccessControl.sol";
+import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
+import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
+import {ICompliance} from "src/mocks/ICompliance.sol";
+import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
 
 /**
  * @title General functions of the RuleEngine
@@ -44,6 +50,19 @@ contract RuleEngineTest is Test, HelperContract {
 
         // Assert
         assertEq(ruleEngineMock.version(), "3.0.0");
+    }
+
+    function testSupportsInterfaces() public {
+        // Arrange
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, address(0x0), ZERO_ADDRESS);
+
+        // Act & Assert
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC165).interfaceId));
+        assertTrue(ruleEngineMock.supportsInterface(type(IAccessControl).interfaceId));
+        assertTrue(ruleEngineMock.supportsInterface(RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(ICompliance).interfaceId));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC7551ComplianceSubset).interfaceId));
     }
 
     function testCannotDeployContractifAdminAddressIsZero() public {

@@ -2,9 +2,6 @@
 
 pragma solidity ^0.8.20;
 
-/* ==== CMTAT === */
-import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
-import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 /* ==== OpenZeppelin === */
 import {Context} from "OZ/utils/Context.sol";
 import {AccessControl} from "OZ/access/AccessControl.sol";
@@ -13,7 +10,6 @@ import {IERC165} from "OZ/utils/introspection/ERC165.sol";
 import {ERC2771ModuleStandalone, ERC2771Context} from "../modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */
 import {RuleEngineBase} from "../RuleEngineBase.sol";
-import {ComplianceInterfaceId} from "../modules/library/ComplianceInterfaceId.sol";
 
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
@@ -50,10 +46,7 @@ contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase, AccessControl {
 
     /* ============ ERC-165 ============ */
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
-        return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
-            || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
-            || interfaceId == ComplianceInterfaceId.ERC3643_COMPLIANCE_INTERFACE_ID
-            || interfaceId == ComplianceInterfaceId.IERC7551_COMPLIANCE_INTERFACE_ID
+        return _supportsRuleEngineBaseInterface(interfaceId)
             || AccessControl.supportsInterface(interfaceId);
     }
 
