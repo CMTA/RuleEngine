@@ -47,7 +47,7 @@ forge lint
 
 
 
-### v3.0.0-rc2 - 2026-03-17
+### v3.0.0-rc2 - 
 
 ### Dependencies
 
@@ -59,11 +59,13 @@ forge lint
 
 - `RuleEngineOwnable.supportsInterface` incorrectly advertised `IAccessControl` via the inherited `AccessControl.supportsInterface` fallback. Replaced with an explicit whitelist; `supportsInterface(IAccessControl)` now returns `false` as expected (Nethermind AuditAgent finding 2).
 - Remove `AccessControl` inheritance from `RulesManagementModule`; RBAC responsibilities are now explicitly held by `RuleEngine`, while the module remains access-control agnostic.
+- Switch `RuleEngine` RBAC base from OpenZeppelin `AccessControl` to `AccessControlEnumerable` while keeping the custom "default admin has all roles" behavior.
 
 ### Added
 
 - Advertise ERC-3643 compliance interface ID (`0x3144991c`) and IERC7551Compliance subset interface ID (`0x7157797f`) in `supportsInterface` for both `RuleEngine` and `RuleEngineOwnable` (Nethermind AuditAgent finding 6).
 - Move deployable contracts to `src/deployment/` and rename RBAC deployable contract `RuleEngine` to `RuleEngine`.
+- `RuleEngine.supportsInterface` now advertises `IAccessControlEnumerable`.
 
 ### Security
 
@@ -78,6 +80,7 @@ forge lint
 - Add `testDoesNotSupportIAccessControlInterface` to `RuleEngineOwnableCoverage` asserting `IAccessControl` is not advertised.
 - Add ERC-3643 and IERC7551Compliance `supportsInterface` coverage tests to both `RuleEngineCoverage` and `RuleEngineOwnableCoverage`.
 - Add mock interfaces `src/mocks/ICompliance.sol` and `src/mocks/IERC7551ComplianceSubset.sol` used by coverage tests.
+- Extend `RuleEngineDeployment` interface coverage to assert support for `IAccessControlEnumerable`.
 
 ### Documentation
 

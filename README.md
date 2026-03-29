@@ -12,7 +12,7 @@ Two deployable contracts are available, differing in their access control mechan
 
 | Contract | Access Control | Interface | Use Case |
 |----------|---------------|-----------|----------|
-| `RuleEngine` | Role-Based (AccessControl) | RBAC roles | Multi-operator environments with granular permissions |
+| `RuleEngine` | Role-Based (AccessControlEnumerable) | RBAC roles | Multi-operator environments with granular permissions |
 | `RuleEngineOwnable` | ERC-173 Ownership | `Ownable` | Single-owner setups, simpler administration |
 
 ERC-3643 compliance specification indicates the use of ERC-173.
@@ -231,14 +231,15 @@ The toolchain includes the following components, where the versions are the late
 
 Two access control mechanisms are available depending on which contract you deploy:
 
-#### RuleEngine (RBAC - AccessControl)
+#### RuleEngine (RBAC - AccessControlEnumerable)
 
-The `RuleEngine` contract uses Role-Based Access Control (RBAC) via OpenZeppelin's `AccessControl`.
+The `RuleEngine` contract uses Role-Based Access Control (RBAC) via OpenZeppelin's `AccessControlEnumerable`.
 
 Each module defines the roles useful to restrict its functions. The contract overrides the OpenZeppelin function `hasRole` to give by default all the roles to the `admin`.
 `RulesManagementModule` itself is access-control agnostic; RBAC is wired at the concrete `RuleEngine` level.
+Note: this `hasRole` override does not add the admin address to each role's enumerable member set. As a result, `getRoleMember` / `getRoleMemberCount` for a specific role do not include the admin unless that role is explicitly granted.
 
-See also [docs.openzeppelin.com - AccessControl](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl)
+See also [docs.openzeppelin.com - AccessControlEnumerable](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControlEnumerable)
 
 #### RuleEngineOwnable (ERC-173 Ownership)
 
@@ -1364,6 +1365,7 @@ forge build
 # Build specific contract
 forge build --contracts src/deployment/RuleEngine.sol
 forge build --contracts src/deployment/RuleEngineOwnable.sol
+forge build --contracts src/deployment/RuleEngineOwnable2Step.sol
 ```
 ### Contract size
 
@@ -1435,6 +1437,7 @@ The official documentation is available in the Foundry [website](https://getfoun
 |----------|---------------------|
 | Multiple operators with different permissions | `RuleEngine` |
 | Single administrator | `RuleEngineOwnable` |
+| Single administrator with safer ownership handover | `RuleEngineOwnable2Step` |
 | Integration with existing RBAC systems | `RuleEngine` |
 | Simpler deployment and management | `RuleEngineOwnable` |
 
