@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./deployment/RuleEngineOwnable.sol | c0ea173590b1935071e1d03d5a4c44bbf372b444 |
+| ./mocks/IERC7551ComplianceSubset.sol | ac1d94775de7a76a4da688bd97a149df399f9a5b |
 
 
 ### Contracts Description Table
@@ -15,14 +15,8 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleEngineOwnable** | Implementation | ERC2771ModuleStandalone, RuleEngineBase, Ownable |||
-| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771ModuleStandalone Ownable |
-| └ | _onlyRulesManager | Internal 🔒 | 🛑  | onlyOwner |
-| └ | _onlyComplianceManager | Internal 🔒 | 🛑  | onlyOwner |
-| └ | supportsInterface | Public ❗️ |   |NO❗️ |
-| └ | _msgSender | Internal 🔒 |   | |
-| └ | _msgData | Internal 🔒 |   | |
-| └ | _contextSuffixLength | Internal 🔒 |   | |
+| **IERC7551ComplianceSubset** | Interface |  |||
+| └ | canTransferFrom | External ❗️ |   |NO❗️ |
 
 
 ### Legend

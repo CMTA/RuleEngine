@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./deployment/RuleEngineOwnable.sol | c0ea173590b1935071e1d03d5a4c44bbf372b444 |
+| ./modules/library/ComplianceInterfaceId.sol | 866fb442493595cbaf8fd20bcd8c1767a5f98123 |
 
 
 ### Contracts Description Table
@@ -15,14 +15,7 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleEngineOwnable** | Implementation | ERC2771ModuleStandalone, RuleEngineBase, Ownable |||
-| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771ModuleStandalone Ownable |
-| └ | _onlyRulesManager | Internal 🔒 | 🛑  | onlyOwner |
-| └ | _onlyComplianceManager | Internal 🔒 | 🛑  | onlyOwner |
-| └ | supportsInterface | Public ❗️ |   |NO❗️ |
-| └ | _msgSender | Internal 🔒 |   | |
-| └ | _msgData | Internal 🔒 |   | |
-| └ | _contextSuffixLength | Internal 🔒 |   | |
+| **ComplianceInterfaceId** | Library |  |||
 
 
 ### Legend

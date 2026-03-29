@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./deployment/RuleEngineOwnable.sol | c0ea173590b1935071e1d03d5a4c44bbf372b444 |
+| ./mocks/ICompliance.sol | ad82538f6d414b1020a82240c7bc7df561b329a1 |
 
 
 ### Contracts Description Table
@@ -15,14 +15,15 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleEngineOwnable** | Implementation | ERC2771ModuleStandalone, RuleEngineBase, Ownable |||
-| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771ModuleStandalone Ownable |
-| └ | _onlyRulesManager | Internal 🔒 | 🛑  | onlyOwner |
-| └ | _onlyComplianceManager | Internal 🔒 | 🛑  | onlyOwner |
-| └ | supportsInterface | Public ❗️ |   |NO❗️ |
-| └ | _msgSender | Internal 🔒 |   | |
-| └ | _msgData | Internal 🔒 |   | |
-| └ | _contextSuffixLength | Internal 🔒 |   | |
+| **ICompliance** | Interface |  |||
+| └ | bindToken | External ❗️ | 🛑  |NO❗️ |
+| └ | unbindToken | External ❗️ | 🛑  |NO❗️ |
+| └ | isTokenBound | External ❗️ |   |NO❗️ |
+| └ | getTokenBound | External ❗️ |   |NO❗️ |
+| └ | canTransfer | External ❗️ |   |NO❗️ |
+| └ | transferred | External ❗️ | 🛑  |NO❗️ |
+| └ | created | External ❗️ | 🛑  |NO❗️ |
+| └ | destroyed | External ❗️ | 🛑  |NO❗️ |
 
 
 ### Legend

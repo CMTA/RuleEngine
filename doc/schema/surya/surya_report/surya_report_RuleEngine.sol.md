@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./RuleEngine.sol | 570421933a0eb92cb20a4d15df6e3105a7c7ffbc |
+| ./deployment/RuleEngine.sol | 594c76e5f85c16253d350e636fb26372bf8c892f |
 
 
 ### Contracts Description Table
@@ -15,7 +15,7 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleEngine** | Implementation | ERC2771ModuleStandalone, RuleEngineBase |||
+| **RuleEngine** | Implementation | ERC2771ModuleStandalone, RuleEngineBase, AccessControl |||
 | └ | <Constructor> | Public ❗️ | 🛑  | ERC2771ModuleStandalone |
 | └ | hasRole | Public ❗️ |   |NO❗️ |
 | └ | supportsInterface | Public ❗️ |   |NO❗️ |

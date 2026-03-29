@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/RulesManagementModule.sol | eeb11b9ffc70fab119916187e532b859c6b45a37 |
+| ./modules/RulesManagementModule.sol | 197635bda28fa8af5cba2be10740ab1a044dc95c |
 
 
 ### Contracts Description Table
@@ -15,7 +15,7 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RulesManagementModule** | Implementation | AccessControl, RulesManagementModuleInvariantStorage, IRulesManagementModule |||
+| **RulesManagementModule** | Implementation | RulesManagementModuleInvariantStorage, IRulesManagementModule |||
 | └ | setRules | Public ❗️ | 🛑  | onlyRulesManager |
 | └ | clearRules | Public ❗️ | 🛑  | onlyRulesManager |
 | └ | addRule | Public ❗️ | 🛑  | onlyRulesManager |
