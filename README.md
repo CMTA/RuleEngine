@@ -8,18 +8,19 @@ The RuleEngine is an external contract used to apply transfer restrictions to an
 
 ## Contract Variants
 
-Two deployable contracts are available, differing in their access control mechanism:
+Three deployable contracts are available:
 
 | Contract | Access Control | Interface | Use Case |
 |----------|---------------|-----------|----------|
 | `RuleEngine` | Role-Based (AccessControlEnumerable) | RBAC roles | Multi-operator environments with granular permissions |
 | `RuleEngineOwnable` | ERC-173 Ownership | `Ownable` | Single-owner setups, simpler administration |
+| `RuleEngineOwnable2Step` | ERC-173 Ownership (two-step transfer) | `Ownable2Step` | Single-owner setups with safer ownership handover |
 
 ERC-3643 compliance specification indicates the use of ERC-173.
 
 > The standard relies on ERC-173 to define contract ownership, with the owner having the responsibility of setting the Compliance parameters and binding the Compliance to a Token contract.
 
-Both contracts share the same core functionality through `RuleEngineBase` and support:
+All deployable contracts share the same core functionality (`RuleEngineBase`, directly or through `RuleEngineOwnableShared`) and support:
 
 - ERC-1404 transfer restrictions
 - ERC-3643 compliance interface
@@ -76,6 +77,7 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 
 | RuleEngine version                                           | Compatible Versions                                          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **v3.0.0-rc2**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
 | **v3.0.0-rc1**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
 | **v3.0.0-rc0**                                               | CMTAT ≥ v3.0.0<br />                                         |
 | **[v1.0.2.1](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2.1)** | CMTAT v2.3.0 (audited)                                       |
@@ -212,7 +214,7 @@ external;
 
 The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is defined in [IERC3643Compliance.sol](src/interfaces/IERC3643Compliance.sol).
 
-A specific module implements this interface for the RuleEngine: [ERC3643Compliance.sol](src/modules/ERC3643Compliance.sol)
+A specific module implements this interface for the RuleEngine: [ERC3643ComplianceModule.sol](src/modules/ERC3643ComplianceModule.sol)
 
 ![ERC3643ComplianceModuleUML](./doc/schema/vscode-uml/ERC3643ComplianceModuleUML.png)
 
@@ -253,6 +255,12 @@ This is a simpler access control model suitable for single-owner deployments.
 
 See also [docs.openzeppelin.com - Ownable](https://docs.openzeppelin.com/contracts/5.x/api/access#Ownable)
 
+#### RuleEngineOwnable2Step (ERC-173 Ownership, two-step transfer)
+
+The `RuleEngineOwnable2Step` contract uses OpenZeppelin's `Ownable2Step`, which keeps the same owner-only protections and adds safer ownership handover with `transferOwnership(address)` + `acceptOwnership()`.
+
+See also [docs.openzeppelin.com - Ownable2Step](https://docs.openzeppelin.com/contracts/5.x/api/access#Ownable2Step)
+
 #### Role list (RuleEngine only)
 
 Here is the list of roles and their 32 bytes identifier for the `RuleEngine` contract.
@@ -261,7 +269,7 @@ The default admin is the address put in argument (`admin`) inside the constructo
 
 It is set in the constructor when the contract is deployed.
 
-> Note: For `RuleEngineOwnable`, all protected functions are controlled by the single `owner` address instead of roles.
+> Note: For `RuleEngineOwnable` and `RuleEngineOwnable2Step`, all protected functions are controlled by the single `owner` address instead of roles.
 
 > **Warning (role assignment):** Rule contracts should be treated as trusted logic components, but they should not be granted `RULES_MANAGEMENT_ROLE` (or admin privileges). Keep rule-management roles on dedicated operator/admin accounts only.
 
@@ -269,8 +277,8 @@ It is set in the constructor when the contract is deployed.
 | ----------------------- | -------------------------------- | ------------------------------------------------------------ |
 | DEFAULT_ADMIN_ROLE      | OpenZeppelin<br />AccessControl  | 0x0000000000000000000000000000000000000000000000000000000000000000 |
 | **Modules**             |                                  |                                                              |
-| COMPLIANCE_MANAGER_ROLE | ERC3643Compliance                | 0xe5c50d0927e06141e032cb9a67e1d7092dc85c0b0825191f7e1cede600028568 |
-| RULES_MANAGEMENT_ROLE   | RuleEngineInvariantStorageCommon | 0xea5f4eb72290e50c32abd6c23e45de3d8300b3286e1cbc2e293114b92e034e5e |
+| COMPLIANCE_MANAGER_ROLE | ERC3643ComplianceModule          | 0xe5c50d0927e06141e032cb9a67e1d7092dc85c0b0825191f7e1cede600028568 |
+| RULES_MANAGEMENT_ROLE   | RulesManagementModuleInvariantStorage | 0xea5f4eb72290e50c32abd6c23e45de3d8300b3286e1cbc2e293114b92e034e5e |
 
 
 
@@ -284,7 +292,7 @@ Here is a schema of the Access Control for `RuleEngine`.
 Here is a summary table for each restricted function defined in a module.
 For function signatures, struct arguments are represented with their corresponding native type.
 
-> Note: For `RuleEngineOwnable`, replace the role requirement with `onlyOwner` for all protected functions.
+> Note: For `RuleEngineOwnable` and `RuleEngineOwnable2Step`, replace the role requirement with `onlyOwner` for all protected functions.
 
 |                      | Function signature | Visibility [public/external] | Input variables (Function arguments) | Output variables<br />(return value) | Role Required |
 | -------------------- | ------------------ | ---------------------------- | ------------------------------------ | ------------------------------------ | ------------- |
@@ -352,17 +360,26 @@ The RuleEngine can be removed from the main token contract by calling these dedi
 
 ### Available Rules
 
-Rules have their own dedicated repository: [github.com/CMTA/Rules](https://github.com/CMTA/Rules)
+Rules are maintained in a dedicated repository: [github.com/CMTA/Rules](https://github.com/CMTA/Rules).
 
-The following rules are available:
+Based on [Rules.md](./Rules.md), rules can be used in two ways:
 
-| Rule                    | Type<br />[read-only / read-write] | Audit planned                     | Description                                                  |
-| ----------------------- | ----------------------------------- | --------------------------------- | ------------------------------------------------------------ |
-| RuleWhitelist           | Read-only                           | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a whitelist. |
-| RuleWhitelistWrapper    | Read-only                           | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators. |
-| RuleBlacklist           | Read-only                           | &#x2611;                          | This rule can be used to forbid transfer from/to addresses in the blacklist |
-| RuleSanctionList        | Read-only                           | &#x2611;                          | The purpose of this contract is to use the oracle contract from Chainalysis to forbid transfer from/to an address  included in a sanctions designation (US, EU, or UN). |
-| RuleConditionalTransfer | Read-Write                          | &#x2612;<br />(experimental rule) | This rule requires that transfers have to be approved before being executed by the token holders. |
+- Directly on CMTAT (single-rule setup, no RuleEngine orchestration).
+- Through RuleEngine (multi-rule orchestration with sequential execution).
+
+Rule families:
+
+| Family | Behavior | Examples |
+| --- | --- | --- |
+| Validation rules (read-only) | Evaluate transfer eligibility without mutating rule state | `RuleWhitelist`, `RuleBlacklist`, `RuleSanctionList`, `RuleIdentityRegistry`, `RuleSpenderWhitelist`, `RuleERC2980`, `RuleMaxTotalSupply` |
+| Operation rules (read-write) | Evaluate transfer eligibility and can update rule-specific state on transfer | `RuleConditionalTransferLight` |
+
+Additional integration notes:
+
+- For RuleEngine integration, a rule must implement `IRule` (including ERC-165 support for the Rule interface ID).
+- RuleEngine executes configured rules in order and reverts on the first failing rule in state-changing paths.
+- Restriction codes should remain unique across the composed rule set. Keep CMTAT-reserved ranges free and use dedicated code ranges per rule (see [Rules.md](./Rules.md), section "Rule - Code list").
+- For the latest list of production rules, audits, and status, use the Rules repository as the source of truth.
 
 
 
@@ -800,7 +817,7 @@ Useful for identifying which version of the smart contract is deployed and in us
 | :-------------------------: | :---------------: | :-------------------------------: | :------------: | :-----------: |
 |              └              | **Function Name** |          **Visibility**           | **Mutability** | **Modifiers** |
 |                             |                   |                                   |                |               |
-| **ERC3643ComplianceModule** |  Implementation   | IERC3643Compliance, AccessControl |                |               |
+| **ERC3643ComplianceModule** |  Implementation   | Context, IERC3643Compliance |                |               |
 |              └              |     bindToken     |             Public ❗️              |       🛑        |   onlyRole    |
 |              └              |    unbindToken    |             Public ❗️              |       🛑        |   onlyRole    |
 |              └              |   isTokenBound    |             Public ❗️              |                |      NO❗️      |
