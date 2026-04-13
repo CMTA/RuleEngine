@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/MetaTxModuleStandalone.sol | 7f61b75c585854e696ec011ef699a3016282bf9f |
+| ./deployment/RuleEngineOwnable2Step.sol | 1e512067a7cba4738ec7f5243ebd6fd769bac157 |
 
 
 ### Contracts Description Table
@@ -15,8 +15,13 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **MetaTxModuleStandalone** | Implementation | ERC2771Context |||
-| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771Context |
+| **RuleEngineOwnable2Step** | Implementation | RuleEngineOwnableShared, Ownable2Step |||
+| └ | <Constructor> | Public ❗️ | 🛑  | RuleEngineOwnableShared Ownable |
+| └ | _onlyRulesManager | Internal 🔒 | 🛑  | onlyOwner |
+| └ | _onlyComplianceManager | Internal 🔒 | 🛑  | onlyOwner |
+| └ | _msgSender | Internal 🔒 |   | |
+| └ | _msgData | Internal 🔒 |   | |
+| └ | _contextSuffixLength | Internal 🔒 |   | |
 
 
 ### Legend

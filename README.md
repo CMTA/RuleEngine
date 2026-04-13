@@ -8,8 +8,6 @@ The RuleEngine is an external contract used to apply transfer restrictions to an
 
 [TOC]
 
-
-
 ## Contract Variants
 
 Three deployable contracts are available:
@@ -324,6 +322,8 @@ Here is the UML of the main contracts:
 
 #### RuleEngineOwnable
 
+![RuleEngineOwnableUML](./doc/schema/vscode-uml/RuleEngineOwnableUML.png)
+
 `RuleEngineOwnable` shares the same base functionality as `RuleEngine` but uses ERC-173 ownership instead of RBAC.
 
 ```
@@ -341,6 +341,30 @@ RuleEngineOwnable
 - Constructor takes `owner_` instead of `admin`
 - All protected functions use `onlyOwner` modifier
 - Supports `transferOwnership()` and `renounceOwnership()`
+- Implements ERC-173 interface (`supportsInterface(0x7f5828d0)` returns `true`)
+
+#### RuleEngineOwnable2Step
+
+![RuleEngineOwnable2StepUML](./doc/schema/vscode-uml/RuleEngineOwnable2StepUML.png)
+
+`RuleEngineOwnable2Step` shares the same base functionality as `RuleEngineOwnable` but uses OpenZeppelin's `Ownable2Step` for safer ownership handover.
+
+```
+RuleEngineOwnable2Step
+├── ERC2771ModuleStandalone (gasless support)
+├── RuleEngineOwnableShared (shared ownable deployment logic)
+│   └── RuleEngineBase
+│       ├── VersionModule
+│       ├── RulesManagementModule
+│       ├── ERC3643ComplianceModule
+│       └── IRuleEngineERC1404
+└── Ownable2Step (ERC-173 access control with pending owner)
+```
+
+**Key differences from RuleEngineOwnable:**
+- Uses a two-step ownership transfer flow: `transferOwnership()` then `acceptOwnership()`
+- The current owner retains privileges until the pending owner accepts ownership
+- Reuses `RuleEngineOwnableShared` for constructor, ERC-165, and ERC-2771 behavior
 - Implements ERC-173 interface (`supportsInterface(0x7f5828d0)` returns `true`)
 
 
@@ -405,7 +429,7 @@ Here is a summary tab of available rules, see [github.com/CMTA/Rules](https://gi
 
 ### Gasless support (ERC-2771)
 
-![ERC2771ModuleUML](./doc/schema/vscode-uml/ERC2771ModuleUML.png)
+![surya_inheritance_ERC2771ModuleStandalone.sol](./doc/schema/surya/surya_inheritance/surya_inheritance_ERC2771ModuleStandalone.sol.png)
 
 The RuleEngine supports client-side gasless transactions using the standard [ERC-2771](https://eips.ethereum.org/EIPS/eip-2771).
 
@@ -1255,11 +1279,11 @@ Checks whether a specific rule is currently configured.
 
 Please see [SECURITY.md](https://github.com/CMTA/CMTAT/blob/master/SECURITY.md) (CMTAT main repository).
 
-The contracts have been audited by [ABDKConsulting](https://www.abdk.consulting/), a globally recognized firm specialized in smart contracts' security.
-
 ### Audit
 
 #### First Audit - March 2022
+
+> The contracts (v.1.0.2) have been audited by [ABDK Consulting](https://www.abdk.consulting/), a globally recognized firm specialized in smart contracts' security.
 
 Fixed version : [v1.0.2](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2)
 
