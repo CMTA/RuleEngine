@@ -228,7 +228,7 @@ The toolchain includes the following components, where the versions are the late
 
 - Foundry (forge-std) [v1.14.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.14.0)
 - Solidity [0.8.34](https://docs.soliditylang.org/en/v0.8.34/)
-- OpenZeppelin Contracts (submodule) [v5.6.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.0)
+- OpenZeppelin Contracts (submodule) [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1)
 - CMTAT [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
 
 ### Access Control

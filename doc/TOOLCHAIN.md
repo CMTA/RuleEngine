@@ -53,7 +53,7 @@ Warning:
 The current tested baseline is:
 
 - Solidity: [0.8.34](https://docs.soliditylang.org/en/v0.8.34/)
-- OpenZeppelin Contracts (submodule): [v5.6.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.0)
+- OpenZeppelin Contracts (submodule): [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1)
 - CMTAT: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
 
 

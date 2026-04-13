@@ -47,12 +47,12 @@ forge lint
 
 
 
-### v3.0.0-rc2 - 
+### v3.0.0-rc2 - 2026-04-13
 
 ### Dependencies
 
 - Update CMTAT submodule to [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0).
-- Update OpenZeppelin Contracts (submodule) to [v5.6.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.0).
+- Update OpenZeppelin Contracts and OpenZeppelin Contracts Upgradeable submodules to [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1).
 - Set Solidity version to [0.8.34](https://docs.soliditylang.org/en/v0.8.34/) in `hardhat.config.js` and `foundry.toml`.
 
 ### Fixed
