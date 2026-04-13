@@ -2,7 +2,7 @@
 
 // Documentation :
 // https://book.getfoundry.sh/tutorials/solidity-scripting
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
 import {RuleEngine} from "src/deployment/RuleEngine.sol";
@@ -12,7 +12,9 @@ import {
 } from "CMTAT/modules/wrapper/extensions/ValidationModule/ValidationModuleRuleEngine.sol";
 
 /**
- * @title Deploy a RuleWhitelist and a RuleEngine. The CMTAT is considred already deployed
+ * @title Example deployment of a mock RuleWhitelist and a RuleEngine
+ * @dev This script deploys a reference/mock rule from `src/mocks/` for demo and testing flows.
+ * It is not a production deployment recipe for rule contracts.
  */
 contract RuleEngineScript is Script {
     function run() external {

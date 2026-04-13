@@ -9,7 +9,7 @@ AGENTS.md and CLAUDE.md files must always be identical
 **RuleEngine** is a Solidity smart contract system that enforces transfer restrictions for [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens. It acts as an external controller that calls pluggable rule contracts on each token transfer, mint, or burn.
 
 - **Version:** 3.0.0 (defined in `src/modules/VersionModule.sol`)
-- **Solidity:** ^0.8.20 (compiled with 0.8.33)
+- **Solidity:** ^0.8.20 (compiled with 0.8.34)
 - **EVM target:** Prague
 - **License:** MPL-2.0
 
@@ -41,14 +41,15 @@ Use `OZ/` for OpenZeppelin imports, `CMTAT/` for CMTAT imports, `src/` for local
 
 ## Architecture
 
-### Two Deployable Contracts
+### Three Deployable Contracts
 
 ```
-RuleEngine         — RBAC via AccessControl (multi-operator)
-RuleEngineOwnable  — ERC-173 Ownable (single-owner)
+RuleEngine              — RBAC via AccessControl (multi-operator)
+RuleEngineOwnable       — ERC-173 Ownable (single-owner)
+RuleEngineOwnable2Step  — ERC-173 Ownable2Step (single-owner, two-step handover)
 ```
 
-Both share 100% of their core logic through `RuleEngineBase`.
+All three share their core logic through `RuleEngineBase` directly or via `RuleEngineOwnableShared`.
 
 ### Inheritance Hierarchy
 
@@ -69,8 +70,15 @@ RuleEngine
 
 RuleEngineOwnable
 ├── ERC2771ModuleStandalone → gasless support
-├── RuleEngineBase
+├── RuleEngineOwnableShared
+│   └── RuleEngineBase
 └── Ownable (OZ) → ERC-173
+
+RuleEngineOwnable2Step
+├── ERC2771ModuleStandalone → gasless support
+├── RuleEngineOwnableShared
+│   └── RuleEngineBase
+└── Ownable2Step (OZ) → ERC-173
 ```
 
 ### Access Control Pattern
@@ -93,7 +101,7 @@ function _onlyRulesManager() internal virtual override onlyOwner {}
 function _onlyComplianceManager() internal virtual override onlyOwner {}
 ```
 
-**When adding a new protected function**, follow this pattern: define a virtual hook in the module, then override it in both `RuleEngine` and `RuleEngineOwnable`.
+**When adding a new protected function**, follow this pattern: define a virtual hook in the module, then override it in `RuleEngine`, `RuleEngineOwnable`, and `RuleEngineOwnable2Step`.
 
 ### `_checkRule` Override Chain
 
@@ -166,23 +174,28 @@ Errors, events, and role constants are centralized in "invariant storage" abstra
 
 ```
 src/
-├── RuleEngine.sol                 # RBAC variant (deploy this)
-├── RuleEngineOwnable.sol          # Ownable variant (deploy this)
+├── deployment/
+│   ├── RuleEngine.sol             # RBAC variant (deploy this)
+│   ├── RuleEngineOwnable.sol      # Ownable variant (deploy this)
+│   └── RuleEngineOwnable2Step.sol # Ownable2Step variant (deploy this)
 ├── RuleEngineBase.sol             # Abstract core logic (do not deploy)
+├── RuleEngineOwnableShared.sol    # Shared logic for ownable variants
 ├── interfaces/                    # IRule, IRulesManagementModule, IERC3643Compliance
 ├── modules/                       # VersionModule, RulesManagementModule, ERC3643ComplianceModule, ERC2771ModuleStandalone
 │   └── library/                   # InvariantStorage contracts, RuleInterfaceId
-└── mocks/                         # Test-only contracts (RuleWhitelist, RuleConditionalTransferLight, etc.)
+└── mocks/                         # Test-only/reference contracts
 
 test/
 ├── HelperContract.sol             # Base helper for RuleEngine tests
 ├── HelperContractOwnable.sol      # Base helper for RuleEngineOwnable tests
+├── HelperContractOwnable2Step.sol # Base helper for RuleEngineOwnable2Step tests
 ├── utils/                         # CMTAT deployment helpers
 ├── RuleEngine/                    # Tests for RuleEngine (RBAC)
 ├── RuleEngineOwnable/             # Tests for RuleEngineOwnable
+├── RuleEngineOwnable2Step/        # Tests for RuleEngineOwnable2Step
 └── RuleWhitelist/                 # Tests for the whitelist mock rule
 
-script/                            # Foundry deployment scripts
+script/                            # Foundry example/deployment scripts
 ```
 
 ## Test Conventions
@@ -191,9 +204,11 @@ For detailed test conventions, templates, helper contracts, test addresses, nami
 
 Key points:
 - Tests for `RuleEngine` go in `test/RuleEngine/`, tests for `RuleEngineOwnable` go in `test/RuleEngineOwnable/`
+- Tests for `RuleEngineOwnable2Step` go in `test/RuleEngineOwnable2Step/`
 - Use `HelperContract` for RBAC tests, `HelperContractOwnable` for Ownable tests
+- Use `HelperContractOwnable2Step` for `RuleEngineOwnable2Step` tests
 - Always use specific error selectors in `vm.expectRevert()`
-- When adding a feature to `RuleEngineBase`, add tests for **both** variants
+- When adding a feature to `RuleEngineBase`, add tests for **all deployable variants**
 
 ## RBAC Roles (RuleEngine only)
 
@@ -211,7 +226,7 @@ Key points:
 4. **No zero-address rules** — checked in `_checkRule`
 5. **Admin has all roles** in `RuleEngine` (the `hasRole` override)
 6. **Forwarder is immutable** — set at construction, cannot be changed
-7. **Rule contracts are in `src/mocks/`** — they are reference implementations for testing, not production rules. Production rules live in a [separate repository](https://github.com/CMTA/Rules).
+7. **Rule contracts in `src/mocks/` are reference implementations** — they are useful for testing and examples, not as production rule contracts. Production rules live in a [separate repository](https://github.com/CMTA/Rules).
 
 ## Solidity Style
 
@@ -230,7 +245,7 @@ Key points:
 3. Add a virtual access control hook (e.g., `_onlyNewManager()`)
 4. Have `RuleEngineBase` inherit the module
 5. Override the hook in both `RuleEngine` and `RuleEngineOwnable`
-6. Add tests in both `test/RuleEngine/` and `test/RuleEngineOwnable/`
+6. Add tests in `test/RuleEngine/`, `test/RuleEngineOwnable/`, and `test/RuleEngineOwnable2Step/`
 
 ### Adding a new rule (mock)
 1. Create the rule in `src/mocks/rules/`
@@ -241,4 +256,4 @@ Key points:
 ### Modifying access control
 1. Update the virtual hook in the relevant module
 2. Update overrides in **both** `RuleEngine.sol` and `RuleEngineOwnable.sol`
-3. Update tests in **both** test directories
+3. Update tests in all affected test directories

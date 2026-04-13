@@ -1,10 +1,10 @@
 {
   "scripts": {
     "uml": "npx sol2uml class src",
-    "uml:ruleEngine": "npx sol2uml src contracts -b RuleEngine",
+    "uml:ruleEngine": "npx sol2uml class src/deployment/RuleEngine.sol",
     "uml:test": "npx sol2uml class test",
-    "surya:report": "npx surya mdreport surya_report_ruleEngine.md src/RuleEngine.sol",
-    "surya:graph": "npx surya graph  src/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png"
+    "surya:report": "npx surya mdreport surya_report_ruleEngine.md src/deployment/RuleEngine.sol",
+    "surya:graph": "npx surya graph src/deployment/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-foundry": "^1.0.1",

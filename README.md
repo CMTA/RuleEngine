@@ -6,6 +6,10 @@ This repository includes the RuleEngine contracts for [CMTAT](https://github.com
 
 The RuleEngine is an external contract used to apply transfer restrictions to another contract, such as CMTAT and ERC-3643 tokens. Acting as a controller, it can call different contract rules and apply these rules on each transfer.
 
+[TOC]
+
+
+
 ## Contract Variants
 
 Three deployable contracts are available:
@@ -362,10 +366,10 @@ The RuleEngine can be removed from the main token contract by calling these dedi
 
 Rules are maintained in a dedicated repository: [github.com/CMTA/Rules](https://github.com/CMTA/Rules).
 
-Based on [Rules.md](./Rules.md), rules can be used in two ways:
+Rules can be used in two ways:
 
 - Directly on CMTAT (single-rule setup, no RuleEngine orchestration).
-- Through RuleEngine (multi-rule orchestration with sequential execution).
+- Through this RuleEngine (multi-rule orchestration with sequential execution).
 
 Rule families:
 
@@ -378,10 +382,26 @@ Additional integration notes:
 
 - For RuleEngine integration, a rule must implement `IRule` (including ERC-165 support for the Rule interface ID).
 - RuleEngine executes configured rules in order and reverts on the first failing rule in state-changing paths.
-- Restriction codes should remain unique across the composed rule set. Keep CMTAT-reserved ranges free and use dedicated code ranges per rule (see [Rules.md](./Rules.md), section "Rule - Code list").
+- Restriction codes should remain unique across the composed rule set. Keep CMTAT-reserved ranges free and use dedicated code ranges per rule 
 - For the latest list of production rules, audits, and status, use the Rules repository as the source of truth.
 
+#### Rules details
 
+Here is a summary tab of available rules, see [github.com/CMTA/Rules](https://github.com/CMTA/Rules)
+
+| Rule                                                         | Type <br />[read-only / read-write] | Description                                                  |
+| ------------------------------------------------------------ | ----------------------------------- | ------------------------------------------------------------ |
+| RuleWhitelist                                                | Read-only                           | This rule can be used to restrict transfers from/to only addresses inside a whitelist. |
+| RuleWhitelistWrapper                                         | Read-Only                           | This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators. |
+| RuleBlacklist                                                | Read-Only                           | This rule can be used to forbid transfer from/to addresses in the blacklist |
+| RuleSanctionList                                             | Read-Only                           | The purpose of this contract is to use the oracle contract from [Chainalysis](https://go.chainalysis.com/chainalysis-oracle-docs.html) to forbid transfer from/to an address included in a sanctions designation (US, EU, or UN). |
+| RuleMaxTotalSupply                                           | Read-Only                           | This rule limits minting so that the total supply never exceeds a configured maximum. |
+| RuleIdentityRegistry                                         | Read-Only                           | This rule checks the ERC-3643 Identity Registry for transfer participants when configured. |
+| RuleSpenderWhitelist                                         | Read-Only                           | This rule blocks `transferFrom` when the spender is not in the whitelist. Direct transfers are always allowed. |
+| RuleERC2980                                                  | Read-Only                           | ERC-2980 Swiss Compliant rule combining a whitelist (recipient-only) and a frozenlist (blocks sender, recipient, and spender for `transferFrom`). Frozenlist takes priority over whitelist. |
+| RuleConditionalTransferLight                                 | Read-Write                          | This rule requires that transfers have to be approved by an operator before being executed. Each approval is consumed once and the same transfer can be approved multiple times. |
+| [RuleConditionalTransfer](https://github.com/CMTA/RuleConditionalTransfer) (external) | Read-Write                          | Full-featured approval-based transfer rule implementing Swiss law *Vinkulierung*. Supports automatic approval after three months, automatic transfer execution, and a conditional whitelist for address pairs that bypass approval. Maintained in a separate repository. |
+| [RuleSelf](https://github.com/rya-sge/ruleself) (community)  | —                                   | Use [Self](https://self.xyz), a zero-knowledge identity  solution to determine which is allowed to interact with the token.<br />Community-maintained rule project. Not developed or maintained by CMTA. |
 
 ### Gasless support (ERC-2771)
 
@@ -1257,7 +1277,7 @@ The final report is available in [ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf](https://g
 
 | Version | Report | Assessment |
 |---------|--------|------------|
-| Scan #1 (Feb 2026) | [audit_agent_report_1_v3.0.0-rc1.pdf](./doc/security/audits/tools/nethermind-audit-agent/audit_agent_report_1_v3.0.0-rc1.pdf) | [feedback.md](./doc/security/audits/tools/nethermind-audit-agent/audit_agent_report_1_v3.0.0-rc1-feedback.md) |
+| Scan #1 (Feb 2026) | [audit_agent_report_1_v3.0.0-rc1.pdf](./doc/security/audits/tools/nethermind-audit-agent/v3.0.0-rc1/audit_agent_report_1_v3.0.0-rc1.pdf) | [feedback.md](./doc/security/audits/tools/nethermind-audit-agent/v3.0.0-rc1/audit_agent_report_1_v3.0.0-rc1-feedback.md) |
 
 7 findings — 0 High · 1 Medium · 1 Low · 4 Info · 1 Best Practices
 
@@ -1329,7 +1349,7 @@ See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMT
 
 ## Toolchains and Usage
 
-*Explain how it works.*
+This repository is primarily developed and tested with Foundry. Hardhat is kept for auxiliary tooling and documentation workflows.
 
 ### Configuration
 
@@ -1460,17 +1480,23 @@ The official documentation is available in the Foundry [website](https://getfoun
 
 #### Script
 
-> This documentation has been written for the version v1.0.2
+The scripts in `script/` are example deployment flows.
 
-To run the script for deployment, you need to create a .env file. The value for CMTAT_ADDRESS is required only to use the script **RuleEngine.s.sol**
+> Warning: `RuleEngineScript.s.sol` and `CMTATWithRuleEngineScript.s.sol` deploy `RuleWhitelist` from `src/mocks/`. That contract is a reference/mock rule for testing and demos, not a production rule contract.
+
+For production deployments, source rule contracts from the dedicated [CMTA/Rules](https://github.com/CMTA/Rules) repository and adapt the script parameters accordingly.
+
+To run the example scripts, create a `.env` file. The value for `CMTAT_ADDRESS` is required only for `RuleEngineScript.s.sol`.
 
 Warning: putting your private key in a .env file is not the most secure approach.
 
-* File .env
+* File `.env`
 ```
 PRIVATE_KEY=<YOUR_PRIVATE_KEY>
 CMTAT_ADDRESS=<CMTAT_ADDRESS>
 ```
+**Private Keys**: Never expose your private keys. The `.env` file here used in this project should not be used for production. See [getfoundry.sh - Key Management](https://getfoundry.sh/guides/best-practices/key-management/)
+
 * Command
 
 CMTAT with RuleEngine
@@ -1486,7 +1512,7 @@ forge script script/CMTATWithRuleEngineScript.s.sol:CMTATWithRuleEngineScript --
 forge script script/CMTATWithRuleEngineScript.s.sol:CMTATWithRuleEngineScript --rpc-url=127.0.0.1:8545  --broadcast --verify -vvv
 ```
 
-Only RuleEngine with a Whitelist contract
+Only RuleEngine with the mock/reference `RuleWhitelist` contract
 
 ```bash
 forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  --broadcast --verify -vvv
@@ -1497,6 +1523,14 @@ forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  
 ```bash
 forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=127.0.0.1:8545  --broadcast --verify -vvv
 ```
+
+#### Production Deployment Checklist
+
+- Choose the deployable variant: `RuleEngine`, `RuleEngineOwnable`, or `RuleEngineOwnable2Step`.
+- Choose the trusted forwarder address, or use `address(0)` if ERC-2771 support is not needed.
+- Decide whether the token should be bound in the constructor or later via `bindToken`.
+- Source production rule contracts from the [CMTA/Rules](https://github.com/CMTA/Rules) repository, not from `src/mocks/`.
+- Verify post-deployment permissions: owner for ownable variants, or admin plus role assignments for the RBAC variant.
 
 ### Solidity style guideline
 
