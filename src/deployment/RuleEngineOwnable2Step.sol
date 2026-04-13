@@ -3,9 +3,9 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-import {Ownable2Step} from "OZ/access/Ownable2Step.sol";
-import {Ownable} from "OZ/access/Ownable.sol";
-import {Context} from "OZ/utils/Context.sol";
+import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {RuleEngineOwnableShared} from "../RuleEngineOwnableShared.sol";
 
 /**

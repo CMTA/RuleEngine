@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.20;
 
-import {Ownable} from "OZ/access/Ownable.sol";
-import {Context} from "OZ/utils/Context.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {RuleEngineOwnableShared} from "../RuleEngineOwnableShared.sol";
 
 /**

@@ -7,8 +7,8 @@ import {
 } from "./abstract/RuleConditionalTransferLightInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
-import {AccessControl} from "OZ/access/AccessControl.sol";
-import {IERC165} from "OZ/utils/introspection/IERC165.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 /**
  * @title TransferApprovalRule

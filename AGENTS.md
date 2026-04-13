@@ -32,12 +32,11 @@ CMTAT submodule also needs `cd lib/CMTAT && npm install` for its OpenZeppelin de
 
 | Alias | Path |
 |-------|------|
-| `OZ/` | `lib/openzeppelin-contracts/contracts` |
 | `CMTAT/` | `lib/CMTAT/contracts/` |
 | `CMTATv3.0.0/` | `lib/CMTATv3.0.0/contracts/` |
 | `@openzeppelin/contracts/` | `lib/openzeppelin-contracts/contracts` |
 
-Use `OZ/` for OpenZeppelin imports, `CMTAT/` for CMTAT imports, `src/` for local imports.
+Use `@openzeppelin/contracts/` for OpenZeppelin imports, `CMTAT/` for CMTAT imports, `src/` for local imports.
 
 ## Architecture
 

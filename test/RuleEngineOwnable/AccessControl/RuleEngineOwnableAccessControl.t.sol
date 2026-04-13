@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContractOwnable.sol";
 
-import {Ownable} from "OZ/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title Access Control tests for RuleEngineOwnable

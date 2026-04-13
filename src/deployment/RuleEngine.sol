@@ -3,11 +3,11 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-import {Context} from "OZ/utils/Context.sol";
-import {IAccessControl} from "OZ/access/IAccessControl.sol";
-import {AccessControl} from "OZ/access/AccessControl.sol";
-import {AccessControlEnumerable} from "OZ/access/extensions/AccessControlEnumerable.sol";
-import {IERC165} from "OZ/utils/introspection/ERC165.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 /* ==== Modules === */
 import {ERC2771ModuleStandalone, ERC2771Context} from "../modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */

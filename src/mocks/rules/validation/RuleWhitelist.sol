@@ -6,8 +6,8 @@ pragma solidity ^0.8.20;
 import "./abstract/RuleAddressList/RuleAddressList.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "./abstract/RuleWhitelistCommon.sol";
-import {AccessControl} from "OZ/access/AccessControl.sol";
-import {IERC165} from "OZ/utils/introspection/IERC165.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
 
 //import {ERC165, IERC165} from "@OZ/utils/introspection/ERC165.sol";

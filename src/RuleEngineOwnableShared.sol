@@ -3,8 +3,8 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-import {Context} from "OZ/utils/Context.sol";
-import {IERC165} from "OZ/utils/introspection/IERC165.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 /* ==== Modules === */
 import {ERC2771ModuleStandalone, ERC2771Context} from "./modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */

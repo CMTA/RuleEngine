@@ -7,7 +7,7 @@ import "../HelperContractOwnable.sol";
 
 import {RuleEngineOwnableExposed} from "src/mocks/RuleEngineExposed.sol";
 import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
-import {IAccessControl} from "OZ/access/IAccessControl.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
 import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
 

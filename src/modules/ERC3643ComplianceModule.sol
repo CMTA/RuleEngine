@@ -3,8 +3,8 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-import {EnumerableSet} from "OZ/utils/structs/EnumerableSet.sol";
-import {Context} from "OZ/utils/Context.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 /* ==== Interface and other library === */
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
 

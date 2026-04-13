@@ -3,7 +3,7 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-import {ERC165Checker} from "OZ/utils/introspection/ERC165Checker.sol";
+import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 /* ==== CMTAT interface IDs === */
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";

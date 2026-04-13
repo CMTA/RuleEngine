@@ -6,7 +6,7 @@ import {IRuleEngineERC1404, IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngi
 import {IERC1404, IERC1404Extend} from "CMTAT/interfaces/tokenization/draft-IERC1404.sol";
 import {IERC3643ComplianceRead, IERC3643IComplianceContract} from "CMTAT/interfaces/tokenization/IERC3643Partial.sol";
 import {IERC7551Compliance} from "CMTAT/interfaces/tokenization/draft-IERC7551.sol";
-import {IERC165} from "OZ/utils/introspection/IERC165.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {RuleInterfaceId} from "../modules/library/RuleInterfaceId.sol";
 
 /**

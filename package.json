@@ -7,7 +7,9 @@
     "surya:graph": "npx surya graph src/deployment/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-foundry": "^1.0.1",
+    "@nomicfoundation/hardhat-foundry": "^1.2.1",
+    "@nomicfoundation/hardhat-toolbox": "^6.1.2",
+    "hardhat": "^2.28.6",
     "surya": "^0.4.13"
   }
 }

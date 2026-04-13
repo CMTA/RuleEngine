@@ -5,9 +5,9 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
 import {MinimalForwarderMock} from "CMTAT/mocks/MinimalForwarderMock.sol";
-import {IERC165} from "OZ/utils/introspection/IERC165.sol";
-import {IAccessControl} from "OZ/access/IAccessControl.sol";
-import {IAccessControlEnumerable} from "OZ/access/extensions/IAccessControlEnumerable.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {IAccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/IAccessControlEnumerable.sol";
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
