@@ -1463,6 +1463,12 @@ Generate gas report
 forge test --gas-report
 ```
 
+There is also a small Hardhat smoke test to confirm the main `RuleEngine` contract can be compiled and deployed through Hardhat:
+
+```bash
+npx hardhat test test/hardhat/RuleEngine.smoke.js
+```
+
 See also the test framework's [official documentation](https://book.getfoundry.sh/forge/tests), and that of the [test commands](https://book.getfoundry.sh/reference/forge/test-commands).
 
 ### Coverage

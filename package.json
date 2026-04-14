@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "test:hardhat": "npx hardhat test test/hardhat/RuleEngine.smoke.js",
     "uml": "npx sol2uml class src",
     "uml:ruleEngine": "npx sol2uml class src/deployment/RuleEngine.sol",
     "uml:test": "npx sol2uml class test",
