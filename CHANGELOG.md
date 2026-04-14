@@ -47,25 +47,31 @@ forge lint
 
 
 
-### v3.0.0-rc2 - 2026-04-13
+### v3.0.0-rc2 - 2026-04-14
 
 ### Dependencies
 
 - Update CMTAT submodule to [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0).
 - Update OpenZeppelin Contracts and OpenZeppelin Contracts Upgradeable submodules to [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1).
 - Set Solidity version to [0.8.34](https://docs.soliditylang.org/en/v0.8.34/) in `hardhat.config.js` and `foundry.toml`.
+- Standardize local OpenZeppelin imports on `@openzeppelin/contracts/...` and remove the legacy `OZ/` remapping to avoid Hardhat source-name collisions.
 
 ### Fixed
 
 - `RuleEngineOwnable.supportsInterface` incorrectly advertised `IAccessControl` via the inherited `AccessControl.supportsInterface` fallback. Replaced with an explicit whitelist; `supportsInterface(IAccessControl)` now returns `false` as expected (Nethermind AuditAgent finding 2).
-- Remove `AccessControl` inheritance from `RulesManagementModule`; RBAC responsibilities are now explicitly held by `RuleEngine`, while the module remains access-control agnostic.
-- Switch `RuleEngine` RBAC base from OpenZeppelin `AccessControl` to `AccessControlEnumerable` while keeping the custom "default admin has all roles" behavior.
+- Advertise ERC-3643 compliance interface ID (`0x3144991c`) and IERC7551Compliance subset interface ID (`0x7157797f`) in `supportsInterface` for both `RuleEngine` and `RuleEngineOwnable` (Nethermind AuditAgent finding 6).
+- Fix Hardhat compatibility after the OpenZeppelin upgrade by removing duplicate import namespaces that resolved to the same file under `hardhat-foundry`.
+- Fix `hardhat.config.js` Solidity config shape so Hardhat applies the configured optimizer and EVM target instead of falling back to defaults.
 
 ### Added
 
-- Advertise ERC-3643 compliance interface ID (`0x3144991c`) and IERC7551Compliance subset interface ID (`0x7157797f`) in `supportsInterface` for both `RuleEngine` and `RuleEngineOwnable` (Nethermind AuditAgent finding 6).
 - Move deployable contracts to `src/deployment/` and rename RBAC deployable contract `RuleEngine` to `RuleEngine`.
 - `RuleEngine.supportsInterface` now advertises `IAccessControlEnumerable`.
+
+### Changed
+
+- Switch `RuleEngine` RBAC base from OpenZeppelin `AccessControl` to `AccessControlEnumerable` while keeping the custom "default admin has all roles" behavior.
+- Remove `AccessControl` inheritance from `RulesManagementModule`; RBAC responsibilities are now explicitly held by `RuleEngine`, while the module remains access-control agnostic.
 
 ### Security
 
@@ -81,11 +87,14 @@ forge lint
 - Add ERC-3643 and IERC7551Compliance `supportsInterface` coverage tests to both `RuleEngineCoverage` and `RuleEngineOwnableCoverage`.
 - Add mock interfaces `src/mocks/ICompliance.sol` and `src/mocks/IERC7551ComplianceSubset.sol` used by coverage tests.
 - Extend `RuleEngineDeployment` interface coverage to assert support for `IAccessControlEnumerable`.
+- Add a small Hardhat smoke test (`test/hardhat/RuleEngine.smoke.js`) to confirm `RuleEngine` can be compiled, deployed, and queried through Hardhat.
+- Add the npm script `test:hardhat` to run the Hardhat smoke test directly.
 
 ### Documentation
 
 - Add Nethermind AuditAgent scan #1 report and remediation assessment (`doc/security/audits/tools/nethermind-audit-agent/`).
 - Update README Security section with Nethermind AuditAgent findings summary table.
+- Update README toolchain and testing sections to mention Hardhat compilation support and the small Hardhat smoke test.
 
 ### v3.0.0-rc1 - 2026-02-16
 
