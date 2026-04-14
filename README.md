@@ -1373,7 +1373,9 @@ See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMT
 
 ## Toolchains and Usage
 
-This repository is primarily developed and tested with Foundry. Hardhat is kept for auxiliary tooling and documentation workflows.
+This repository is primarily developed and tested with Foundry.
+
+Hardhat configuration is also present to allow compiling the contracts and running a small smoke test with Hardhat.
 
 ### Configuration
 
@@ -1463,13 +1465,13 @@ Generate gas report
 forge test --gas-report
 ```
 
+See also the test framework's [official documentation](https://book.getfoundry.sh/forge/tests), and that of the [test commands](https://book.getfoundry.sh/reference/forge/test-commands).
+
 There is also a small Hardhat smoke test to confirm the main `RuleEngine` contract can be compiled and deployed through Hardhat:
 
 ```bash
 npx hardhat test test/hardhat/RuleEngine.smoke.js
 ```
-
-See also the test framework's [official documentation](https://book.getfoundry.sh/forge/tests), and that of the [test commands](https://book.getfoundry.sh/reference/forge/test-commands).
 
 ### Coverage
 
