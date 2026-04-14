@@ -2,17 +2,19 @@
 
 // Documentation :
 // https://book.getfoundry.sh/tutorials/solidity-scripting
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
 import {ICMTATConstructor, CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
 import {IERC1643CMTAT} from "CMTAT/interfaces/tokenization/draft-IERC1643CMTAT.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
-import {RuleEngine} from "src/RuleEngine.sol";
+import {RuleEngine} from "src/deployment/RuleEngine.sol";
 import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
 
 /**
- * @title Deploy a CMTAT, a RuleWhitelist and a RuleEngine
+ * @title Example deployment of a CMTAT, a mock RuleWhitelist and a RuleEngine
+ * @dev This script deploys a reference/mock rule from `src/mocks/` for demo and testing flows.
+ * It is not a production deployment recipe for rule contracts.
  */
 contract CMTATWithRuleEngineScript is Script {
     function run() external {

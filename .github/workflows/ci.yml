@@ -25,3 +25,17 @@ jobs:
 
       - name: Run Forge tests
         run: forge test -vvv
+        
+     - name: Setup NodeJS 20.5.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 #v4.4.0
+        with:
+          node-version: 20.5.0
+
+      - name: Show NodeJS version
+        run: npm --version
+
+      - name: Install Project Dependencies
+        run: npm install
+
+      - name: Run Hardhat Test
+        run: npx hardhat test

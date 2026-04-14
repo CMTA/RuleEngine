@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./RuleEngineBase.sol | 8d58f8c07e60ca21bf97210530ebfa477aaba3d2 |
+| ./RuleEngineBase.sol | 5130f4dd846a01768400a053b1c3ff7a897a7e76 |
 
 
 ### Contracts Description Table
@@ -29,6 +29,7 @@
 | └ | _detectTransferRestrictionFrom | Internal 🔒 |   | |
 | └ | _messageForTransferRestriction | Internal 🔒 |   | |
 | └ | _checkRule | Internal 🔒 |   | |
+| └ | _supportsRuleEngineBaseInterface | Internal 🔒 |   | |
 
 
 ### Legend

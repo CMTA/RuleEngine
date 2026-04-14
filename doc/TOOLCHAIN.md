@@ -42,11 +42,19 @@ Utility tool for smart contract systems.
 
 **[OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-contracts)**
 OpenZeppelin Contracts
-The version of the library used is available in the [READEME](../README.md)
+The version of the library used is available in the [README](../README.md)
 
 Warning: 
 - Submodules are not automatically updated when the host repository is updated.  
 - Only update the module to a specific version, not an intermediary commit.
+
+## Tested versions
+
+The current tested baseline is:
+
+- Solidity: [0.8.34](https://docs.soliditylang.org/en/v0.8.34/)
+- OpenZeppelin Contracts (submodule): [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1)
+- CMTAT: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
 
 
 
@@ -122,10 +130,14 @@ npm run-script surya:report
 >Slither is a Solidity static analysis framework written in Python3
 
 ```bash
-slither .  --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std" > slither-report.md
+slither .  --checklist --filter-paths "openzeppelin-contracts|test|mocks|CMTAT|forge-std" > slither-report.md
 ```
 
+### [Aderyn](https://github.com/Cyfrin/aderyn)
 
+```bash
+aderyn -x mocks --output aderyn-report.md
+```
 
 ## Code style guidelines
 

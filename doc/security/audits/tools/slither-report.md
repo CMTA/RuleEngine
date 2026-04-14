@@ -1,49 +1,104 @@
 **THIS CHECKLIST IS NOT COMPLETE**. Use `--show-ignored-findings` to show all the results.
 Summary
- - [calls-loop](#calls-loop) (4 results) (Low)
- - [dead-code](#dead-code) (1 results) (Informational)
+ - [calls-loop](#calls-loop) (10 results) (Low)
+ - [unindexed-event-address](#unindexed-event-address) (2 results) (Informational)
 ## calls-loop
-
-> Acknowledge
-> Rule contracts are considered as trusted
-
 Impact: Low
 Confidence: Medium
  - [ ] ID-0
-[RuleEngineBase.detectTransferRestriction(address,address,uint256)](src/RuleEngineBase.sol#L76-L90) has external calls inside a loop: [restriction = IRule(rule(i)).detectTransferRestriction(from,to,value)](src/RuleEngineBase.sol#L83-L84)
+[RuleEngineBase._messageForTransferRestriction(uint8)](src/RuleEngineBase.sol#L176-L184) has external calls inside a loop: [IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)](src/RuleEngineBase.sol#L179)
+	Calls stack containing the loop:
+		RuleEngineBase.messageForTransferRestriction(uint8)
 
-src/RuleEngineBase.sol#L76-L90
+src/RuleEngineBase.sol#L176-L184
 
 
  - [ ] ID-1
-[RuleEngineBase.messageForTransferRestriction(uint8)](src/RuleEngineBase.sol#L116-L132) has external calls inside a loop: [IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)](src/RuleEngineBase.sol#L123-L124)
+[RuleEngineBase._detectTransferRestrictionFrom(address,address,address,uint256)](src/RuleEngineBase.sol#L154-L168) has external calls inside a loop: [restriction = IRule(rule(i)).detectTransferRestrictionFrom(spender,from,to,value)](src/RuleEngineBase.sol#L162)
+	Calls stack containing the loop:
+		RuleEngineBase.detectTransferRestrictionFrom(address,address,address,uint256)
 
-src/RuleEngineBase.sol#L116-L132
+src/RuleEngineBase.sol#L154-L168
 
 
  - [ ] ID-2
-[RuleEngineBase.messageForTransferRestriction(uint8)](src/RuleEngineBase.sol#L116-L132) has external calls inside a loop: [IRule(rule(i)).messageForTransferRestriction(restrictionCode)](src/RuleEngineBase.sol#L126-L128)
+[RuleEngineBase._messageForTransferRestriction(uint8)](src/RuleEngineBase.sol#L176-L184) has external calls inside a loop: [IRule(rule(i)).messageForTransferRestriction(restrictionCode)](src/RuleEngineBase.sol#L180)
+	Calls stack containing the loop:
+		RuleEngineBase.messageForTransferRestriction(uint8)
 
-src/RuleEngineBase.sol#L116-L132
+src/RuleEngineBase.sol#L176-L184
 
 
  - [ ] ID-3
-[RuleEngineBase.detectTransferRestrictionFrom(address,address,address,uint256)](src/RuleEngineBase.sol#L95-L111) has external calls inside a loop: [restriction = IRule(rule(i)).detectTransferRestrictionFrom(spender,from,to,value)](src/RuleEngineBase.sol#L103-L104)
+[RulesManagementModule._transferred(address,address,address,uint256)](src/modules/RulesManagementModule.sol#L192-L197) has external calls inside a loop: [IRule(_rules.at(i)).transferred(spender,from,to,value)](src/modules/RulesManagementModule.sol#L195)
+	Calls stack containing the loop:
+		RuleEngineBase.transferred(address,address,address,uint256)
 
-src/RuleEngineBase.sol#L95-L111
+src/modules/RulesManagementModule.sol#L192-L197
 
-## dead-code
 
-> - Implemented to be gasless compatible (see MetaTxModule)
->
-> - If we remove this function, we will have the following error:
->
->   "Derived contract must override function "_msgData". Two or more base classes define function with same name and parameter types."
-
-Impact: Informational
-Confidence: Medium
  - [ ] ID-4
-[RuleEngine._msgData()](src/RuleEngine.sol#L56-L64) is never used and should be removed
+[RuleEngineBase._detectTransferRestrictionFrom(address,address,address,uint256)](src/RuleEngineBase.sol#L154-L168) has external calls inside a loop: [restriction = IRule(rule(i)).detectTransferRestrictionFrom(spender,from,to,value)](src/RuleEngineBase.sol#L162)
+	Calls stack containing the loop:
+		RuleEngineBase.canTransferFrom(address,address,address,uint256)
+		RuleEngineBase.detectTransferRestrictionFrom(address,address,address,uint256)
 
-src/RuleEngine.sol#L56-L64
+src/RuleEngineBase.sol#L154-L168
+
+
+ - [ ] ID-5
+[RuleEngineBase._detectTransferRestriction(address,address,uint256)](src/RuleEngineBase.sol#L143-L152) has external calls inside a loop: [restriction = IRule(rule(i)).detectTransferRestriction(from,to,value)](src/RuleEngineBase.sol#L146)
+	Calls stack containing the loop:
+		RuleEngineBase.detectTransferRestriction(address,address,uint256)
+
+src/RuleEngineBase.sol#L143-L152
+
+
+ - [ ] ID-6
+[RulesManagementModule._transferred(address,address,uint256)](src/modules/RulesManagementModule.sol#L173-L178) has external calls inside a loop: [IRule(_rules.at(i)).transferred(from,to,value)](src/modules/RulesManagementModule.sol#L176)
+	Calls stack containing the loop:
+		RuleEngineBase.created(address,uint256)
+
+src/modules/RulesManagementModule.sol#L173-L178
+
+
+ - [ ] ID-7
+[RuleEngineBase._detectTransferRestriction(address,address,uint256)](src/RuleEngineBase.sol#L143-L152) has external calls inside a loop: [restriction = IRule(rule(i)).detectTransferRestriction(from,to,value)](src/RuleEngineBase.sol#L146)
+	Calls stack containing the loop:
+		RuleEngineBase.canTransfer(address,address,uint256)
+		RuleEngineBase.detectTransferRestriction(address,address,uint256)
+
+src/RuleEngineBase.sol#L143-L152
+
+
+ - [ ] ID-8
+[RulesManagementModule._transferred(address,address,uint256)](src/modules/RulesManagementModule.sol#L173-L178) has external calls inside a loop: [IRule(_rules.at(i)).transferred(from,to,value)](src/modules/RulesManagementModule.sol#L176)
+	Calls stack containing the loop:
+		RuleEngineBase.transferred(address,address,uint256)
+
+src/modules/RulesManagementModule.sol#L173-L178
+
+
+ - [ ] ID-9
+[RulesManagementModule._transferred(address,address,uint256)](src/modules/RulesManagementModule.sol#L173-L178) has external calls inside a loop: [IRule(_rules.at(i)).transferred(from,to,value)](src/modules/RulesManagementModule.sol#L176)
+	Calls stack containing the loop:
+		RuleEngineBase.destroyed(address,uint256)
+
+src/modules/RulesManagementModule.sol#L173-L178
+
+
+## unindexed-event-address
+Impact: Informational
+Confidence: High
+ - [ ] ID-10
+Event [IERC3643Compliance.TokenBound(address)](src/interfaces/IERC3643Compliance.sol#L14) has address parameters but no indexed parameters
+
+src/interfaces/IERC3643Compliance.sol#L14
+
+
+ - [ ] ID-11
+Event [IERC3643Compliance.TokenUnbound(address)](src/interfaces/IERC3643Compliance.sol#L20) has address parameters but no indexed parameters
+
+src/interfaces/IERC3643Compliance.sol#L20
+
 

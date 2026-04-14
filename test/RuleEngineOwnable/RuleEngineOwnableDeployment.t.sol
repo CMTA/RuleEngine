@@ -5,6 +5,11 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContractOwnable.sol";
 import {MinimalForwarderMock} from "CMTAT/mocks/MinimalForwarderMock.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
+import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
+import {ICompliance} from "src/mocks/ICompliance.sol";
+import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
 
 /**
  * @title Deployment tests for RuleEngineOwnable
@@ -55,12 +60,17 @@ contract RuleEngineOwnableDeploymentTest is Test, HelperContractOwnable {
         ruleEngineMock = new RuleEngineOwnable(address(0x0), address(forwarder), ZERO_ADDRESS);
     }
 
-    function testSupportsERC173Interface() public {
+    function testSupportsInterfaces() public {
         // Arrange
         ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, address(0x0), ZERO_ADDRESS);
 
-        // Act & Assert - ERC-173 interface ID
-        assertTrue(ruleEngineMock.supportsInterface(0x7f5828d0));
+        // Act & Assert
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC165).interfaceId));
+        assertTrue(ruleEngineMock.supportsInterface(0x7f5828d0)); // ERC-173
+        assertTrue(ruleEngineMock.supportsInterface(RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(ICompliance).interfaceId));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC7551ComplianceSubset).interfaceId));
     }
 
     function testDeploymentWithTokenBound() public {

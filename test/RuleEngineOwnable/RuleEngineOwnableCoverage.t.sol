@@ -7,9 +7,12 @@ import "../HelperContractOwnable.sol";
 
 import {RuleEngineOwnableExposed} from "src/mocks/RuleEngineExposed.sol";
 import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {ICompliance} from "src/mocks/ICompliance.sol";
+import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
 
 /**
- * @title Coverage tests for RuleEngineOwnable (supportsInterface fallback, _msgData, ERC-165 rule check)
+ * @title Coverage tests for RuleEngineOwnable (_msgData, ERC-165 rule check)
  */
 contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
     RuleEngineOwnableExposed public ruleEngineOwnableExposed;
@@ -42,13 +45,23 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
         assertTrue(ruleEngineMock.supportsInterface(ERC173_ID));
     }
 
-    function testSupportsERC165ViaAccessControlFallback() public view {
-        // This hits line 61: AccessControl.supportsInterface(interfaceId)
+    function testSupportsERC3643ComplianceInterface() public view {
+        assertTrue(ruleEngineMock.supportsInterface(type(ICompliance).interfaceId));
+    }
+
+    function testSupportsIERC7551ComplianceSubsetInterface() public view {
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC7551ComplianceSubset).interfaceId));
+    }
+
+    function testSupportsERC165() public view {
         assertTrue(ruleEngineMock.supportsInterface(ERC165_ID));
     }
 
+    function testDoesNotSupportIAccessControlInterface() public view {
+        assertFalse(ruleEngineMock.supportsInterface(type(IAccessControl).interfaceId));
+    }
+
     function testDoesNotSupportInvalidInterface() public view {
-        // Falls through all checks including AccessControl.supportsInterface -> false
         assertFalse(ruleEngineMock.supportsInterface(INVALID_ID));
     }
 

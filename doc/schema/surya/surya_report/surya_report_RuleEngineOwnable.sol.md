@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./RuleEngineOwnable.sol | ee4b074118dd5b6e5081dee278d7dbcc22f633ca |
+| ./deployment/RuleEngineOwnable.sol | 19b70cde4d1a7d7d4e5453ea53d5e69308043167 |
 
 
 ### Contracts Description Table
@@ -15,11 +15,10 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleEngineOwnable** | Implementation | ERC2771ModuleStandalone, RuleEngineBase, Ownable |||
-| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771ModuleStandalone Ownable |
+| **RuleEngineOwnable** | Implementation | RuleEngineOwnableShared, Ownable |||
+| └ | <Constructor> | Public ❗️ | 🛑  | RuleEngineOwnableShared Ownable |
 | └ | _onlyRulesManager | Internal 🔒 | 🛑  | onlyOwner |
 | └ | _onlyComplianceManager | Internal 🔒 | 🛑  | onlyOwner |
-| └ | supportsInterface | Public ❗️ |   |NO❗️ |
 | └ | _msgSender | Internal 🔒 |   | |
 | └ | _msgData | Internal 🔒 |   | |
 | └ | _contextSuffixLength | Internal 🔒 |   | |

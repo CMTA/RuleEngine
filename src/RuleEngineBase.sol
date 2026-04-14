@@ -3,7 +3,10 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-import {ERC165Checker} from "OZ/utils/introspection/ERC165Checker.sol";
+import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+/* ==== CMTAT interface IDs === */
+import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
+import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 /* ==== CMTAT === */
 import {IRuleEngine, IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {IERC1404, IERC1404Extend} from "CMTAT/interfaces/tokenization/draft-IERC1404.sol";
@@ -17,6 +20,7 @@ import {RulesManagementModule} from "./modules/RulesManagementModule.sol";
 
 /* ==== Interface and other library === */
 import {IRule} from "./interfaces/IRule.sol";
+import {ComplianceInterfaceId} from "./modules/library/ComplianceInterfaceId.sol";
 import {RuleEngineInvariantStorage} from "./modules/library/RuleEngineInvariantStorage.sol";
 import {RuleInterfaceId} from "./modules/library/RuleInterfaceId.sol";
 
@@ -167,8 +171,13 @@ abstract contract RuleEngineBase is
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
+    /**
+     * @dev This function returns the message from the first rule claiming the code.
+     * Rule designers should keep restriction codes unique across rules.
+     * If a code is shared intentionally, all rules using that code should return
+     * the same message to avoid ambiguous operator feedback.
+     */
     function _messageForTransferRestriction(uint8 restrictionCode) internal view virtual returns (string memory) {
-        //
         uint256 rulesLength = rulesCount();
         for (uint256 i = 0; i < rulesLength; ++i) {
             if (IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)) {
@@ -186,5 +195,16 @@ abstract contract RuleEngineBase is
         if (!ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)) {
             revert RuleEngine_RuleInvalidInterface();
         }
+    }
+
+    /**
+     * @dev Shared ERC-165 checks common to all RuleEngine deployment variants.
+     * Concrete deployments can extend this with access-control-specific interfaces.
+     */
+    function _supportsRuleEngineBaseInterface(bytes4 interfaceId) internal pure returns (bool) {
+        return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
+            || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
+            || interfaceId == ComplianceInterfaceId.ERC3643_COMPLIANCE_INTERFACE_ID
+            || interfaceId == ComplianceInterfaceId.IERC7551_COMPLIANCE_INTERFACE_ID;
     }
 }

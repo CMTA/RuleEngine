@@ -2,14 +2,14 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {AccessControl} from "OZ/access/AccessControl.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
 
 /**
  * @title Tests on the provided functions by OpenZeppelin
  */
-contract RuleEngineAccessControlTest is Test, HelperContract, AccessControl {
+contract RuleEngineTest is Test, HelperContract, AccessControl {
     // Arrange
     function setUp() public {
         ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);

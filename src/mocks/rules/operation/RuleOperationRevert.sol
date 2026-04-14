@@ -5,7 +5,8 @@ pragma solidity ^0.8.20;
 import "../validation/abstract/RuleCommonInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
-import {IERC165, AccessControl} from "OZ/access/AccessControl.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 /**
  * @title TransferApprovalRule

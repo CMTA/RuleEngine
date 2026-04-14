@@ -15,7 +15,9 @@ cache_hardhat/
 *.bkp
 *.dtmp
 #claude
+history
 INSTRUCTION.md
 PLAN.md
 SUMMARY.md
 FEEDBACK.md
+.codex

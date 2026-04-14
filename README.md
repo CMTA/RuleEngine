@@ -6,25 +6,30 @@ This repository includes the RuleEngine contracts for [CMTAT](https://github.com
 
 The RuleEngine is an external contract used to apply transfer restrictions to another contract, such as CMTAT and ERC-3643 tokens. Acting as a controller, it can call different contract rules and apply these rules on each transfer.
 
+[TOC]
+
 ## Contract Variants
 
-Two deployable contracts are available, differing in their access control mechanism:
+Three deployable contracts are available:
 
 | Contract | Access Control | Interface | Use Case |
 |----------|---------------|-----------|----------|
-| `RuleEngine` | Role-Based (AccessControl) | RBAC roles | Multi-operator environments with granular permissions |
+| `RuleEngine` | Role-Based (AccessControlEnumerable) | RBAC roles | Multi-operator environments with granular permissions |
 | `RuleEngineOwnable` | ERC-173 Ownership | `Ownable` | Single-owner setups, simpler administration |
+| `RuleEngineOwnable2Step` | ERC-173 Ownership (two-step transfer) | `Ownable2Step` | Single-owner setups with safer ownership handover |
 
 ERC-3643 compliance specification indicates the use of ERC-173.
 
 > The standard relies on ERC-173 to define contract ownership, with the owner having the responsibility of setting the Compliance parameters and binding the Compliance to a Token contract.
 
-Both contracts share the same core functionality through `RuleEngineBase` and support:
+All deployable contracts share the same core functionality (`RuleEngineBase`, directly or through `RuleEngineOwnableShared`) and support:
 
 - ERC-1404 transfer restrictions
 - ERC-3643 compliance interface
 - ERC-2771 meta-transactions (gasless)
 - Multiple token bindings
+
+> **Warning (shared engine across multiple tokens):** A "multi-tenant" setup here means one RuleEngine instance is shared by several token contracts (all bound through `bindToken`). In this setup, tokens must be equally trusted and governed together. ERC-3643 callbacks (`transferred`, `created`, `destroyed`) do not pass the token address to rules, so stateful/accounting rules are not safe for mutually untrusted tokens sharing the same engine.
 
 [TOC]
 
@@ -64,7 +69,9 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 2. The transfer function inside the token calls the ERC-3643 function `transferred` from the RuleEngine with the following parameters inside: `from, to, value`.
 3. The Rule Engine calls each rule separately. If the transfer is not authorized by the rule, the rule must directly revert (no return value).
 
-> **Warning:** The RuleEngine iterates over all configured rules on every transfer (and on every call to `detectTransferRestriction`, `canTransfer`, etc.). Adding a large number of rules increases gas consumption for each transfer and may eventually exceed the block gas limit, effectively preventing any transfer from succeeding. Administrators should keep the rule set small and be mindful that a misconfigured or gas-heavy rule can also impact all transfers.
+> **Warning:** The RuleEngine iterates over all configured rules on every transfer (and on every call to `detectTransferRestriction`, `canTransfer`, etc.). Adding a large number of rules increases gas consumption for each transfer and may eventually exceed the block gas limit, effectively preventing any transfer from succeeding. There is no hard on-chain maximum rule count; administrators are responsible for sizing the rule set for their target blockchain and should keep it small. A misconfigured or gas-heavy rule can also impact all transfers.
+
+> **Warning (restriction code conventions):** Rule implementations should use unique ERC-1404 restriction codes across the rule set. If several rules intentionally share the same restriction code, they should return the exact same `messageForTransferRestriction` text for that code to avoid inconsistent operator/user feedback.
 
 ### How to set it
 
@@ -72,7 +79,8 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 
 | RuleEngine version                                           | Compatible Versions                                          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **v3.0.0-rc1**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0-rc2](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0-rc2) |
+| **v3.0.0-rc2**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
+| **v3.0.0-rc1**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
 | **v3.0.0-rc0**                                               | CMTAT ≥ v3.0.0<br />                                         |
 | **[v1.0.2.1](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2.1)** | CMTAT v2.3.0 (audited)                                       |
 
@@ -200,13 +208,15 @@ function transferred(address from, address to, uint256 value)
 external;
 ```
 
+> Note: `IERC7551Compliance` comes from `draft-IERC7551` (not final) and, in this project, is used as a subset compliance interface focused on `canTransferFrom`.
+
 
 
 ### ERC-3643
 
 The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is defined in [IERC3643Compliance.sol](src/interfaces/IERC3643Compliance.sol).
 
-A specific module implements this interface for the RuleEngine: [ERC3643Compliance.sol](src/modules/ERC3643Compliance.sol)
+A specific module implements this interface for the RuleEngine: [ERC3643ComplianceModule.sol](src/modules/ERC3643ComplianceModule.sol)
 
 ![ERC3643ComplianceModuleUML](./doc/schema/vscode-uml/ERC3643ComplianceModuleUML.png)
 
@@ -216,22 +226,24 @@ A specific module implements this interface for the RuleEngine: [ERC3643Complian
 
 The toolchain includes the following components, where the versions are the latest ones that we tested:
 
-- Foundry (forge-std) [v1.14.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.10.0)
-- Solidity [0.8.33](https://docs.soliditylang.org/en/v0.8.33/)
-- OpenZeppelin Contracts (submodule) [v5.5.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.5.0)
-- CMTAT [v3.2.0-rc2](https://github.com/CMTA/CMTAT/releases/tag/v3.0.0-rc7)
+- Foundry (forge-std) [v1.14.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.14.0)
+- Solidity [0.8.34](https://docs.soliditylang.org/en/v0.8.34/)
+- OpenZeppelin Contracts (submodule) [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1)
+- CMTAT [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
 
 ### Access Control
 
 Two access control mechanisms are available depending on which contract you deploy:
 
-#### RuleEngine (RBAC - AccessControl)
+#### RuleEngine (RBAC - AccessControlEnumerable)
 
-The `RuleEngine` contract uses Role-Based Access Control (RBAC) via OpenZeppelin's `AccessControl`.
+The `RuleEngine` contract uses Role-Based Access Control (RBAC) via OpenZeppelin's `AccessControlEnumerable`.
 
 Each module defines the roles useful to restrict its functions. The contract overrides the OpenZeppelin function `hasRole` to give by default all the roles to the `admin`.
+`RulesManagementModule` itself is access-control agnostic; RBAC is wired at the concrete `RuleEngine` level.
+Note: this `hasRole` override does not add the admin address to each role's enumerable member set. As a result, `getRoleMember` / `getRoleMemberCount` for a specific role do not include the admin unless that role is explicitly granted.
 
-See also [docs.openzeppelin.com - AccessControl](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl)
+See also [docs.openzeppelin.com - AccessControlEnumerable](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControlEnumerable)
 
 #### RuleEngineOwnable (ERC-173 Ownership)
 
@@ -245,6 +257,12 @@ This is a simpler access control model suitable for single-owner deployments.
 
 See also [docs.openzeppelin.com - Ownable](https://docs.openzeppelin.com/contracts/5.x/api/access#Ownable)
 
+#### RuleEngineOwnable2Step (ERC-173 Ownership, two-step transfer)
+
+The `RuleEngineOwnable2Step` contract uses OpenZeppelin's `Ownable2Step`, which keeps the same owner-only protections and adds safer ownership handover with `transferOwnership(address)` + `acceptOwnership()`.
+
+See also [docs.openzeppelin.com - Ownable2Step](https://docs.openzeppelin.com/contracts/5.x/api/access#Ownable2Step)
+
 #### Role list (RuleEngine only)
 
 Here is the list of roles and their 32 bytes identifier for the `RuleEngine` contract.
@@ -253,14 +271,16 @@ The default admin is the address put in argument (`admin`) inside the constructo
 
 It is set in the constructor when the contract is deployed.
 
-> Note: For `RuleEngineOwnable`, all protected functions are controlled by the single `owner` address instead of roles.
+> Note: For `RuleEngineOwnable` and `RuleEngineOwnable2Step`, all protected functions are controlled by the single `owner` address instead of roles.
+
+> **Warning (role assignment):** Rule contracts should be treated as trusted logic components, but they should not be granted `RULES_MANAGEMENT_ROLE` (or admin privileges). Keep rule-management roles on dedicated operator/admin accounts only.
 
 |                         | Defined in                       | 32 bytes identifier                                          |
 | ----------------------- | -------------------------------- | ------------------------------------------------------------ |
 | DEFAULT_ADMIN_ROLE      | OpenZeppelin<br />AccessControl  | 0x0000000000000000000000000000000000000000000000000000000000000000 |
 | **Modules**             |                                  |                                                              |
-| COMPLIANCE_MANAGER_ROLE | ERC3643Compliance                | 0xe5c50d0927e06141e032cb9a67e1d7092dc85c0b0825191f7e1cede600028568 |
-| RULES_MANAGEMENT_ROLE   | RuleEngineInvariantStorageCommon | 0xea5f4eb72290e50c32abd6c23e45de3d8300b3286e1cbc2e293114b92e034e5e |
+| COMPLIANCE_MANAGER_ROLE | ERC3643ComplianceModule          | 0xe5c50d0927e06141e032cb9a67e1d7092dc85c0b0825191f7e1cede600028568 |
+| RULES_MANAGEMENT_ROLE   | RulesManagementModuleInvariantStorage | 0xea5f4eb72290e50c32abd6c23e45de3d8300b3286e1cbc2e293114b92e034e5e |
 
 
 
@@ -274,7 +294,7 @@ Here is a schema of the Access Control for `RuleEngine`.
 Here is a summary table for each restricted function defined in a module.
 For function signatures, struct arguments are represented with their corresponding native type.
 
-> Note: For `RuleEngineOwnable`, replace the role requirement with `onlyOwner` for all protected functions.
+> Note: For `RuleEngineOwnable` and `RuleEngineOwnable2Step`, replace the role requirement with `onlyOwner` for all protected functions.
 
 |                      | Function signature | Visibility [public/external] | Input variables (Function arguments) | Output variables<br />(return value) | Role Required |
 | -------------------- | ------------------ | ---------------------------- | ------------------------------------ | ------------------------------------ | ------------- |
@@ -302,6 +322,8 @@ Here is the UML of the main contracts:
 
 #### RuleEngineOwnable
 
+![RuleEngineOwnableUML](./doc/schema/vscode-uml/RuleEngineOwnableUML.png)
+
 `RuleEngineOwnable` shares the same base functionality as `RuleEngine` but uses ERC-173 ownership instead of RBAC.
 
 ```
@@ -319,6 +341,30 @@ RuleEngineOwnable
 - Constructor takes `owner_` instead of `admin`
 - All protected functions use `onlyOwner` modifier
 - Supports `transferOwnership()` and `renounceOwnership()`
+- Implements ERC-173 interface (`supportsInterface(0x7f5828d0)` returns `true`)
+
+#### RuleEngineOwnable2Step
+
+![RuleEngineOwnable2StepUML](./doc/schema/vscode-uml/RuleEngineOwnable2StepUML.png)
+
+`RuleEngineOwnable2Step` shares the same base functionality as `RuleEngineOwnable` but uses OpenZeppelin's `Ownable2Step` for safer ownership handover.
+
+```
+RuleEngineOwnable2Step
+├── ERC2771ModuleStandalone (gasless support)
+├── RuleEngineOwnableShared (shared ownable deployment logic)
+│   └── RuleEngineBase
+│       ├── VersionModule
+│       ├── RulesManagementModule
+│       ├── ERC3643ComplianceModule
+│       └── IRuleEngineERC1404
+└── Ownable2Step (ERC-173 access control with pending owner)
+```
+
+**Key differences from RuleEngineOwnable:**
+- Uses a two-step ownership transfer flow: `transferOwnership()` then `acceptOwnership()`
+- The current owner retains privileges until the pending owner accepts ownership
+- Reuses `RuleEngineOwnableShared` for constructor, ERC-165, and ERC-2771 behavior
 - Implements ERC-173 interface (`supportsInterface(0x7f5828d0)` returns `true`)
 
 
@@ -342,23 +388,48 @@ The RuleEngine can be removed from the main token contract by calling these dedi
 
 ### Available Rules
 
-Rules have their own dedicated repository: [github.com/CMTA/Rules](https://github.com/CMTA/Rules)
+Rules are maintained in a dedicated repository: [github.com/CMTA/Rules](https://github.com/CMTA/Rules).
 
-The following rules are available:
+Rules can be used in two ways:
 
-| Rule                    | Type<br />[read-only / read-write] | Audit planned                     | Description                                                  |
-| ----------------------- | ----------------------------------- | --------------------------------- | ------------------------------------------------------------ |
-| RuleWhitelist           | Read-only                           | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a whitelist. |
-| RuleWhitelistWrapper    | Read-only                           | &#x2611;                          | This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators. |
-| RuleBlacklist           | Read-only                           | &#x2611;                          | This rule can be used to forbid transfer from/to addresses in the blacklist |
-| RuleSanctionList        | Read-only                           | &#x2611;                          | The purpose of this contract is to use the oracle contract from Chainalysis to forbid transfer from/to an address  included in a sanctions designation (US, EU, or UN). |
-| RuleConditionalTransfer | Read-Write                          | &#x2612;<br />(experimental rule) | This rule requires that transfers have to be approved before being executed by the token holders. |
+- Directly on CMTAT (single-rule setup, no RuleEngine orchestration).
+- Through this RuleEngine (multi-rule orchestration with sequential execution).
 
+Rule families:
 
+| Family | Behavior | Examples |
+| --- | --- | --- |
+| Validation rules (read-only) | Evaluate transfer eligibility without mutating rule state | `RuleWhitelist`, `RuleBlacklist`, `RuleSanctionList`, `RuleIdentityRegistry`, `RuleSpenderWhitelist`, `RuleERC2980`, `RuleMaxTotalSupply` |
+| Operation rules (read-write) | Evaluate transfer eligibility and can update rule-specific state on transfer | `RuleConditionalTransferLight` |
+
+Additional integration notes:
+
+- For RuleEngine integration, a rule must implement `IRule` (including ERC-165 support for the Rule interface ID).
+- RuleEngine executes configured rules in order and reverts on the first failing rule in state-changing paths.
+- Restriction codes should remain unique across the composed rule set. Keep CMTAT-reserved ranges free and use dedicated code ranges per rule 
+- For the latest list of production rules, audits, and status, use the Rules repository as the source of truth.
+
+#### Rules details
+
+Here is a summary tab of available rules, see [github.com/CMTA/Rules](https://github.com/CMTA/Rules)
+
+| Rule                                                         | Type <br />[read-only / read-write] | Description                                                  |
+| ------------------------------------------------------------ | ----------------------------------- | ------------------------------------------------------------ |
+| RuleWhitelist                                                | Read-only                           | This rule can be used to restrict transfers from/to only addresses inside a whitelist. |
+| RuleWhitelistWrapper                                         | Read-Only                           | This rule can be used to restrict transfers from/to only addresses inside a group of whitelist rules managed by different operators. |
+| RuleBlacklist                                                | Read-Only                           | This rule can be used to forbid transfer from/to addresses in the blacklist |
+| RuleSanctionList                                             | Read-Only                           | The purpose of this contract is to use the oracle contract from [Chainalysis](https://go.chainalysis.com/chainalysis-oracle-docs.html) to forbid transfer from/to an address included in a sanctions designation (US, EU, or UN). |
+| RuleMaxTotalSupply                                           | Read-Only                           | This rule limits minting so that the total supply never exceeds a configured maximum. |
+| RuleIdentityRegistry                                         | Read-Only                           | This rule checks the ERC-3643 Identity Registry for transfer participants when configured. |
+| RuleSpenderWhitelist                                         | Read-Only                           | This rule blocks `transferFrom` when the spender is not in the whitelist. Direct transfers are always allowed. |
+| RuleERC2980                                                  | Read-Only                           | ERC-2980 Swiss Compliant rule combining a whitelist (recipient-only) and a frozenlist (blocks sender, recipient, and spender for `transferFrom`). Frozenlist takes priority over whitelist. |
+| RuleConditionalTransferLight                                 | Read-Write                          | This rule requires that transfers have to be approved by an operator before being executed. Each approval is consumed once and the same transfer can be approved multiple times. |
+| [RuleConditionalTransfer](https://github.com/CMTA/RuleConditionalTransfer) (external) | Read-Write                          | Full-featured approval-based transfer rule implementing Swiss law *Vinkulierung*. Supports automatic approval after three months, automatic transfer execution, and a conditional whitelist for address pairs that bypass approval. Maintained in a separate repository. |
+| [RuleSelf](https://github.com/rya-sge/ruleself) (community)  | —                                   | Use [Self](https://self.xyz), a zero-knowledge identity  solution to determine which is allowed to interact with the token.<br />Community-maintained rule project. Not developed or maintained by CMTA. |
 
 ### Gasless support (ERC-2771)
 
-![ERC2771ModuleUML](./doc/schema/vscode-uml/ERC2771ModuleUML.png)
+![surya_inheritance_ERC2771ModuleStandalone.sol](./doc/schema/surya/surya_inheritance/surya_inheritance_ERC2771ModuleStandalone.sol.png)
 
 The RuleEngine supports client-side gasless transactions using the standard [ERC-2771](https://eips.ethereum.org/EIPS/eip-2771).
 
@@ -494,6 +565,8 @@ Must revert if the transfer is invalid.
 #### IERC7551Compliance
 
 ![IERC7551ComplianceUML](./doc/schema/vscode-uml/IERC7551ComplianceUML.png)
+
+> Note: ERC-7551 is draft (not final). The `IERC7551Compliance` interface used here is a subset interface exposing the compliance check `canTransferFrom`.
 
 ##### canTransferFrom(address spender, address from, address to, uint256 value) -> bool
 
@@ -788,7 +861,7 @@ Useful for identifying which version of the smart contract is deployed and in us
 | :-------------------------: | :---------------: | :-------------------------------: | :------------: | :-----------: |
 |              └              | **Function Name** |          **Visibility**           | **Mutability** | **Modifiers** |
 |                             |                   |                                   |                |               |
-| **ERC3643ComplianceModule** |  Implementation   | IERC3643Compliance, AccessControl |                |               |
+| **ERC3643ComplianceModule** |  Implementation   | Context, IERC3643Compliance |                |               |
 |              └              |     bindToken     |             Public ❗️              |       🛑        |   onlyRole    |
 |              └              |    unbindToken    |             Public ❗️              |       🛑        |   onlyRole    |
 |              └              |   isTokenBound    |             Public ❗️              |                |      NO❗️      |
@@ -1206,11 +1279,11 @@ Checks whether a specific rule is currently configured.
 
 Please see [SECURITY.md](https://github.com/CMTA/CMTAT/blob/master/SECURITY.md) (CMTAT main repository).
 
-The contracts have been audited by [ABDKConsulting](https://www.abdk.consulting/), a globally recognized firm specialized in smart contracts' security.
-
 ### Audit
 
 #### First Audit - March 2022
+
+> The contracts (v.1.0.2) have been audited by [ABDK Consulting](https://www.abdk.consulting/), a globally recognized firm specialized in smart contracts' security.
 
 Fixed version : [v1.0.2](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2)
 
@@ -1222,19 +1295,44 @@ The final report is available in [ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf](https://g
 
 ### Tools
 
+#### Nethermind AuditAgent
+
+> **Note:** This scan was performed by an AI-powered automated tool, not a formal human-led audit.
+
+| Version | Report | Assessment |
+|---------|--------|------------|
+| Scan #1 (Feb 2026) | [audit_agent_report_1_v3.0.0-rc1.pdf](./doc/security/audits/tools/nethermind-audit-agent/v3.0.0-rc1/audit_agent_report_1_v3.0.0-rc1.pdf) | [feedback.md](./doc/security/audits/tools/nethermind-audit-agent/v3.0.0-rc1/audit_agent_report_1_v3.0.0-rc1-feedback.md) |
+
+7 findings — 0 High · 1 Medium · 1 Low · 4 Info · 1 Best Practices
+
+| # | Severity | Finding | Status |
+|---|----------|---------|--------|
+| 1 | Medium | Cross-token rule state pollution in multi-tenant deployments | NatSpec + README warnings. Interface fix deferred (requires CMTAT coordination). |
+| 2 | Low | `RuleEngineOwnable` misreports `IAccessControl` via ERC-165 | Fixed: explicit interface whitelist + negative test added. |
+| 3 | Info | Unbounded rules loop — potential permanent DoS | NatSpec + README operator warnings (no hard cap by design). |
+| 4 | Info | Restriction code and message can come from different rules | Convention documented in NatSpec and README (no logic change by design). |
+| 5 | Info | Re-entrant rule can modify rule set during `transferred()` | NatSpec + README warning — rules must not hold `RULES_MANAGEMENT_ROLE`. |
+| 6 | Info | Missing ERC-3643 and IERC7551Compliance interface IDs | Fixed: both IDs added to `supportsInterface` in both contracts, with tests. |
+| 7 | Best Practices | `setRules` does not allow an empty array | NatSpec clarification added (behavior unchanged by design). |
+
 #### Slither
 
 Here is the list of report performed with [Slither](https://github.com/crytic/slither)
 
-| Version | File                                                         |
-| ------- | ------------------------------------------------------------ |
-| latest  | [slither-report.md](./doc/security/audits/tools/slither-report.md) |
+| Version | Report | Assessment |
+| ------- | ------ | ---------- |
+| v3.0.0-rc2 | [slither-report.md](./doc/security/audits/tools/slither-report.md) | [slither-report-feedback.md](./doc/security/audits/tools/slither-report-feedback.md) |
 
 ```bash
 slither .  --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" > slither-report.md
 ```
 
+2 finding categories — 0 High · 0 Medium · 10 Low · 2 Informational
 
+| ID | Detector | Impact | Instances | Assessment |
+|----|----------|--------|-----------|------------|
+| 0–9 | `calls-loop` | Low | 10 | Accepted by design — fan-out to rule contracts is the core architecture |
+| 10–11 | `unindexed-event-address` | Informational | 2 | Accepted — adding `indexed` to `TokenBound`/`TokenUnbound` is interface-breaking |
 
 #### Aderyn
 
@@ -1244,9 +1342,23 @@ Here is the list of report performed with [Aderyn](https://github.com/Cyfrin/ade
 aderyn -x mocks --output aderyn-report.md
 ```
 
-| Version | File                                                         |
-| ------- | ------------------------------------------------------------ |
-| latest  | [aderyn-report.md](./doc/security/audits/tools/aderyn-report.md) |
+| Version | Report | Assessment |
+| ------- | ------ | ---------- |
+| v3.0.0-rc2 | [aderyn-report.md](./doc/security/audits/tools/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/aderyn-report-feedback.md) |
+
+Report scope: 14 Solidity files, 425 nSLOC.
+
+0 High · 7 Low
+
+| ID | Finding | Instances | Assessment |
+|----|---------|-----------|------------|
+| L-1 | Centralization Risk | 6 | Accepted by design — privileged compliance tool |
+| L-2 | Unspecific Solidity Pragma | 12 | Accepted by design — intentional for library reusability |
+| L-3 | PUSH0 Opcode | 14 | Not applicable — project targets Prague EVM |
+| L-4 | Empty Block | 4 | Accepted by design — access-control hook pattern |
+| L-5 | Loop Contains `require`/`revert` | 1 | Accepted by design — `setRules` is an atomic batch operation |
+| L-6 | Costly Operations Inside Loop | 1 | Accepted — unavoidable `SSTORE` in `setRules` |
+| L-7 | Unchecked Return | 1 | Accepted — `_grantRole` return is irrelevant in constructor |
 
 ## Documentation
 
@@ -1261,19 +1373,21 @@ See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMT
 
 ## Toolchains and Usage
 
-*Explain how it works.*
+This repository is primarily developed and tested with Foundry.
+
+Hardhat configuration is also present to allow compiling the contracts and running a small smoke test with Hardhat.
 
 ### Configuration
 
 Here are the settings for [Hardhat](https://hardhat.org) and [Foundry](https://getfoundry.sh).
 
 - `hardhat.config.js`
-  - Solidity [v0.8.33](https://docs.soliditylang.org/en/v0.8.33/)
+  - Solidity [v0.8.34](https://docs.soliditylang.org/en/v0.8.34/)
   - EVM version: Prague (Pectra upgrade)
   - Optimizer: true, 200 runs
 
 - `foundry.toml`
-  - Solidity [v0.8.33](https://docs.soliditylang.org/en/v0.8.33/)
+  - Solidity [v0.8.34](https://docs.soliditylang.org/en/v0.8.34/)
   - EVM version: Prague (Pectra upgrade)
   - Optimizer: true, 200 runs
 
@@ -1312,8 +1426,9 @@ The official documentation is available in the Foundry [website](https://book.ge
 forge build
 
 # Build specific contract
-forge build --contracts src/RuleEngine.sol
-forge build --contracts src/RuleEngineOwnable.sol
+forge build --contracts src/deployment/RuleEngine.sol
+forge build --contracts src/deployment/RuleEngineOwnable.sol
+forge build --contracts src/deployment/RuleEngineOwnable2Step.sol
 ```
 ### Contract size
 
@@ -1321,11 +1436,14 @@ forge build --contracts src/RuleEngineOwnable.sol
 forge build --sizes
 ```
 
-Both `RuleEngine` and `RuleEngineOwnable` have similar bytecode sizes since they share the same base functionality. The `RuleEngineOwnable` contract is slightly smaller as `Ownable` has less overhead than `AccessControl`.
+Latest output (`2026-03-18`) for the main RuleEngine contracts:
 
+| Contract | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
+|----------|------------------:|------------------:|--------------------:|---------------------:|
+| RuleEngine | 6,756 | 7,805 | 17,820 | 41,347 |
+| RuleEngineOwnable | 6,170 | 6,833 | 18,406 | 42,319 |
 
-
-![contract-size](./doc/compilation/contract-size.png)
+Both `RuleEngine` and `RuleEngineOwnable` remain well below the EIP-170 runtime limit. `RuleEngineOwnable` is slightly smaller because `Ownable` has less overhead than `AccessControl`.
 
 ### Testing
 
@@ -1348,6 +1466,12 @@ forge test --gas-report
 ```
 
 See also the test framework's [official documentation](https://book.getfoundry.sh/forge/tests), and that of the [test commands](https://book.getfoundry.sh/reference/forge/test-commands).
+
+There is also a small Hardhat smoke test to confirm the main `RuleEngine` contract can be compiled and deployed through Hardhat:
+
+```bash
+npx hardhat test test/hardhat/RuleEngine.smoke.js
+```
 
 ### Coverage
 
@@ -1382,22 +1506,29 @@ The official documentation is available in the Foundry [website](https://getfoun
 |----------|---------------------|
 | Multiple operators with different permissions | `RuleEngine` |
 | Single administrator | `RuleEngineOwnable` |
+| Single administrator with safer ownership handover | `RuleEngineOwnable2Step` |
 | Integration with existing RBAC systems | `RuleEngine` |
 | Simpler deployment and management | `RuleEngineOwnable` |
 
 #### Script
 
-> This documentation has been written for the version v1.0.2
+The scripts in `script/` are example deployment flows.
 
-To run the script for deployment, you need to create a .env file. The value for CMTAT_ADDRESS is required only to use the script **RuleEngine.s.sol**
+> Warning: `RuleEngineScript.s.sol` and `CMTATWithRuleEngineScript.s.sol` deploy `RuleWhitelist` from `src/mocks/`. That contract is a reference/mock rule for testing and demos, not a production rule contract.
+
+For production deployments, source rule contracts from the dedicated [CMTA/Rules](https://github.com/CMTA/Rules) repository and adapt the script parameters accordingly.
+
+To run the example scripts, create a `.env` file. The value for `CMTAT_ADDRESS` is required only for `RuleEngineScript.s.sol`.
 
 Warning: putting your private key in a .env file is not the most secure approach.
 
-* File .env
+* File `.env`
 ```
 PRIVATE_KEY=<YOUR_PRIVATE_KEY>
 CMTAT_ADDRESS=<CMTAT_ADDRESS>
 ```
+**Private Keys**: Never expose your private keys. The `.env` file here used in this project should not be used for production. See [getfoundry.sh - Key Management](https://getfoundry.sh/guides/best-practices/key-management/)
+
 * Command
 
 CMTAT with RuleEngine
@@ -1413,7 +1544,7 @@ forge script script/CMTATWithRuleEngineScript.s.sol:CMTATWithRuleEngineScript --
 forge script script/CMTATWithRuleEngineScript.s.sol:CMTATWithRuleEngineScript --rpc-url=127.0.0.1:8545  --broadcast --verify -vvv
 ```
 
-Only RuleEngine with a Whitelist contract
+Only RuleEngine with the mock/reference `RuleWhitelist` contract
 
 ```bash
 forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  --broadcast --verify -vvv
@@ -1424,6 +1555,14 @@ forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  
 ```bash
 forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=127.0.0.1:8545  --broadcast --verify -vvv
 ```
+
+#### Production Deployment Checklist
+
+- Choose the deployable variant: `RuleEngine`, `RuleEngineOwnable`, or `RuleEngineOwnable2Step`.
+- Choose the trusted forwarder address, or use `address(0)` if ERC-2771 support is not needed.
+- Decide whether the token should be bound in the constructor or later via `bindToken`.
+- Source production rule contracts from the [CMTA/Rules](https://github.com/CMTA/Rules) repository, not from `src/mocks/`.
+- Verify post-deployment permissions: owner for ownable variants, or admin plus role assignments for the RBAC variant.
 
 ### Solidity style guideline
 
