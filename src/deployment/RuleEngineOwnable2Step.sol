@@ -27,6 +27,7 @@ contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
      * @dev Access control check using Ownable pattern
      */
     function _onlyRulesManager() internal virtual override onlyOwner {}
+    function _onlyRulesLimitManager() internal virtual override onlyOwner {}
 
     /**
      * @dev Access control check using Ownable pattern

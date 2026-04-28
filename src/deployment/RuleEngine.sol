@@ -68,6 +68,7 @@ contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase, AccessControlEnu
     //////////////////////////////////////////////////////////////*/
     function _onlyComplianceManager() internal virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {}
     function _onlyRulesManager() internal virtual override onlyRole(RULES_MANAGEMENT_ROLE) {}
+    function _onlyRulesLimitManager() internal virtual override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule

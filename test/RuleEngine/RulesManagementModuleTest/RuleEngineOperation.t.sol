@@ -218,6 +218,94 @@ contract RulesManagementModuleInvariantStorageTest is Test, HelperContract {
         assertEq(resUint256, 2);
     }
 
+    function testDefaultMaxRulesIsTen() public view {
+        assertEq(ruleEngineMock.maxRules(), 10);
+    }
+
+    function testCannotAddRuleAboveMaxRules() public {
+        for (uint256 i = 0; i < 9; ++i) {
+            vm.prank(WHITELIST_OPERATOR_ADDRESS);
+            RuleConditionalTransferLight rule =
+                new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+            vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+            ruleEngineMock.addRule(rule);
+        }
+
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleConditionalTransferLight extraRule =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        vm.expectRevert(
+            abi.encodeWithSelector(RuleEngine_RulesManagementModule_MaxRulesExceeded.selector, ruleEngineMock.maxRules())
+        );
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(extraRule);
+    }
+
+    function testCannotSetRulesAboveMaxRules() public {
+        IRule[] memory manyRules = new IRule[](11);
+        for (uint256 i = 0; i < 11; ++i) {
+            vm.prank(WHITELIST_OPERATOR_ADDRESS);
+            RuleConditionalTransferLight rule =
+                new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+            manyRules[i] = IRule(rule);
+        }
+
+        vm.expectRevert(
+            abi.encodeWithSelector(RuleEngine_RulesManagementModule_MaxRulesExceeded.selector, ruleEngineMock.maxRules())
+        );
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.setRules(manyRules);
+    }
+
+    function testCanSetRulesAtMaxRulesBoundary() public {
+        IRule[] memory atMaxRules = new IRule[](10);
+        for (uint256 i = 0; i < 10; ++i) {
+            vm.prank(WHITELIST_OPERATOR_ADDRESS);
+            RuleConditionalTransferLight rule =
+                new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+            atMaxRules[i] = IRule(rule);
+        }
+
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.setRules(atMaxRules);
+        assertEq(ruleEngineMock.rulesCount(), 10);
+    }
+
+    function testAdminCanUpdateMaxRules() public {
+        vm.expectEmit(false, false, false, true);
+        emit RulesManagementModuleInvariantStorage.SetMaxRules(15);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.setMaxRules(15);
+        assertEq(ruleEngineMock.maxRules(), 15);
+    }
+
+    function testCannotSetMaxRulesToZero() public {
+        vm.expectRevert(RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed.selector);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.setMaxRules(0);
+    }
+
+    function testLoweredMaxRulesDoesNotRemoveExistingRulesButBlocksNewAdds() public {
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleConditionalTransferLight secondRule =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(secondRule);
+        assertEq(ruleEngineMock.rulesCount(), 2);
+
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.setMaxRules(1);
+        assertEq(ruleEngineMock.maxRules(), 1);
+        assertEq(ruleEngineMock.rulesCount(), 2);
+
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        RuleConditionalTransferLight thirdRule =
+            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        vm.expectRevert(abi.encodeWithSelector(RuleEngine_RulesManagementModule_MaxRulesExceeded.selector, uint256(1)));
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.addRule(thirdRule);
+    }
+
     function testCannotAddRuleZeroAddress() public {
         // Act
         vm.expectRevert(RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed.selector);

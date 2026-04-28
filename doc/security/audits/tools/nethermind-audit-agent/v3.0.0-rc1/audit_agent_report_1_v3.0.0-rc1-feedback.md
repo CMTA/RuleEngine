@@ -88,7 +88,7 @@ Code check confirmed:
 
 **File(s):** `src/modules/RulesManagementModule.sol`, `src/RuleEngineBase.sol`
 
-**Remediation commit:** `1caf4ea` — `Id-3: docs(rules-management): clarify operator-owned rule-count risk and blockchain-dependent gas limits`
+**Remediation commits:** `1caf4ea` (rc2 docs warning), `v3.0.0-rc3` hard-cap implementation
 
 ### Finding summary
 
@@ -96,27 +96,37 @@ Code check confirmed:
 
 ### Developer assessment
 
-**Partially agree.** The risk is real as an operational concern. However, a fixed on-chain maximum would be deployment-dependent and potentially overly restrictive across different blockchains and rule complexities. Operator responsibility is retained; the mitigation is explicit documentation.
+**Updated in rc3: fully addressed on-chain.** The prior rc2 docs-only mitigation was insufficient for liveness guarantees. `v3.0.0-rc3` introduces an on-chain configurable cap with a safe default.
 
 ### Implementation
 
-- **`src/modules/RulesManagementModule.sol`**:
-  - `setRules`: "No on-chain maximum number of rules is enforced. Operators are responsible for keeping the rule set size compatible with the target chain gas limits."
-  - `addRule`: "No on-chain maximum number of rules is enforced. Adding too many rules can increase transfer-time gas usage because rule checks are linear in rule count."
-  - `_transferred` (both overloads): "Complexity is O(number of configured rules). Large rule sets can make transfers too expensive on chains with lower block gas limits."
-- **`README.md`** — explicit "How it works" warning paragraph added about gas scaling and absence of an on-chain rule count cap.
-
-No runtime logic was changed.
+- **`src/modules/library/RulesManagementModuleInvariantStorage.sol`**
+  - Add `DEFAULT_MAX_RULES = 10`.
+  - Add `RuleEngine_RulesManagementModule_MaxRulesExceeded(uint256)`.
+  - Add `RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed()`.
+  - Add `SetMaxRules(uint256)` event.
+- **`src/interfaces/IRulesManagementModule.sol`**
+  - Add `maxRules()` and `setMaxRules(uint256)`.
+- **`src/modules/RulesManagementModule.sol`**
+  - Add `_maxRules` state initialized to default cap (`10`).
+  - Enforce cap in `addRule` and `setRules`.
+  - Add governance setter `setMaxRules(uint256)` with zero-value guard.
+- **Access control overrides**
+  - `RuleEngine`: cap setter restricted to `DEFAULT_ADMIN_ROLE`.
+  - `RuleEngineOwnable` / `RuleEngineOwnable2Step`: cap setter restricted to owner.
+- **`README.md`**
+  - Replace outdated “no on-chain cap” warning with current rc3 behavior.
 
 ### Verification
 
-Code check confirmed:
-- `RulesManagementModule.sol` line 46: `setRules` NatSpec — gas/cap warning present. ✓
-- `RulesManagementModule.sol` line 75: `addRule` NatSpec — linear gas warning present. ✓
-- `RulesManagementModule.sol` lines 169–173 and 188–192: `_transferred` overloads — O(n) and block-gas warning present. ✓
-- `README.md` line 69: gas-limit warning block present. ✓
+Code and tests confirm:
+- cap default is `10`;
+- `addRule` and `setRules` revert above cap;
+- cap update emits `SetMaxRules`;
+- cap setter is admin/owner restricted by variant;
+- zero cap is rejected.
 
-**Status: Implemented (warnings only — no hard cap by design).**
+**Status: Fixed in `v3.0.0-rc3` (runtime mitigation implemented).**
 
 ---
 

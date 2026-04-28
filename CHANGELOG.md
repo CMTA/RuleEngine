@@ -45,9 +45,30 @@ forge lint
   - Update surya doc by running the 3 scripts in [./doc/script](./doc/script)
   - Update changelog
 
+### v3.0.0-rc3 - 2026-04-28
 
+### Security
+
+- Enforce an on-chain maximum rule count in `RulesManagementModule` to mitigate transfer liveness risk from unbounded per-transfer rule iteration (Nethermind AuditAgent finding 3 follow-up).
+- Add cap checks in both `addRule` and `setRules`, reverting with `RuleEngine_RulesManagementModule_MaxRulesExceeded(uint256)` when exceeded.
+
+### Added
+
+- Add `maxRules()` and `setMaxRules(uint256)` to `IRulesManagementModule`.
+- Add `DEFAULT_MAX_RULES = 10` and initialize module state with this default cap.
+- Add `SetMaxRules(uint256)` event emitted on cap updates.
+- Add dedicated access-control hook for cap governance:
+  - `RuleEngine`: `DEFAULT_ADMIN_ROLE` can update cap.
+  - `RuleEngineOwnable` and `RuleEngineOwnable2Step`: owner can update cap.
+
+### Testing
+
+- Add tests for default cap value, cap enforcement for `addRule` and `setRules`, and access control on `setMaxRules`.
+- Add event-emission coverage for `SetMaxRules`.
 
 ### v3.0.0-rc2 - 2026-04-14
+
+Commit: `ec4a24a96ca30e2ef8f79a06e49846a431e9b4b1`
 
 ### Dependencies
 

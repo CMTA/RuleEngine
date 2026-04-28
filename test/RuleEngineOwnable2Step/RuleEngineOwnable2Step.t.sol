@@ -9,6 +9,7 @@ import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.s
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
 import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
+import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContractOwnable2Step.sol";
 
@@ -57,10 +58,28 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         assertEq(ruleEngineMock.rulesCount(), 1);
     }
 
+    function testDefaultMaxRulesIsTen() public view {
+        assertEq(ruleEngineMock.maxRules(), 10);
+    }
+
+    function testOwnerCanSetMaxRules() public {
+        vm.expectEmit(false, false, false, true);
+        emit RulesManagementModuleInvariantStorage.SetMaxRules(12);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setMaxRules(12);
+        assertEq(ruleEngineMock.maxRules(), 12);
+    }
+
     function testNonOwnerCannotAddRule() public {
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
         vm.prank(ATTACKER);
         ruleEngineMock.addRule(ruleConditionalTransferLight);
+    }
+
+    function testNonOwnerCannotSetMaxRules() public {
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
+        vm.prank(ATTACKER);
+        ruleEngineMock.setMaxRules(12);
     }
 
     function testTransferOwnershipSetsPendingOwner() public {

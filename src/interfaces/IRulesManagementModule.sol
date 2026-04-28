@@ -7,6 +7,18 @@ import {IRule} from "./IRule.sol";
 
 interface IRulesManagementModule {
     /**
+     * @notice Returns the maximum number of rules allowed in the engine.
+     */
+    function maxRules() external view returns (uint256);
+
+    /**
+     * @notice Updates the maximum number of rules allowed in the engine.
+     * @dev Access control is implementation specific (admin/owner).
+     * @param maxRules_ New maximum number of rules.
+     */
+    function setMaxRules(uint256 maxRules_) external;
+
+    /**
      * @notice Defines the  rules for the rule engine.
      * @dev Sets the list of rule contract addresses for s.
      *      Any previously set rules will be completely overwritten by the new list.

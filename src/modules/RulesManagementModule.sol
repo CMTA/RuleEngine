@@ -18,12 +18,19 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
         _;
     }
 
+    modifier onlyRulesLimitManager() {
+        _onlyRulesLimitManager();
+        _;
+    }
+
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /* ==== State Variables === */
     /// @dev Array of rules
     EnumerableSet.AddressSet internal _rules;
+    /// @dev Maximum number of rules allowed in the engine.
+    uint256 internal _maxRules = DEFAULT_MAX_RULES;
 
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS
@@ -37,14 +44,15 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * Reverts if `rules_` is empty. Use {clearRules} to remove all rules explicitly.
      * To transition from one non-empty set to another without an enforcement gap,
      * call this function directly with the new set.
-     * No on-chain maximum number of rules is enforced. Operators are responsible
-     * for keeping the rule set size compatible with the target chain gas limits.
      * Security convention: rule contracts should be treated as trusted business logic,
      * but should not also be granted {RULES_MANAGEMENT_ROLE}.
      */
     function setRules(IRule[] calldata rules_) public virtual override(IRulesManagementModule) onlyRulesManager {
         if (rules_.length == 0) {
             revert RuleEngine_RulesManagementModule_ArrayIsEmpty();
+        }
+        if (rules_.length > _maxRules) {
+            revert RuleEngine_RulesManagementModule_MaxRulesExceeded(_maxRules);
         }
         if (_rules.length() > 0) {
             _clearRules();
@@ -66,14 +74,34 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
 
     /**
      * @inheritdoc IRulesManagementModule
-     * @dev No on-chain maximum number of rules is enforced. Adding too many rules
-     * can increase transfer-time gas usage because rule checks are linear in rule count.
+     * @dev Reverts when the configured maximum number of rules is already reached.
      * Security convention: do not grant {RULES_MANAGEMENT_ROLE} to rule contracts.
      */
     function addRule(IRule rule_) public virtual override(IRulesManagementModule) onlyRulesManager {
+        if (_rules.length() >= _maxRules) {
+            revert RuleEngine_RulesManagementModule_MaxRulesExceeded(_maxRules);
+        }
         _checkRule(address(rule_));
         require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_OperationNotSuccessful());
         emit AddRule(rule_);
+    }
+
+    /**
+     * @inheritdoc IRulesManagementModule
+     */
+    function maxRules() public view virtual override(IRulesManagementModule) returns (uint256) {
+        return _maxRules;
+    }
+
+    /**
+     * @inheritdoc IRulesManagementModule
+     */
+    function setMaxRules(uint256 maxRules_) public virtual override(IRulesManagementModule) onlyRulesLimitManager {
+        if (maxRules_ == 0) {
+            revert RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed();
+        }
+        _maxRules = maxRules_;
+        emit SetMaxRules(maxRules_);
     }
 
     /**
@@ -197,4 +225,5 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     }
 
     function _onlyRulesManager() internal virtual;
+    function _onlyRulesLimitManager() internal virtual;
 }
