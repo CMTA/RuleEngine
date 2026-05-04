@@ -42,7 +42,7 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
 
     function testTrustedForwarderSetAtDeployment() public {
         MinimalForwarderMock forwarder = new MinimalForwarderMock();
-        forwarder.initialize(ERC2771ForwarderDomain);
+        forwarder.initialize(ERC2771_FORWARDER_DOMAIN);
 
         RuleEngineOwnable2Step ruleEngineWithForwarder =
             new RuleEngineOwnable2Step(OWNER_ADDRESS, address(forwarder), ZERO_ADDRESS);

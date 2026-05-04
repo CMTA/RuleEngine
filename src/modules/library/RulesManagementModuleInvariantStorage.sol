@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 import {IRule} from "../../interfaces/IRule.sol";
 
 abstract contract RulesManagementModuleInvariantStorage {
-    uint256 public constant DEFAULT_MAX_RULES = 10;
+    //uint256 public constant DEFAULT_MAX_RULES = 10;
 
     /* ==== Errors === */
     error RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed();

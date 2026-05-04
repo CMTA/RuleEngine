@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 pragma solidity ^0.8.20;
-// forge-lint: disable-next-line(unaliased-plain-import)
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../../validation/abstract/RuleCommonInvariantStorage.sol";
