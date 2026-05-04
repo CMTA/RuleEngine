@@ -9,7 +9,11 @@ import {RuleEngineOwnableExposed} from "src/mocks/RuleEngineExposed.sol";
 import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
+import {IERC173Subset} from "src/mocks/IERC173Subset.sol";
+import {IERC1404Subset} from "src/mocks/IERC1404Subset.sol";
 import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
+import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
+import {OwnableInterfaceId} from "src/modules/library/OwnableInterfaceId.sol";
 
 /**
  * @title Coverage tests for RuleEngineOwnable (_msgData, ERC-165 rule check)
@@ -20,7 +24,6 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
     // Known interface IDs
     bytes4 constant RULE_ENGINE_ID = 0x20c49ce7;
     bytes4 constant ERC1404_EXTEND_ID = 0x78a8de7d;
-    bytes4 constant ERC173_ID = 0x7f5828d0;
     bytes4 constant ERC165_ID = 0x01ffc9a7;
     bytes4 constant INVALID_ID = 0xffffffff;
 
@@ -41,8 +44,14 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
         assertTrue(ruleEngineMock.supportsInterface(ERC1404_EXTEND_ID));
     }
 
+    function testSupportsERC1404Interface() public view {
+        assertTrue(ruleEngineMock.supportsInterface(ERC1404InterfaceId.IERC1404_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC1404Subset).interfaceId));
+    }
+
     function testSupportsERC173Interface() public view {
-        assertTrue(ruleEngineMock.supportsInterface(ERC173_ID));
+        assertTrue(ruleEngineMock.supportsInterface(OwnableInterfaceId.IERC173_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC173Subset).interfaceId));
     }
 
     function testSupportsERC3643ComplianceInterface() public view {

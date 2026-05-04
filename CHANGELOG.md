@@ -51,20 +51,38 @@ forge lint
 
 - Enforce an on-chain maximum rule count in `RulesManagementModule` to mitigate transfer liveness risk from unbounded per-transfer rule iteration (Nethermind AuditAgent finding 3 follow-up).
 - Add cap checks in both `addRule` and `setRules`, reverting with `RuleEngine_RulesManagementModule_MaxRulesExceeded(uint256)` when exceeded.
+- Enforce on-chain privilege-separation for rule accounts:
+  - `RuleEngine.grantRole` now reverts for any role when `account` is currently in the rules set.
+  - `RuleEngineOwnable` and `RuleEngineOwnable2Step` now reject `transferOwnership` targets that are currently in the rules set.
 
 ### Added
 
 - Add `maxRules()` and `setMaxRules(uint256)` to `IRulesManagementModule`.
 - Add `DEFAULT_MAX_RULES = 10` and initialize module state with this default cap.
 - Add `SetMaxRules(uint256)` event emitted on cap updates.
+- Add interface ID libraries:
+  - `ERC1404InterfaceId` for `IERC1404` (`0xab84a5c8`)
+  - `OwnableInterfaceId` for `IERC173` (`0x7f5828d0`)
 - Add dedicated access-control hook for cap governance:
   - `RuleEngine`: `DEFAULT_ADMIN_ROLE` can update cap.
   - `RuleEngineOwnable` and `RuleEngineOwnable2Step`: owner can update cap.
+- Add `RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges()` error for rule-account privilege/ownership target protection.
+
+### Changed
+
+- Ownable variants now rely on OpenZeppelin `ERC165` inheritance in `RuleEngineOwnableShared` for base ERC-165 advertisement and extend it with RuleEngine + ERC-173 interface IDs.
+- `supportsInterface` advertisement now explicitly includes `IERC1404` in addition to `IERC1404Extend`.
 
 ### Testing
 
 - Add tests for default cap value, cap enforcement for `addRule` and `setRules`, and access control on `setMaxRules`.
 - Add event-emission coverage for `SetMaxRules`.
+- Extend interface advertisement tests to validate interface IDs through both:
+  - library constants
+  - `type(<mock interface>).interfaceId`
+  for `IERC1404` and `IERC173`.
+- Add RBAC tests ensuring roles cannot be granted to rule accounts.
+- Add ownable and ownable2step tests ensuring ownership cannot be transferred to rule accounts.
 
 ### v3.0.0-rc2 - 2026-04-14
 

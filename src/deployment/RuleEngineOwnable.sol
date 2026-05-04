@@ -33,6 +33,15 @@ contract RuleEngineOwnable is RuleEngineOwnableShared, Ownable {
     function _onlyComplianceManager() internal virtual override onlyOwner {}
 
     /**
+     * @notice Transfers ownership of the contract to a new account (`newOwner`).
+     * @dev Reverts when `newOwner` is already configured as a rule.
+     */
+    function transferOwnership(address newOwner) public virtual override onlyOwner {
+        _checkOwnershipTransferTarget(newOwner);
+        super.transferOwnership(newOwner);
+    }
+
+    /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
      */
     function _msgSender() internal view virtual override(RuleEngineOwnableShared, Context) returns (address sender) {

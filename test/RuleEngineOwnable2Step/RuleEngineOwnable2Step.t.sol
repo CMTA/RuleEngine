@@ -8,7 +8,11 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
+import {IERC173Subset} from "src/mocks/IERC173Subset.sol";
+import {IERC1404Subset} from "src/mocks/IERC1404Subset.sol";
 import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
+import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
+import {OwnableInterfaceId} from "src/modules/library/OwnableInterfaceId.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContractOwnable2Step.sol";
@@ -17,8 +21,6 @@ import "../HelperContractOwnable2Step.sol";
  * @title Deployment and ownership tests for RuleEngineOwnable2Step
  */
 contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
-    bytes4 constant ERC173_ID = 0x7f5828d0;
-
     function setUp() public {
         ruleEngineMock = new RuleEngineOwnable2Step(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         ruleConditionalTransferLight =
@@ -45,7 +47,10 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
 
     function testSupportsOwnableAndComplianceInterfaces() public view {
         assertTrue(ruleEngineMock.supportsInterface(type(IERC165).interfaceId));
-        assertTrue(ruleEngineMock.supportsInterface(ERC173_ID));
+        assertTrue(ruleEngineMock.supportsInterface(ERC1404InterfaceId.IERC1404_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC1404Subset).interfaceId));
+        assertTrue(ruleEngineMock.supportsInterface(OwnableInterfaceId.IERC173_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC173Subset).interfaceId));
         assertTrue(ruleEngineMock.supportsInterface(RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID));
         assertTrue(ruleEngineMock.supportsInterface(ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID));
         assertTrue(ruleEngineMock.supportsInterface(type(ICompliance).interfaceId));
@@ -108,6 +113,15 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
         vm.prank(ATTACKER);
         ruleEngineMock.acceptOwnership();
+    }
+
+    function testOwnerCannotTransferOwnershipToRuleAddress() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.addRule(ruleConditionalTransferLight);
+
+        vm.expectRevert(RulesManagementModuleInvariantStorage.RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges.selector);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.transferOwnership(address(ruleConditionalTransferLight));
     }
 
     function testOwnerKeepsRightsUntilAcceptOwnership() public {

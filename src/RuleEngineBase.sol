@@ -21,6 +21,7 @@ import {RulesManagementModule} from "./modules/RulesManagementModule.sol";
 /* ==== Interface and other library === */
 import {IRule} from "./interfaces/IRule.sol";
 import {ComplianceInterfaceId} from "./modules/library/ComplianceInterfaceId.sol";
+import {ERC1404InterfaceId} from "./modules/library/ERC1404InterfaceId.sol";
 import {RuleEngineInvariantStorage} from "./modules/library/RuleEngineInvariantStorage.sol";
 import {RuleInterfaceId} from "./modules/library/RuleInterfaceId.sol";
 
@@ -203,6 +204,7 @@ abstract contract RuleEngineBase is
      */
     function _supportsRuleEngineBaseInterface(bytes4 interfaceId) internal pure returns (bool) {
         return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
+            || interfaceId == ERC1404InterfaceId.IERC1404_INTERFACE_ID
             || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
             || interfaceId == ComplianceInterfaceId.ERC3643_COMPLIANCE_INTERFACE_ID
             || interfaceId == ComplianceInterfaceId.IERC7551_COMPLIANCE_INTERFACE_ID;

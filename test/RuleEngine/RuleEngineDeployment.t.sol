@@ -12,6 +12,8 @@ import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.s
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
 import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
+import {IERC1404Subset} from "src/mocks/IERC1404Subset.sol";
+import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
 
 /**
  * @title General functions of the RuleEngine
@@ -62,6 +64,8 @@ contract RuleEngineTest is Test, HelperContract {
         assertTrue(ruleEngineMock.supportsInterface(type(IAccessControl).interfaceId));
         assertTrue(ruleEngineMock.supportsInterface(type(IAccessControlEnumerable).interfaceId));
         assertTrue(ruleEngineMock.supportsInterface(RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(ERC1404InterfaceId.IERC1404_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC1404Subset).interfaceId));
         assertTrue(ruleEngineMock.supportsInterface(ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID));
         assertTrue(ruleEngineMock.supportsInterface(type(ICompliance).interfaceId));
         assertTrue(ruleEngineMock.supportsInterface(type(IERC7551ComplianceSubset).interfaceId));

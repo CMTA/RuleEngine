@@ -35,6 +35,15 @@ contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
     function _onlyComplianceManager() internal virtual override onlyOwner {}
 
     /**
+     * @notice Starts ownership transfer to `newOwner`.
+     * @dev Reverts when `newOwner` is already configured as a rule.
+     */
+    function transferOwnership(address newOwner) public virtual override onlyOwner {
+        _checkOwnershipTransferTarget(newOwner);
+        super.transferOwnership(newOwner);
+    }
+
+    /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
      */
     function _msgSender() internal view virtual override(RuleEngineOwnableShared, Context) returns (address sender) {

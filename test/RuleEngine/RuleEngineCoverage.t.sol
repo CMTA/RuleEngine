@@ -8,7 +8,9 @@ import "../HelperContract.sol";
 import {RuleEngineExposed} from "src/mocks/RuleEngineExposed.sol";
 import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
+import {IERC1404Subset} from "src/mocks/IERC1404Subset.sol";
 import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
+import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
 
 /**
  * @title Coverage tests for RuleEngine (supportsInterface, _msgData, ERC-165 rule check)
@@ -37,6 +39,11 @@ contract RuleEngineCoverageTest is Test, HelperContract {
 
     function testSupportsERC1404ExtendInterface() public view {
         assertTrue(ruleEngineMock.supportsInterface(ERC1404_EXTEND_ID));
+    }
+
+    function testSupportsERC1404Interface() public view {
+        assertTrue(ruleEngineMock.supportsInterface(ERC1404InterfaceId.IERC1404_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC1404Subset).interfaceId));
     }
 
     function testSupportsERC3643ComplianceInterface() public view {

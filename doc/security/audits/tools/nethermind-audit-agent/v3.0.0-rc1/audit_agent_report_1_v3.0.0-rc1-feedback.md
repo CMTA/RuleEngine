@@ -167,7 +167,7 @@ Code check confirmed:
 
 **File(s):** `src/RuleEngineBase.sol`, `src/modules/RulesManagementModule.sol`
 
-**Remediation commit:** `33ff6fa` — `ID5: docs(access-control): warn that rule contracts must never hold RULES_MANAGEMENT_ROLE`
+**Remediation commits:** `33ff6fa` (rc2 docs warning), `v3.0.0-rc3` on-chain privilege separation
 
 ### Finding summary
 
@@ -175,26 +175,32 @@ Code check confirmed:
 
 ### Developer assessment
 
-**Disagree with exploit framing; agree on governance risk.** The scenario requires granting `RULES_MANAGEMENT_ROLE` to an external rule contract — a severe governance misconfiguration. Rules are trusted logic components; they should never be granted management privileges. The key mitigation is making this constraint explicit in code and documentation.
+**Updated in rc3: partially mitigated on-chain.** We keep the trust-model framing, but implemented direct runtime guardrails to prevent key privilege-coupling paths between rule accounts and governance/control-plane identities.
 
 ### Implementation
 
-- **`src/modules/RulesManagementModule.sol`**:
-  - `setRules` and `addRule`: "Security convention: rule contracts should be treated as trusted business logic, but should not also be granted `{RULES_MANAGEMENT_ROLE}`."
-  - `_transferred` (both overloads): "Security convention: rule contracts are expected to be trusted and must not hold `{RULES_MANAGEMENT_ROLE}`."
-- **`README.md`** — "role assignment" warning added: rule contracts must not be granted `RULES_MANAGEMENT_ROLE` or admin privileges.
+- **`src/deployment/RuleEngine.sol`**
+  - Override `grantRole`: revert if `account` is currently in `_rules` (applies to any role grant).
+- **`src/deployment/RuleEngineOwnable.sol`**
+  - Override `transferOwnership`: revert if `newOwner` is currently in rules set.
+- **`src/deployment/RuleEngineOwnable2Step.sol`**
+  - Override `transferOwnership`: revert if `newOwner` is currently in rules set.
+- **`src/RuleEngineOwnableShared.sol`**
+  - Add shared `_checkOwnershipTransferTarget` guard to reduce duplication across ownable variants.
+- **`src/modules/library/RulesManagementModuleInvariantStorage.sol`**
+  - Add `RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges()` error.
+- Existing NatSpec/README warnings retained as operational guidance.
 
-No reentrancy guard was added (would add gas overhead to every transfer; not warranted given the trust model).
+No reentrancy guard was added; transfer-path fan-out remains architecture by design.
 
 ### Verification
 
-Code check confirmed:
-- `RulesManagementModule.sol` line 48: `setRules` — role-grant warning present. ✓
-- `RulesManagementModule.sol` line 76: `addRule` — role-grant warning present. ✓
-- `RulesManagementModule.sol` lines 173 and 193: both `_transferred` overloads — must-not-hold-role warning present. ✓
-- `README.md` line 264: role assignment warning block present. ✓
+Code and tests confirm:
+- role grants to rule accounts revert in RBAC variant;
+- ownership transfer to rule accounts reverts in both ownable variants;
+- NatSpec/README warnings remain present.
 
-**Status: Implemented (warnings only — no reentrancy guard by design).**
+**Status: Implemented in `v3.0.0-rc3` (on-chain guardrails + documentation).**
 
 ---
 

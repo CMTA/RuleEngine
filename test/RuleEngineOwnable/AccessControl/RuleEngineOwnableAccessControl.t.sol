@@ -219,6 +219,15 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
         ruleEngineMock.transferOwnership(ATTACKER);
     }
 
+    function testOwnerCannotTransferOwnershipToRuleAddress() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.addRule(ruleConditionalTransferLight);
+
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges.selector);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.transferOwnership(address(ruleConditionalTransferLight));
+    }
+
     /*//////////////////////////////////////////////////////////////
                         RENOUNCE OWNERSHIP
     //////////////////////////////////////////////////////////////*/

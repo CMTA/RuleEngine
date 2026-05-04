@@ -164,7 +164,7 @@ The `RuleEngine` base interface is defined in the CMTAT repository.
 
 ![cmtat_surya_inheritance_IRuleEngine.sol](./doc/schema/cmtat_surya_inheritance_IRuleEngine.sol.png)
 
-It inherits from several others interfaces: `IERC1404Extend`, `IERC7551Compliance`, `IERC3643ComplianceContract`
+It inherits from several others interfaces: `IERC1404`, `IERC1404Extend`, `IERC7551Compliance`, `IERC3643ComplianceContract`
 
 ```solidity
 // IRuleEngine
@@ -272,7 +272,7 @@ It is set in the constructor when the contract is deployed.
 
 > Note: For `RuleEngineOwnable` and `RuleEngineOwnable2Step`, all protected functions are controlled by the single `owner` address instead of roles.
 
-> **Warning (role assignment):** Rule contracts should be treated as trusted logic components, but they should not be granted `RULES_MANAGEMENT_ROLE` (or admin privileges). Keep rule-management roles on dedicated operator/admin accounts only.
+> **Warning (role assignment):** Rule contracts should be treated as trusted logic components and kept separate from governance/operator identities. The protocol now enforces key protections on-chain: in RBAC deployments, `grantRole` reverts if the target account is in the rule set; in ownable deployments, `transferOwnership` reverts if the new owner is in the rule set.
 
 |                         | Defined in                       | 32 bytes identifier                                          |
 | ----------------------- | -------------------------------- | ------------------------------------------------------------ |
@@ -363,7 +363,7 @@ RuleEngineOwnable2Step
 **Key differences from RuleEngineOwnable:**
 - Uses a two-step ownership transfer flow: `transferOwnership()` then `acceptOwnership()`
 - The current owner retains privileges until the pending owner accepts ownership
-- Reuses `RuleEngineOwnableShared` for constructor, ERC-165, and ERC-2771 behavior
+- Reuses `RuleEngineOwnableShared` for constructor, ERC-165 (via OpenZeppelin `ERC165`), and ERC-2771 behavior
 - Implements ERC-173 interface (`supportsInterface(0x7f5828d0)` returns `true`)
 
 
@@ -1308,9 +1308,9 @@ The final report is available in [ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf](https://g
 |---|----------|---------|--------|
 | 1 | Medium | Cross-token rule state pollution in multi-tenant deployments | NatSpec + README warnings. Interface fix deferred (requires CMTAT coordination). |
 | 2 | Low | `RuleEngineOwnable` misreports `IAccessControl` via ERC-165 | Fixed: explicit interface whitelist + negative test added. |
-| 3 | Info | Unbounded rules loop — potential permanent DoS | NatSpec + README operator warnings (no hard cap by design). |
+| 3 | Info | Unbounded rules loop — potential permanent DoS | Fixed in `v3.0.0-rc3`: on-chain configurable cap (`maxRules`) with default `10`, enforced in `addRule` and `setRules`. |
 | 4 | Info | Restriction code and message can come from different rules | Convention documented in NatSpec and README (no logic change by design). |
-| 5 | Info | Re-entrant rule can modify rule set during `transferred()` | NatSpec + README warning — rules must not hold `RULES_MANAGEMENT_ROLE`. |
+| 5 | Info | Re-entrant rule can modify rule set during `transferred()` | Fixed in `v3.0.0-rc3`: rule accounts cannot receive roles in RBAC `RuleEngine`; ownable variants reject ownership transfer to rule accounts. |
 | 6 | Info | Missing ERC-3643 and IERC7551Compliance interface IDs | Fixed: both IDs added to `supportsInterface` in both contracts, with tests. |
 | 7 | Best Practices | `setRules` does not allow an empty array | NatSpec clarification added (behavior unchanged by design). |
 

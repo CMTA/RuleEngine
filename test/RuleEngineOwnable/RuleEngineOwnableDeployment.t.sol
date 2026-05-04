@@ -9,7 +9,11 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
+import {IERC173Subset} from "src/mocks/IERC173Subset.sol";
+import {IERC1404Subset} from "src/mocks/IERC1404Subset.sol";
 import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
+import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
+import {OwnableInterfaceId} from "src/modules/library/OwnableInterfaceId.sol";
 
 /**
  * @title Deployment tests for RuleEngineOwnable
@@ -66,7 +70,10 @@ contract RuleEngineOwnableDeploymentTest is Test, HelperContractOwnable {
 
         // Act & Assert
         assertTrue(ruleEngineMock.supportsInterface(type(IERC165).interfaceId));
-        assertTrue(ruleEngineMock.supportsInterface(0x7f5828d0)); // ERC-173
+        assertTrue(ruleEngineMock.supportsInterface(ERC1404InterfaceId.IERC1404_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC1404Subset).interfaceId));
+        assertTrue(ruleEngineMock.supportsInterface(OwnableInterfaceId.IERC173_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC173Subset).interfaceId));
         assertTrue(ruleEngineMock.supportsInterface(RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID));
         assertTrue(ruleEngineMock.supportsInterface(ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID));
         assertTrue(ruleEngineMock.supportsInterface(type(ICompliance).interfaceId));

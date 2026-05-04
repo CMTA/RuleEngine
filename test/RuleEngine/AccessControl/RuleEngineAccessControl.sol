@@ -114,4 +114,23 @@ contract RuleEngineTest is Test, HelperContract {
         );
         ruleEngineMock.setMaxRules(12);
     }
+
+    function testCannotGrantRulesManagementRoleToRuleAccount() public {
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges.selector);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.grantRole(RULES_MANAGEMENT_ROLE, address(ruleWhitelist));
+    }
+
+    function testCannotGrantDefaultAdminRoleToRuleAccount() public {
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges.selector);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.grantRole(bytes32(0), address(ruleWhitelist));
+    }
+
+    function testCannotGrantArbitraryRoleToRuleAccount() public {
+        assertTrue(ruleEngineMock.containsRule(ruleWhitelist));
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges.selector);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.grantRole(keccak256("ARBITRARY_ROLE"), address(ruleWhitelist));
+    }
 }

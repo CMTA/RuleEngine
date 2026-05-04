@@ -15,6 +15,7 @@ abstract contract RulesManagementModuleInvariantStorage {
     error RuleEngine_RulesManagementModule_OperationNotSuccessful();
     error RuleEngine_RulesManagementModule_MaxRulesExceeded(uint256 maxRules);
     error RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed();
+    error RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges();
 
     /* ============ Events ============ */
     /**
