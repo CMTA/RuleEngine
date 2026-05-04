@@ -54,6 +54,7 @@ forge lint
 - Enforce on-chain privilege-separation for rule accounts:
   - `RuleEngine.grantRole` now reverts for any role when `account` is currently in the rules set.
   - `RuleEngineOwnable` and `RuleEngineOwnable2Step` now reject `transferOwnership` targets that are currently in the rules set.
+- Add T-REX compatibility path for compliance binding operations: `bindToken(token)` / `unbindToken(token)` now allow token self-calls (`msg.sender == token`) in addition to manager/owner authorization.
 
 ### Added
 
@@ -83,6 +84,17 @@ forge lint
   for `IERC1404` and `IERC173`.
 - Add RBAC tests ensuring roles cannot be granted to rule accounts.
 - Add ownable and ownable2step tests ensuring ownership cannot be transferred to rule accounts.
+- Add compliance-binding authorization tests across RBAC/ownable/ownable2step variants for:
+  - token self-bind
+  - token self-unbind
+  - cross-token bind/unbind denial
+
+### Documentation
+
+- Clarify README multi-token guidance with explicit data-plane vs control-plane wording:
+  - data-plane = runtime compliance callbacks (`transferred`, `created`, `destroyed`)
+  - control-plane = governance/configuration actions (`bindToken`, `unbindToken`, role grants, ownership changes, and rule management)
+- Document that token-privilege separation in multi-token setups is an operational recommendation (not enforced on-chain) to preserve integrator flexibility for token-driven control-plane extensions.
 
 ### v3.0.0-rc2 - 2026-04-14
 
