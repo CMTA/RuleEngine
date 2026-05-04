@@ -5,7 +5,6 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
 
-
 /**
  * @title Tests the functions to remove addresses from the whitelist
  */

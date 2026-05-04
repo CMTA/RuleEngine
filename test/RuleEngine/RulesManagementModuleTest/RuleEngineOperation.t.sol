@@ -5,8 +5,6 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
 
-
-
 /**
  * @title General functions of the RuleEngine
  */
@@ -235,7 +233,9 @@ contract RulesManagementModuleInvariantStorageTest is Test, HelperContract {
         RuleConditionalTransferLight extraRule =
             new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
         vm.expectRevert(
-            abi.encodeWithSelector(RuleEngine_RulesManagementModule_MaxRulesExceeded.selector, ruleEngineMock.maxRules())
+            abi.encodeWithSelector(
+                RuleEngine_RulesManagementModule_MaxRulesExceeded.selector, ruleEngineMock.maxRules()
+            )
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(extraRule);
@@ -251,7 +251,9 @@ contract RulesManagementModuleInvariantStorageTest is Test, HelperContract {
         }
 
         vm.expectRevert(
-            abi.encodeWithSelector(RuleEngine_RulesManagementModule_MaxRulesExceeded.selector, ruleEngineMock.maxRules())
+            abi.encodeWithSelector(
+                RuleEngine_RulesManagementModule_MaxRulesExceeded.selector, ruleEngineMock.maxRules()
+            )
         );
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.setRules(manyRules);

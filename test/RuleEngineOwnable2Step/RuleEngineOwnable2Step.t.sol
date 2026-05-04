@@ -123,7 +123,10 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight);
 
-        vm.expectRevert(RulesManagementModuleInvariantStorage.RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges.selector);
+        vm.expectRevert(
+            RulesManagementModuleInvariantStorage.RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges
+                .selector
+        );
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.transferOwnership(address(ruleConditionalTransferLight));
     }

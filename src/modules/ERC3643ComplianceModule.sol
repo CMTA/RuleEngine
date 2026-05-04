@@ -108,7 +108,7 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
         emit TokenBound(token);
     }
 
-    function _checkBoundToken() internal view virtual{
+    function _checkBoundToken() internal view virtual {
         if (!_boundTokens.contains(_msgSender())) {
             revert RuleEngine_ERC3643Compliance_UnauthorizedCaller();
         }

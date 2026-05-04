@@ -27,8 +27,7 @@ abstract contract RuleEngineOwnableShared is ERC2771ModuleStandalone, RuleEngine
 
     /* ============ ERC-165 ============ */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-        return _supportsRuleEngineBaseInterface(interfaceId)
-            || interfaceId == OwnableInterfaceId.IERC173_INTERFACE_ID
+        return _supportsRuleEngineBaseInterface(interfaceId) || interfaceId == OwnableInterfaceId.IERC173_INTERFACE_ID
             || ERC165.supportsInterface(interfaceId);
     }
 

@@ -5,7 +5,6 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
 
-
 /**
  * @title Tests on the Access Control
  */
@@ -98,9 +97,7 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testCannotAttackerSetMaxRules() public {
         vm.prank(ATTACKER);
-        vm.expectRevert(
-            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, bytes32(0))
-        );
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, bytes32(0)));
         ruleEngineMock.setMaxRules(12);
     }
 

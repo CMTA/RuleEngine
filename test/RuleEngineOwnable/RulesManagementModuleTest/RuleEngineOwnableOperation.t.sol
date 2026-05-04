@@ -5,8 +5,6 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContractOwnable.sol";
 
-
-
 /**
  * @title Rules management operations tests for RuleEngineOwnable
  */
