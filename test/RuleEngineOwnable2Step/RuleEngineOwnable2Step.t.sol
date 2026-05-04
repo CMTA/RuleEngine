@@ -13,6 +13,7 @@ import {IERC1404Subset} from "src/mocks/IERC1404Subset.sol";
 import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
 import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
 import {OwnableInterfaceId} from "src/modules/library/OwnableInterfaceId.sol";
+import {ERC3643ComplianceModule} from "src/modules/ERC3643ComplianceModule.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContractOwnable2Step.sol";
@@ -21,6 +22,9 @@ import "../HelperContractOwnable2Step.sol";
  * @title Deployment and ownership tests for RuleEngineOwnable2Step
  */
 contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
+    address internal constant TOKEN_1 = address(0x1111);
+    address internal constant TOKEN_2 = address(0x2222);
+
     function setUp() public {
         ruleEngineMock = new RuleEngineOwnable2Step(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         ruleConditionalTransferLight =
@@ -144,5 +148,37 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, OWNER_ADDRESS));
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.clearRules();
+    }
+
+    function testTokenCanBindItself() public {
+        vm.prank(TOKEN_1);
+        ruleEngineMock.bindToken(TOKEN_1);
+
+        assertTrue(ruleEngineMock.isTokenBound(TOKEN_1));
+    }
+
+    function testBoundTokenCanUnbindItself() public {
+        vm.prank(TOKEN_1);
+        ruleEngineMock.bindToken(TOKEN_1);
+
+        vm.prank(TOKEN_1);
+        ruleEngineMock.unbindToken(TOKEN_1);
+
+        assertFalse(ruleEngineMock.isTokenBound(TOKEN_1));
+    }
+
+    function testTokenCannotBindAnotherToken() public {
+        vm.expectRevert();
+        vm.prank(TOKEN_1);
+        ruleEngineMock.bindToken(TOKEN_2);
+    }
+
+    function testTokenCannotUnbindAnotherToken() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.bindToken(TOKEN_2);
+
+        vm.expectRevert();
+        vm.prank(TOKEN_1);
+        ruleEngineMock.unbindToken(TOKEN_2);
     }
 }

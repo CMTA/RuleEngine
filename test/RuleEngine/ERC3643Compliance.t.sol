@@ -162,6 +162,38 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngine.bindToken(address(0x1));
     }
 
+    function testTokenCanBindItself() public {
+        vm.prank(address(token1));
+        ruleEngine.bindToken(address(token1));
+
+        assertTrue(ruleEngine.isTokenBound(address(token1)));
+    }
+
+    function testBoundTokenCanUnbindItself() public {
+        vm.prank(address(token1));
+        ruleEngine.bindToken(address(token1));
+
+        vm.prank(address(token1));
+        ruleEngine.unbindToken(address(token1));
+
+        assertFalse(ruleEngine.isTokenBound(address(token1)));
+    }
+
+    function testTokenCannotBindAnotherToken() public {
+        vm.expectRevert();
+        vm.prank(address(token1));
+        ruleEngine.bindToken(address(token2));
+    }
+
+    function testTokenCannotUnbindAnotherToken() public {
+        vm.prank(operator);
+        ruleEngine.bindToken(address(token2));
+
+        vm.expectRevert();
+        vm.prank(address(token1));
+        ruleEngine.unbindToken(address(token2));
+    }
+
     function testCannotCreatedIfNotBound() public {
         vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngine.created(user1, 100);
