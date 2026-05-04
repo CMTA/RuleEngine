@@ -37,7 +37,7 @@ contract RuleEngineOwnable is RuleEngineOwnableShared, Ownable {
      * @dev Reverts when `newOwner` is already configured as a rule.
      */
     function transferOwnership(address newOwner) public virtual override onlyOwner {
-        _checkOwnershipTransferTarget(newOwner);
+        RuleEngineOwnableShared._checkOwnershipTransferTarget(newOwner);
         Ownable.transferOwnership(newOwner);
     }
 
