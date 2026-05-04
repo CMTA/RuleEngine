@@ -107,7 +107,7 @@ function _onlyComplianceManager() internal virtual override onlyOwner {}
 Rule validation uses a two-layer override:
 
 1. **`RulesManagementModule._checkRule()`** — checks zero address + duplicates
-2. **`RuleEngineBase._checkRule()`** — calls `super._checkRule()` then validates ERC-165 interface
+2. **`RuleEngineBase._checkRule()`** — calls `RulesManagementModule._checkRule()` then validates ERC-165 interface
 
 ```solidity
 // RulesManagementModule (generic checks):
@@ -118,7 +118,7 @@ function _checkRule(address rule_) internal view virtual {
 
 // RuleEngineBase (adds ERC-165 check):
 function _checkRule(address rule_) internal view virtual override {
-    super._checkRule(rule_);
+    RulesManagementModule._checkRule(rule_);
     if (!ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID))
         revert RuleEngine_RuleInvalidInterface();
 }
@@ -233,6 +233,7 @@ Key points:
 - NatSpec comments on all public/external functions
 - Function ordering: constructor, receive, fallback, external, public, internal, private (view/pure last within each group)
 - Function declaration order: visibility, mutability, virtual, override, custom modifiers
+- In `src/`, avoid `super` calls and prefer explicit parent-contract calls (e.g., `AccessControl.grantRole(...)`) for readability and deterministic inheritance behavior.
 - Section headers: `/* ============ SECTION ============ */`
 - Run `forge fmt` before committing
 

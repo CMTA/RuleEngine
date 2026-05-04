@@ -45,7 +45,7 @@ contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase, AccessControlEnu
         if (_rules.contains(account)) {
             revert RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges();
         }
-        super.grantRole(role, account);
+        AccessControl.grantRole(role, account);
     }
 
     /**

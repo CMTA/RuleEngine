@@ -192,7 +192,7 @@ abstract contract RuleEngineBase is
      * @dev Override to add ERC-165 interface check for the full IRule hierarchy.
      */
     function _checkRule(address rule_) internal view virtual override {
-        super._checkRule(rule_);
+        RulesManagementModule._checkRule(rule_);
         if (!ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)) {
             revert RuleEngine_RuleInvalidInterface();
         }

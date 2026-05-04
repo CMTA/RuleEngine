@@ -40,7 +40,7 @@ contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
      */
     function transferOwnership(address newOwner) public virtual override onlyOwner {
         _checkOwnershipTransferTarget(newOwner);
-        super.transferOwnership(newOwner);
+        Ownable2Step.transferOwnership(newOwner);
     }
 
     /**
