@@ -262,6 +262,28 @@ The `RuleEngineOwnable2Step` contract uses OpenZeppelin's `Ownable2Step`, which 
 
 See also [docs.openzeppelin.com - Ownable2Step](https://docs.openzeppelin.com/contracts/5.x/api/access#Ownable2Step)
 
+### ERC-165 Support by Deployment Version
+
+The table below summarizes which ERC-165 interfaces are advertised by each deployment version via `supportsInterface(bytes4)`.
+
+| Interface | Interface ID | RuleEngine (RBAC deployment) | RuleEngineOwnable deployment | RuleEngineOwnable2Step deployment |
+| --- | --- | --- | --- | --- |
+| `IERC165` | `0x01ffc9a7` | Yes | Yes | Yes |
+| `IRuleEngine` | `0x20c49ce7` | Yes | Yes | Yes |
+| `IERC1404` | `0xab84a5c8` | Yes | Yes | Yes |
+| `IERC1404Extend` | `0x78a8de7d` | Yes | Yes | Yes |
+| `IERC3643Compliance` | `0x3144991c` | Yes | Yes | Yes |
+| `IERC7551Compliance` (subset) | `0x7157797f` | Yes | Yes | Yes |
+| `IERC173` | `0x7f5828d0` | No | Yes | Yes |
+| `Ownable2Step` specific (`pendingOwner()`, `acceptOwnership()`) | `0x9ab669ef` | No | No | Yes |
+| `IAccessControl` | `0x7965db0b` | Yes | No | No |
+| `IAccessControlEnumerable` | `0x5a05180f` | Yes | No | No |
+
+Notes:
+- `RuleEngine` advertises OpenZeppelin RBAC interfaces because it inherits `AccessControlEnumerable`.
+- `RuleEngineOwnable` / `RuleEngineOwnable2Step` intentionally do not advertise `IAccessControl`.
+- `Ownable2Step` specific interface ID is defined in `Ownable2StepInterfaceId` and includes only `pendingOwner()` and `acceptOwnership()`.
+
 #### Role list (RuleEngine only)
 
 Here is the list of roles and their 32 bytes identifier for the `RuleEngine` contract.
