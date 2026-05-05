@@ -45,7 +45,7 @@ forge lint
   - Update surya doc by running the 3 scripts in [./doc/script](./doc/script)
   - Update changelog
 
-### v3.0.0-rc3 - 2026-04-28
+### v3.0.0-rc3 - 2026-05-06
 
 ### Security
 
@@ -64,6 +64,7 @@ forge lint
 - Add interface ID libraries:
   - `ERC1404InterfaceId` for `IERC1404` (`0xab84a5c8`)
   - `OwnableInterfaceId` for `IERC173` (`0x7f5828d0`)
+  - `Ownable2StepInterfaceId` for Ownable2Step-specific methods (`0x9ab669ef`)
 - Add dedicated access-control hook for cap governance:
   - `RuleEngine`: `DEFAULT_ADMIN_ROLE` can update cap.
   - `RuleEngineOwnable` and `RuleEngineOwnable2Step`: owner can update cap.
@@ -73,6 +74,7 @@ forge lint
 
 - Ownable variants now rely on OpenZeppelin `ERC165` inheritance in `RuleEngineOwnableShared` for base ERC-165 advertisement and extend it with RuleEngine + ERC-173 interface IDs.
 - `supportsInterface` advertisement now explicitly includes `IERC1404` in addition to `IERC1404Extend`.
+- `RuleEngineOwnable2Step.supportsInterface` now advertises the Ownable2Step-specific interface ID in addition to inherited RuleEngine/Ownable interfaces.
 
 ### Testing
 
@@ -82,6 +84,9 @@ forge lint
   - library constants
   - `type(<mock interface>).interfaceId`
   for `IERC1404` and `IERC173`.
+- Extend `RuleEngineOwnable2Step` interface support tests to assert:
+  - library constant support (`Ownable2StepInterfaceId.IOWNABLE2STEP_INTERFACE_ID`)
+  - mock interface support (`type(IOwnable2StepSubset).interfaceId`).
 - Add RBAC tests ensuring roles cannot be granted to rule accounts.
 - Add ownable and ownable2step tests ensuring ownership cannot be transferred to rule accounts.
 - Add compliance-binding authorization tests across RBAC/ownable/ownable2step variants for:

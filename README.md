@@ -365,6 +365,7 @@ RuleEngineOwnable2Step
 - The current owner retains privileges until the pending owner accepts ownership
 - Reuses `RuleEngineOwnableShared` for constructor, ERC-165 (via OpenZeppelin `ERC165`), and ERC-2771 behavior
 - Implements ERC-173 interface (`supportsInterface(0x7f5828d0)` returns `true`)
+- Implements Ownable2Step-specific ERC-165 interface (`supportsInterface(0x9ab669ef)` returns `true`), covering `pendingOwner()` and `acceptOwnership()`
 
 
 

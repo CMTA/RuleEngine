@@ -9,10 +9,12 @@ import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.s
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
 import {IERC173Subset} from "src/mocks/IERC173Subset.sol";
+import {IOwnable2StepSubset} from "src/mocks/IOwnable2StepSubset.sol";
 import {IERC1404Subset} from "src/mocks/IERC1404Subset.sol";
 import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
 import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
 import {OwnableInterfaceId} from "src/modules/library/OwnableInterfaceId.sol";
+import {Ownable2StepInterfaceId} from "src/modules/library/Ownable2StepInterfaceId.sol";
 import {ERC3643ComplianceModule} from "src/modules/ERC3643ComplianceModule.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 import {RuleEngineOwnable2StepExposed} from "src/mocks/RuleEngineExposed.sol";
@@ -58,6 +60,8 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         assertTrue(ruleEngineMock.supportsInterface(type(IERC1404Subset).interfaceId));
         assertTrue(ruleEngineMock.supportsInterface(OwnableInterfaceId.IERC173_INTERFACE_ID));
         assertTrue(ruleEngineMock.supportsInterface(type(IERC173Subset).interfaceId));
+        assertTrue(ruleEngineMock.supportsInterface(Ownable2StepInterfaceId.IOWNABLE2STEP_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(IOwnable2StepSubset).interfaceId));
         assertTrue(ruleEngineMock.supportsInterface(RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID));
         assertTrue(ruleEngineMock.supportsInterface(ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID));
         assertTrue(ruleEngineMock.supportsInterface(type(ICompliance).interfaceId));

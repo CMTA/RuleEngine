@@ -7,6 +7,7 @@ import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {RuleEngineOwnableShared} from "../RuleEngineOwnableShared.sol";
+import {Ownable2StepInterfaceId} from "../modules/library/Ownable2StepInterfaceId.sol";
 
 /**
  * @title Implementation of a ruleEngine with ERC-173 Ownable2Step access control
@@ -41,6 +42,12 @@ contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
     function transferOwnership(address newOwner) public virtual override onlyOwner {
         RuleEngineOwnableShared._checkOwnershipTransferTarget(newOwner);
         Ownable2Step.transferOwnership(newOwner);
+    }
+
+    /* ============ ERC-165 ============ */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(RuleEngineOwnableShared) returns (bool) {
+        return interfaceId == Ownable2StepInterfaceId.IOWNABLE2STEP_INTERFACE_ID
+            || RuleEngineOwnableShared.supportsInterface(interfaceId);
     }
 
     /**
