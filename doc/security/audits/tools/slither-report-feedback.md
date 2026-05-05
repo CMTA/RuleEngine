@@ -1,80 +1,32 @@
 # Slither Report — Assessment Feedback
 
-**Tool:** [Slither](https://github.com/crytic/slither)
-**Report file:** `slither-report.md`
-**Codebase version:** v3.0.0-rc2
-**Assessment date:** 2026-03-18
-
-> Slither was run with `--show-ignored-findings` suppressed; this checklist reflects only non-ignored findings.
-
----
+**Tool:** [Slither](https://github.com/crytic/slither)  
+**Report file:** `doc/security/audits/tools/slither-report.md`  
+**Assessment date:** 2026-05-05
 
 ## Summary
 
-| ID | Detector | Impact | Confidence | Assessment |
-|----|----------|--------|------------|------------|
-| 0–9 | `calls-loop` | Low | Medium | Accepted by design — see below |
-| 10–11 | `unindexed-event-address` | Informational | High | Accepted — interface-breaking to fix |
+| IDs | Detector | Tool Impact | Assessment | Decision |
+|-----|----------|-------------|------------|----------|
+| 0-9 | `calls-loop` | Low | Inherent to pluggable rule-engine dispatch architecture | Accepted by design |
+| 10 | `dead-code` (`RuleEngineOwnable2Step._msgData`) | Informational | False positive in context; required override in ERC2771/context inheritance chain | Accepted / no action |
+| 11 | `naming-convention` (CMTAT dependency enum) | Informational | External dependency style issue, not project code risk | Ignored |
+| 12-13 | `unindexed-event-address` | Informational | Valid optimization note, but ABI-breaking to change now | Deferred |
 
----
+## Detailed triage
 
-## calls-loop (ID-0 to ID-9) — Low / Medium confidence
+### IDs 0-9: `calls-loop`
+The RuleEngine intentionally iterates `_rules` and performs external rule calls for transfer checks and transfer hooks. This is core product behavior.  
+Risk is controlled through trusted-rule governance and documented operational limits on rule count. No direct security defect is introduced by this detector output.
 
-### What Slither reports
+### ID 10: `dead-code` on `RuleEngineOwnable2Step._msgData`
+This override is part of required multiple-inheritance context resolution (`RuleEngineOwnableShared` + `Context`) for ERC2771-compatible message handling. Static analysis can mark it as unused even though it is part of the contract’s context surface and override chain. Keep as-is.
 
-Ten instances of external calls inside loops, covering every call path through the rule-dispatch layer:
+### ID 11: `naming-convention` in `lib/CMTAT/.../draft-IERC1404.sol`
+Finding targets vendored dependency naming style. This is not a vulnerability and should not be patched locally unless forking upstream conventions intentionally.
 
-| ID | Function | Called from |
-|----|----------|-------------|
-| 0 | `_messageForTransferRestriction` — `canReturnTransferRestrictionCode` | `messageForTransferRestriction` |
-| 1 | `_detectTransferRestrictionFrom` | `detectTransferRestrictionFrom` |
-| 2 | `_messageForTransferRestriction` — `messageForTransferRestriction` | `messageForTransferRestriction` |
-| 3 | `_transferred(spender, from, to, value)` | `transferred(address,address,address,uint256)` |
-| 4 | `_detectTransferRestrictionFrom` | `canTransferFrom` → `detectTransferRestrictionFrom` |
-| 5 | `_detectTransferRestriction` | `detectTransferRestriction` |
-| 6 | `_transferred(from, to, value)` | `created` |
-| 7 | `_detectTransferRestriction` | `canTransfer` → `detectTransferRestriction` |
-| 8 | `_transferred(from, to, value)` | `transferred(address,address,uint256)` |
-| 9 | `_transferred(from, to, value)` | `destroyed` |
+### IDs 12-13: `unindexed-event-address`
+`TokenBound(address)` / `TokenUnbound(address)` could add `indexed` for cheaper filtering, but doing so changes event signature and breaks existing consumers. Given low event frequency and backward-compatibility requirements, defer to a planned major interface revision.
 
-### Assessment
-
-**Accepted by design. No action required.**
-
-The 10 results are all expressions of the same fundamental architecture: the RuleEngine fans out each transfer event to every registered rule contract by iterating `_rules` and making an external call per rule. This is the entire purpose of the contract — there is no way to implement a pluggable rule engine without external calls in a loop.
-
-The typical concern behind this detector is reentrancy risk or gas griefing from a malicious external callee. Both are addressed:
-
-- **Reentrancy:** Rule contracts are trusted components added by a privileged operator. Granting management roles to rule contracts is explicitly warned against in NatSpec (see also Nethermind AuditAgent finding 5 remediation). A reentrancy guard on every transfer would add significant gas overhead for no benefit given the trust model.
-- **Gas griefing / DoS:** Operators are responsible for keeping the rule set sized for the target chain gas limits. This is documented in NatSpec on `addRule`, `setRules`, and `_transferred`, and warned about in the README (see also Nethermind AuditAgent finding 3 remediation).
-
-These findings are expected and the pattern is inherent to the design. No code change is needed.
-
----
-
-## unindexed-event-address (ID-10 to ID-11) — Informational / High confidence
-
-### What Slither reports
-
-- `IERC3643Compliance.TokenBound(address token)` — `token` is not indexed.
-- `IERC3643Compliance.TokenUnbound(address token)` — `token` is not indexed.
-
-### Assessment
-
-**Valid observation. Not fixed — interface-breaking change.**
-
-Adding `indexed` to the `token` parameter would allow off-chain tooling to filter `TokenBound` / `TokenUnbound` events by token address efficiently using a Bloom filter (topic-based filtering). Without `indexed`, a listener must fetch and decode all events of that type and filter client-side.
-
-However, adding `indexed` changes the event's ABI signature (the topic hash), which is a breaking change for any off-chain application already listening for these events.
-
-Given that:
-- These events are emitted infrequently (only during administrative `bindToken` / `unbindToken` calls), so the filtering cost is negligible in practice.
-- Changing the event signature breaks existing integrations.
-
-**Decision: accepted as-is.** If the interface is ever revised for another reason, the `indexed` keyword should be added at the same time.
-
----
-
-## Overall conclusion
-
-Both finding categories are **accepted by design** and require no code changes for v3.0.0-rc2. The `calls-loop` pattern is inherent to the RuleEngine architecture; the `unindexed-event-address` finding is noted and deferred to a future interface revision.
+## Conclusion
+No actionable security fixes are required from this Slither run. Findings are architectural by-design, dependency style-only, or compatibility tradeoffs.
