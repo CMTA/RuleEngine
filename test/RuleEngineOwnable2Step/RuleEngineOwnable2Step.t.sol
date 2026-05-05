@@ -15,6 +15,7 @@ import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
 import {OwnableInterfaceId} from "src/modules/library/OwnableInterfaceId.sol";
 import {ERC3643ComplianceModule} from "src/modules/ERC3643ComplianceModule.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
+import {RuleEngineOwnable2StepExposed} from "src/mocks/RuleEngineExposed.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContractOwnable2Step.sol";
 
@@ -24,9 +25,11 @@ import "../HelperContractOwnable2Step.sol";
 contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
     address internal constant TOKEN_1 = address(0x1111);
     address internal constant TOKEN_2 = address(0x2222);
+    RuleEngineOwnable2StepExposed internal ruleEngineOwnable2StepExposed;
 
     function setUp() public {
         ruleEngineMock = new RuleEngineOwnable2Step(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngineOwnable2StepExposed = new RuleEngineOwnable2StepExposed(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         ruleConditionalTransferLight =
             new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
     }
@@ -183,5 +186,12 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         vm.expectRevert();
         vm.prank(TOKEN_1);
         ruleEngineMock.unbindToken(TOKEN_2);
+    }
+
+    function testMsgDataReturnsCalldata() public view {
+        bytes memory data = ruleEngineOwnable2StepExposed.exposedMsgData();
+        assertEq(data.length, 4);
+        // forge-lint: disable-next-line(unsafe-typecast)
+        assertEq(bytes4(data), ruleEngineOwnable2StepExposed.exposedMsgData.selector);
     }
 }
