@@ -25,11 +25,21 @@ contract RuleEngineOwnable is RuleEngineOwnableShared, Ownable {
      * @dev Access control check using Ownable pattern
      */
     function _onlyRulesManager() internal virtual override onlyOwner {}
+    function _onlyRulesLimitManager() internal virtual override onlyOwner {}
 
     /**
      * @dev Access control check using Ownable pattern
      */
     function _onlyComplianceManager() internal virtual override onlyOwner {}
+
+    /**
+     * @notice Transfers ownership of the contract to a new account (`newOwner`).
+     * @dev Reverts when `newOwner` is already configured as a rule.
+     */
+    function transferOwnership(address newOwner) public virtual override onlyOwner {
+        RuleEngineOwnableShared._checkOwnershipTransferTarget(newOwner);
+        Ownable.transferOwnership(newOwner);
+    }
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
@@ -51,5 +61,4 @@ contract RuleEngineOwnable is RuleEngineOwnableShared, Ownable {
     function _contextSuffixLength() internal view virtual override(RuleEngineOwnableShared, Context) returns (uint256) {
         return RuleEngineOwnableShared._contextSuffixLength();
     }
-
 }

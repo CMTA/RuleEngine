@@ -5,7 +5,6 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
 
-
 /**
  * @title Tests on the Access Control
  */
@@ -94,5 +93,41 @@ contract RuleEngineTest is Test, HelperContract {
         vm.prank(ATTACKER);
         vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngineMock.transferred(address(0), ADDRESS1, ADDRESS2, 10);
+    }
+
+    function testCannotAttackerSetMaxRules() public {
+        vm.prank(ATTACKER);
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, ATTACKER, bytes32(0)));
+        ruleEngineMock.setMaxRules(12);
+    }
+
+    function testRulesManagerCannotSetMaxRulesWithoutAdminRole() public {
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.grantRole(RULES_MANAGEMENT_ROLE, WHITELIST_OPERATOR_ADDRESS);
+
+        vm.prank(WHITELIST_OPERATOR_ADDRESS);
+        vm.expectRevert(
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, WHITELIST_OPERATOR_ADDRESS, bytes32(0))
+        );
+        ruleEngineMock.setMaxRules(12);
+    }
+
+    function testCannotGrantRulesManagementRoleToRuleAccount() public {
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges.selector);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.grantRole(RULES_MANAGEMENT_ROLE, address(ruleWhitelist));
+    }
+
+    function testCannotGrantDefaultAdminRoleToRuleAccount() public {
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges.selector);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.grantRole(bytes32(0), address(ruleWhitelist));
+    }
+
+    function testCannotGrantArbitraryRoleToRuleAccount() public {
+        assertTrue(ruleEngineMock.containsRule(ruleWhitelist));
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges.selector);
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.grantRole(keccak256("ARBITRARY_ROLE"), address(ruleWhitelist));
     }
 }

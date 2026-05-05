@@ -8,6 +8,7 @@ import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol"
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 /* ==== Modules === */
 import {ERC2771ModuleStandalone, ERC2771Context} from "../modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */
@@ -17,6 +18,8 @@ import {RuleEngineBase} from "../RuleEngineBase.sol";
  * @title Implementation of a ruleEngine as defined by the CMTAT
  */
 contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase, AccessControlEnumerable {
+    using EnumerableSet for EnumerableSet.AddressSet;
+
     /**
      * @param admin Address of the contract (Access Control)
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
@@ -34,6 +37,17 @@ contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase, AccessControlEnu
     }
 
     /* ============ ACCESS CONTROL ============ */
+    /**
+     * @notice Grants `role` to `account`.
+     * @dev Prevents granting any role to accounts already configured as rules.
+     */
+    function grantRole(bytes32 role, address account) public virtual override(AccessControl, IAccessControl) {
+        if (_rules.contains(account)) {
+            revert RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges();
+        }
+        AccessControl.grantRole(role, account);
+    }
+
     /**
      * @notice Returns `true` if `account` has been granted `role`.
      * @dev The Default Admin has all roles
@@ -68,6 +82,7 @@ contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase, AccessControlEnu
     //////////////////////////////////////////////////////////////*/
     function _onlyComplianceManager() internal virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {}
     function _onlyRulesManager() internal virtual override onlyRole(RULES_MANAGEMENT_ROLE) {}
+    function _onlyRulesLimitManager() internal virtual override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule

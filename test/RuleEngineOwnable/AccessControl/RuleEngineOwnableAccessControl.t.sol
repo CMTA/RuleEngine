@@ -77,6 +77,14 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
         assertEq(ruleEngineMock.rulesCount(), 0);
     }
 
+    function testOwnerCanSetMaxRules() public {
+        vm.expectEmit(false, false, false, true);
+        emit RulesManagementModuleInvariantStorage.SetMaxRules(12);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setMaxRules(12);
+        assertEq(ruleEngineMock.maxRules(), 12);
+    }
+
     function testOwnerCanBindToken() public {
         // Act
         vm.prank(OWNER_ADDRESS);
@@ -143,6 +151,12 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
         ruleEngineMock.clearRules();
     }
 
+    function testNonOwnerCannotSetMaxRules() public {
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
+        vm.prank(ATTACKER);
+        ruleEngineMock.setMaxRules(12);
+    }
+
     function testNonOwnerCannotBindToken() public {
         // Act & Assert
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
@@ -203,6 +217,15 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ATTACKER));
         vm.prank(ATTACKER);
         ruleEngineMock.transferOwnership(ATTACKER);
+    }
+
+    function testOwnerCannotTransferOwnershipToRuleAddress() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.addRule(ruleConditionalTransferLight);
+
+        vm.expectRevert(RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges.selector);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.transferOwnership(address(ruleConditionalTransferLight));
     }
 
     /*//////////////////////////////////////////////////////////////

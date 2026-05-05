@@ -155,6 +155,38 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         ruleEngineMock.bindToken(address(0x1));
     }
 
+    function testTokenCanBindItself() public {
+        vm.prank(address(token1));
+        ruleEngineMock.bindToken(address(token1));
+
+        assertTrue(ruleEngineMock.isTokenBound(address(token1)));
+    }
+
+    function testBoundTokenCanUnbindItself() public {
+        vm.prank(address(token1));
+        ruleEngineMock.bindToken(address(token1));
+
+        vm.prank(address(token1));
+        ruleEngineMock.unbindToken(address(token1));
+
+        assertFalse(ruleEngineMock.isTokenBound(address(token1)));
+    }
+
+    function testTokenCannotBindAnotherToken() public {
+        vm.expectRevert();
+        vm.prank(address(token1));
+        ruleEngineMock.bindToken(address(token2));
+    }
+
+    function testTokenCannotUnbindAnotherToken() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.bindToken(address(token2));
+
+        vm.expectRevert();
+        vm.prank(address(token1));
+        ruleEngineMock.unbindToken(address(token2));
+    }
+
     function testCannotCreatedIfNotBound() public {
         vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngineMock.created(user1, 100);

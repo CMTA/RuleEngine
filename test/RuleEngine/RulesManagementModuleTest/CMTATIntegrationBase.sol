@@ -6,8 +6,6 @@ import {CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
 
-
-
 /**
  * @title Base integration test for RuleEngine with CMTAT
  */

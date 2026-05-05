@@ -17,5 +17,5 @@ abstract contract HelperContractOwnable2Step {
     RuleEngineOwnable2Step public ruleEngineMock;
     RuleConditionalTransferLight public ruleConditionalTransferLight;
 
-    string internal constant ERC2771ForwarderDomain = "ERC2771ForwarderDomain";
+    string internal constant ERC2771_FORWARDER_DOMAIN = "ERC2771ForwarderDomain";
 }

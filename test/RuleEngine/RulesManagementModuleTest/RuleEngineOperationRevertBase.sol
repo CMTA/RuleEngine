@@ -7,7 +7,6 @@ import "../../HelperContract.sol";
 
 import {RuleOperationRevert} from "src/mocks/rules/operation/RuleOperationRevert.sol";
 
-
 /**
  * @title Base test for RuleEngine operation revert with CMTAT
  */

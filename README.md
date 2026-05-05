@@ -67,7 +67,7 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 2. The transfer function inside the token calls the ERC-3643 function `transferred` from the RuleEngine with the following parameters inside: `from, to, value`.
 3. The Rule Engine calls each rule separately. If the transfer is not authorized by the rule, the rule must directly revert (no return value).
 
-> **Warning:** The RuleEngine iterates over all configured rules on every transfer (and on every call to `detectTransferRestriction`, `canTransfer`, etc.). Adding a large number of rules increases gas consumption for each transfer and may eventually exceed the block gas limit, effectively preventing any transfer from succeeding. There is no hard on-chain maximum rule count; administrators are responsible for sizing the rule set for their target blockchain and should keep it small. A misconfigured or gas-heavy rule can also impact all transfers.
+> **Warning:** The RuleEngine iterates over all configured rules on every transfer (and on every call to `detectTransferRestriction`, `canTransfer`, etc.). Adding a large number of rules increases gas consumption for each transfer and may eventually exceed the block gas limit, effectively preventing any transfer from succeeding. An on-chain rule cap is enforced (`maxRules`), set to `10` by default, and can be changed by governance (`DEFAULT_ADMIN_ROLE` on `RuleEngine`, owner on ownable variants). A misconfigured or gas-heavy rule can still impact all transfers.
 
 > **Warning (restriction code conventions):** Rule implementations should use unique ERC-1404 restriction codes across the rule set. If several rules intentionally share the same restriction code, they should return the exact same `messageForTransferRestriction` text for that code to avoid inconsistent operator/user feedback.
 
@@ -77,6 +77,7 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 
 | RuleEngine version                                           | Compatible Versions                                          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **v3.0.0-rc3**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
 | **v3.0.0-rc2**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
 | **v3.0.0-rc1**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
 | **v3.0.0-rc0**                                               | CMTAT ≥ v3.0.0<br />                                         |
@@ -163,7 +164,7 @@ The `RuleEngine` base interface is defined in the CMTAT repository.
 
 ![cmtat_surya_inheritance_IRuleEngine.sol](./doc/schema/cmtat_surya_inheritance_IRuleEngine.sol.png)
 
-It inherits from several others interfaces: `IERC1404Extend`, `IERC7551Compliance`, `IERC3643ComplianceContract`
+It inherits from several others interfaces: `IERC1404`, `IERC1404Extend`, `IERC7551Compliance`, `IERC3643ComplianceContract`
 
 ```solidity
 // IRuleEngine
@@ -261,6 +262,28 @@ The `RuleEngineOwnable2Step` contract uses OpenZeppelin's `Ownable2Step`, which 
 
 See also [docs.openzeppelin.com - Ownable2Step](https://docs.openzeppelin.com/contracts/5.x/api/access#Ownable2Step)
 
+### ERC-165 Support by Deployment Version
+
+The table below summarizes which ERC-165 interfaces are advertised by each deployment version via `supportsInterface(bytes4)`.
+
+| Interface | Interface ID | RuleEngine (RBAC deployment) | RuleEngineOwnable deployment | RuleEngineOwnable2Step deployment |
+| --- | --- | --- | --- | --- |
+| `IERC165` | `0x01ffc9a7` | Yes | Yes | Yes |
+| `IRuleEngine` | `0x20c49ce7` | Yes | Yes | Yes |
+| `IERC1404` | `0xab84a5c8` | Yes | Yes | Yes |
+| `IERC1404Extend` | `0x78a8de7d` | Yes | Yes | Yes |
+| `IERC3643Compliance` | `0x3144991c` | Yes | Yes | Yes |
+| `IERC7551Compliance` (subset) | `0x7157797f` | Yes | Yes | Yes |
+| `IERC173` | `0x7f5828d0` | No | Yes | Yes |
+| `Ownable2Step` specific (`pendingOwner()`, `acceptOwnership()`) | `0x9ab669ef` | No | No | Yes |
+| `IAccessControl` | `0x7965db0b` | Yes | No | No |
+| `IAccessControlEnumerable` | `0x5a05180f` | Yes | No | No |
+
+Notes:
+- `RuleEngine` advertises OpenZeppelin RBAC interfaces because it inherits `AccessControlEnumerable`.
+- `RuleEngineOwnable` / `RuleEngineOwnable2Step` intentionally do not advertise `IAccessControl`.
+- `Ownable2Step` specific interface ID is defined in `Ownable2StepInterfaceId` and includes only `pendingOwner()` and `acceptOwnership()`.
+
 #### Role list (RuleEngine only)
 
 Here is the list of roles and their 32 bytes identifier for the `RuleEngine` contract.
@@ -271,7 +294,7 @@ It is set in the constructor when the contract is deployed.
 
 > Note: For `RuleEngineOwnable` and `RuleEngineOwnable2Step`, all protected functions are controlled by the single `owner` address instead of roles.
 
-> **Warning (role assignment):** Rule contracts should be treated as trusted logic components, but they should not be granted `RULES_MANAGEMENT_ROLE` (or admin privileges). Keep rule-management roles on dedicated operator/admin accounts only.
+> **Warning (role assignment):** Rule contracts should be treated as trusted logic components and kept separate from governance/operator identities. The protocol now enforces key protections on-chain: in RBAC deployments, `grantRole` reverts if the target account is in the rule set; in ownable deployments, `transferOwnership` reverts if the new owner is in the rule set. In multi-token deployments, do not grant any governance/operator privileges to token contract addresses (bound tokens should remain data-plane callers only, meaning runtime compliance callbacks such as `transferred`, `created`, and `destroyed`). This token-privilege separation is intentionally documented as an operational constraint (not enforced on-chain) to preserve flexibility for integrators who explicitly want to extend their token and route selected RuleEngine control-plane actions through token logic (`control-plane` here means configuration/governance actions such as `bindToken`, `unbindToken`, role grants, ownership changes, and rule management).
 
 |                         | Defined in                       | 32 bytes identifier                                          |
 | ----------------------- | -------------------------------- | ------------------------------------------------------------ |
@@ -362,8 +385,9 @@ RuleEngineOwnable2Step
 **Key differences from RuleEngineOwnable:**
 - Uses a two-step ownership transfer flow: `transferOwnership()` then `acceptOwnership()`
 - The current owner retains privileges until the pending owner accepts ownership
-- Reuses `RuleEngineOwnableShared` for constructor, ERC-165, and ERC-2771 behavior
+- Reuses `RuleEngineOwnableShared` for constructor, ERC-165 (via OpenZeppelin `ERC165`), and ERC-2771 behavior
 - Implements ERC-173 interface (`supportsInterface(0x7f5828d0)` returns `true`)
+- Implements Ownable2Step-specific ERC-165 interface (`supportsInterface(0x9ab669ef)` returns `true`), covering `pendingOwner()` and `acceptOwnership()`
 
 
 
@@ -1307,9 +1331,9 @@ The final report is available in [ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf](https://g
 |---|----------|---------|--------|
 | 1 | Medium | Cross-token rule state pollution in multi-tenant deployments | NatSpec + README warnings. Interface fix deferred (requires CMTAT coordination). |
 | 2 | Low | `RuleEngineOwnable` misreports `IAccessControl` via ERC-165 | Fixed: explicit interface whitelist + negative test added. |
-| 3 | Info | Unbounded rules loop — potential permanent DoS | NatSpec + README operator warnings (no hard cap by design). |
+| 3 | Info | Unbounded rules loop — potential permanent DoS | Fixed in `v3.0.0-rc3`: on-chain configurable cap (`maxRules`) with default `10`, enforced in `addRule` and `setRules`. |
 | 4 | Info | Restriction code and message can come from different rules | Convention documented in NatSpec and README (no logic change by design). |
-| 5 | Info | Re-entrant rule can modify rule set during `transferred()` | NatSpec + README warning — rules must not hold `RULES_MANAGEMENT_ROLE`. |
+| 5 | Info | Re-entrant rule can modify rule set during `transferred()` | Fixed in `v3.0.0-rc3`: rule accounts cannot receive roles in RBAC `RuleEngine`; ownable variants reject ownership transfer to rule accounts. |
 | 6 | Info | Missing ERC-3643 and IERC7551Compliance interface IDs | Fixed: both IDs added to `supportsInterface` in both contracts, with tests. |
 | 7 | Best Practices | `setRules` does not allow an empty array | NatSpec clarification added (behavior unchanged by design). |
 
@@ -1325,12 +1349,14 @@ Here is the list of report performed with [Slither](https://github.com/crytic/sl
 slither .  --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" > slither-report.md
 ```
 
-2 finding categories — 0 High · 0 Medium · 10 Low · 2 Informational
+4 finding categories — 0 High · 0 Medium · 10 Low · 4 Informational
 
 | ID | Detector | Impact | Instances | Assessment |
 |----|----------|--------|-----------|------------|
 | 0–9 | `calls-loop` | Low | 10 | Accepted by design — fan-out to rule contracts is the core architecture |
-| 10–11 | `unindexed-event-address` | Informational | 2 | Accepted — adding `indexed` to `TokenBound`/`TokenUnbound` is interface-breaking |
+| 10 | `dead-code` | Informational | 1 | Accepted / no action — `_msgData` override is required by inheritance/context pattern |
+| 11 | `naming-convention` | Informational | 1 | Ignored — finding is in external CMTAT dependency code |
+| 12–13 | `unindexed-event-address` | Informational | 2 | Deferred — adding `indexed` to `TokenBound`/`TokenUnbound` is interface-breaking |
 
 #### Aderyn
 
@@ -1344,19 +1370,20 @@ aderyn -x mocks --output aderyn-report.md
 | ------- | ------ | ---------- |
 | v3.0.0-rc2 | [aderyn-report.md](./doc/security/audits/tools/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/aderyn-report-feedback.md) |
 
-Report scope: 14 Solidity files, 425 nSLOC.
+Report scope: 18 Solidity files, 542 nSLOC.
 
-0 High · 7 Low
+0 High · 8 Low
 
 | ID | Finding | Instances | Assessment |
 |----|---------|-----------|------------|
-| L-1 | Centralization Risk | 6 | Accepted by design — privileged compliance tool |
-| L-2 | Unspecific Solidity Pragma | 12 | Accepted by design — intentional for library reusability |
-| L-3 | PUSH0 Opcode | 14 | Not applicable — project targets Prague EVM |
-| L-4 | Empty Block | 4 | Accepted by design — access-control hook pattern |
-| L-5 | Loop Contains `require`/`revert` | 1 | Accepted by design — `setRules` is an atomic batch operation |
-| L-6 | Costly Operations Inside Loop | 1 | Accepted — unavoidable `SSTORE` in `setRules` |
-| L-7 | Unchecked Return | 1 | Accepted — `_grantRole` return is irrelevant in constructor |
+| L-1 | Centralization Risk | 14 | Accepted by design — privileged compliance tool |
+| L-2 | Unspecific Solidity Pragma | 14 | Accepted by design — intentional for library reusability |
+| L-3 | PUSH0 Opcode | 18 | Not applicable — project targets Prague EVM |
+| L-4 | Modifier Invoked Only Once | 1 | Accepted by design — keeps hook-style access-control abstraction |
+| L-5 | Empty Block | 9 | Accepted by design — access-control hook pattern |
+| L-6 | Loop Contains `require`/`revert` | 1 | Accepted by design — `setRules` is an atomic batch operation |
+| L-7 | Costly Operations Inside Loop | 1 | Accepted — unavoidable `SSTORE` in `setRules` |
+| L-8 | Unchecked Return | 1 | Accepted — `_grantRole` return is irrelevant in constructor |
 
 ## Documentation
 

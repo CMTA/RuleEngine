@@ -88,7 +88,7 @@ Code check confirmed:
 
 **File(s):** `src/modules/RulesManagementModule.sol`, `src/RuleEngineBase.sol`
 
-**Remediation commit:** `1caf4ea` — `Id-3: docs(rules-management): clarify operator-owned rule-count risk and blockchain-dependent gas limits`
+**Remediation commits:** `1caf4ea` (rc2 docs warning), `v3.0.0-rc3` hard-cap implementation
 
 ### Finding summary
 
@@ -96,27 +96,37 @@ Code check confirmed:
 
 ### Developer assessment
 
-**Partially agree.** The risk is real as an operational concern. However, a fixed on-chain maximum would be deployment-dependent and potentially overly restrictive across different blockchains and rule complexities. Operator responsibility is retained; the mitigation is explicit documentation.
+**Updated in rc3: fully addressed on-chain.** The prior rc2 docs-only mitigation was insufficient for liveness guarantees. `v3.0.0-rc3` introduces an on-chain configurable cap with a safe default.
 
 ### Implementation
 
-- **`src/modules/RulesManagementModule.sol`**:
-  - `setRules`: "No on-chain maximum number of rules is enforced. Operators are responsible for keeping the rule set size compatible with the target chain gas limits."
-  - `addRule`: "No on-chain maximum number of rules is enforced. Adding too many rules can increase transfer-time gas usage because rule checks are linear in rule count."
-  - `_transferred` (both overloads): "Complexity is O(number of configured rules). Large rule sets can make transfers too expensive on chains with lower block gas limits."
-- **`README.md`** — explicit "How it works" warning paragraph added about gas scaling and absence of an on-chain rule count cap.
-
-No runtime logic was changed.
+- **`src/modules/library/RulesManagementModuleInvariantStorage.sol`**
+  - Add `DEFAULT_MAX_RULES = 10`.
+  - Add `RuleEngine_RulesManagementModule_MaxRulesExceeded(uint256)`.
+  - Add `RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed()`.
+  - Add `SetMaxRules(uint256)` event.
+- **`src/interfaces/IRulesManagementModule.sol`**
+  - Add `maxRules()` and `setMaxRules(uint256)`.
+- **`src/modules/RulesManagementModule.sol`**
+  - Add `_maxRules` state initialized to default cap (`10`).
+  - Enforce cap in `addRule` and `setRules`.
+  - Add governance setter `setMaxRules(uint256)` with zero-value guard.
+- **Access control overrides**
+  - `RuleEngine`: cap setter restricted to `DEFAULT_ADMIN_ROLE`.
+  - `RuleEngineOwnable` / `RuleEngineOwnable2Step`: cap setter restricted to owner.
+- **`README.md`**
+  - Replace outdated “no on-chain cap” warning with current rc3 behavior.
 
 ### Verification
 
-Code check confirmed:
-- `RulesManagementModule.sol` line 46: `setRules` NatSpec — gas/cap warning present. ✓
-- `RulesManagementModule.sol` line 75: `addRule` NatSpec — linear gas warning present. ✓
-- `RulesManagementModule.sol` lines 169–173 and 188–192: `_transferred` overloads — O(n) and block-gas warning present. ✓
-- `README.md` line 69: gas-limit warning block present. ✓
+Code and tests confirm:
+- cap default is `10`;
+- `addRule` and `setRules` revert above cap;
+- cap update emits `SetMaxRules`;
+- cap setter is admin/owner restricted by variant;
+- zero cap is rejected.
 
-**Status: Implemented (warnings only — no hard cap by design).**
+**Status: Fixed in `v3.0.0-rc3` (runtime mitigation implemented).**
 
 ---
 
@@ -157,7 +167,7 @@ Code check confirmed:
 
 **File(s):** `src/RuleEngineBase.sol`, `src/modules/RulesManagementModule.sol`
 
-**Remediation commit:** `33ff6fa` — `ID5: docs(access-control): warn that rule contracts must never hold RULES_MANAGEMENT_ROLE`
+**Remediation commits:** `33ff6fa` (rc2 docs warning), `v3.0.0-rc3` on-chain privilege separation
 
 ### Finding summary
 
@@ -165,26 +175,32 @@ Code check confirmed:
 
 ### Developer assessment
 
-**Disagree with exploit framing; agree on governance risk.** The scenario requires granting `RULES_MANAGEMENT_ROLE` to an external rule contract — a severe governance misconfiguration. Rules are trusted logic components; they should never be granted management privileges. The key mitigation is making this constraint explicit in code and documentation.
+**Updated in rc3: partially mitigated on-chain.** We keep the trust-model framing, but implemented direct runtime guardrails to prevent key privilege-coupling paths between rule accounts and governance/control-plane identities.
 
 ### Implementation
 
-- **`src/modules/RulesManagementModule.sol`**:
-  - `setRules` and `addRule`: "Security convention: rule contracts should be treated as trusted business logic, but should not also be granted `{RULES_MANAGEMENT_ROLE}`."
-  - `_transferred` (both overloads): "Security convention: rule contracts are expected to be trusted and must not hold `{RULES_MANAGEMENT_ROLE}`."
-- **`README.md`** — "role assignment" warning added: rule contracts must not be granted `RULES_MANAGEMENT_ROLE` or admin privileges.
+- **`src/deployment/RuleEngine.sol`**
+  - Override `grantRole`: revert if `account` is currently in `_rules` (applies to any role grant).
+- **`src/deployment/RuleEngineOwnable.sol`**
+  - Override `transferOwnership`: revert if `newOwner` is currently in rules set.
+- **`src/deployment/RuleEngineOwnable2Step.sol`**
+  - Override `transferOwnership`: revert if `newOwner` is currently in rules set.
+- **`src/RuleEngineOwnableShared.sol`**
+  - Add shared `_checkOwnershipTransferTarget` guard to reduce duplication across ownable variants.
+- **`src/modules/library/RulesManagementModuleInvariantStorage.sol`**
+  - Add `RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges()` error.
+- Existing NatSpec/README warnings retained as operational guidance.
 
-No reentrancy guard was added (would add gas overhead to every transfer; not warranted given the trust model).
+No reentrancy guard was added; transfer-path fan-out remains architecture by design.
 
 ### Verification
 
-Code check confirmed:
-- `RulesManagementModule.sol` line 48: `setRules` — role-grant warning present. ✓
-- `RulesManagementModule.sol` line 76: `addRule` — role-grant warning present. ✓
-- `RulesManagementModule.sol` lines 173 and 193: both `_transferred` overloads — must-not-hold-role warning present. ✓
-- `README.md` line 264: role assignment warning block present. ✓
+Code and tests confirm:
+- role grants to rule accounts revert in RBAC variant;
+- ownership transfer to rule accounts reverts in both ownable variants;
+- NatSpec/README warnings remain present.
 
-**Status: Implemented (warnings only — no reentrancy guard by design).**
+**Status: Implemented in `v3.0.0-rc3` (on-chain guardrails + documentation).**
 
 ---
 

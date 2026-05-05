@@ -6,7 +6,6 @@ import {Test} from "forge-std/Test.sol";
 import "../../HelperContract.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
-
 /**
  * @title Tests on the provided functions by OpenZeppelin
  */

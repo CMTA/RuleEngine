@@ -46,8 +46,11 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
      * @dev Operator warning: "multi-tenant" means one RuleEngine is shared by
      * multiple token contracts. In that setup, bind only tokens that are equally
      * trusted and governed together.
+     * @dev T-REX compatibility: allows token self-binding when caller equals
+     * `token`, because TREX `Token.setCompliance` invokes `compliance.bindToken(address(this))`.
      */
-    function bindToken(address token) public virtual override onlyComplianceManager {
+    function bindToken(address token) public virtual override {
+        _authorizeComplianceBindingChange(token);
         _bindToken(token);
     }
 
@@ -56,8 +59,11 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
      * @dev Operator warning: unbinding is an administrative operation and does not
      * erase any state already stored by external rule contracts in a previously
      * shared ("multi-tenant") setup.
+     * @dev T-REX compatibility: allows token self-unbinding when caller equals
+     * `token`, because TREX token contracts may call `compliance.unbindToken(address(this))`.
      */
-    function unbindToken(address token) public virtual override onlyComplianceManager {
+    function unbindToken(address token) public virtual override {
+        _authorizeComplianceBindingChange(token);
         _unbindToken(token);
     }
 
@@ -102,9 +108,19 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
         emit TokenBound(token);
     }
 
-    function _checkBoundToken() internal view virtual{
+    function _checkBoundToken() internal view virtual {
         if (!_boundTokens.contains(_msgSender())) {
             revert RuleEngine_ERC3643Compliance_UnauthorizedCaller();
+        }
+    }
+
+    /**
+     * @dev Authorizes bind/unbind operations.
+     * Allows compliance manager, or token self-calls for T-REX compatibility.
+     */
+    function _authorizeComplianceBindingChange(address token) internal virtual {
+        if (_msgSender() != token) {
+            _onlyComplianceManager();
         }
     }
 
