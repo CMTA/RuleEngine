@@ -7,8 +7,9 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 /* ==== Interface and other library === */
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
+import {IERC3643ComplianceExtended} from "../interfaces/IERC3643ComplianceExtended.sol";
 
-abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
+abstract contract ERC3643ComplianceModule is Context, IERC3643ComplianceExtended {
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
     /* ==== State Variables === */
@@ -58,6 +59,13 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
         _bindToken(token);
     }
 
+    /// @inheritdoc IERC3643ComplianceExtended
+    function bindTokens(address[] calldata tokens) public virtual override onlyComplianceManager {
+        for (uint256 i = 0; i < tokens.length; ++i) {
+            _bindToken(tokens[i]);
+        }
+    }
+
     /**
      * @inheritdoc IERC3643Compliance
      * @dev Operator warning: unbinding is an administrative operation and does not
@@ -72,14 +80,21 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
         _unbindToken(token);
     }
 
-    /// @inheritdoc IERC3643Compliance
+    /// @inheritdoc IERC3643ComplianceExtended
+    function unbindTokens(address[] calldata tokens) public virtual override onlyComplianceManager {
+        for (uint256 i = 0; i < tokens.length; ++i) {
+            _unbindToken(tokens[i]);
+        }
+    }
+
+    /// @inheritdoc IERC3643ComplianceExtended
     function setTokenSelfBindingApproval(address token, bool approved) public virtual override onlyComplianceManager {
         require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
         _tokenSelfBindingApproval[token] = approved;
         emit TokenSelfBindingApprovalSet(token, approved);
     }
 
-    /// @inheritdoc IERC3643Compliance
+    /// @inheritdoc IERC3643ComplianceExtended
     function setTokenSelfBindingApprovalBatch(address[] calldata tokens, bool approved)
         public
         virtual
@@ -94,7 +109,7 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
         }
     }
 
-    /// @inheritdoc IERC3643Compliance
+    /// @inheritdoc IERC3643ComplianceExtended
     function isTokenSelfBindingApproved(address token) public view virtual override returns (bool) {
         return _tokenSelfBindingApproval[token];
     }
@@ -115,7 +130,7 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
         }
     }
 
-    /// @inheritdoc IERC3643Compliance
+    /// @inheritdoc IERC3643ComplianceExtended
     function getTokenBounds() public view override returns (address[] memory) {
         return _boundTokens.values();
     }

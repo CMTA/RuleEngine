@@ -84,6 +84,9 @@ forge lint
 - `supportsInterface` advertisement now explicitly includes `IERC1404` in addition to `IERC1404Extend`.
 - `RuleEngineOwnable2Step.supportsInterface` now advertises the Ownable2Step-specific interface ID in addition to inherited RuleEngine/Ownable interfaces.
 - `ERC3643ComplianceModule` authorization logic now requires explicit per-token approval for token-driven self-bind/self-unbind flows.
+- Split compliance interfaces between standard and extensions:
+  - `IERC3643Compliance` now contains the base ERC-3643 compliance surface.
+  - supplementary functions are grouped in `IERC3643ComplianceExtended` and advertised through a dedicated ERC-165 extension interface ID.
 
 ### Testing
 

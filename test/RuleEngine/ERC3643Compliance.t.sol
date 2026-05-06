@@ -319,6 +319,101 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngine.setTokenSelfBindingApprovalBatch(tokens, true);
     }
 
+    function testCanBindTokensBatch() public {
+        address[] memory tokens = new address[](2);
+        tokens[0] = address(token1);
+        tokens[1] = address(token2);
+
+        vm.prank(operator);
+        ruleEngine.bindTokens(tokens);
+
+        assertTrue(ruleEngine.isTokenBound(address(token1)));
+        assertTrue(ruleEngine.isTokenBound(address(token2)));
+    }
+
+    function testCanUnbindTokensBatch() public {
+        address[] memory tokens = new address[](2);
+        tokens[0] = address(token1);
+        tokens[1] = address(token2);
+
+        vm.startPrank(operator);
+        ruleEngine.bindTokens(tokens);
+        ruleEngine.unbindTokens(tokens);
+        vm.stopPrank();
+
+        assertFalse(ruleEngine.isTokenBound(address(token1)));
+        assertFalse(ruleEngine.isTokenBound(address(token2)));
+    }
+
+    function testOnlyComplianceManagerCanBindTokensBatch() public {
+        address[] memory tokens = new address[](1);
+        tokens[0] = address(token1);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR,
+                user1,
+                ruleEngine.COMPLIANCE_MANAGER_ROLE()
+            )
+        );
+        vm.prank(user1);
+        ruleEngine.bindTokens(tokens);
+    }
+
+    function testOnlyComplianceManagerCanUnbindTokensBatch() public {
+        address[] memory tokens = new address[](1);
+        tokens[0] = address(token1);
+
+        vm.prank(operator);
+        ruleEngine.bindTokens(tokens);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR,
+                user1,
+                ruleEngine.COMPLIANCE_MANAGER_ROLE()
+            )
+        );
+        vm.prank(user1);
+        ruleEngine.unbindTokens(tokens);
+    }
+
+    function testCannotBindTokensBatchWithZeroAddress() public {
+        address[] memory tokens = new address[](2);
+        tokens[0] = address(token1);
+        tokens[1] = address(0);
+
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.prank(operator);
+        ruleEngine.bindTokens(tokens);
+    }
+
+    function testCannotBindTokensBatchWithAlreadyBoundToken() public {
+        address[] memory tokens = new address[](2);
+        tokens[0] = address(token1);
+        tokens[1] = address(token2);
+
+        vm.prank(operator);
+        ruleEngine.bindToken(address(token1));
+
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_TokenAlreadyBound.selector);
+        vm.prank(operator);
+        ruleEngine.bindTokens(tokens);
+    }
+
+    function testCannotUnbindTokensBatchWithTokenNotBound() public {
+        address[] memory tokens = new address[](2);
+        tokens[0] = address(token1);
+        tokens[1] = address(token2);
+
+        vm.prank(operator);
+        ruleEngine.bindToken(address(token1));
+
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_TokenNotBound.selector);
+        vm.prank(operator);
+        ruleEngine.unbindTokens(tokens);
+    }
+
     function testCannotCreatedIfNotBound() public {
         vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngine.created(user1, 100);

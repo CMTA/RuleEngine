@@ -9,9 +9,11 @@ import {RuleEngineOwnableExposed} from "src/mocks/RuleEngineExposed.sol";
 import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
+import {IERC3643ComplianceExtendedSubset} from "src/mocks/IERC3643ComplianceExtendedSubset.sol";
 import {IERC173Subset} from "src/mocks/IERC173Subset.sol";
 import {IERC1404Subset} from "src/mocks/IERC1404Subset.sol";
 import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
+import {ComplianceInterfaceId} from "src/modules/library/ComplianceInterfaceId.sol";
 import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
 import {OwnableInterfaceId} from "src/modules/library/OwnableInterfaceId.sol";
 
@@ -56,6 +58,11 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
 
     function testSupportsERC3643ComplianceInterface() public view {
         assertTrue(ruleEngineMock.supportsInterface(type(ICompliance).interfaceId));
+    }
+
+    function testSupportsERC3643ComplianceExtendedSubsetInterface() public view {
+        assertTrue(ruleEngineMock.supportsInterface(ComplianceInterfaceId.ERC3643_COMPLIANCE_EXTENDED_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC3643ComplianceExtendedSubset).interfaceId));
     }
 
     function testSupportsIERC7551ComplianceSubsetInterface() public view {

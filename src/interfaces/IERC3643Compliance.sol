@@ -18,12 +18,6 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      * @param token The address of the token that was unbound.
      */
     event TokenUnbound(address token);
-    /**
-     * @notice Emitted when self-binding permission is updated for a token.
-     * @param token The token address whose self-binding permission changed.
-     * @param approved True if token self-bind/unbind is allowed, false otherwise.
-     */
-    event TokenSelfBindingApprovalSet(address token, bool approved);
 
     /* ============ Functions ============ */
     /**
@@ -53,29 +47,6 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      */
     function unbindToken(address token) external;
 
-    /**
-     * @notice Sets whether a token is allowed to self-bind and self-unbind.
-     * @dev Must be restricted by implementation-specific compliance manager access control.
-     * @param token The token address to configure.
-     * @param approved Whether self-binding is approved for `token`.
-     */
-    function setTokenSelfBindingApproval(address token, bool approved) external;
-
-    /**
-     * @notice Sets self-binding approval for multiple tokens in one transaction.
-     * @dev Must be restricted by implementation-specific compliance manager access control.
-     * Reverts if any token in `tokens` is the zero address.
-     * @param tokens The token addresses to configure.
-     * @param approved Whether self-binding is approved for all provided tokens.
-     */
-    function setTokenSelfBindingApprovalBatch(address[] calldata tokens, bool approved) external;
-
-    /**
-     * @notice Returns whether a token is approved to self-bind and self-unbind.
-     * @param token The token address to query.
-     * @return approved True if self-binding is approved for `token`, false otherwise.
-     */
-    function isTokenSelfBindingApproved(address token) external view returns (bool approved);
 
     /**
      * @notice Checks whether a token is currently bound to this compliance contract.
@@ -94,16 +65,6 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      * @return token The address of the currently bound token.
      */
     function getTokenBound() external view returns (address token);
-
-    /**
-     * @notice Returns all tokens currently bound to this compliance contract.
-     * @dev This is a view-only function and does not modify state.
-     * This function is not part of the original ERC-3643 specification
-     * This operation will copy the entire storage to memory, which can be quite expensive.
-     * This is designed to mostly be used by view accessors that are queried without any gas fees.
-     * @return tokens An array of addresses of bound token contracts.
-     */
-    function getTokenBounds() external view returns (address[] memory tokens);
 
     /**
      * @notice Updates the compliance contract state when tokens are created (minted).
