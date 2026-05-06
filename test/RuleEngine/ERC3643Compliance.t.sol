@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
+import {Vm} from "forge-std/Vm.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
 import {IERC3643Compliance} from "../../src/interfaces/IERC3643Compliance.sol";
@@ -292,6 +293,20 @@ contract RuleEngineTest is Test, HelperContract {
 
         assertTrue(ruleEngine.isTokenSelfBindingApproved(address(token1)));
         assertTrue(ruleEngine.isTokenSelfBindingApproved(address(token2)));
+    }
+
+    function testSetTokenSelfBindingApprovalBatchEmitsSingleBatchEvent() public {
+        address[] memory tokens = new address[](2);
+        tokens[0] = address(token1);
+        tokens[1] = address(token2);
+
+        vm.recordLogs();
+        vm.prank(operator);
+        ruleEngine.setTokenSelfBindingApprovalBatch(tokens, true);
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+
+        assertEq(entries.length, 1);
+        assertEq(entries[0].topics[0], keccak256("TokenSelfBindingApprovalBatchSet(address[],bool)"));
     }
 
     function testOnlyComplianceManagerCanSetTokenSelfBindingApprovalBatch() public {

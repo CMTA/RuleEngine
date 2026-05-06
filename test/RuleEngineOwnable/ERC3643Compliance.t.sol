@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
+import {Vm} from "forge-std/Vm.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContractOwnable.sol";
@@ -231,6 +232,20 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
 
         assertTrue(ruleEngineMock.isTokenSelfBindingApproved(address(token1)));
         assertTrue(ruleEngineMock.isTokenSelfBindingApproved(address(token2)));
+    }
+
+    function testSetTokenSelfBindingApprovalBatchEmitsSingleBatchEvent() public {
+        address[] memory tokens = new address[](2);
+        tokens[0] = address(token1);
+        tokens[1] = address(token2);
+
+        vm.recordLogs();
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApprovalBatch(tokens, true);
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+
+        assertEq(entries.length, 1);
+        assertEq(entries[0].topics[0], keccak256("TokenSelfBindingApprovalBatchSet(address[],bool)"));
     }
 
     function testOnlyOwnerCanSetTokenSelfBindingApprovalBatch() public {

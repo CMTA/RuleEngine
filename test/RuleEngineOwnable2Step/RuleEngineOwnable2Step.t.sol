@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
+import {Vm} from "forge-std/Vm.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {MinimalForwarderMock} from "CMTAT/mocks/MinimalForwarderMock.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
@@ -239,6 +240,20 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
 
         assertTrue(ruleEngineMock.isTokenSelfBindingApproved(TOKEN_1));
         assertTrue(ruleEngineMock.isTokenSelfBindingApproved(TOKEN_2));
+    }
+
+    function testSetTokenSelfBindingApprovalBatchEmitsSingleBatchEvent() public {
+        address[] memory tokens = new address[](2);
+        tokens[0] = TOKEN_1;
+        tokens[1] = TOKEN_2;
+
+        vm.recordLogs();
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApprovalBatch(tokens, true);
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+
+        assertEq(entries.length, 1);
+        assertEq(entries[0].topics[0], keccak256("TokenSelfBindingApprovalBatchSet(address[],bool)"));
     }
 
     function testOnlyOwnerCanSetTokenSelfBindingApprovalBatch() public {
