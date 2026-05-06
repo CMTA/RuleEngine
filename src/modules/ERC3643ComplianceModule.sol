@@ -105,8 +105,8 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643ComplianceExtended
             address token = tokens[i];
             require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
             _tokenSelfBindingApproval[token] = approved;
-            emit TokenSelfBindingApprovalSet(token, approved);
         }
+        emit TokenSelfBindingApprovalBatchSet(tokens, approved);
     }
 
     /// @inheritdoc IERC3643ComplianceExtended

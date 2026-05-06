@@ -77,6 +77,7 @@ forge lint
   - `TokenSelfBindingApprovalSet(address token, bool approved)` event.
 - Add batch self-binding approval API:
   - `setTokenSelfBindingApprovalBatch(address[] tokens, bool approved)`.
+  - `TokenSelfBindingApprovalBatchSet(address[] tokens, bool approved)` event.
 
 ### Changed
 
@@ -87,6 +88,7 @@ forge lint
 - Split compliance interfaces between standard and extensions:
   - `IERC3643Compliance` now contains the base ERC-3643 compliance surface.
   - supplementary functions are grouped in `IERC3643ComplianceExtended` and advertised through a dedicated ERC-165 extension interface ID.
+- Batch self-binding approval event emission now uses a single batch event (`TokenSelfBindingApprovalBatchSet`) per call instead of per-token `TokenSelfBindingApprovalSet` emissions.
 
 ### Testing
 

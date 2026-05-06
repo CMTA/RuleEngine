@@ -11,6 +11,12 @@ interface IERC3643ComplianceExtended is IERC3643Compliance {
      * @param approved True if token self-bind/unbind is allowed, false otherwise.
      */
     event TokenSelfBindingApprovalSet(address token, bool approved);
+    /**
+     * @notice Emitted when self-binding permission is updated in batch.
+     * @param tokens The token addresses whose self-binding permission changed.
+     * @param approved True if token self-bind/unbind is allowed, false otherwise.
+     */
+    event TokenSelfBindingApprovalBatchSet(address[] tokens, bool approved);
 
     /**
      * @notice Associates multiple token contracts with this compliance contract.
