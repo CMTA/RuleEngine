@@ -54,7 +54,9 @@ forge lint
 - Enforce on-chain privilege-separation for rule accounts:
   - `RuleEngine.grantRole` now reverts for any role when `account` is currently in the rules set.
   - `RuleEngineOwnable` and `RuleEngineOwnable2Step` now reject `transferOwnership` targets that are currently in the rules set.
-- Add T-REX compatibility path for compliance binding operations: `bindToken(token)` / `unbindToken(token)` now allow token self-calls (`msg.sender == token`) in addition to manager/owner authorization.
+- Add T-REX compatibility path for compliance binding operations with admission control:
+  - token self-calls (`msg.sender == token`) for `bindToken(token)` / `unbindToken(token)` are supported only when explicitly approved.
+  - unapproved token self-calls are rejected and still require manager/owner authorization.
 
 ### Added
 
@@ -69,12 +71,19 @@ forge lint
   - `RuleEngine`: `DEFAULT_ADMIN_ROLE` can update cap.
   - `RuleEngineOwnable` and `RuleEngineOwnable2Step`: owner can update cap.
 - Add `RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges()` error for rule-account privilege/ownership target protection.
+- Add token self-binding approval management to `IERC3643Compliance` / `ERC3643ComplianceModule`:
+  - `setTokenSelfBindingApproval(address token, bool approved)`
+  - `isTokenSelfBindingApproved(address token)`
+  - `TokenSelfBindingApprovalSet(address token, bool approved)` event.
+- Add batch self-binding approval API:
+  - `setTokenSelfBindingApprovalBatch(address[] tokens, bool approved)`.
 
 ### Changed
 
 - Ownable variants now rely on OpenZeppelin `ERC165` inheritance in `RuleEngineOwnableShared` for base ERC-165 advertisement and extend it with RuleEngine + ERC-173 interface IDs.
 - `supportsInterface` advertisement now explicitly includes `IERC1404` in addition to `IERC1404Extend`.
 - `RuleEngineOwnable2Step.supportsInterface` now advertises the Ownable2Step-specific interface ID in addition to inherited RuleEngine/Ownable interfaces.
+- `ERC3643ComplianceModule` authorization logic now requires explicit per-token approval for token-driven self-bind/self-unbind flows.
 
 ### Testing
 
@@ -90,9 +99,16 @@ forge lint
 - Add RBAC tests ensuring roles cannot be granted to rule accounts.
 - Add ownable and ownable2step tests ensuring ownership cannot be transferred to rule accounts.
 - Add compliance-binding authorization tests across RBAC/ownable/ownable2step variants for:
-  - token self-bind
-  - token self-unbind
+  - approved token self-bind
+  - approved token self-unbind
+  - unapproved token self-bind/self-unbind denial
   - cross-token bind/unbind denial
+- Add tests for self-binding approval management across RBAC/ownable/ownable2step variants:
+  - single approval set
+  - batch approval set
+  - zero-address rejection
+  - unauthorized caller rejection.
+- Add ERC-3643 `setCompliance`-style migration test with a dedicated mock token to validate unbind(old) + bind(new) flow against RuleEngine self-binding approval controls.
 
 ### Documentation
 
@@ -100,6 +116,10 @@ forge lint
   - data-plane = runtime compliance callbacks (`transferred`, `created`, `destroyed`)
   - control-plane = governance/configuration actions (`bindToken`, `unbindToken`, role grants, ownership changes, and rule management)
 - Document that token-privilege separation in multi-token setups is an operational recommendation (not enforced on-chain) to preserve integrator flexibility for token-driven control-plane extensions.
+- Document ERC-3643 `setCompliance` compatibility details in README:
+  - token self-bind/self-unbind feature support
+  - required explicit self-binding approval
+  - recommended operational sequence for compliance migration.
 
 ### v3.0.0-rc2 - 2026-04-14
 

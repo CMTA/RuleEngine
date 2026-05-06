@@ -101,6 +101,41 @@ This function is defined in the extension module `ValidationModuleRuleEngine`
 setCompliance(address _compliance)
 ```
 
+### Making `setCompliance` work with RuleEngine
+
+RuleEngine supports the ERC-3643/T-REX pattern where the token contract binds and unbinds itself when `setCompliance` is called.
+
+In other words, a token can call:
+
+- `bindToken(address(this))`
+- `unbindToken(address(this))`
+
+To keep this feature secure, self-bind/self-unbind is gated:
+
+- A token can call `bindToken(address(this))` and `unbindToken(address(this))` only if it was explicitly approved first.
+- Approval is set by governance/compliance admin using:
+  - `setTokenSelfBindingApproval(address token, bool approved)`
+- Approval status can be checked with:
+  - `isTokenSelfBindingApproved(address token)`
+
+This preserves compatibility with ERC-3643 tokens that do:
+
+```solidity
+if (address(_tokenCompliance) != address(0)) {
+    _tokenCompliance.unbindToken(address(this));
+}
+_tokenCompliance = IModularCompliance(_compliance);
+_tokenCompliance.bindToken(address(this));
+```
+
+while preventing arbitrary third-party contracts from self-binding.
+
+Recommended operational sequence:
+
+1. On the target RuleEngine, grant self-binding approval for the token.
+2. Call token `setCompliance(newRuleEngine)`.
+3. (Optional) Revoke self-binding approval after migration if no longer needed.
+
 
 
 ## How to include it

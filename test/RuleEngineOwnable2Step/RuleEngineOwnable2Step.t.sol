@@ -160,14 +160,20 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         ruleEngineMock.clearRules();
     }
 
-    function testTokenCanBindItself() public {
+    function testApprovedTokenCanBindItself() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApproval(TOKEN_1, true);
+
         vm.prank(TOKEN_1);
         ruleEngineMock.bindToken(TOKEN_1);
 
         assertTrue(ruleEngineMock.isTokenBound(TOKEN_1));
     }
 
-    function testBoundTokenCanUnbindItself() public {
+    function testApprovedBoundTokenCanUnbindItself() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApproval(TOKEN_1, true);
+
         vm.prank(TOKEN_1);
         ruleEngineMock.bindToken(TOKEN_1);
 
@@ -177,8 +183,23 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         assertFalse(ruleEngineMock.isTokenBound(TOKEN_1));
     }
 
+    function testTokenCannotBindItselfWithoutApproval() public {
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, TOKEN_1));
+        vm.prank(TOKEN_1);
+        ruleEngineMock.bindToken(TOKEN_1);
+    }
+
+    function testTokenCannotUnbindItselfWithoutApproval() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.bindToken(TOKEN_1);
+
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, TOKEN_1));
+        vm.prank(TOKEN_1);
+        ruleEngineMock.unbindToken(TOKEN_1);
+    }
+
     function testTokenCannotBindAnotherToken() public {
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, TOKEN_1));
         vm.prank(TOKEN_1);
         ruleEngineMock.bindToken(TOKEN_2);
     }
@@ -187,9 +208,52 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindToken(TOKEN_2);
 
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, TOKEN_1));
         vm.prank(TOKEN_1);
         ruleEngineMock.unbindToken(TOKEN_2);
+    }
+
+    function testOnlyOwnerCanSetTokenSelfBindingApproval() public {
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, TOKEN_1));
+        vm.prank(TOKEN_1);
+        ruleEngineMock.setTokenSelfBindingApproval(TOKEN_1, true);
+    }
+
+    function testCannotSetTokenSelfBindingApprovalForZeroAddress() public {
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApproval(address(0), true);
+    }
+
+    function testCanSetTokenSelfBindingApprovalBatch() public {
+        address[] memory tokens = new address[](2);
+        tokens[0] = TOKEN_1;
+        tokens[1] = TOKEN_2;
+
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApprovalBatch(tokens, true);
+
+        assertTrue(ruleEngineMock.isTokenSelfBindingApproved(TOKEN_1));
+        assertTrue(ruleEngineMock.isTokenSelfBindingApproved(TOKEN_2));
+    }
+
+    function testOnlyOwnerCanSetTokenSelfBindingApprovalBatch() public {
+        address[] memory tokens = new address[](1);
+        tokens[0] = TOKEN_1;
+
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, TOKEN_1));
+        vm.prank(TOKEN_1);
+        ruleEngineMock.setTokenSelfBindingApprovalBatch(tokens, true);
+    }
+
+    function testCannotSetTokenSelfBindingApprovalBatchWithZeroAddress() public {
+        address[] memory tokens = new address[](2);
+        tokens[0] = TOKEN_1;
+        tokens[1] = address(0);
+
+        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApprovalBatch(tokens, true);
     }
 
     function testMsgDataReturnsCalldata() public view {
