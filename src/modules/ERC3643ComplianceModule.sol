@@ -7,15 +7,13 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 /* ==== Interface and other library === */
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
-import {IERC3643ComplianceExtended} from "../interfaces/IERC3643ComplianceExtended.sol";
 
-abstract contract ERC3643ComplianceModule is Context, IERC3643ComplianceExtended {
+abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
     /* ==== State Variables === */
     // Token binding tracking
-    EnumerableSet.AddressSet private _boundTokens;
-    mapping(address token => bool approved) private _tokenSelfBindingApproval;
+    EnumerableSet.AddressSet internal _boundTokens;
     // Access Control
     // Will not be present in the final bytecode if not used
     bytes32 public constant COMPLIANCE_MANAGER_ROLE = keccak256("COMPLIANCE_MANAGER_ROLE");
@@ -48,22 +46,10 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643ComplianceExtended
      * @dev Operator warning: "multi-tenant" means one RuleEngine is shared by
      * multiple token contracts. In that setup, bind only tokens that are equally
      * trusted and governed together.
-     * @dev T-REX compatibility: supports token self-binding (caller equals
-     * `token`) when that token was explicitly approved via
-     * `setTokenSelfBindingApproval(token, true)`. This preserves the
-     * `Token.setCompliance` integration path while preventing arbitrary
-     * contracts from self-binding.
      */
     function bindToken(address token) public virtual override {
         _authorizeComplianceBindingChange(token);
         _bindToken(token);
-    }
-
-    /// @inheritdoc IERC3643ComplianceExtended
-    function bindTokens(address[] calldata tokens) public virtual override onlyComplianceManager {
-        for (uint256 i = 0; i < tokens.length; ++i) {
-            _bindToken(tokens[i]);
-        }
     }
 
     /**
@@ -71,47 +57,10 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643ComplianceExtended
      * @dev Operator warning: unbinding is an administrative operation and does not
      * erase any state already stored by external rule contracts in a previously
      * shared ("multi-tenant") setup.
-     * @dev T-REX compatibility: supports token self-unbinding (caller equals
-     * `token`) when that token was explicitly approved via
-     * `setTokenSelfBindingApproval(token, true)`.
      */
     function unbindToken(address token) public virtual override {
         _authorizeComplianceBindingChange(token);
         _unbindToken(token);
-    }
-
-    /// @inheritdoc IERC3643ComplianceExtended
-    function unbindTokens(address[] calldata tokens) public virtual override onlyComplianceManager {
-        for (uint256 i = 0; i < tokens.length; ++i) {
-            _unbindToken(tokens[i]);
-        }
-    }
-
-    /// @inheritdoc IERC3643ComplianceExtended
-    function setTokenSelfBindingApproval(address token, bool approved) public virtual override onlyComplianceManager {
-        require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
-        _tokenSelfBindingApproval[token] = approved;
-        emit TokenSelfBindingApprovalSet(token, approved);
-    }
-
-    /// @inheritdoc IERC3643ComplianceExtended
-    function setTokenSelfBindingApprovalBatch(address[] calldata tokens, bool approved)
-        public
-        virtual
-        override
-        onlyComplianceManager
-    {
-        for (uint256 i = 0; i < tokens.length; ++i) {
-            address token = tokens[i];
-            require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
-            _tokenSelfBindingApproval[token] = approved;
-        }
-        emit TokenSelfBindingApprovalBatchSet(tokens, approved);
-    }
-
-    /// @inheritdoc IERC3643ComplianceExtended
-    function isTokenSelfBindingApproved(address token) public view virtual override returns (bool) {
-        return _tokenSelfBindingApproval[token];
     }
 
     /// @inheritdoc IERC3643Compliance
@@ -128,11 +77,6 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643ComplianceExtended
         } else {
             return address(0);
         }
-    }
-
-    /// @inheritdoc IERC3643ComplianceExtended
-    function getTokenBounds() public view override returns (address[] memory) {
-        return _boundTokens.values();
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -161,16 +105,6 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643ComplianceExtended
         }
     }
 
-    /**
-     * @dev Authorizes bind/unbind operations.
-     * Allows compliance manager, or approved token self-calls for T-REX compatibility.
-     */
-    function _authorizeComplianceBindingChange(address token) internal virtual {
-        if (_msgSender() == token && _tokenSelfBindingApproval[token]) {
-            return;
-        }
-        _onlyComplianceManager();
-    }
-
+    function _authorizeComplianceBindingChange(address token) internal virtual;
     function _onlyComplianceManager() internal virtual;
 }

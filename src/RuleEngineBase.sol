@@ -14,7 +14,7 @@ import {IERC3643ComplianceRead, IERC3643IComplianceContract} from "CMTAT/interfa
 import {IERC7551Compliance} from "CMTAT/interfaces/tokenization/draft-IERC7551.sol";
 
 /* ==== Modules === */
-import {ERC3643ComplianceModule} from "./modules/ERC3643ComplianceModule.sol";
+import {ERC3643ComplianceExtendedModule} from "./modules/ERC3643ComplianceExtendedModule.sol";
 import {VersionModule} from "./modules/VersionModule.sol";
 import {RulesManagementModule} from "./modules/RulesManagementModule.sol";
 
@@ -32,7 +32,7 @@ import {RuleInterfaceId} from "./modules/library/RuleInterfaceId.sol";
 abstract contract RuleEngineBase is
     VersionModule,
     RulesManagementModule,
-    ERC3643ComplianceModule,
+    ERC3643ComplianceExtendedModule,
     RuleEngineInvariantStorage,
     IRuleEngineERC1404
 {

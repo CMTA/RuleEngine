@@ -71,11 +71,11 @@ forge lint
   - `RuleEngine`: `DEFAULT_ADMIN_ROLE` can update cap.
   - `RuleEngineOwnable` and `RuleEngineOwnable2Step`: owner can update cap.
 - Add `RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges()` error for rule-account privilege/ownership target protection.
-- Add token self-binding approval management to `IERC3643Compliance` / `ERC3643ComplianceModule`:
+- Add token self-binding approval management to `IERC3643ComplianceExtended` / `ERC3643ComplianceExtendedModule`:
   - `setTokenSelfBindingApproval(address token, bool approved)`
   - `isTokenSelfBindingApproved(address token)`
   - `TokenSelfBindingApprovalSet(address token, bool approved)` event.
-- Add batch self-binding approval API:
+- Add batch self-binding approval API in `IERC3643ComplianceExtended` / `ERC3643ComplianceExtendedModule`:
   - `setTokenSelfBindingApprovalBatch(address[] tokens, bool approved)`.
   - `TokenSelfBindingApprovalBatchSet(address[] tokens, bool approved)` event.
 
@@ -88,6 +88,9 @@ forge lint
 - Split compliance interfaces between standard and extensions:
   - `IERC3643Compliance` now contains the base ERC-3643 compliance surface.
   - supplementary functions are grouped in `IERC3643ComplianceExtended` and advertised through a dedicated ERC-165 extension interface ID.
+- Split compliance modules between standard and extensions:
+  - `ERC3643ComplianceModule` now contains the base ERC-3643 compliance surface.
+  - supplementary functions are grouped in `ERC3643ComplianceExtendedModule`.
 - Batch self-binding approval event emission now uses a single batch event (`TokenSelfBindingApprovalBatchSet`) per call instead of per-token `TokenSelfBindingApprovalSet` emissions.
 
 ### Testing

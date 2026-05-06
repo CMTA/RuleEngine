@@ -143,6 +143,7 @@ Recommended operational sequence:
 While the RuleEngine has been designed for CMTAT and ERC-3643 tokens, it can be used with other contracts to apply transfer restrictions.
 
 For that, the only thing to do is to import in your contract the interface `IRuleEngine`(CMTAT) or `IERC3643Compliance` (ERC-3643), which declares the corresponding functions to call by the token contract. This interface can be found [here](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/interfaces/engine/IRuleEngine.sol).
+If you need non-standard helper functions (batch bind/unbind, self-binding approval APIs, multi-token getter), use `IERC3643ComplianceExtended`.
 
 ### Like CMTAT
 
@@ -249,8 +250,11 @@ external;
 ### ERC-3643
 
 The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is defined in [IERC3643Compliance.sol](src/interfaces/IERC3643Compliance.sol).
+Non-standard helper functions are defined in [IERC3643ComplianceExtended.sol](src/interfaces/IERC3643ComplianceExtended.sol).
 
-A specific module implements this interface for the RuleEngine: [ERC3643ComplianceModule.sol](src/modules/ERC3643ComplianceModule.sol)
+The RuleEngine modules are split as follows:
+- Base ERC-3643 surface: [ERC3643ComplianceModule.sol](src/modules/ERC3643ComplianceModule.sol)
+- Non-standard extensions: [ERC3643ComplianceExtendedModule.sol](src/modules/ERC3643ComplianceExtendedModule.sol)
 
 ![ERC3643ComplianceModuleUML](./doc/schema/vscode-uml/ERC3643ComplianceModuleUML.png)
 
