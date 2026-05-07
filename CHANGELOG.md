@@ -45,7 +45,7 @@ forge lint
   - Update surya doc by running the 3 scripts in [./doc/script](./doc/script)
   - Update changelog
 
-### v3.0.0-rc3 - 2026-05-06
+### v3.0.0-rc3 - 2026-05-07
 
 ### Security
 
