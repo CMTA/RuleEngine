@@ -307,16 +307,16 @@ The table below summarizes which ERC-165 interfaces are advertised by each deplo
 
 | Interface | Interface ID | RuleEngine (RBAC deployment) | RuleEngineOwnable deployment | RuleEngineOwnable2Step deployment |
 | --- | --- | --- | --- | --- |
-| `IERC165` | `0x01ffc9a7` | Yes | Yes | Yes |
-| `IRuleEngine` | `0x20c49ce7` | Yes | Yes | Yes |
-| `IERC1404` | `0xab84a5c8` | Yes | Yes | Yes |
-| `IERC1404Extend` | `0x78a8de7d` | Yes | Yes | Yes |
-| `IERC3643Compliance` | `0x3144991c` | Yes | Yes | Yes |
-| `IERC7551Compliance` (subset) | `0x7157797f` | Yes | Yes | Yes |
-| `IERC173` | `0x7f5828d0` | No | Yes | Yes |
-| `Ownable2Step` specific (`pendingOwner()`, `acceptOwnership()`) | `0x9ab669ef` | No | No | Yes |
-| `IAccessControl` | `0x7965db0b` | Yes | No | No |
-| `IAccessControlEnumerable` | `0x5a05180f` | Yes | No | No |
+| `IERC165` | `0x01ffc9a7` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IRuleEngine` | `0x20c49ce7` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC1404` | `0xab84a5c8` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC1404Extend` | `0x78a8de7d` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC3643Compliance` | `0x3144991c` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC7551Compliance` (subset) | `0x7157797f` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC173` | `0x7f5828d0` | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `Ownable2Step` specific (`pendingOwner()`, `acceptOwnership()`) | `0x9ab669ef` | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IAccessControl` | `0x7965db0b` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> |
+| `IAccessControlEnumerable` | `0x5a05180f` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> |
 
 Notes:
 - `RuleEngine` advertises OpenZeppelin RBAC interfaces because it inherits `AccessControlEnumerable`.
