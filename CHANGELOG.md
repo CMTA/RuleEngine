@@ -74,7 +74,7 @@ forge lint
 - Add token self-binding approval management to `IERC3643ComplianceExtended` / `ERC3643ComplianceExtendedModule`:
   - `setTokenSelfBindingApproval(address token, bool approved)`
   - `isTokenSelfBindingApproved(address token)`
-  - `TokenSelfBindingApprovalSet(address token, bool approved)` event.
+  - `TokenSelfBindingApprovalSet(address indexed token, bool approved)` event.
 - Add batch self-binding approval API in `IERC3643ComplianceExtended` / `ERC3643ComplianceExtendedModule`:
   - `setTokenSelfBindingApprovalBatch(address[] tokens, bool approved)`.
   - `TokenSelfBindingApprovalBatchSet(address[] tokens, bool approved)` event.

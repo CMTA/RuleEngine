@@ -367,6 +367,11 @@ For function signatures, struct arguments are represented with their correspondi
 | ERC3643ComplianceModule |  |                              |                                      |                                      |               |
 |  | `bindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE |
 |  | `unbindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE |
+| ERC3643ComplianceExtendedModule |  |                              |                                      |                                      |               |
+|  | `bindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |
+|  | `unbindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |
+|  | `setTokenSelfBindingApproval(address token,bool approved)` | public | `address token,bool approved` | - | COMPLIANCE_MANAGER_ROLE |
+|  | `setTokenSelfBindingApprovalBatch(address[] tokens,bool approved)` | public | `address[] tokens,bool approved` | - | COMPLIANCE_MANAGER_ROLE |
 | RuleEngineBase |  | | | | |
 |  | `transferred(address from,address to,uint256 value)` | public | `address from,address to, uint256 value` | - | onlyBoundToken (modifier) |
 |  | `transferred(address spender,address from,address to,uint256 value)` | public | `address spender,address from,address to, uint256 value` | - | onlyBoundToken (modifier) |
@@ -392,7 +397,8 @@ RuleEngineOwnable
 ├── RuleEngineBase (core functionality)
 │   ├── VersionModule
 │   ├── RulesManagementModule
-│   ├── ERC3643ComplianceModule
+│   ├── ERC3643ComplianceModule (core ERC-3643)
+│   ├── ERC3643ComplianceExtendedModule (project extensions)
 │   └── IRuleEngineERC1404
 └── Ownable (ERC-173 access control)
 ```
@@ -416,7 +422,8 @@ RuleEngineOwnable2Step
 │   └── RuleEngineBase
 │       ├── VersionModule
 │       ├── RulesManagementModule
-│       ├── ERC3643ComplianceModule
+│       ├── ERC3643ComplianceModule (core ERC-3643)
+│       ├── ERC3643ComplianceExtendedModule (project extensions)
 │       └── IRuleEngineERC1404
 └── Ownable2Step (ERC-173 access control with pending owner)
 ```
@@ -575,7 +582,7 @@ constructor(
 | :----------------: | :---------------------------: | :----------------------------------------------------------: | :------------: | :------------: |
 |         └          |       **Function Name**       |                        **Visibility**                        | **Mutability** | **Modifiers**  |
 |                    |                               |                                                              |                |                |
-| **RuleEngineBase** |        Implementation         | VersionModule, RulesManagementModule, ERC3643ComplianceModule, RuleEngineInvariantStorage, IRuleEngine |                |                |
+| **RuleEngineBase** |        Implementation         | VersionModule, RulesManagementModule, ERC3643ComplianceExtendedModule, RuleEngineInvariantStorage, IRuleEngine |                |                |
 |         └          |          transferred          |                           Public ❗️                           |       🛑        | onlyBoundToken |
 |         └          |          transferred          |                           Public ❗️                           |       🛑        | onlyBoundToken |
 |         └          |            created            |                           Public ❗️                           |       🛑        | onlyBoundToken |
@@ -926,8 +933,11 @@ Useful for identifying which version of the smart contract is deployed and in us
 |              └              |     bindToken     |             Public ❗️              |       🛑        |   onlyRole    |
 |              └              |    unbindToken    |             Public ❗️              |       🛑        |   onlyRole    |
 |              └              |   isTokenBound    |             Public ❗️              |                |      NO❗️      |
-|              └              |   getTokenBound   |            External ❗️             |                |      NO❗️      |
-|              └              |  getTokenBounds   |            External ❗️             |                |      NO❗️      |
+|              └              |   getTokenBound   |             Public ❗️              |                |      NO❗️      |
+
+### ERC3643ComplianceExtendedModule
+
+`ERC3643ComplianceExtendedModule` inherits `ERC3643ComplianceModule` and contains project-specific helpers not part of the ERC-3643 base interface (`IERC3643Compliance`): batch bind/unbind, self-binding approval APIs, and `getTokenBounds()`.
 |              └              |   _unbindToken    |            Internal 🔒             |       🛑        |               |
 |              └              |    _bindToken     |            Internal 🔒             |       🛑        |               |
 
