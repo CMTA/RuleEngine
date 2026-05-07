@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2026-05-05 13:03:55</td>
+            <td class="headerValue">2026-05-06 17:22:22</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">6</td>
@@ -90,15 +90,15 @@
 <a name="19"><span class="lineNum">      19 </span>                :            :  * (`Ownable` or `Ownable2Step`) while reusing constructor, ERC-165 and ERC-2771 code.</a>
 <a name="20"><span class="lineNum">      20 </span>                :            :  */</a>
 <a name="21"><span class="lineNum">      21 </span>                :            : abstract contract RuleEngineOwnableShared is ERC2771ModuleStandalone, RuleEngineBase, ERC165 {</a>
-<a name="22"><span class="lineNum">      22 </span>                :<span class="lineCov">        128 :     constructor(address forwarderIrrevocable, address tokenContract) ERC2771ModuleStandalone(forwarderIrrevocable) {</span></a>
-<a name="23"><span class="lineNum">      23 </span>           [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span>]:<span class="lineCov">        128 :         if (tokenContract != address(0)) {</span></a>
+<a name="22"><span class="lineNum">      22 </span>                :<span class="lineCov">        175 :     constructor(address forwarderIrrevocable, address tokenContract) ERC2771ModuleStandalone(forwarderIrrevocable) {</span></a>
+<a name="23"><span class="lineNum">      23 </span>           [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span>]:<span class="lineCov">        175 :         if (tokenContract != address(0)) {</span></a>
 <a name="24"><span class="lineNum">      24 </span>                :<span class="lineCov">          1 :             _bindToken(tokenContract);</span></a>
 <a name="25"><span class="lineNum">      25 </span>                :            :         }</a>
 <a name="26"><span class="lineNum">      26 </span>                :            :     }</a>
 <a name="27"><span class="lineNum">      27 </span>                :            : </a>
 <a name="28"><span class="lineNum">      28 </span>                :            :     /* ============ ERC-165 ============ */</a>
-<a name="29"><span class="lineNum">      29 </span>                :<span class="lineCov">         29 :     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {</span></a>
-<a name="30"><span class="lineNum">      30 </span>                :<span class="lineCov">         29 :         return _supportsRuleEngineBaseInterface(interfaceId) || interfaceId == OwnableInterfaceId.IERC173_INTERFACE_ID</span></a>
+<a name="29"><span class="lineNum">      29 </span>                :<span class="lineCov">         35 :     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {</span></a>
+<a name="30"><span class="lineNum">      30 </span>                :<span class="lineCov">         35 :         return _supportsRuleEngineBaseInterface(interfaceId) || interfaceId == OwnableInterfaceId.IERC173_INTERFACE_ID</span></a>
 <a name="31"><span class="lineNum">      31 </span>                :<span class="lineCov">          5 :             || ERC165.supportsInterface(interfaceId);</span></a>
 <a name="32"><span class="lineNum">      32 </span>                :            :     }</a>
 <a name="33"><span class="lineNum">      33 </span>                :            : </a>
@@ -118,8 +118,8 @@
 <a name="47"><span class="lineNum">      47 </span>                :            :     /**</a>
 <a name="48"><span class="lineNum">      48 </span>                :            :      * @dev This surcharge is not necessary if you do not use the MetaTxModule</a>
 <a name="49"><span class="lineNum">      49 </span>                :            :      */</a>
-<a name="50"><span class="lineNum">      50 </span>                :<span class="lineCov">        181 :     function _msgSender() internal view virtual override(ERC2771Context, Context) returns (address sender) {</span></a>
-<a name="51"><span class="lineNum">      51 </span>                :<span class="lineCov">        181 :         return ERC2771Context._msgSender();</span></a>
+<a name="50"><span class="lineNum">      50 </span>                :<span class="lineCov">        249 :     function _msgSender() internal view virtual override(ERC2771Context, Context) returns (address sender) {</span></a>
+<a name="51"><span class="lineNum">      51 </span>                :<span class="lineCov">        249 :         return ERC2771Context._msgSender();</span></a>
 <a name="52"><span class="lineNum">      52 </span>                :            :     }</a>
 <a name="53"><span class="lineNum">      53 </span>                :            : </a>
 <a name="54"><span class="lineNum">      54 </span>                :            :     /**</a>
@@ -132,8 +132,8 @@
 <a name="61"><span class="lineNum">      61 </span>                :            :     /**</a>
 <a name="62"><span class="lineNum">      62 </span>                :            :      * @dev This surcharge is not necessary if you do not use the MetaTxModule</a>
 <a name="63"><span class="lineNum">      63 </span>                :            :      */</a>
-<a name="64"><span class="lineNum">      64 </span>                :<span class="lineCov">        183 :     function _contextSuffixLength() internal view virtual override(ERC2771Context, Context) returns (uint256) {</span></a>
-<a name="65"><span class="lineNum">      65 </span>                :<span class="lineCov">        183 :         return ERC2771Context._contextSuffixLength();</span></a>
+<a name="64"><span class="lineNum">      64 </span>                :<span class="lineCov">        251 :     function _contextSuffixLength() internal view virtual override(ERC2771Context, Context) returns (uint256) {</span></a>
+<a name="65"><span class="lineNum">      65 </span>                :<span class="lineCov">        251 :         return ERC2771Context._contextSuffixLength();</span></a>
 <a name="66"><span class="lineNum">      66 </span>                :            :     }</a>
 <a name="67"><span class="lineNum">      67 </span>                :            : }</a>
 </pre>
