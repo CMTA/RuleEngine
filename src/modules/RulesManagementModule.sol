@@ -30,7 +30,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     /// @dev Array of rules
     EnumerableSet.AddressSet internal _rules;
     /// @dev Maximum number of rules allowed in the engine.
-    uint256 internal _maxRules = 10;
+    uint256 internal _maxRules = DEFAULT_MAX_RULES;
 
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS

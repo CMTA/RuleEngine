@@ -101,6 +101,41 @@ This function is defined in the extension module `ValidationModuleRuleEngine`
 setCompliance(address _compliance)
 ```
 
+### Making `setCompliance` work with RuleEngine
+
+RuleEngine supports the ERC-3643/T-REX pattern where the token contract binds and unbinds itself when `setCompliance` is called.
+
+In other words, a token can call:
+
+- `bindToken(address(this))`
+- `unbindToken(address(this))`
+
+To keep this feature secure, self-bind/self-unbind is gated:
+
+- A token can call `bindToken(address(this))` and `unbindToken(address(this))` only if it was explicitly approved first.
+- Approval is set by governance/compliance admin using:
+  - `setTokenSelfBindingApproval(address token, bool approved)`
+- Approval status can be checked with:
+  - `isTokenSelfBindingApproved(address token)`
+
+This preserves compatibility with ERC-3643 tokens that do:
+
+```solidity
+if (address(_tokenCompliance) != address(0)) {
+    _tokenCompliance.unbindToken(address(this));
+}
+_tokenCompliance = IModularCompliance(_compliance);
+_tokenCompliance.bindToken(address(this));
+```
+
+while preventing arbitrary third-party contracts from self-binding.
+
+Recommended operational sequence:
+
+1. On the target RuleEngine, grant self-binding approval for the token.
+2. Call token `setCompliance(newRuleEngine)`.
+3. (Optional) Revoke self-binding approval after migration if no longer needed.
+
 
 
 ## How to include it
@@ -108,6 +143,7 @@ setCompliance(address _compliance)
 While the RuleEngine has been designed for CMTAT and ERC-3643 tokens, it can be used with other contracts to apply transfer restrictions.
 
 For that, the only thing to do is to import in your contract the interface `IRuleEngine`(CMTAT) or `IERC3643Compliance` (ERC-3643), which declares the corresponding functions to call by the token contract. This interface can be found [here](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/interfaces/engine/IRuleEngine.sol).
+If you need non-standard helper functions (batch bind/unbind, self-binding approval APIs, multi-token getter), use `IERC3643ComplianceExtended`.
 
 ### Like CMTAT
 
@@ -214,8 +250,11 @@ external;
 ### ERC-3643
 
 The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is defined in [IERC3643Compliance.sol](src/interfaces/IERC3643Compliance.sol).
+Non-standard helper functions are defined in [IERC3643ComplianceExtended.sol](src/interfaces/IERC3643ComplianceExtended.sol).
 
-A specific module implements this interface for the RuleEngine: [ERC3643ComplianceModule.sol](src/modules/ERC3643ComplianceModule.sol)
+The RuleEngine modules are split as follows:
+- Base ERC-3643 surface: [ERC3643ComplianceModule.sol](src/modules/ERC3643ComplianceModule.sol)
+- Non-standard extensions: [ERC3643ComplianceExtendedModule.sol](src/modules/ERC3643ComplianceExtendedModule.sol)
 
 ![ERC3643ComplianceModuleUML](./doc/schema/vscode-uml/ERC3643ComplianceModuleUML.png)
 
@@ -268,16 +307,16 @@ The table below summarizes which ERC-165 interfaces are advertised by each deplo
 
 | Interface | Interface ID | RuleEngine (RBAC deployment) | RuleEngineOwnable deployment | RuleEngineOwnable2Step deployment |
 | --- | --- | --- | --- | --- |
-| `IERC165` | `0x01ffc9a7` | Yes | Yes | Yes |
-| `IRuleEngine` | `0x20c49ce7` | Yes | Yes | Yes |
-| `IERC1404` | `0xab84a5c8` | Yes | Yes | Yes |
-| `IERC1404Extend` | `0x78a8de7d` | Yes | Yes | Yes |
-| `IERC3643Compliance` | `0x3144991c` | Yes | Yes | Yes |
-| `IERC7551Compliance` (subset) | `0x7157797f` | Yes | Yes | Yes |
-| `IERC173` | `0x7f5828d0` | No | Yes | Yes |
-| `Ownable2Step` specific (`pendingOwner()`, `acceptOwnership()`) | `0x9ab669ef` | No | No | Yes |
-| `IAccessControl` | `0x7965db0b` | Yes | No | No |
-| `IAccessControlEnumerable` | `0x5a05180f` | Yes | No | No |
+| `IERC165` | `0x01ffc9a7` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IRuleEngine` | `0x20c49ce7` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC1404` | `0xab84a5c8` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC1404Extend` | `0x78a8de7d` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC3643Compliance` | `0x3144991c` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC7551Compliance` (subset) | `0x7157797f` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC173` | `0x7f5828d0` | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `Ownable2Step` specific (`pendingOwner()`, `acceptOwnership()`) | `0x9ab669ef` | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IAccessControl` | `0x7965db0b` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> |
+| `IAccessControlEnumerable` | `0x5a05180f` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> |
 
 Notes:
 - `RuleEngine` advertises OpenZeppelin RBAC interfaces because it inherits `AccessControlEnumerable`.
@@ -328,6 +367,11 @@ For function signatures, struct arguments are represented with their correspondi
 | ERC3643ComplianceModule |  |                              |                                      |                                      |               |
 |  | `bindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE |
 |  | `unbindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE |
+| ERC3643ComplianceExtendedModule |  |                              |                                      |                                      |               |
+|  | `bindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |
+|  | `unbindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |
+|  | `setTokenSelfBindingApproval(address token,bool approved)` | public | `address token,bool approved` | - | COMPLIANCE_MANAGER_ROLE |
+|  | `setTokenSelfBindingApprovalBatch(address[] tokens,bool approved)` | public | `address[] tokens,bool approved` | - | COMPLIANCE_MANAGER_ROLE |
 | RuleEngineBase |  | | | | |
 |  | `transferred(address from,address to,uint256 value)` | public | `address from,address to, uint256 value` | - | onlyBoundToken (modifier) |
 |  | `transferred(address spender,address from,address to,uint256 value)` | public | `address spender,address from,address to, uint256 value` | - | onlyBoundToken (modifier) |
@@ -353,7 +397,8 @@ RuleEngineOwnable
 ├── RuleEngineBase (core functionality)
 │   ├── VersionModule
 │   ├── RulesManagementModule
-│   ├── ERC3643ComplianceModule
+│   ├── ERC3643ComplianceModule (core ERC-3643)
+│   ├── ERC3643ComplianceExtendedModule (project extensions)
 │   └── IRuleEngineERC1404
 └── Ownable (ERC-173 access control)
 ```
@@ -377,7 +422,8 @@ RuleEngineOwnable2Step
 │   └── RuleEngineBase
 │       ├── VersionModule
 │       ├── RulesManagementModule
-│       ├── ERC3643ComplianceModule
+│       ├── ERC3643ComplianceModule (core ERC-3643)
+│       ├── ERC3643ComplianceExtendedModule (project extensions)
 │       └── IRuleEngineERC1404
 └── Ownable2Step (ERC-173 access control with pending owner)
 ```
@@ -536,7 +582,7 @@ constructor(
 | :----------------: | :---------------------------: | :----------------------------------------------------------: | :------------: | :------------: |
 |         └          |       **Function Name**       |                        **Visibility**                        | **Mutability** | **Modifiers**  |
 |                    |                               |                                                              |                |                |
-| **RuleEngineBase** |        Implementation         | VersionModule, RulesManagementModule, ERC3643ComplianceModule, RuleEngineInvariantStorage, IRuleEngine |                |                |
+| **RuleEngineBase** |        Implementation         | VersionModule, RulesManagementModule, ERC3643ComplianceExtendedModule, RuleEngineInvariantStorage, IRuleEngine |                |                |
 |         └          |          transferred          |                           Public ❗️                           |       🛑        | onlyBoundToken |
 |         └          |          transferred          |                           Public ❗️                           |       🛑        | onlyBoundToken |
 |         └          |            created            |                           Public ❗️                           |       🛑        | onlyBoundToken |
@@ -887,8 +933,11 @@ Useful for identifying which version of the smart contract is deployed and in us
 |              └              |     bindToken     |             Public ❗️              |       🛑        |   onlyRole    |
 |              └              |    unbindToken    |             Public ❗️              |       🛑        |   onlyRole    |
 |              └              |   isTokenBound    |             Public ❗️              |                |      NO❗️      |
-|              └              |   getTokenBound   |            External ❗️             |                |      NO❗️      |
-|              └              |  getTokenBounds   |            External ❗️             |                |      NO❗️      |
+|              └              |   getTokenBound   |             Public ❗️              |                |      NO❗️      |
+
+### ERC3643ComplianceExtendedModule
+
+`ERC3643ComplianceExtendedModule` inherits `ERC3643ComplianceModule` and contains project-specific helpers not part of the ERC-3643 base interface (`IERC3643Compliance`): batch bind/unbind, self-binding approval APIs, and `getTokenBounds()`.
 |              └              |   _unbindToken    |            Internal 🔒             |       🛑        |               |
 |              └              |    _bindToken     |            Internal 🔒             |       🛑        |               |
 

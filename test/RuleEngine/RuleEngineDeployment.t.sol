@@ -11,8 +11,10 @@ import {IAccessControlEnumerable} from "@openzeppelin/contracts/access/extension
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
+import {IERC3643ComplianceExtendedSubset} from "src/mocks/IERC3643ComplianceExtendedSubset.sol";
 import {IERC7551ComplianceSubset} from "src/mocks/IERC7551ComplianceSubset.sol";
 import {IERC1404Subset} from "src/mocks/IERC1404Subset.sol";
+import {ComplianceInterfaceId} from "src/modules/library/ComplianceInterfaceId.sol";
 import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
 
 /**
@@ -68,6 +70,8 @@ contract RuleEngineTest is Test, HelperContract {
         assertTrue(ruleEngineMock.supportsInterface(type(IERC1404Subset).interfaceId));
         assertTrue(ruleEngineMock.supportsInterface(ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID));
         assertTrue(ruleEngineMock.supportsInterface(type(ICompliance).interfaceId));
+        assertTrue(ruleEngineMock.supportsInterface(ComplianceInterfaceId.ERC3643_COMPLIANCE_EXTENDED_INTERFACE_ID));
+        assertTrue(ruleEngineMock.supportsInterface(type(IERC3643ComplianceExtendedSubset).interfaceId));
         assertTrue(ruleEngineMock.supportsInterface(type(IERC7551ComplianceSubset).interfaceId));
     }
 

@@ -14,11 +14,12 @@ import {IERC3643ComplianceRead, IERC3643IComplianceContract} from "CMTAT/interfa
 import {IERC7551Compliance} from "CMTAT/interfaces/tokenization/draft-IERC7551.sol";
 
 /* ==== Modules === */
-import {ERC3643ComplianceModule, IERC3643Compliance} from "./modules/ERC3643ComplianceModule.sol";
+import {ERC3643ComplianceExtendedModule} from "./modules/ERC3643ComplianceExtendedModule.sol";
 import {VersionModule} from "./modules/VersionModule.sol";
 import {RulesManagementModule} from "./modules/RulesManagementModule.sol";
 
 /* ==== Interface and other library === */
+import {IERC3643Compliance} from "./interfaces/IERC3643Compliance.sol";
 import {IRule} from "./interfaces/IRule.sol";
 import {ComplianceInterfaceId} from "./modules/library/ComplianceInterfaceId.sol";
 import {ERC1404InterfaceId} from "./modules/library/ERC1404InterfaceId.sol";
@@ -31,7 +32,7 @@ import {RuleInterfaceId} from "./modules/library/RuleInterfaceId.sol";
 abstract contract RuleEngineBase is
     VersionModule,
     RulesManagementModule,
-    ERC3643ComplianceModule,
+    ERC3643ComplianceExtendedModule,
     RuleEngineInvariantStorage,
     IRuleEngineERC1404
 {
@@ -207,6 +208,7 @@ abstract contract RuleEngineBase is
             || interfaceId == ERC1404InterfaceId.IERC1404_INTERFACE_ID
             || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
             || interfaceId == ComplianceInterfaceId.ERC3643_COMPLIANCE_INTERFACE_ID
+            || interfaceId == ComplianceInterfaceId.ERC3643_COMPLIANCE_EXTENDED_INTERFACE_ID
             || interfaceId == ComplianceInterfaceId.IERC7551_COMPLIANCE_INTERFACE_ID;
     }
 }

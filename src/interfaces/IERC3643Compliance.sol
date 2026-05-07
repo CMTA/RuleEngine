@@ -47,6 +47,7 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      */
     function unbindToken(address token) external;
 
+
     /**
      * @notice Checks whether a token is currently bound to this compliance contract.
      * @dev
@@ -64,16 +65,6 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      * @return token The address of the currently bound token.
      */
     function getTokenBound() external view returns (address token);
-
-    /**
-     * @notice Returns all tokens currently bound to this compliance contract.
-     * @dev This is a view-only function and does not modify state.
-     * This function is not part of the original ERC-3643 specification
-     * This operation will copy the entire storage to memory, which can be quite expensive.
-     * This is designed to mostly be used by view accessors that are queried without any gas fees.
-     * @return tokens An array of addresses of bound token contracts.
-     */
-    function getTokenBounds() external view returns (address[] memory tokens);
 
     /**
      * @notice Updates the compliance contract state when tokens are created (minted).
