@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 // forge-lint: disable-next-line(unused-import)
 import {Test} from "forge-std/Test.sol";
-import {CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
+import {CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.sol";
 
 import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
@@ -69,7 +69,7 @@ abstract contract HelperContractOwnable is
 
     // CMTAT
     CMTATDeployment cmtatDeployment;
-    CMTATStandalone cmtatContract;
+    CMTATStandardStandalone cmtatContract;
 
     // RuleEngineOwnable Mock
     RuleEngineOwnable public ruleEngineMock;

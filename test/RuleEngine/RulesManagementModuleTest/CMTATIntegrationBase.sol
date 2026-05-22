@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
+import {CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
 
@@ -12,7 +12,7 @@ import "../../HelperContract.sol";
 abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
     uint256 defaultValue = 20;
 
-    function _deployCmtat() internal virtual returns (CMTATStandalone);
+    function _deployCmtat() internal virtual returns (CMTATStandardStandalone);
 
     // Arrange
     function setUp() public virtual {

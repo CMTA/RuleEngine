@@ -77,7 +77,7 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 
 | RuleEngine version                                           | Compatible Versions                                          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **v3.0.0-rc3**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
+| **v3.0.0-rc3**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0) |
 | **v3.0.0-rc2**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
 | **v3.0.0-rc1**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
 | **v3.0.0-rc0**                                               | CMTAT ≥ v3.0.0<br />                                         |
@@ -147,17 +147,29 @@ If you need non-standard helper functions (batch bind/unbind, self-binding appro
 
 ### Like CMTAT
 
-Before each ERC-20 transfer, the CMTAT calls the function `transferred` which is the entrypoint for the RuleEngine.
+Before each ERC-20 transfer, mint, or burn, CMTAT calls the RuleEngine through the internal function `_checkTransferred`, which dispatches to one of two `transferred` overloads depending on whether a non-zero spender is present.
 
 ```solidity
-function transferred(address from,address to,uint256 value)
+// Called when spender == address(0)
+function transferred(address from, address to, uint256 value)
+
+// Called when spender != address(0)
+function transferred(address spender, address from, address to, uint256 value)
 ```
 
-If you want to apply restrictions on the spender address, you have to call the `transferred` function which takes the spender argument in your ERC-20  function `transferFrom`.
+#### CMTAT v3.3.0 — mint and burn use the spender path
 
-```solidity
-function transferred(address spender,address from,address to,uint256 value)
-```
+Since CMTAT v3.3.0, **mint and burn operations also go through the 4-argument overload**, with the operator (minter or burner) passed as `spender`:
+
+| Operation | `spender` | `from` | `to` |
+|-----------|-----------|--------|------|
+| `transfer` / `transferFrom` | caller / approved spender | token holder | recipient |
+| `mint` | minter (`_msgSender()`) | `address(0)` | recipient |
+| `burn` | burner (`_msgSender()`) | token holder | `address(0)` |
+
+The 3-argument overload is only called when `spender == address(0)`, which does not occur in normal CMTAT v3.3.0 flows.
+
+> **Rule authoring note:** Rules that check the `spender` argument in `transferred(spender, from, to, value)` must explicitly handle the mint (`from == address(0)`) and burn (`to == address(0)`) cases. A spender check that is intended only for `transferFrom` will also fire for mints and burns unless the rule skips it when `from` or `to` is the zero address. See `RuleWhitelist` and `RuleSpenderWhitelist` in the Rules repository for reference implementations.
 
 For example, CMTAT defines the interaction with the RuleEngine inside a specific module, [ValidationModuleRuleEngine](https://github.com/CMTA/CMTAT/blob/master/contracts/modules/wrapper/extensions/ValidationModule/ValidationModuleRuleEngine.sol) and [CMTATBaseRuleEngine](https://github.com/CMTA/CMTAT/blob/master/contracts/modules/1_CMTATBaseRuleEngine.sol).
 
@@ -169,7 +181,7 @@ For example, CMTAT defines the interaction with the RuleEngine inside a specific
 
 ![checkTransferred](./doc/other/CMTAT/checkTransferred.png)
 
-This function `_transferred` is called before each transfer/burn/mint through the internal function `_checkTransferred` defined in [CMTAT_BASE](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/modules/CMTAT_BASE.sol#L198).
+This function `_transferred` is called before each transfer/burn/mint through the internal function `_checkTransferred`.
 
 ### Like ERC-3643
 

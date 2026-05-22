@@ -9,8 +9,8 @@ import {CMTATDeploymentV3} from "../../utils/CMTATDeploymentV3.sol";
  * @title General functions of the RuleEngine (v3.0.0)
  */
 contract RuleEngineOperationTestRevertV3 is RuleEngineOperationRevertBase {
-    function _deployCmtat() internal override returns (CMTATStandalone) {
+    function _deployCmtat() internal override returns (CMTATStandardStandalone) {
         CMTATDeploymentV3 v3deploy = new CMTATDeploymentV3();
-        return CMTATStandalone(address(v3deploy.cmtat()));
+        return CMTATStandardStandalone(address(v3deploy.cmtat()));
     }
 }

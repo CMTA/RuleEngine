@@ -8,7 +8,7 @@ import "./CMTATIntegrationBase.sol";
  * @title Integration test with the CMTAT (v3.2.0-rc2)
  */
 contract CMTATIntegration is CMTATIntegrationBase {
-    function _deployCmtat() internal override returns (CMTATStandalone) {
+    function _deployCmtat() internal override returns (CMTATStandardStandalone) {
         cmtatDeployment = new CMTATDeployment();
         return cmtatDeployment.cmtat();
     }

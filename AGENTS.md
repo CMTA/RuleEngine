@@ -127,11 +127,18 @@ function _checkRule(address rule_) internal view virtual override {
 ### Rule Execution Flow
 
 ```
-Token.transfer() → RuleEngine.transferred(from, to, value)
-                    ├── onlyBoundToken modifier (caller must be bound)
-                    └── for each rule in _rules:
-                          rule.transferred(from, to, value)  // reverts if disallowed
+Token operation → RuleEngine.transferred(spender, from, to, value)   ← used by CMTAT v3.3.0+ for all operations
+                   ├── onlyBoundToken modifier (caller must be bound)
+                   └── for each rule in _rules:
+                         rule.transferred(spender, from, to, value)  // reverts if disallowed
+
+                  RuleEngine.transferred(from, to, value)            ← 3-arg fallback (spender == address(0))
+                   ├── onlyBoundToken modifier
+                   └── for each rule in _rules:
+                         rule.transferred(from, to, value)
 ```
+
+Since CMTAT v3.3.0, mint (`from == address(0)`) and burn (`to == address(0)`) also go through the 4-argument overload with the operator as `spender`. Rules that check `spender` must skip or adapt that check for mint/burn to avoid blocking those operations unintentionally.
 
 View path: `detectTransferRestriction()` iterates rules, returns first non-zero code.
 

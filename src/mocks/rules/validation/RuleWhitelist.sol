@@ -84,7 +84,8 @@ contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
         override
         returns (uint8)
     {
-        if (!addressIsListed(spender)) {
+        // Mint (from == address(0)) and burn (to == address(0)) are exempt from spender check
+        if (from != address(0) && to != address(0) && !addressIsListed(spender)) {
             return CODE_ADDRESS_SPENDER_NOT_WHITELISTED;
         } else {
             return detectTransferRestriction(from, to, value);

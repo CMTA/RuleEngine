@@ -11,7 +11,7 @@ import {RuleOperationRevert} from "src/mocks/rules/operation/RuleOperationRevert
  * @title Base test for RuleEngine operation revert with CMTAT
  */
 abstract contract RuleEngineOperationRevertBase is Test, HelperContract {
-    function _deployCmtat() internal virtual returns (CMTATStandalone);
+    function _deployCmtat() internal virtual returns (CMTATStandardStandalone);
 
     // Arrange
     function setUp() public virtual {
