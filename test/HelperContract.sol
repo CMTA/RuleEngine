@@ -7,6 +7,7 @@ import {CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.
 
 import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
+import {RulesManagementModuleRolesStorage} from "src/modules/library/RulesManagementModuleRolesStorage.sol";
 // RuleEngine
 import {RuleEngine} from "src/deployment/RuleEngine.sol";
 // forge-lint: disable-next-line(unused-import)
@@ -42,7 +43,8 @@ abstract contract HelperContract is
     RuleAddressListInvariantStorage,
     RuleEngineInvariantStorage,
     RuleConditionalTransferLightInvariantStorage,
-    RulesManagementModuleInvariantStorage
+    RulesManagementModuleInvariantStorage,
+    RulesManagementModuleRolesStorage
 {
     // Test result
     uint256 internal resUint256;

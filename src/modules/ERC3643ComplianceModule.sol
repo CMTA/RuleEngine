@@ -8,13 +8,11 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 /* ==== Interface and other library === */
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
 import {ERC3643ComplianceModuleInvariantStorage} from "./library/ERC3643ComplianceModuleInvariantStorage.sol";
-import {ERC3643ComplianceRolesStorage} from "./library/ERC3643ComplianceRolesStorage.sol";
 
 abstract contract ERC3643ComplianceModule is
     Context,
     IERC3643Compliance,
-    ERC3643ComplianceModuleInvariantStorage,
-    ERC3643ComplianceRolesStorage
+    ERC3643ComplianceModuleInvariantStorage
 {
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;

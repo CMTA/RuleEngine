@@ -45,7 +45,51 @@ forge lint
   - Update surya doc by running the 3 scripts in [./doc/script](./doc/script)
   - Update changelog
 
+
+
+### v3.0.0-rc4 - 2026-05-22
+
+### Added
+
+- Add `RuleMintAllowance` mock rule: admin-controlled per-minter mint allowance with `setMintAllowance(address, uint256)`, enforcement in `transferred(spender, from, to, value)` when `from == address(0)`, and `CODE_MINTER_INSUFFICIENT_ALLOWANCE` (code 81).
+- Add `ERC3643ComplianceModuleInvariantStorage` in `src/modules/library/` to hold all `RuleEngine_ERC3643Compliance_*` custom errors, following the invariant storage pattern already used by `RulesManagementModule`.
+- Add `ERC3643ComplianceRolesStorage` in `src/modules/library/` as a dedicated contract for `COMPLIANCE_MANAGER_ROLE`, separating role constants from error/event declarations.
+
+### Changed
+
+- `ERC3643ComplianceModule` now inherits `ERC3643ComplianceModuleInvariantStorage` and `ERC3643ComplianceRolesStorage`; errors and role constant are no longer declared inline.
+- `RuleWhitelist.detectTransferRestrictionFrom`: spender check is now skipped for mint (`from == address(0)`) and burn (`to == address(0)`) operations, as the operator in those cases is the authorized minter/burner rather than a delegated spender.
+- `RuleWhitelist.transferred` (both overloads): removed `view` modifier to match the intended mutable-callback semantics of the `IRule` interface.
+- `RuleMintAllowance.transferred(address, address, uint256)`: removed `view` modifier for the same reason.
+- `COMPLIANCE_MANAGER_ROLE` moved from inline declaration in `ERC3643ComplianceModule` to `ERC3643ComplianceRolesStorage`.
+- `VersionModule.VERSION` constant visibility changed from `private` to `internal` to allow direct access by inheriting contracts and tests.
+- `IRulesManagementModule.containsRule` now correctly declares `view`.
+- `IRulesManagementModule.setMaxRules` NatSpec documents that high cap values re-expose O(n) gas cost for administrative operations such as `clearRules`.
+- `IRulesManagementModule.clearRules` NatSpec updated to reflect O(n) cost relative to rule count and the interaction with `maxRules`.
+- `RulesManagementModule.setRules` NatSpec now documents that `ClearRules` is emitted when replacing a non-empty rule set, in addition to `AddRule` per new rule.
+- `RuleWhitelist` imports converted from plain imports with forge-lint suppression comments to named imports.
+- `RuleEngineOwnable2Step` constructor now has full `@notice`/`@param` NatSpec.
+- `RuleEngine.grantRole` NatSpec documents the intentional asymmetry: the check prevents granting roles to current rules but does not prevent adding a privileged address as a rule afterwards.
+- `ERC3643ComplianceModule.bindToken` and `ERC3643ComplianceExtendedModule.bindTokens` now carry a `@custom:security-note` warning about cross-token state contamination in multi-tenant setups with stateful/operation rules.
+
+### Documentation
+
+- CLAUDE.md / AGENTS.md:
+  - Inheritance hierarchy corrected to show `ERC3643ComplianceExtendedModule` → `ERC3643ComplianceModule` → `ERC3643ComplianceModuleInvariantStorage`.
+  - Access control pattern section now documents the `_onlyRulesLimitManager` hook alongside `_onlyRulesManager` and `_onlyComplianceManager`.
+  - Rule Execution Flow diagram extended with `created` and `destroyed` ERC-3643 entry points.
+- README:
+  - CMTAT target version updated to v3.3.0 in both the compatibility table and the dependencies section.
+  - "Like CMTAT" section rewritten to document the v3.3.0 spender path for mint and burn, with an operation/address table and a rule-authoring note.
+  - `bindToken`/`unbindToken` function table updated to reflect `COMPLIANCE_MANAGER_ROLE or approved token self-call` access path.
+
+### Dependencies
+
+- Update CMTAT submodule to v3.3.0-rc1.
+
 ### v3.0.0-rc3 - 2026-05-07
+
+Commit: `5827604be4e38f65c055a929c7b62462a20f4bbd`
 
 ### Security
 

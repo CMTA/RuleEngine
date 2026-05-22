@@ -11,13 +11,21 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 /* ==== Modules === */
 import {ERC2771ModuleStandalone, ERC2771Context} from "../modules/ERC2771ModuleStandalone.sol";
+import {ERC3643ComplianceRolesStorage} from "../modules/library/ERC3643ComplianceRolesStorage.sol";
+import {RulesManagementModuleRolesStorage} from "../modules/library/RulesManagementModuleRolesStorage.sol";
 /* ==== Base contract === */
 import {RuleEngineBase} from "../RuleEngineBase.sol";
 
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
  */
-contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase, AccessControlEnumerable {
+contract RuleEngine is
+    ERC2771ModuleStandalone,
+    RuleEngineBase,
+    AccessControlEnumerable,
+    ERC3643ComplianceRolesStorage,
+    RulesManagementModuleRolesStorage
+{
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /**

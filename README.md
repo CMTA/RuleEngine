@@ -1404,20 +1404,20 @@ Here is the list of report performed with [Slither](https://github.com/crytic/sl
 
 | Version | Report | Assessment |
 | ------- | ------ | ---------- |
-| v3.0.0-rc2 | [slither-report.md](./doc/security/audits/tools/slither-report.md) | [slither-report-feedback.md](./doc/security/audits/tools/slither-report-feedback.md) |
+| v3.0.0-rc4 | [slither-report.md](./doc/security/audits/tools/v3.0.0-rc4/slither-report.md) | [slither-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc4/slither-report-feedback.md) |
+| v3.0.0-rc3 | [slither-report.md](./doc/security/audits/tools/v3.0.0-rc3/slither-report.md) | [slither-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc3/slither-report-feedback.md) |
+| v3.0.0-rc2 | [slither-report.md](./doc/security/audits/tools/v3.0.0-rc2/slither-report.md) | [slither-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc2/slither-report-feedback.md) |
 
 ```bash
 slither .  --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" > slither-report.md
 ```
 
-4 finding categories — 0 High · 0 Medium · 10 Low · 4 Informational
+2 finding categories — 0 High · 0 Medium · 10 Low · 2 Informational
 
 | ID | Detector | Impact | Instances | Assessment |
 |----|----------|--------|-----------|------------|
 | 0–9 | `calls-loop` | Low | 10 | Accepted by design — fan-out to rule contracts is the core architecture |
-| 10 | `dead-code` | Informational | 1 | Accepted / no action — `_msgData` override is required by inheritance/context pattern |
-| 11 | `naming-convention` | Informational | 1 | Ignored — finding is in external CMTAT dependency code |
-| 12–13 | `unindexed-event-address` | Informational | 2 | Deferred — adding `indexed` to `TokenBound`/`TokenUnbound` is interface-breaking |
+| 10–11 | `unindexed-event-address` | Informational | 2 | Deferred — adding `indexed` to `TokenBound`/`TokenUnbound` is interface-breaking |
 
 #### Aderyn
 
@@ -1429,21 +1429,23 @@ aderyn -x mocks --output aderyn-report.md
 
 | Version | Report | Assessment |
 | ------- | ------ | ---------- |
-| v3.0.0-rc2 | [aderyn-report.md](./doc/security/audits/tools/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/aderyn-report-feedback.md) |
+| v3.0.0-rc4 | [aderyn-report.md](./doc/security/audits/tools/v3.0.0-rc4/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc4/aderyn-report-feedback.md) |
+| v3.0.0-rc3 | [aderyn-report.md](./doc/security/audits/tools/v3.0.0-rc3/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc3/aderyn-report-feedback.md) |
+| v3.0.0-rc2 | [aderyn-report.md](./doc/security/audits/tools/v3.0.0-rc2/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc2/aderyn-report-feedback.md) |
 
-Report scope: 18 Solidity files, 542 nSLOC.
+Report scope: 24 Solidity files, 629 nSLOC.
 
 0 High · 8 Low
 
 | ID | Finding | Instances | Assessment |
 |----|---------|-----------|------------|
 | L-1 | Centralization Risk | 14 | Accepted by design — privileged compliance tool |
-| L-2 | Unspecific Solidity Pragma | 14 | Accepted by design — intentional for library reusability |
-| L-3 | PUSH0 Opcode | 18 | Not applicable — project targets Prague EVM |
+| L-2 | Unspecific Solidity Pragma | 19 | Accepted by design — intentional for library reusability |
+| L-3 | PUSH0 Opcode | 24 | Not applicable — project targets Prague EVM |
 | L-4 | Modifier Invoked Only Once | 1 | Accepted by design — keeps hook-style access-control abstraction |
 | L-5 | Empty Block | 9 | Accepted by design — access-control hook pattern |
-| L-6 | Loop Contains `require`/`revert` | 1 | Accepted by design — `setRules` is an atomic batch operation |
-| L-7 | Costly Operations Inside Loop | 1 | Accepted — unavoidable `SSTORE` in `setRules` |
+| L-6 | Loop Contains `require`/`revert` | 4 | Accepted by design — `setRules` and `bindTokens`/`unbindTokens` are atomic batch operations |
+| L-7 | Costly Operations Inside Loop | 4 | Accepted — unavoidable `SSTORE` in batch operations |
 | L-8 | Unchecked Return | 1 | Accepted — `_grantRole` return is irrelevant in constructor |
 
 ## Documentation
