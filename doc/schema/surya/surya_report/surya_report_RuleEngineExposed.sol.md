@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/RuleEngineExposed.sol | 32dc5064e590129ba225606fb229838bdce53545 |
+| ./mocks/RuleEngineExposed.sol | 84e4f8be4361590f336a2771b0feec449d9ac074 |
 
 
 ### Contracts Description Table
@@ -21,6 +21,10 @@
 ||||||
 | **RuleEngineOwnableExposed** | Implementation | RuleEngineOwnable |||
 | └ | <Constructor> | Public ❗️ | 🛑  | RuleEngineOwnable |
+| └ | exposedMsgData | External ❗️ |   |NO❗️ |
+||||||
+| **RuleEngineOwnable2StepExposed** | Implementation | RuleEngineOwnable2Step |||
+| └ | <Constructor> | Public ❗️ | 🛑  | RuleEngineOwnable2Step |
 | └ | exposedMsgData | External ❗️ |   |NO❗️ |
 
 

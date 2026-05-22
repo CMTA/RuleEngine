@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/operation/RuleOperationRevert.sol | d73e135daf5ae5f508edb4cd4b616513f3a99655 |
+| ./mocks/rules/operation/RuleOperationRevert.sol | 689fae1c2576424be3fe4e39fada0425dd0c3025 |
 
 
 ### Contracts Description Table

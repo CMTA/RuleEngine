@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./interfaces/IERC3643Compliance.sol | fc7795352d154b3fe13fd9df3c8a85b19d667cc5 |
+| ./interfaces/IERC3643Compliance.sol | 6a206df8531bc148ae65b3061fe56bd91d64440e |
 
 
 ### Contracts Description Table
@@ -20,7 +20,6 @@
 | └ | unbindToken | External ❗️ | 🛑  |NO❗️ |
 | └ | isTokenBound | External ❗️ |   |NO❗️ |
 | └ | getTokenBound | External ❗️ |   |NO❗️ |
-| └ | getTokenBounds | External ❗️ |   |NO❗️ |
 | └ | created | External ❗️ | 🛑  |NO❗️ |
 | └ | destroyed | External ❗️ | 🛑  |NO❗️ |
 
