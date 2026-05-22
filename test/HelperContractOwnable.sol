@@ -12,7 +12,7 @@ import {RuleEngineOwnable} from "src/deployment/RuleEngineOwnable.sol";
 // forge-lint: disable-next-line(unused-import)
 import {RulesManagementModule} from "src/RuleEngineBase.sol";
 // forge-lint: disable-next-line(unused-import)
-import {ERC3643ComplianceModule} from "src/modules/ERC3643ComplianceModule.sol";
+import {ERC3643ComplianceModuleInvariantStorage} from "src/modules/library/ERC3643ComplianceModuleInvariantStorage.sol";
 // RuleConditionalTransfer
 import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
 import {

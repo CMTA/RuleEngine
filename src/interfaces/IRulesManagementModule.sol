@@ -14,6 +14,8 @@ interface IRulesManagementModule {
     /**
      * @notice Updates the maximum number of rules allowed in the engine.
      * @dev Access control is implementation specific (admin/owner).
+     * Setting a very high cap re-exposes unbounded gas cost for administrative operations
+     * such as {clearRules} even though normal per-transfer cost remains bounded.
      * @param maxRules_ New maximum number of rules.
      */
     function setMaxRules(uint256 maxRules_) external;
@@ -60,9 +62,9 @@ interface IRulesManagementModule {
     /**
      * @notice Removes all configured rules.
      * @dev After calling this function, no rules will remain set.
-     * Developers should keep in mind that this function has an unbounded cost
-     * and using it may render the function uncallable if the set grows to the point
-     * where clearing it consumes too much gas to fit in a block.
+     * Cost is O(n) in the number of configured rules. With the default cap of 10 this is
+     * negligible, but a high {maxRules} setting re-exposes unbounded cost here even though
+     * per-transfer cost remains bounded.
      */
     function clearRules() external;
 
@@ -88,5 +90,5 @@ interface IRulesManagementModule {
      * @dev Complexity: O(1).
      * @return exists True if the rule is present, false otherwise.
      */
-    function containsRule(IRule rule_) external returns (bool exists);
+    function containsRule(IRule rule_) external view returns (bool exists);
 }

@@ -279,7 +279,7 @@ The toolchain includes the following components, where the versions are the late
 - Foundry (forge-std) [v1.14.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.14.0)
 - Solidity [0.8.34](https://docs.soliditylang.org/en/v0.8.34/)
 - OpenZeppelin Contracts (submodule) [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1)
-- CMTAT [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
+- CMTAT [v3.3.0](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0)
 
 ### Access Control
 
@@ -377,8 +377,8 @@ For function signatures, struct arguments are represented with their correspondi
 |                         | `addRule(address rule_)`                                     | public | `IRule rule_` |-|RULES_MANAGEMENT_ROLE|
 |                         | `removeRule(address rule_)`                                  | public | `IRule rule_` |-|RULES_MANAGEMENT_ROLE|
 | ERC3643ComplianceModule |  |                              |                                      |                                      |               |
-|  | `bindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE |
-|  | `unbindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE |
+|  | `bindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE or approved token self-call |
+|  | `unbindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE or approved token self-call |
 | ERC3643ComplianceExtendedModule |  |                              |                                      |                                      |               |
 |  | `bindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |
 |  | `unbindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |

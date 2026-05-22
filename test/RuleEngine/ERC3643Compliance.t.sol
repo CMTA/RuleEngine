@@ -6,7 +6,7 @@ import {Vm} from "forge-std/Vm.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
 import {IERC3643Compliance} from "../../src/interfaces/IERC3643Compliance.sol";
-import {ERC3643ComplianceModule} from "../../src/modules/ERC3643ComplianceModule.sol";
+import {ERC3643ComplianceModuleInvariantStorage} from "../../src/modules/library/ERC3643ComplianceModuleInvariantStorage.sol";
 
 // Minimal mock ERC-3643 token to simulate calls to RuleEngine
 contract ERC3643MockToken {
@@ -166,13 +166,13 @@ contract RuleEngineTest is Test, HelperContract {
     }
 
     function testCannotBoundIfInvalidAddress() public {
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
         vm.prank(admin);
         ruleEngine.bindToken(address(ZERO_ADDRESS));
     }
 
     function testCannotUnBoundIfTokenIsNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_TokenNotBound.selector);
+        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_TokenNotBound.selector);
         vm.prank(admin);
         ruleEngine.unbindToken(address(0x100));
     }
@@ -183,7 +183,7 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngine.bindToken(address(0x1));
 
         // Assert
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_TokenAlreadyBound.selector);
+        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_TokenAlreadyBound.selector);
         vm.prank(admin);
         ruleEngine.bindToken(address(0x1));
     }
@@ -278,7 +278,7 @@ contract RuleEngineTest is Test, HelperContract {
     }
 
     function testCannotSetTokenSelfBindingApprovalForZeroAddress() public {
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
         vm.prank(operator);
         ruleEngine.setTokenSelfBindingApproval(address(0), true);
     }
@@ -329,7 +329,7 @@ contract RuleEngineTest is Test, HelperContract {
         tokens[0] = address(token1);
         tokens[1] = address(0);
 
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
         vm.prank(operator);
         ruleEngine.setTokenSelfBindingApprovalBatch(tokens, true);
     }
@@ -398,7 +398,7 @@ contract RuleEngineTest is Test, HelperContract {
         tokens[0] = address(token1);
         tokens[1] = address(0);
 
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
         vm.prank(operator);
         ruleEngine.bindTokens(tokens);
     }
@@ -411,7 +411,7 @@ contract RuleEngineTest is Test, HelperContract {
         vm.prank(operator);
         ruleEngine.bindToken(address(token1));
 
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_TokenAlreadyBound.selector);
+        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_TokenAlreadyBound.selector);
         vm.prank(operator);
         ruleEngine.bindTokens(tokens);
     }
@@ -424,23 +424,23 @@ contract RuleEngineTest is Test, HelperContract {
         vm.prank(operator);
         ruleEngine.bindToken(address(token1));
 
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_TokenNotBound.selector);
+        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_TokenNotBound.selector);
         vm.prank(operator);
         ruleEngine.unbindTokens(tokens);
     }
 
     function testCannotCreatedIfNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngine.created(user1, 100);
     }
 
     function testCannotDestroyedIfNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngine.destroyed(user2, 50);
     }
 
     function testCannotTransferredIfNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModule.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
         ruleEngine.transferred(user1, user2, 200);
     }
 

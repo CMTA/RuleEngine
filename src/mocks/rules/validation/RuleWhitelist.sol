@@ -2,10 +2,8 @@
 
 pragma solidity ^0.8.20;
 
-// forge-lint: disable-next-line(unaliased-plain-import)
-import "./abstract/RuleAddressList/RuleAddressList.sol";
-// forge-lint: disable-next-line(unaliased-plain-import)
-import "./abstract/RuleWhitelistCommon.sol";
+import {RuleAddressList} from "./abstract/RuleAddressList/RuleAddressList.sol";
+import {RuleWhitelistCommon} from "./abstract/RuleWhitelistCommon.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
@@ -92,12 +90,12 @@ contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
         }
     }
 
-    function transferred(address from, address to, uint256 value) public view {
+    function transferred(address from, address to, uint256 value) public {
         uint8 code = detectTransferRestriction(from, to, value);
         require(code == uint8(REJECTED_CODE_BASE.TRANSFER_OK), RuleWhitelist_InvalidTransfer(from, to, value, code));
     }
 
-    function transferred(address spender, address from, address to, uint256 value) public view {
+    function transferred(address spender, address from, address to, uint256 value) public {
         uint8 code = detectTransferRestrictionFrom(spender, from, to, value);
         require(code == uint8(REJECTED_CODE_BASE.TRANSFER_OK), RuleWhitelist_InvalidTransfer(from, to, value, code));
     }

@@ -39,7 +39,11 @@ contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase, AccessControlEnu
     /* ============ ACCESS CONTROL ============ */
     /**
      * @notice Grants `role` to `account`.
-     * @dev Prevents granting any role to accounts already configured as rules.
+     * @dev Prevents granting any role to accounts currently configured as rules.
+     * Note: this check is intentionally one-directional. {addRule} does not verify
+     * whether the rule address already holds a privileged role, and this function does
+     * not prevent adding a privileged address as a rule afterwards. Operators are
+     * responsible for keeping rule contracts and privileged accounts disjoint.
      */
     function grantRole(bytes32 role, address account) public virtual override(AccessControl, IAccessControl) {
         if (_rules.contains(account)) {

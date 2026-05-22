@@ -55,11 +55,13 @@ All three share their core logic through `RuleEngineBase` directly or via `RuleE
 ```
 RuleEngineBase (abstract)
 ├── VersionModule                         → version() returns "3.0.0"
-├── RulesManagementModule                 → add/remove/set/clear rules
+├── RulesManagementModule                 → add/remove/set/clear rules, maxRules cap
 │   ├── AccessControl (OZ)
 │   └── RulesManagementModuleInvariantStorage  → errors, events, roles
-├── ERC3643ComplianceModule               → bind/unbind tokens
-│   └── IERC3643Compliance
+├── ERC3643ComplianceExtendedModule       → bind/unbind tokens (extended API)
+│   └── ERC3643ComplianceModule           → core ERC-3643 compliance
+│       ├── IERC3643Compliance
+│       └── ERC3643ComplianceModuleInvariantStorage  → errors
 ├── RuleEngineInvariantStorage            → errors
 └── IRuleEngineERC1404                    → CMTAT interface
 
@@ -87,16 +89,19 @@ Modules define **virtual internal hooks** for access control. Concrete contracts
 ```solidity
 // In RulesManagementModule (abstract):
 function _onlyRulesManager() internal virtual;
+function _onlyRulesLimitManager() internal virtual;  // guards setMaxRules
 
 // In ERC3643ComplianceModule (abstract):
 function _onlyComplianceManager() internal virtual;
 
 // RuleEngine overrides with RBAC:
 function _onlyRulesManager() internal virtual override onlyRole(RULES_MANAGEMENT_ROLE) {}
+function _onlyRulesLimitManager() internal virtual override onlyRole(DEFAULT_ADMIN_ROLE) {}
 function _onlyComplianceManager() internal virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {}
 
 // RuleEngineOwnable overrides with Ownable:
 function _onlyRulesManager() internal virtual override onlyOwner {}
+function _onlyRulesLimitManager() internal virtual override onlyOwner {}
 function _onlyComplianceManager() internal virtual override onlyOwner {}
 ```
 
@@ -127,7 +132,7 @@ function _checkRule(address rule_) internal view virtual override {
 ### Rule Execution Flow
 
 ```
-Token operation → RuleEngine.transferred(spender, from, to, value)   ← used by CMTAT v3.3.0+ for all operations
+Token operation → RuleEngine.transferred(spender, from, to, value)   ← CMTAT v3.3.0+ primary path
                    ├── onlyBoundToken modifier (caller must be bound)
                    └── for each rule in _rules:
                          rule.transferred(spender, from, to, value)  // reverts if disallowed
@@ -136,9 +141,19 @@ Token operation → RuleEngine.transferred(spender, from, to, value)   ← used 
                    ├── onlyBoundToken modifier
                    └── for each rule in _rules:
                          rule.transferred(from, to, value)
+
+                  RuleEngine.created(to, value)                      ← ERC-3643 mint entry point
+                   ├── onlyBoundToken modifier
+                   └── calls _transferred(address(0), to, value)
+
+                  RuleEngine.destroyed(from, value)                  ← ERC-3643 burn entry point
+                   ├── onlyBoundToken modifier
+                   └── calls _transferred(from, address(0), value)
 ```
 
 Since CMTAT v3.3.0, mint (`from == address(0)`) and burn (`to == address(0)`) also go through the 4-argument overload with the operator as `spender`. Rules that check `spender` must skip or adapt that check for mint/burn to avoid blocking those operations unintentionally.
+
+`created` and `destroyed` use the 3-argument `_transferred` path (no spender), consistent with the ERC-3643 spec which does not carry a spender for mint/burn.
 
 View path: `detectTransferRestriction()` iterates rules, returns first non-zero code.
 

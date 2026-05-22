@@ -53,7 +53,7 @@ contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, 
      * @notice Called for transfers where no spender context is available.
      *         Mint allowance cannot be enforced without a spender; passes through.
      */
-    function transferred(address from, address to, uint256 value) public view {
+    function transferred(address from, address to, uint256 value) public {
         // no-op: spender unknown, enforcement requires transferred(spender,...)
     }
 
