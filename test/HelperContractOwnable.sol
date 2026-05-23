@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 // forge-lint: disable-next-line(unused-import)
 import {Test} from "forge-std/Test.sol";
-import {CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
+import {CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.sol";
 
 import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
@@ -12,7 +12,7 @@ import {RuleEngineOwnable} from "src/deployment/RuleEngineOwnable.sol";
 // forge-lint: disable-next-line(unused-import)
 import {RulesManagementModule} from "src/RuleEngineBase.sol";
 // forge-lint: disable-next-line(unused-import)
-import {ERC3643ComplianceModule} from "src/modules/ERC3643ComplianceModule.sol";
+import {ERC3643ComplianceModuleInvariantStorage} from "src/modules/library/ERC3643ComplianceModuleInvariantStorage.sol";
 // RuleConditionalTransfer
 import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
 import {
@@ -69,7 +69,7 @@ abstract contract HelperContractOwnable is
 
     // CMTAT
     CMTATDeployment cmtatDeployment;
-    CMTATStandalone cmtatContract;
+    CMTATStandardStandalone cmtatContract;
 
     // RuleEngineOwnable Mock
     RuleEngineOwnable public ruleEngineMock;

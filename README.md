@@ -77,10 +77,9 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 
 | RuleEngine version                                           | Compatible Versions                                          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **v3.0.0-rc3**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
+| **v3.0.0-rc4**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc1](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc1) |
+| **v3.0.0-rc3**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0) |
 | **v3.0.0-rc2**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
-| **v3.0.0-rc1**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
-| **v3.0.0-rc0**                                               | CMTAT ≥ v3.0.0<br />                                         |
 | **[v1.0.2.1](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2.1)** | CMTAT v2.3.0 (audited)                                       |
 
 #### CMTAT v3.0.0
@@ -147,17 +146,29 @@ If you need non-standard helper functions (batch bind/unbind, self-binding appro
 
 ### Like CMTAT
 
-Before each ERC-20 transfer, the CMTAT calls the function `transferred` which is the entrypoint for the RuleEngine.
+Before each ERC-20 transfer, mint, or burn, CMTAT calls the RuleEngine through the internal function `_checkTransferred`, which dispatches to one of two `transferred` overloads depending on whether a non-zero spender is present.
 
 ```solidity
-function transferred(address from,address to,uint256 value)
+// Called when spender == address(0)
+function transferred(address from, address to, uint256 value)
+
+// Called when spender != address(0)
+function transferred(address spender, address from, address to, uint256 value)
 ```
 
-If you want to apply restrictions on the spender address, you have to call the `transferred` function which takes the spender argument in your ERC-20  function `transferFrom`.
+#### CMTAT v3.3.0 — mint and burn use the spender path
 
-```solidity
-function transferred(address spender,address from,address to,uint256 value)
-```
+Since CMTAT v3.3.0, **mint and burn operations also go through the 4-argument overload**, with the operator (minter or burner) passed as `spender`:
+
+| Operation | `spender` | `from` | `to` |
+|-----------|-----------|--------|------|
+| `transfer` / `transferFrom` | caller / approved spender | token holder | recipient |
+| `mint` | minter (`_msgSender()`) | `address(0)` | recipient |
+| `burn` | burner (`_msgSender()`) | token holder | `address(0)` |
+
+The 3-argument overload is only called when `spender == address(0)`, which does not occur in normal CMTAT v3.3.0 flows.
+
+> **Rule authoring note:** Rules that check the `spender` argument in `transferred(spender, from, to, value)` must explicitly handle the mint (`from == address(0)`) and burn (`to == address(0)`) cases. A spender check that is intended only for `transferFrom` will also fire for mints and burns unless the rule skips it when `from` or `to` is the zero address. See `RuleWhitelist` and `RuleSpenderWhitelist` in the Rules repository for reference implementations.
 
 For example, CMTAT defines the interaction with the RuleEngine inside a specific module, [ValidationModuleRuleEngine](https://github.com/CMTA/CMTAT/blob/master/contracts/modules/wrapper/extensions/ValidationModule/ValidationModuleRuleEngine.sol) and [CMTATBaseRuleEngine](https://github.com/CMTA/CMTAT/blob/master/contracts/modules/1_CMTATBaseRuleEngine.sol).
 
@@ -169,7 +180,7 @@ For example, CMTAT defines the interaction with the RuleEngine inside a specific
 
 ![checkTransferred](./doc/other/CMTAT/checkTransferred.png)
 
-This function `_transferred` is called before each transfer/burn/mint through the internal function `_checkTransferred` defined in [CMTAT_BASE](https://github.com/CMTA/CMTAT/blob/23a1e59f913d079d0c09d32fafbd95ab2d426093/contracts/modules/CMTAT_BASE.sol#L198).
+This function `_transferred` is called before each transfer/burn/mint through the internal function `_checkTransferred`.
 
 ### Like ERC-3643
 
@@ -267,7 +278,7 @@ The toolchain includes the following components, where the versions are the late
 - Foundry (forge-std) [v1.14.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.14.0)
 - Solidity [0.8.34](https://docs.soliditylang.org/en/v0.8.34/)
 - OpenZeppelin Contracts (submodule) [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1)
-- CMTAT [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
+- CMTAT [v3.3.0](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0)
 
 ### Access Control
 
@@ -365,8 +376,8 @@ For function signatures, struct arguments are represented with their correspondi
 |                         | `addRule(address rule_)`                                     | public | `IRule rule_` |-|RULES_MANAGEMENT_ROLE|
 |                         | `removeRule(address rule_)`                                  | public | `IRule rule_` |-|RULES_MANAGEMENT_ROLE|
 | ERC3643ComplianceModule |  |                              |                                      |                                      |               |
-|  | `bindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE |
-|  | `unbindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE |
+|  | `bindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE or approved token self-call |
+|  | `unbindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE or approved token self-call |
 | ERC3643ComplianceExtendedModule |  |                              |                                      |                                      |               |
 |  | `bindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |
 |  | `unbindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |
@@ -1392,20 +1403,20 @@ Here is the list of report performed with [Slither](https://github.com/crytic/sl
 
 | Version | Report | Assessment |
 | ------- | ------ | ---------- |
-| v3.0.0-rc2 | [slither-report.md](./doc/security/audits/tools/slither-report.md) | [slither-report-feedback.md](./doc/security/audits/tools/slither-report-feedback.md) |
+| v3.0.0-rc4 | [slither-report.md](./doc/security/audits/tools/v3.0.0-rc4/slither-report.md) | [slither-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc4/slither-report-feedback.md) |
+| v3.0.0-rc3 | [slither-report.md](./doc/security/audits/tools/v3.0.0-rc3/slither-report.md) | [slither-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc3/slither-report-feedback.md) |
+| v3.0.0-rc2 | [slither-report.md](./doc/security/audits/tools/v3.0.0-rc2/slither-report.md) | [slither-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc2/slither-report-feedback.md) |
 
 ```bash
 slither .  --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" > slither-report.md
 ```
 
-4 finding categories — 0 High · 0 Medium · 10 Low · 4 Informational
+2 finding categories — 0 High · 0 Medium · 10 Low · 2 Informational
 
 | ID | Detector | Impact | Instances | Assessment |
 |----|----------|--------|-----------|------------|
 | 0–9 | `calls-loop` | Low | 10 | Accepted by design — fan-out to rule contracts is the core architecture |
-| 10 | `dead-code` | Informational | 1 | Accepted / no action — `_msgData` override is required by inheritance/context pattern |
-| 11 | `naming-convention` | Informational | 1 | Ignored — finding is in external CMTAT dependency code |
-| 12–13 | `unindexed-event-address` | Informational | 2 | Deferred — adding `indexed` to `TokenBound`/`TokenUnbound` is interface-breaking |
+| 10–11 | `unindexed-event-address` | Informational | 2 | Deferred — adding `indexed` to `TokenBound`/`TokenUnbound` is interface-breaking |
 
 #### Aderyn
 
@@ -1417,21 +1428,23 @@ aderyn -x mocks --output aderyn-report.md
 
 | Version | Report | Assessment |
 | ------- | ------ | ---------- |
-| v3.0.0-rc2 | [aderyn-report.md](./doc/security/audits/tools/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/aderyn-report-feedback.md) |
+| v3.0.0-rc4 | [aderyn-report.md](./doc/security/audits/tools/v3.0.0-rc4/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc4/aderyn-report-feedback.md) |
+| v3.0.0-rc3 | [aderyn-report.md](./doc/security/audits/tools/v3.0.0-rc3/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc3/aderyn-report-feedback.md) |
+| v3.0.0-rc2 | [aderyn-report.md](./doc/security/audits/tools/v3.0.0-rc2/aderyn-report.md) | [aderyn-report-feedback.md](./doc/security/audits/tools/v3.0.0-rc2/aderyn-report-feedback.md) |
 
-Report scope: 18 Solidity files, 542 nSLOC.
+Report scope: 24 Solidity files, 629 nSLOC.
 
 0 High · 8 Low
 
 | ID | Finding | Instances | Assessment |
 |----|---------|-----------|------------|
 | L-1 | Centralization Risk | 14 | Accepted by design — privileged compliance tool |
-| L-2 | Unspecific Solidity Pragma | 14 | Accepted by design — intentional for library reusability |
-| L-3 | PUSH0 Opcode | 18 | Not applicable — project targets Prague EVM |
+| L-2 | Unspecific Solidity Pragma | 19 | Accepted by design — intentional for library reusability |
+| L-3 | PUSH0 Opcode | 24 | Not applicable — project targets Prague EVM |
 | L-4 | Modifier Invoked Only Once | 1 | Accepted by design — keeps hook-style access-control abstraction |
 | L-5 | Empty Block | 9 | Accepted by design — access-control hook pattern |
-| L-6 | Loop Contains `require`/`revert` | 1 | Accepted by design — `setRules` is an atomic batch operation |
-| L-7 | Costly Operations Inside Loop | 1 | Accepted — unavoidable `SSTORE` in `setRules` |
+| L-6 | Loop Contains `require`/`revert` | 4 | Accepted by design — `setRules` and `bindTokens`/`unbindTokens` are atomic batch operations |
+| L-7 | Costly Operations Inside Loop | 4 | Accepted — unavoidable `SSTORE` in batch operations |
 | L-8 | Unchecked Return | 1 | Accepted — `_grantRole` return is irrelevant in constructor |
 
 ## Documentation

@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {CMTATDeployment} from "../utils/CMTATDeployment.sol";
-import {CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
+import {CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.sol";
 import {RuleEngineScript} from "../../script/RuleEngineScript.s.sol";
 
 /**
@@ -17,7 +17,7 @@ contract RuleEngineScriptTest is Test {
 
         // Deploy a CMTAT first (admin is address(1) by default in CMTATDeployment)
         CMTATDeployment cmtatDeployment = new CMTATDeployment();
-        CMTATStandalone cmtat = cmtatDeployment.cmtat();
+        CMTATStandardStandalone cmtat = cmtatDeployment.cmtat();
 
         // Grant DEFAULT_ADMIN_ROLE to the deployer so setRuleEngine succeeds.
         // Cache the role bytes32 before pranking to avoid consuming the prank on a view call.

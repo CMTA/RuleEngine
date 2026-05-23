@@ -8,7 +8,7 @@ import "./CMTATIntegrationBase.sol";
  * @title General functions of the RuleEngine (v3.2.0-rc2)
  */
 contract RuleEngineCMTATIntegrationTest is RuleEngineCMTATIntegrationBase {
-    function _deployCmtat() internal override returns (CMTATStandalone) {
+    function _deployCmtat() internal override returns (CMTATStandardStandalone) {
         cmtatDeployment = new CMTATDeployment();
         return cmtatDeployment.cmtat();
     }

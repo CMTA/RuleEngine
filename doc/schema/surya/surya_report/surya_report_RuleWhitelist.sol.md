@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/validation/RuleWhitelist.sol | cf4b1568b96b381fa66ea41cf675e47455852055 |
+| ./mocks/rules/validation/RuleWhitelist.sol | a5f2223286e30d05a0444ab0cc7cfd0a2aef7080 |
 
 
 ### Contracts Description Table
@@ -22,8 +22,8 @@
 | └ | canTransferFrom | Public ❗️ |   |NO❗️ |
 | └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
 | └ | detectTransferRestrictionFrom | Public ❗️ |   |NO❗️ |
-| └ | transferred | Public ❗️ |   |NO❗️ |
-| └ | transferred | Public ❗️ |   |NO❗️ |
+| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
+| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
 
 
 ### Legend

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/RulesManagementModule.sol | 197635bda28fa8af5cba2be10740ab1a044dc95c |
+| ./modules/RulesManagementModule.sol | 27d1c99e25a5558da4ddf1e527e5ac9f1e8f4a32 |
 
 
 ### Contracts Description Table
@@ -19,6 +19,8 @@
 | └ | setRules | Public ❗️ | 🛑  | onlyRulesManager |
 | └ | clearRules | Public ❗️ | 🛑  | onlyRulesManager |
 | └ | addRule | Public ❗️ | 🛑  | onlyRulesManager |
+| └ | maxRules | Public ❗️ |   |NO❗️ |
+| └ | setMaxRules | Public ❗️ | 🛑  | onlyRulesLimitManager |
 | └ | removeRule | Public ❗️ | 🛑  | onlyRulesManager |
 | └ | rulesCount | Public ❗️ |   |NO❗️ |
 | └ | containsRule | Public ❗️ |   |NO❗️ |
@@ -30,6 +32,7 @@
 | └ | _transferred | Internal 🔒 | 🛑  | |
 | └ | _transferred | Internal 🔒 | 🛑  | |
 | └ | _onlyRulesManager | Internal 🔒 | 🛑  | |
+| └ | _onlyRulesLimitManager | Internal 🔒 | 🛑  | |
 
 
 ### Legend

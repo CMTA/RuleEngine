@@ -5,7 +5,7 @@
 pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
-import {ICMTATConstructor, CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
+import {ICMTATConstructor, CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.sol";
 import {IERC1643CMTAT} from "CMTAT/interfaces/tokenization/draft-IERC1643CMTAT.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {RuleEngine} from "src/deployment/RuleEngine.sol";
@@ -35,8 +35,8 @@ contract CMTATWithRuleEngineScript is Script {
                 "CMTAT_info"
             );
         ICMTATConstructor.Engine memory engines = ICMTATConstructor.Engine(IRuleEngine(address(0)));
-        CMTATStandalone cmtatContract =
-            new CMTATStandalone(trustedForwarder, admin, erc20Attributes, extraInformationAttributes, engines);
+        CMTATStandardStandalone cmtatContract =
+            new CMTATStandardStandalone(trustedForwarder, admin, erc20Attributes, extraInformationAttributes, engines);
         console.log("CMTAT cmtatContract : ", address(cmtatContract));
         // whitelist
         RuleWhitelist ruleWhitelist = new RuleWhitelist(admin, trustedForwarder);

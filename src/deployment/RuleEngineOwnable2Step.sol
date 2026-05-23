@@ -14,9 +14,10 @@ import {Ownable2StepInterfaceId} from "../modules/library/Ownable2StepInterfaceI
  */
 contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
     /**
-     * @param owner_ Address of the contract owner (ERC-173)
-     * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
-     * @param tokenContract Address of the token contract to bind (can be zero address)
+     * @notice Deploys a RuleEngine with ERC-173 two-step ownership transfer.
+     * @param owner_ Address of the initial contract owner (ERC-173).
+     * @param forwarderIrrevocable Address of the ERC-2771 trusted forwarder (use zero address to disable gasless).
+     * @param tokenContract Address of the token contract to bind at deployment (use zero address to skip).
      */
     constructor(address owner_, address forwarderIrrevocable, address tokenContract)
         RuleEngineOwnableShared(forwarderIrrevocable, tokenContract)

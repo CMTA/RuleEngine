@@ -7,23 +7,18 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 /* ==== Interface and other library === */
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
+import {ERC3643ComplianceModuleInvariantStorage} from "./library/ERC3643ComplianceModuleInvariantStorage.sol";
 
-abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
+abstract contract ERC3643ComplianceModule is
+    Context,
+    IERC3643Compliance,
+    ERC3643ComplianceModuleInvariantStorage
+{
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
     /* ==== State Variables === */
     // Token binding tracking
     EnumerableSet.AddressSet internal _boundTokens;
-    // Access Control
-    // Will not be present in the final bytecode if not used
-    bytes32 public constant COMPLIANCE_MANAGER_ROLE = keccak256("COMPLIANCE_MANAGER_ROLE");
-
-    /* ==== Errors === */
-    error RuleEngine_ERC3643Compliance_InvalidTokenAddress();
-    error RuleEngine_ERC3643Compliance_TokenAlreadyBound();
-    error RuleEngine_ERC3643Compliance_TokenNotBound();
-    error RuleEngine_ERC3643Compliance_UnauthorizedCaller();
-    error RuleEngine_ERC3643Compliance_OperationNotSuccessful();
 
     /* ==== Modifier === */
     modifier onlyBoundToken() {
@@ -46,6 +41,10 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance {
      * @dev Operator warning: "multi-tenant" means one RuleEngine is shared by
      * multiple token contracts. In that setup, bind only tokens that are equally
      * trusted and governed together.
+     * @custom:security-note Operation rules (stateful rules such as `RuleConditionalTransferLight`
+     * or `RuleMintAllowance`) maintain per-address accounting that is shared across all bound tokens.
+     * Binding tokens from different issuers to the same engine will silently cross-contaminate
+     * their accounting. Only bind tokens that are equally trusted and governed together.
      */
     function bindToken(address token) public virtual override {
         _authorizeComplianceBindingChange(token);

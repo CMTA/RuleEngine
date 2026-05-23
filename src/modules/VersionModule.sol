@@ -11,7 +11,7 @@ abstract contract VersionModule is IERC3643Version {
      * @dev
      * Get the current version of the smart contract
      */
-    string private constant VERSION = "3.0.0";
+    string internal constant VERSION = "3.0.0";
 
     /* ============ Events ============ */
     /*//////////////////////////////////////////////////////////////

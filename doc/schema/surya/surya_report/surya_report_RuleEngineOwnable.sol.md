@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./deployment/RuleEngineOwnable.sol | 19b70cde4d1a7d7d4e5453ea53d5e69308043167 |
+| ./deployment/RuleEngineOwnable.sol | 0cec773602b5703708472364b6280ead7f29906a |
 
 
 ### Contracts Description Table
@@ -18,7 +18,9 @@
 | **RuleEngineOwnable** | Implementation | RuleEngineOwnableShared, Ownable |||
 | └ | <Constructor> | Public ❗️ | 🛑  | RuleEngineOwnableShared Ownable |
 | └ | _onlyRulesManager | Internal 🔒 | 🛑  | onlyOwner |
+| └ | _onlyRulesLimitManager | Internal 🔒 | 🛑  | onlyOwner |
 | └ | _onlyComplianceManager | Internal 🔒 | 🛑  | onlyOwner |
+| └ | transferOwnership | Public ❗️ | 🛑  | onlyOwner |
 | └ | _msgSender | Internal 🔒 |   | |
 | └ | _msgData | Internal 🔒 |   | |
 | └ | _contextSuffixLength | Internal 🔒 |   | |

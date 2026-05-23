@@ -44,6 +44,8 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * Reverts if `rules_` is empty. Use {clearRules} to remove all rules explicitly.
      * To transition from one non-empty set to another without an enforcement gap,
      * call this function directly with the new set.
+     * Emits {ClearRules} when the existing rule set is non-empty, then emits {AddRule}
+     * for each new rule. Off-chain indexers must handle both events to reconstruct state.
      * Security convention: rule contracts should be treated as trusted business logic,
      * but should not also be granted {RULES_MANAGEMENT_ROLE}.
      */

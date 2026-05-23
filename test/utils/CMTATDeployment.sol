@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import {ICMTATConstructor, CMTATStandalone} from "CMTAT/deployment/CMTATStandalone.sol";
+import {ICMTATConstructor, CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {IERC1643CMTAT} from "CMTAT/interfaces/tokenization/draft-IERC1643CMTAT.sol";
 
@@ -10,7 +10,7 @@ contract CMTATDeployment {
     address constant ZERO_ADDRESS = address(0);
     address constant DEFAULT_ADMIN_ADDRESS = address(1);
 
-    CMTATStandalone public cmtat;
+    CMTATStandardStandalone public cmtat;
 
     constructor() {
         // CMTAT
@@ -25,7 +25,7 @@ contract CMTATDeployment {
                 "CMTAT_info"
             );
         ICMTATConstructor.Engine memory engines = ICMTATConstructor.Engine(IRuleEngine(ZERO_ADDRESS));
-        cmtat = new CMTATStandalone(
+        cmtat = new CMTATStandardStandalone(
             ZERO_ADDRESS, DEFAULT_ADMIN_ADDRESS, erc20Attributes, extraInformationAttributes, engines
         );
     }

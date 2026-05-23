@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./interfaces/IRulesManagementModule.sol | 417e61575c2de9c0ac3946d842e738a2c4fa35ed |
+| ./interfaces/IRulesManagementModule.sol | c51bcceecca4f78a7bbe5b394786eec2416afe84 |
 
 
 ### Contracts Description Table
@@ -16,6 +16,8 @@
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
 | **IRulesManagementModule** | Interface |  |||
+| └ | maxRules | External ❗️ |   |NO❗️ |
+| └ | setMaxRules | External ❗️ | 🛑  |NO❗️ |
 | └ | setRules | External ❗️ | 🛑  |NO❗️ |
 | └ | rulesCount | External ❗️ |   |NO❗️ |
 | └ | rule | External ❗️ |   |NO❗️ |
@@ -23,7 +25,7 @@
 | └ | clearRules | External ❗️ | 🛑  |NO❗️ |
 | └ | addRule | External ❗️ | 🛑  |NO❗️ |
 | └ | removeRule | External ❗️ | 🛑  |NO❗️ |
-| └ | containsRule | External ❗️ | 🛑  |NO❗️ |
+| └ | containsRule | External ❗️ |   |NO❗️ |
 
 
 ### Legend

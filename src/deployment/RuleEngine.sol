@@ -11,13 +11,21 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 /* ==== Modules === */
 import {ERC2771ModuleStandalone, ERC2771Context} from "../modules/ERC2771ModuleStandalone.sol";
+import {ERC3643ComplianceRolesStorage} from "../modules/library/ERC3643ComplianceRolesStorage.sol";
+import {RulesManagementModuleRolesStorage} from "../modules/library/RulesManagementModuleRolesStorage.sol";
 /* ==== Base contract === */
 import {RuleEngineBase} from "../RuleEngineBase.sol";
 
 /**
  * @title Implementation of a ruleEngine as defined by the CMTAT
  */
-contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase, AccessControlEnumerable {
+contract RuleEngine is
+    ERC2771ModuleStandalone,
+    RuleEngineBase,
+    AccessControlEnumerable,
+    ERC3643ComplianceRolesStorage,
+    RulesManagementModuleRolesStorage
+{
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /**
@@ -39,7 +47,11 @@ contract RuleEngine is ERC2771ModuleStandalone, RuleEngineBase, AccessControlEnu
     /* ============ ACCESS CONTROL ============ */
     /**
      * @notice Grants `role` to `account`.
-     * @dev Prevents granting any role to accounts already configured as rules.
+     * @dev Prevents granting any role to accounts currently configured as rules.
+     * Note: this check is intentionally one-directional. {addRule} does not verify
+     * whether the rule address already holds a privileged role, and this function does
+     * not prevent adding a privileged address as a rule afterwards. Operators are
+     * responsible for keeping rule contracts and privileged accounts disjoint.
      */
     function grantRole(bytes32 role, address account) public virtual override(AccessControl, IAccessControl) {
         if (_rules.contains(account)) {

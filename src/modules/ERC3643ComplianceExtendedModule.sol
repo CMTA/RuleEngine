@@ -12,7 +12,12 @@ abstract contract ERC3643ComplianceExtendedModule is ERC3643ComplianceModule, IE
 
     mapping(address token => bool approved) private _tokenSelfBindingApproval;
 
-    /// @inheritdoc IERC3643ComplianceExtended
+    /**
+     * @inheritdoc IERC3643ComplianceExtended
+     * @custom:security-note See {bindToken} for multi-tenant accounting risks. All tokens bound
+     * in this batch share the same rule state. Only bind tokens that are equally trusted and
+     * governed together.
+     */
     function bindTokens(address[] calldata tokens) public virtual override onlyComplianceManager {
         for (uint256 i = 0; i < tokens.length; ++i) {
             _bindToken(tokens[i]);
