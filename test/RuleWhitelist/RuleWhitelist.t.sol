@@ -112,6 +112,13 @@ contract RuleWhitelistTest is Test, HelperContract {
         assertEq(resString, TEXT_CODE_NOT_FOUND);
     }
 
+    function testReturnTheNoRestrictionMessageForTheCodeZero() public {
+        // Act
+        resString = ruleWhitelist.messageForTransferRestriction(TRANSFER_OK);
+        // Assert
+        assertEq(resString, TEXT_TRANSFER_OK);
+    }
+
     function testCanTransfer() public {
         // Arrange
         _addAddressesToTheList();

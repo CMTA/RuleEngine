@@ -36,6 +36,16 @@ abstract contract RuleEngineBase is
     RuleEngineInvariantStorage,
     IRuleEngineERC1404
 {
+    /* ============ State variables ============ */
+    /**
+     * @dev ERC-1404 reserves the code 0 as the "no restriction" sentinel. It is never claimed by a rule,
+     * so it is answered here instead of being reported as an unknown code.
+     * The message matches the one returned by CMTAT (ValidationModuleERC1404) for the same code.
+     */
+    string private constant TEXT_TRANSFER_OK = "NoRestriction";
+    /// @dev Returned when no active rule claims the restriction code
+    string private constant TEXT_CODE_NOT_FOUND = "Unknown restriction code";
+
     /* ============ State functions ============ */
     /*
      * @inheritdoc IRuleEngine
@@ -178,15 +188,20 @@ abstract contract RuleEngineBase is
      * Rule designers should keep restriction codes unique across rules.
      * If a code is shared intentionally, all rules using that code should return
      * the same message to avoid ambiguous operator feedback.
+     * The reserved code 0 (REJECTED_CODE_BASE.TRANSFER_OK) is answered before the rules are queried,
+     * so that a valid transfer is never reported as an unknown restriction code.
      */
     function _messageForTransferRestriction(uint8 restrictionCode) internal view virtual returns (string memory) {
+        if (restrictionCode == uint8(REJECTED_CODE_BASE.TRANSFER_OK)) {
+            return TEXT_TRANSFER_OK;
+        }
         uint256 rulesLength = rulesCount();
         for (uint256 i = 0; i < rulesLength; ++i) {
             if (IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)) {
                 return IRule(rule(i)).messageForTransferRestriction(restrictionCode);
             }
         }
-        return "Unknown restriction code";
+        return TEXT_CODE_NOT_FOUND;
     }
 
     /**

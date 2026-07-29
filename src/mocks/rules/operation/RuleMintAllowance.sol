@@ -115,6 +115,9 @@ contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, 
     }
 
     function messageForTransferRestriction(uint8 restrictionCode) external pure override returns (string memory) {
+        if (restrictionCode == uint8(REJECTED_CODE_BASE.TRANSFER_OK)) {
+            return TEXT_TRANSFER_OK;
+        }
         if (restrictionCode == CODE_MINTER_INSUFFICIENT_ALLOWANCE) {
             return TEXT_MINTER_INSUFFICIENT_ALLOWANCE;
         }

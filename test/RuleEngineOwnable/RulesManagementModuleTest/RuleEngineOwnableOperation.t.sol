@@ -421,4 +421,32 @@ contract RuleEngineOwnableOperationTest is Test, HelperContractOwnable {
         // Arrange - Assert
         assertEq(resCallBool, true);
     }
+
+    function testMessageForTransferRestrictionWithTransferOKCode() public {
+        // Act
+        resString = ruleEngineMock.messageForTransferRestriction(TRANSFER_OK);
+
+        // Assert
+        assertEq(resString, TEXT_TRANSFER_OK);
+    }
+
+    function testMessageForTransferRestrictionWithTransferOKCodeNoRule() public {
+        // Arrange
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.clearRules();
+
+        // Act
+        resString = ruleEngineMock.messageForTransferRestriction(TRANSFER_OK);
+
+        // Assert
+        assertEq(resString, TEXT_TRANSFER_OK);
+    }
+
+    function testMessageForTransferRestrictionWithUnknownRestrictionCode() public {
+        // Act
+        resString = ruleEngineMock.messageForTransferRestriction(codeNonexistent);
+
+        // Assert
+        assertEq(resString, "Unknown restriction code");
+    }
 }

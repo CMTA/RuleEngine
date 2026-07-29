@@ -161,6 +161,26 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         assertEq(resString, "Unknown restriction code");
     }
 
+    function testMessageForTransferRestrictionWithTransferOKCode() public {
+        // Act
+        resString = ruleEngineMock.messageForTransferRestriction(TRANSFER_OK);
+
+        // Assert
+        assertEq(resString, TEXT_TRANSFER_OK);
+    }
+
+    function testMessageForTransferRestrictionWithTransferOKCodeNoRule() public {
+        // Arrange
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.clearRules();
+
+        // Act
+        resString = ruleEngineMock.messageForTransferRestriction(TRANSFER_OK);
+
+        // Assert
+        assertEq(resString, TEXT_TRANSFER_OK);
+    }
+
     function testcanTransferOK() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);

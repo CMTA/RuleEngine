@@ -364,4 +364,22 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         // forge-lint: disable-next-line(unsafe-typecast)
         assertEq(bytes4(data), ruleEngineOwnable2StepExposed.exposedMsgData.selector);
     }
+
+    function testMessageForTransferRestrictionWithTransferOKCode() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.addRule(ruleConditionalTransferLight);
+
+        assertEq(ruleEngineMock.messageForTransferRestriction(TRANSFER_OK), TEXT_TRANSFER_OK);
+    }
+
+    function testMessageForTransferRestrictionWithTransferOKCodeNoRule() public view {
+        assertEq(ruleEngineMock.messageForTransferRestriction(TRANSFER_OK), TEXT_TRANSFER_OK);
+    }
+
+    function testMessageForTransferRestrictionWithUnknownRestrictionCode() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.addRule(ruleConditionalTransferLight);
+
+        assertEq(ruleEngineMock.messageForTransferRestriction(CODE_NONEXISTENT), TEXT_CODE_NOT_FOUND);
+    }
 }

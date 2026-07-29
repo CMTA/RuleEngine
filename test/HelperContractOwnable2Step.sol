@@ -18,4 +18,10 @@ abstract contract HelperContractOwnable2Step {
     RuleConditionalTransferLight public ruleConditionalTransferLight;
 
     string internal constant ERC2771_FORWARDER_DOMAIN = "ERC2771ForwarderDomain";
+
+    // ERC-1404 restriction codes and messages
+    uint8 internal constant TRANSFER_OK = 0;
+    uint8 internal constant CODE_NONEXISTENT = 255;
+    string internal constant TEXT_TRANSFER_OK = "NoRestriction";
+    string internal constant TEXT_CODE_NOT_FOUND = "Unknown restriction code";
 }

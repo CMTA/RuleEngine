@@ -138,7 +138,9 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
      *
      */
     function messageForTransferRestriction(uint8 restrictionCode) external pure override returns (string memory) {
-        if (restrictionCode == CODE_TRANSFER_REQUEST_NOT_APPROVED) {
+        if (restrictionCode == uint8(REJECTED_CODE_BASE.TRANSFER_OK)) {
+            return TEXT_TRANSFER_OK;
+        } else if (restrictionCode == CODE_TRANSFER_REQUEST_NOT_APPROVED) {
             return TEXT_TRANSFER_REQUEST_NOT_APPROVED;
         } else {
             return TEXT_CODE_NOT_FOUND;

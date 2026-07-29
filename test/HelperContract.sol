@@ -85,7 +85,7 @@ abstract contract HelperContract is
     uint8 codeNonexistent = 255;
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
-    string constant TEXT_TRANSFER_OK = "NoRestriction";
+    // TEXT_TRANSFER_OK ("NoRestriction") comes from RuleCommonInvariantStorage
     // Forwarder
     string ERC2771ForwarderDomain = "ERC2771ForwarderDomain";
 

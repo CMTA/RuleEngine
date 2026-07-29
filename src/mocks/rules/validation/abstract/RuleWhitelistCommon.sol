@@ -26,7 +26,9 @@ abstract contract RuleWhitelistCommon is RuleWhitelistInvariantStorage, IRule {
      *
      */
     function messageForTransferRestriction(uint8 restrictionCode) external pure override returns (string memory) {
-        if (restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED) {
+        if (restrictionCode == uint8(REJECTED_CODE_BASE.TRANSFER_OK)) {
+            return TEXT_TRANSFER_OK;
+        } else if (restrictionCode == CODE_ADDRESS_FROM_NOT_WHITELISTED) {
             return TEXT_ADDRESS_FROM_NOT_WHITELISTED;
         } else if (restrictionCode == CODE_ADDRESS_TO_NOT_WHITELISTED) {
             return TEXT_ADDRESS_TO_NOT_WHITELISTED;
