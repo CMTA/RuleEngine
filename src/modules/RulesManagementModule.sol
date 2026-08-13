@@ -92,11 +92,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * @inheritdoc IRulesManagementModule
      */
     function setMaxRules(uint256 maxRules_) public virtual override(IRulesManagementModule) onlyRulesLimitManager {
-        if (maxRules_ == 0) {
-            revert RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed();
-        }
-        _maxRules = maxRules_;
-        emit SetMaxRules(maxRules_);
+        _setMaxRules(maxRules_);
     }
 
     /**
@@ -159,6 +155,22 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     function _clearRules() internal virtual {
         emit ClearRules();
         _rules.clear();
+    }
+
+    /**
+     * @notice Set the maximum number of rules and emit the corresponding event
+     * @dev Single point where `_maxRules` is written, so the invariant "every change to the cap emits
+     * {SetMaxRules}" holds structurally rather than by convention. Called by {setMaxRules} and by the
+     * deployable contracts' constructors, which emit the initial cap so the event log alone is enough to
+     * reconstruct it.
+     * @param maxRules_ New maximum number of rules; must not be zero.
+     */
+    function _setMaxRules(uint256 maxRules_) internal virtual {
+        if (maxRules_ == 0) {
+            revert RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed();
+        }
+        _maxRules = maxRules_;
+        emit SetMaxRules(maxRules_);
     }
 
     /**

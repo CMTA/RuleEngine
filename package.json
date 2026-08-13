@@ -4,8 +4,8 @@
     "uml": "mkdir -p docOut/uml && npx sol2uml class src -o docOut/uml/uml_src.svg",
     "uml:ruleEngine": "mkdir -p docOut/uml && npx sol2uml class src/deployment/RuleEngine.sol -o docOut/uml/uml_RuleEngine.svg",
     "uml:test": "mkdir -p docOut/uml && npx sol2uml class test -o docOut/uml/uml_test.svg",
-    "surya:report": "mkdir -p docOut/surya_report && npx surya mdreport docOut/surya_report/surya_report_ruleEngine.md src/deployment/RuleEngine.sol",
-    "surya:graph": "mkdir -p docOut/surya_graph && npx surya graph src/deployment/RuleEngine.sol | dot -Tpng > docOut/surya_graph/surya_graph_RuleEngine.png"
+    "surya:report": "mkdir -p docOut/npm && npx surya mdreport docOut/npm/surya_report_ruleEngine.md src/deployment/RuleEngine.sol",
+    "surya:graph": "mkdir -p docOut/npm && npx surya graph src/deployment/RuleEngine.sol | dot -Tpng > docOut/npm/surya_graph_RuleEngine.png"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-foundry": "^1.2.1",

@@ -45,7 +45,7 @@ contract RuleEngine is
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         // Emit the initial cap so the event log alone is enough to reconstruct maxRules.
-        emit SetMaxRules(_maxRules);
+        _setMaxRules(DEFAULT_MAX_RULES);
     }
 
     /* ============ ACCESS CONTROL ============ */
