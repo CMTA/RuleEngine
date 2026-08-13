@@ -128,6 +128,12 @@ contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, 
 
     /**
      * @notice Returns TRANSFER_OK; without spender context mint allowance cannot be evaluated.
+     * @dev WARNING: this path fails open. The ERC-1404 3-argument signature carries no spender,
+     * and the mint allowance is keyed by spender, so this rule cannot evaluate a mint here and
+     * answers TRANSFER_OK. The engine aggregates that answer, so `detectTransferRestriction` and
+     * `canTransfer` on the RuleEngine can report a mint as allowed that `transferred(spender, ...)`
+     * will revert. Integrators must use the 4-argument `detectTransferRestrictionFrom` /
+     * `canTransferFrom` to pre-check a mint.
      * @return Always REJECTED_CODE_BASE.TRANSFER_OK.
      */
     function detectTransferRestriction(address, address, uint256) public pure override returns (uint8) {

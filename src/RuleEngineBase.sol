@@ -238,7 +238,7 @@ abstract contract RuleEngineBase is
      * @param interfaceId The interface identifier to check.
      * @return True if the interface is part of the shared RuleEngine base, false otherwise.
      */
-    function _supportsRuleEngineBaseInterface(bytes4 interfaceId) internal pure returns (bool) {
+    function _supportsRuleEngineBaseInterface(bytes4 interfaceId) internal pure virtual returns (bool) {
         return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
             || interfaceId == ERC1404InterfaceId.IERC1404_INTERFACE_ID
             || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID

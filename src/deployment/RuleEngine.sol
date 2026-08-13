@@ -44,6 +44,8 @@ contract RuleEngine is
             _bindToken(tokenContract);
         }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        // Emit the initial cap so the event log alone is enough to reconstruct maxRules.
+        emit SetMaxRules(_maxRules);
     }
 
     /* ============ ACCESS CONTROL ============ */

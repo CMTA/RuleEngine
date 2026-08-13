@@ -28,6 +28,8 @@ abstract contract RuleEngineOwnableShared is ERC2771ModuleStandalone, RuleEngine
         if (tokenContract != address(0)) {
             _bindToken(tokenContract);
         }
+        // Emit the initial cap so the event log alone is enough to reconstruct maxRules.
+        emit SetMaxRules(_maxRules);
     }
 
     /* ============ ERC-165 ============ */

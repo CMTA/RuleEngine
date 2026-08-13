@@ -745,6 +745,13 @@ Returns true if the transfer is valid, and false otherwise.
 
 Does not check balances or access rights (Access Control).
 
+> **Warning (spender-dependent rules fail open here):** this signature carries no `spender`. A rule whose
+> decision depends on the spender — for example a per-minter mint allowance — cannot evaluate the operation
+> on this path and must answer "no restriction". The RuleEngine aggregates that answer, so `canTransfer` and
+> `detectTransferRestriction` can report a mint as allowed that the state-changing
+> `transferred(spender, from, to, value)` will revert. To pre-check an operation that has an operator, use
+> the 4-argument `canTransferFrom` / `detectTransferRestrictionFrom`.
+
 **Input Parameters:**
 
 | Name  | Type    | Description                       |

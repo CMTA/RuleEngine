@@ -13,3 +13,6 @@
 [submodule "lib/CMTATv3.0.0"]
 	path = lib/CMTATv3.0.0
 	url = https://github.com/CMTA/CMTAT
+[submodule "ERC-3643"]
+	path = ERC-3643
+	url = https://github.com/ERC-3643/ERC-3643

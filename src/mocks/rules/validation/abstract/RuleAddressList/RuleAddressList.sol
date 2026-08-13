@@ -106,7 +106,7 @@ abstract contract RuleAddressList is
      * @return One boolean per input address, true when listed.
      *
      */
-    function addressIsListedBatch(address[] memory _targetAddresses) public view returns (bool[] memory) {
+    function addressIsListedBatch(address[] calldata _targetAddresses) public view virtual returns (bool[] memory) {
         bool[] memory isListed = new bool[](_targetAddresses.length);
         for (uint256 i = 0; i < _targetAddresses.length; ++i) {
             isListed[i] = _addressIsListed(_targetAddresses[i]);
@@ -137,7 +137,7 @@ abstract contract RuleAddressList is
      * @dev This surcharge is not necessary if you do not use the ERC2771Module
      * @return sender The transaction sender, unwrapped from the forwarder calldata when relayed.
      */
-    function _msgSender() internal view override(ERC2771Context, Context) returns (address sender) {
+    function _msgSender() internal view virtual override(ERC2771Context, Context) returns (address sender) {
         return ERC2771Context._msgSender();
     }
 
@@ -145,7 +145,7 @@ abstract contract RuleAddressList is
      * @dev This surcharge is not necessary if you do not use the ERC2771Module
      * @return The transaction calldata, with the appended sender stripped when relayed.
      */
-    function _msgData() internal view override(ERC2771Context, Context) returns (bytes calldata) {
+    function _msgData() internal view virtual override(ERC2771Context, Context) returns (bytes calldata) {
         return ERC2771Context._msgData();
     }
 
@@ -153,7 +153,7 @@ abstract contract RuleAddressList is
      * @dev This surcharge is not necessary if you do not use the ERC2771Module
      * @return The length of the ERC-2771 calldata suffix.
      */
-    function _contextSuffixLength() internal view override(ERC2771Context, Context) returns (uint256) {
+    function _contextSuffixLength() internal view virtual override(ERC2771Context, Context) returns (uint256) {
         return ERC2771Context._contextSuffixLength();
     }
 }

@@ -49,6 +49,22 @@ forge lint
 
 ### v3.0.0-rc5
 
+### Changed
+
+- `ERC3643ComplianceModule._bindToken` / `_unbindToken`: rely on the `EnumerableSet` mutation return value instead of a preceding `contains()` lookup, keeping the `TokenAlreadyBound` / `TokenNotBound` diagnostics (269 gas measured).
+- `_bindToken`, `_unbindToken` and `RuleEngineBase._supportsRuleEngineBaseInterface` are now `virtual`, along with the remaining non-`virtual` internals in the mock rules, per the project convention.
+- `RuleAddressList.addressIsListedBatch`: `memory` parameter changed to `calldata` (587 gas measured for 10 addresses).
+- Deployment now emits `SetMaxRules` with the initial cap, so the event log alone is sufficient to reconstruct `maxRules`.
+
+### Removed
+
+- `RuleEngine_ERC3643Compliance_OperationNotSuccessful`: unreachable after the bind/unbind simplification and referenced nowhere else.
+
+### Documentation
+
+- Document that the ERC-1404 3-argument `canTransfer` / `detectTransferRestriction` path fails open for spender-dependent rules, and that `canTransferFrom` / `detectTransferRestrictionFrom` must be used to pre-check an operation that has an operator.
+- Add the code-quality review in [doc/security/audits/CLAUDE_ANALYSIS.md](./doc/security/audits/CLAUDE_ANALYSIS.md).
+
 ### Dependencies
 
 - Update CMTAT submodule to [v3.3.0-rc3](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3).

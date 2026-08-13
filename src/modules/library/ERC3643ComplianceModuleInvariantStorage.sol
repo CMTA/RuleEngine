@@ -12,5 +12,4 @@ abstract contract ERC3643ComplianceModuleInvariantStorage {
     error RuleEngine_ERC3643Compliance_TokenAlreadyBound();
     error RuleEngine_ERC3643Compliance_TokenNotBound();
     error RuleEngine_ERC3643Compliance_UnauthorizedCaller();
-    error RuleEngine_ERC3643Compliance_OperationNotSuccessful();
 }

@@ -175,6 +175,13 @@ Since CMTAT v3.3.0, mint (`from == address(0)`) and burn (`to == address(0)`) th
 
 View path: `detectTransferRestriction()` iterates rules, returns first non-zero code.
 
+**The 3-argument view path fails open for spender-dependent rules.** `detectTransferRestriction` and
+`canTransfer` carry no `spender`, so a rule keyed by spender (e.g. a per-minter mint allowance) cannot
+evaluate the operation and must answer "no restriction". The engine aggregates that answer, so these two views
+can report a mint as allowed that `transferred(spender, ...)` will revert. Use the 4-argument
+`detectTransferRestrictionFrom` / `canTransferFrom` to pre-check an operation that has an operator. See
+`H-1` in `doc/security/audits/CLAUDE_ANALYSIS.md`.
+
 ### Storage: EnumerableSet
 
 Both rules and bound tokens use `EnumerableSet.AddressSet`:

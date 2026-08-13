@@ -89,10 +89,10 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC364
      * @dev Removes a token from the bound set.
      * @param token The token to unbind; reverts when it is not currently bound.
      */
-    function _unbindToken(address token) internal {
-        require(_boundTokens.contains(token), RuleEngine_ERC3643Compliance_TokenNotBound());
-        // Should never revert because we check if the token address is already set before
-        require(_boundTokens.remove(token), RuleEngine_ERC3643Compliance_OperationNotSuccessful());
+    function _unbindToken(address token) internal virtual {
+        // remove() returns false when the token was not bound, so a separate
+        // contains() lookup is unnecessary.
+        require(_boundTokens.remove(token), RuleEngine_ERC3643Compliance_TokenNotBound());
 
         emit TokenUnbound(token);
     }
@@ -101,11 +101,11 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC364
      * @dev Adds a token to the bound set.
      * @param token The token to bind; reverts on the zero address or when already bound.
      */
-    function _bindToken(address token) internal {
+    function _bindToken(address token) internal virtual {
         require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
-        require(!_boundTokens.contains(token), RuleEngine_ERC3643Compliance_TokenAlreadyBound());
-        // Should never revert because we check if the token address is already set before
-        require(_boundTokens.add(token), RuleEngine_ERC3643Compliance_OperationNotSuccessful());
+        // add() returns false when the token is already bound, so a separate
+        // contains() lookup is unnecessary.
+        require(_boundTokens.add(token), RuleEngine_ERC3643Compliance_TokenAlreadyBound());
         emit TokenBound(token);
     }
 
