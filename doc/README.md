@@ -1473,6 +1473,7 @@ Here is the list of report performed with [Slither](https://github.com/crytic/sl
 
 | Version | Report | Assessment |
 | ------- | ------ | ---------- |
+| v3.0.0-rc5 | [slither-report.md](./security/audits/tools/v3.0.0-rc5/slither-report.md) | [slither-report-feedback.md](./security/audits/tools/v3.0.0-rc5/slither-report-feedback.md) |
 | v3.0.0-rc4 | [slither-report.md](./security/audits/tools/v3.0.0-rc4/slither-report.md) | [slither-report-feedback.md](./security/audits/tools/v3.0.0-rc4/slither-report-feedback.md) |
 | v3.0.0-rc3 | [slither-report.md](./security/audits/tools/v3.0.0-rc3/slither-report.md) | [slither-report-feedback.md](./security/audits/tools/v3.0.0-rc3/slither-report-feedback.md) |
 | v3.0.0-rc2 | [slither-report.md](./security/audits/tools/v3.0.0-rc2/slither-report.md) | [slither-report-feedback.md](./security/audits/tools/v3.0.0-rc2/slither-report-feedback.md) |
@@ -1498,6 +1499,7 @@ aderyn -x mocks --output aderyn-report.md
 
 | Version | Report | Assessment |
 | ------- | ------ | ---------- |
+| v3.0.0-rc5 | [aderyn-report.md](./security/audits/tools/v3.0.0-rc5/aderyn-report.md) | [aderyn-report-feedback.md](./security/audits/tools/v3.0.0-rc5/aderyn-report-feedback.md) |
 | v3.0.0-rc4 | [aderyn-report.md](./security/audits/tools/v3.0.0-rc4/aderyn-report.md) | [aderyn-report-feedback.md](./security/audits/tools/v3.0.0-rc4/aderyn-report-feedback.md) |
 | v3.0.0-rc3 | [aderyn-report.md](./security/audits/tools/v3.0.0-rc3/aderyn-report.md) | [aderyn-report-feedback.md](./security/audits/tools/v3.0.0-rc3/aderyn-report-feedback.md) |
 | v3.0.0-rc2 | [aderyn-report.md](./security/audits/tools/v3.0.0-rc2/aderyn-report.md) | [aderyn-report-feedback.md](./security/audits/tools/v3.0.0-rc2/aderyn-report-feedback.md) |
@@ -1529,6 +1531,7 @@ Here a summary of the main documentation
 | Surya report | [doc/schema/surya](./schema/surya/) |
 | Code-quality review | [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md](./security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md) |
 | Script review | [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md](./security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md) |
+| Audit overview | [doc/security/audits/AUDIT_OVERVIEW.md](./security/audits/AUDIT_OVERVIEW.md) |
 
 See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMTAT and ERC-1404](https://www.taurushq.com/blog/token-transfer-management-how-to-apply-restrictions-with-cmtat-and-erc-1404/) (RuleEngine v2.02 and CMTAT v2.4.0)
 
@@ -1653,7 +1656,7 @@ forge coverage --report lcov
 - Generate `index.html`
 
 ```bash
-forge coverage --no-match-coverage "(script|mocks|test)" --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage
+forge coverage --no-match-coverage "(mocks|test)" --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage
 ```
 
 See [Solidity Coverage in VS Code with Foundry](https://mirror.xyz/devanon.eth/RrDvKPnlD-pmpuW7hQeR5wWdVjklrpOgPCOA-PJkWFU) & [Foundry forge coverage](https://www.rareskills.io/post/foundry-forge-coverage)

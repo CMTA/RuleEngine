@@ -73,6 +73,8 @@ forge lint
 - Add the code-quality review in [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md](./doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md).
 - Add integration guides in `doc/technical`: [RuleEngine-with-CMTAT.md](./doc/technical/RuleEngine-with-CMTAT.md) and [RuleEngine-with-ERC3643.md](./doc/technical/RuleEngine-with-ERC3643.md), covering entry points, configuration, warnings, limitations and test coverage for each token standard.
 - Add the script review in [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md](./doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md).
+- Add the v3.0.0-rc5 Slither and Aderyn reports with their assessment feedback, each prefixed with a summary table of findings and dispositions.
+- Add [doc/security/audits/AUDIT_OVERVIEW.md](./doc/security/audits/AUDIT_OVERVIEW.md) indexing every analysis performed, the static-analysis results per tool, and the substantive findings that were fixed.
 
 ### Fixed
 
