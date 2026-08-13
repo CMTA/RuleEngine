@@ -55,6 +55,8 @@ forge lint
 - `_bindToken`, `_unbindToken` and `RuleEngineBase._supportsRuleEngineBaseInterface` are now `virtual`, along with the remaining non-`virtual` internals in the mock rules, per the project convention.
 - `RuleAddressList.addressIsListedBatch`: `memory` parameter changed to `calldata` (587 gas measured for 10 addresses).
 - Deployment now emits `SetMaxRules` with the initial cap, so the event log alone is sufficient to reconstruct `maxRules`.
+- `RulesManagementModule`: the rule-cap write and its event moved into a new `internal virtual _setMaxRules(uint256)`, called by `setMaxRules` and by the deployable contracts' constructors. `_maxRules` is now written from a single place, so the invariant "every change to the cap emits `SetMaxRules`" holds structurally rather than by convention, and the non-zero check guards every path including construction.
+- `RulesManagementModule`: rule insertion moved into a new `internal virtual _addRule(IRule)`, called by `addRule` and by the `setRules` loop. `AddRule` is now emitted from a single site. The `maxRules` cap is deliberately checked by the callers, since `addRule` checks per insertion while `setRules` checks the whole batch up front.
 
 ### Added
 
