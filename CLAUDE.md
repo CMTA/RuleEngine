@@ -21,7 +21,7 @@ forge test               # Run all tests
 forge test -vvv          # Verbose test output
 forge test --match-contract <Name> --match-test <fn>  # Run specific test
 forge coverage           # Code coverage
-forge coverage --no-match-coverage "(script|mocks|test)" --report lcov  # Production coverage
+forge coverage --no-match-coverage "(mocks|test)" --report lcov  # Production coverage (src/ + script/)
 forge fmt                # Format code
 ```
 

@@ -6,6 +6,9 @@ lib/
 out/
 docOut/
 cache/
+#coverage scratch output (the published report lives in doc/coverage/)
+lcov.info
+/coverage/
 .~lock.test.odt#
 nethereum-gen.settings
 #hardhat
