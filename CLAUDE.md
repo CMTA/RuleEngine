@@ -32,13 +32,13 @@ CMTAT submodule also needs `cd lib/CMTAT && npm install` for its OpenZeppelin de
 
 - **Never create git commits.** Provide commit messages only when they are requested.
 - **Always run the full test suite (`forge test`) after any code modification** — including lint-driven or mechanical refactors — before reporting completion.
-- **Always update `README.md`** to reflect the latest change.
+- **Always update the documentation** to reflect the latest change. There are two READMEs: `README.md` at the root is the short overview (project, architecture, main files, quick start); `doc/README.md` is the full reference (interfaces, Ethereum API, deployment, UML, audits). Update whichever the change affects — often both.
 - After each implemented feature or fix, provide a **one-line GitHub commit message** covering all changes since the last commit.
 
 ### When implementing a new rule or feature
 
 1. Create or update the technical documentation in `doc/technical`
-2. Update `README.md`
+2. Update `README.md` (root overview) and `doc/README.md` (full reference) as applicable
 3. Create or update tests, targeting **100% code coverage** — check with `forge coverage --report summary`
 4. Update `CHANGELOG.md`
 

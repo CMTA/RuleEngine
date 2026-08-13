@@ -42,7 +42,7 @@ Utility tool for smart contract systems.
 
 **[OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-contracts)**
 OpenZeppelin Contracts
-The version of the library used is available in the [README](../README.md)
+The version of the library used is available in the [README](./README.md#dependencies)
 
 Warning: 
 - Submodules are not automatically updated when the host repository is updated.  
