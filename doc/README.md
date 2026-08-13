@@ -1,10 +1,10 @@
-> This project has not undergone an audit and is provided as-is without any warranties.
-
 # RuleEngine
 
 This repository includes the RuleEngine contracts for [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens.
 
 The RuleEngine is an external contract used to apply transfer restrictions to another contract, such as CMTAT and ERC-3643 tokens. Acting as a controller, it can call different contract rules and apply these rules on each transfer.
+
+> This project has not undergone an audit and is provided as-is without any warranties.
 
 ## Table of Contents
 

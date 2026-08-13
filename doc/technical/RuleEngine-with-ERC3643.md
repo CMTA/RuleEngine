@@ -1,8 +1,6 @@
 # Using the RuleEngine with an ERC-3643 token
 
-How to attach a RuleEngine to an [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) (T-REX) token as its
-compliance contract, which entry points the token actually calls, how to configure the self-binding handshake,
-and the limitations to know about before deploying.
+How to attach a RuleEngine to an [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) (T-REX) token as its compliance contract, which entry points the token actually calls, how to configure the self-binding handshake, and the limitations to know about before deploying.
 
 For the CMTAT equivalent, see [RuleEngine-with-CMTAT.md](./RuleEngine-with-CMTAT.md). The two standards drive
 **disjoint entry points** on the engine, which is the most important distinction between these documents.
@@ -15,8 +13,7 @@ _Diagram source: [doc/schema/plantuml/ruleengine-flow-erc3643.puml](../schema/pl
 
 ## 2. Which entry points an ERC-3643 token uses
 
-In ERC-3643 the RuleEngine plays the role of the **compliance contract**. Taken from `Token.sol` in the
-reference implementation (submodule `lib/ERC-3643`, tag 4.1.3):
+In ERC-3643 the RuleEngine plays the role of the **compliance contract**. Taken from `Token.sol` in the reference implementation (submodule `lib/ERC-3643`, tag 4.1.3):
 
 | Token operation | Pre-check | State-changing callback |
 |---|---|---|
@@ -46,11 +43,9 @@ section 4.
 
 Same three variants as for CMTAT. ERC-3643's own specification points at ERC-173 for ownership:
 
-> The standard relies on ERC-173 to define contract ownership, with the owner having the responsibility of
-> setting the Compliance parameters and binding the Compliance to a Token contract.
+> The standard relies on ERC-173 to define contract ownership, with the owner having the responsibility of setting the Compliance parameters and binding the Compliance to a Token contract.
 
-so `RuleEngineOwnable` or `RuleEngineOwnable2Step` is the closest match to the spec, though `RuleEngine`
-(role-based) works identically and is preferable with multiple operators.
+so `RuleEngineOwnable` or `RuleEngineOwnable2Step` is the closest match to the spec, though `RuleEngine` (role-based) works identically and is preferable with multiple operators.
 
 ```solidity
 RuleEngineOwnable engine = new RuleEngineOwnable(owner, forwarder, address(0));
@@ -128,10 +123,10 @@ The state-changing path is unaffected and still enforces correctly; the damage i
 
 ### 4.2 `address(0)` must be whitelisted for minting to work
 
-**This concerns `RuleWhitelistMock`, a reference rule in `src/mocks/`, not a production rule.** Production
-rules live in [CMTA/Rules](https://github.com/CMTA/Rules) and may handle the sentinel differently — check the
-rule you actually deploy. The behaviour is described here because the mock is what the examples, scripts and
-tests in this repository use, and because integrators copy it.
+**This concerns `RuleWhitelistMock`, a reference rule in `src/mocks/`, not a production rule.** Production rules live in [CMTA/Rules](https://github.com/CMTA/Rules) and may handle the sentinel differently — check the
+rule you actually deploy.
+
+The behavior is described here because the mock is what the examples, scripts and tests in this repository use, and because integrators copy it.
 
 `RuleWhitelistMock` treats the zero address as an ordinary participant:
 
@@ -146,15 +141,18 @@ Pinned by `testMintIsBlockedWhenZeroAddressNotListed`, recorded as finding `F-2`
 ### 4.3 One engine shared by several tokens is not neutral
 
 The ERC-3643 callbacks **do not pass the token address to the rules**, so a stateful rule that keeps
-per-address accounting mixes state across every bound token. Only bind tokens that are equally trusted and
-governed together. Unbinding does not retroactively separate state already accumulated in a rule.
+per-address accounting mixes state across every bound token. 
+
+- Only bind tokens that are equally trusted and governed together. 
+- Unbinding does not retroactively separate state already accumulated in a rule.
 
 This matters more here than for CMTAT, because `bindTokens` makes multi-token binding a one-call operation.
 
 ### 4.4 The rule set is iterated on every operation
 
-O(number of rules) on every transfer, mint, burn and view call, capped by `maxRules` (default **10**). A
-gas-heavy rule affects every operation on every bound token.
+O(number of rules) on every transfer, mint, burn and view call, capped by `maxRules` (default **10**). 
+
+A gas-heavy rule affects every operation on every bound token.
 
 ### 4.5 Only bound tokens may call the callbacks
 
@@ -164,8 +162,7 @@ gas-heavy rule affects every operation on every bound token.
 
 ### 4.6 Restriction codes must be unique across the rule set
 
-As with CMTAT: the engine returns the first non-zero code, so overlapping codes across rules produce
-inconsistent operator feedback unless they share the same message.
+As with CMTAT: the engine returns the first non-zero code, so overlapping codes across rules produce inconsistent operator feedback unless they share the same message.
 
 ### 4.7 ERC-7551 support is a draft subset
 
@@ -187,9 +184,7 @@ Error: Encountered invalid solc version in lib/ERC-3643/contracts/token/Token.so
 No solc version exists that matches the version requirement: =0.8.17
 ```
 
-The integration tests therefore use `ERC3643TokenMock`, whose compliance interaction is copied from the
-reference `Token.sol` (the table in section 2 is taken from it directly). Compiling the real token would
-require unpinning the project compiler and vendoring a second OpenZeppelin major alongside the current one.
+The integration tests therefore use `ERC3643TokenMock`, whose compliance interaction is copied from the reference `Token.sol` (the table in section 2 is taken from it directly). Compiling the real token would require unpinning the project compiler and vendoring a second OpenZeppelin major alongside the current one.
 
 ## 5. What is tested
 

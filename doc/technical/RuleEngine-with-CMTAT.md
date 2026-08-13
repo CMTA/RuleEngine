@@ -4,8 +4,7 @@ How to attach a RuleEngine to a [CMTAT](https://github.com/CMTA/CMTAT) token, wh
 actually calls, how to configure both sides, and the limitations to know about before deploying.
 
 For the ERC-3643 equivalent, see [RuleEngine-with-ERC3643.md](./RuleEngine-with-ERC3643.md). The two token
-standards drive **disjoint entry points** on the engine — that distinction is the single most important thing
-to carry between these documents.
+standards drive **disjoint entry points** on the engine — that distinction is the single most important thing to carry between these documents.
 
 ## 1. Flow
 
@@ -15,8 +14,9 @@ _Diagram source: [doc/schema/plantuml/ruleengine-flow-cmtat.puml](../schema/plan
 
 ## 2. Which entry points CMTAT uses
 
-CMTAT calls **`transferred`** for every state-changing operation, and picks between two overloads according to
-whether the operation has a spender. The choice is made in
+CMTAT calls **`transferred`** for every state-changing operation, and picks between two overloads according to whether the operation has a spender.
+
+The choice is made in
 `ValidationModuleRuleEngine._callRuleEngineTransferred`:
 
 ```solidity
@@ -41,17 +41,16 @@ Two consequences worth internalising:
 - A **plain transfer never carries a spender**. The zero address is a branch condition inside CMTAT and is
   never forwarded, so the engine is never called with a zero spender.
 - Since CMTAT v3.3.0, **mint and burn go through the 4-argument overload** with the operator as `spender`.
-  A rule that rejects unknown spenders must skip or adapt that check when `from == address(0)` (mint) or
-  `to == address(0)` (burn), or it will block issuance and redemption.
+  A rule that rejects unknown spenders must skip or adapt that check when `from == address(0)` (mint) or `to == address(0)` (burn), or it will block issuance and redemption.
 
-**CMTAT never calls `created()` or `destroyed()`.** Those belong to `IERC3643Compliance` and are used only by
-ERC-3643 tokens. The 4-argument `transferred` is conversely declared by CMTAT's `IRuleEngine` and is never
+**CMTAT never calls `created()` or `destroyed()`.** Those belong to `IERC3643Compliance` and are used only by ERC-3643 tokens. 
+
+The 4-argument `transferred` is conversely declared by CMTAT's `IRuleEngine` and is never
 reached by an ERC-3643 token.
 
 ### Read-only path
 
-CMTAT exposes the ERC-1404 view path, which the engine answers by iterating the same rules and returning the
-**first non-zero** restriction code:
+CMTAT exposes the ERC-1404 view path, which the engine answers by iterating the same rules and returning the **first non-zero** restriction code:
 
 - `detectTransferRestriction(from, to, value)` / `canTransfer(from, to, value)`
 - `detectTransferRestrictionFrom(spender, from, to, value)` / `canTransferFrom(spender, from, to, value)`
@@ -86,9 +85,7 @@ engine.bindToken(address(cmtat));    // COMPLIANCE_MANAGER_ROLE, or owner on the
 
 You can also pass the token as the third constructor argument to bind it at deployment.
 
-CMTAT does **not** self-bind — unlike ERC-3643's `setCompliance`, `setRuleEngine` does not call back into the
-engine. Binding is therefore always an explicit operator action, and the self-binding approval mechanism
-(`setTokenSelfBindingApproval`) is not needed for CMTAT.
+CMTAT does **not** self-bind — unlike ERC-3643's `setCompliance`, `setRuleEngine` does not call back into the engine. Binding is therefore always an explicit operator action, and the self-binding approval mechanism (`setTokenSelfBindingApproval`) is not needed for CMTAT.
 
 ### 3.3 Point the token at the engine
 
@@ -111,9 +108,7 @@ engine.addRule(IRule(address(rule)));                  // RULES_MANAGEMENT_ROLE,
 engine.setRules(rulesArray);                           // replaces the whole set atomically
 ```
 
-A rule must implement `IRule` and advertise `RuleInterfaceId.IRULE_INTERFACE_ID` (`0x2497d6cb`) through
-ERC-165; the engine validates this on `addRule` and rejects anything else. Rules run **in declaration order**
-and the first one to revert aborts the whole transaction.
+A rule must implement `IRule` and advertise `RuleInterfaceId.IRULE_INTERFACE_ID` (`0x2497d6cb`) through ERC-165; the engine validates this on `addRule` and rejects anything else. Rules run **in declaration order** and the first one to revert aborts the whole transaction.
 
 ### 3.5 Roles reference (`RuleEngine` variant)
 
@@ -129,52 +124,49 @@ On `RuleEngineOwnable` / `RuleEngineOwnable2Step` all three collapse to `onlyOwn
 
 ### 4.1 The rule set is iterated on every transfer
 
-Every configured rule is called on every transfer, mint, burn **and** on every view call. Cost is O(number of
-rules). An on-chain cap (`maxRules`, default **10**) bounds this; raising it re-exposes unbounded gas cost for
-administrative operations such as `clearRules`. A single gas-heavy or misconfigured rule can make all
-transfers fail.
+Every configured rule is called on every transfer, mint, burn **and** on every view call. Cost is O(number of rules). 
+
+An on-chain cap (`maxRules`, default **10**) bounds this; raising it re-exposes unbounded gas cost for
+administrative operations such as `clearRules`. 
+
+A single gas-heavy or misconfigured rule can make all transfers fail.
 
 ### 4.2 The 3-argument view path fails open for spender-dependent rules
 
-`detectTransferRestriction` and `canTransfer` carry no `spender`. A rule keyed by spender — a per-minter mint
-allowance, a spender whitelist — cannot evaluate the operation on that path and must answer "no restriction".
-The engine aggregates that answer, so **these two views can report an operation as allowed that the
-state-changing path will revert**.
+`detectTransferRestriction` and `canTransfer` carry no `spender`. A rule keyed by spender — a per-minter mint allowance, a spender whitelist — cannot evaluate the operation on that path and must answer "no restriction".
+The engine aggregates that answer, so **these two views can report an operation as allowed that the state-changing path will revert**.
 
-Use the 4-argument `detectTransferRestrictionFrom` / `canTransferFrom` to pre-check anything with an operator.
-Recorded as finding `H-1` in
-[CLAUDE_ANALYSIS.md](../security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md).
+Use the 4-argument `detectTransferRestrictionFrom` / `canTransferFrom` to pre-check anything with an operator. Recorded as finding `H-1` in [CLAUDE_ANALYSIS.md](../security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md).
 
 ### 4.3 Address-list rules treat `address(0)` as a participant
 
-**This concerns `RuleWhitelistMock`, a reference rule in `src/mocks/`, not a production rule.** Production
-rules live in [CMTA/Rules](https://github.com/CMTA/Rules) and may handle the sentinel differently — check the
+**This concerns `RuleWhitelistMock`, a reference rule in `src/mocks/`, not a production rule.** Production rules live in [CMTA/Rules](https://github.com/CMTA/Rules) and may handle the sentinel differently — check the
 rule you actually deploy.
 
-`RuleWhitelistMock` checks both endpoints without exempting the zero-address sentinel. Because CMTAT routes mint
-through the 4-argument overload with `from == address(0)`, and the whitelist's `from`/`to` checks still apply,
-**the zero address must be whitelisted for minting to be permitted**. Whitelisting only real holders silently
-blocks issuance. Recorded as finding `F-2`.
+`RuleWhitelistMock` checks both endpoints without exempting the zero-address sentinel. Because CMTAT routes mint through the 4-argument overload with `from == address(0)`, and the whitelist's `from`/`to` checks still apply, **the zero address must be whitelisted for minting to be permitted**.
+
+Whitelisting only real holders silently blocks issuance. Recorded as finding `F-2`.
 
 ### 4.4 One engine shared by several tokens is not neutral
 
-An engine can be bound to multiple tokens, but the ERC-3643 callbacks **do not pass the token address to the
-rules**. Any stateful rule that keeps per-address accounting therefore mixes state across every bound token.
-Only bind tokens that are equally trusted and governed together. Unbinding does not retroactively separate
-state already accumulated.
+An engine can be bound to multiple tokens, but the ERC-3643 callbacks **do not pass the token address to the rules**. 
+
+Any stateful rule that keeps per-address accounting therefore mixes state across every bound token.
+
+Only bind tokens that are equally trusted and governed together. Unbinding does not retroactively separate state already accumulated.
 
 ### 4.5 Restriction codes must be unique across the rule set
 
-The engine returns the first non-zero code, and `messageForTransferRestriction` resolves a code against the
-first rule claiming it. If two rules share a code they must return the same message, or operators get
-inconsistent feedback. Keep the CMTAT-reserved ranges free.
+The engine returns the first non-zero code, and `messageForTransferRestriction` resolves a code against the first rule claiming it. 
+
+If two rules share a code they must return the same message, or operators get inconsistent feedback. Keep the CMTAT-reserved ranges free.
 
 ### 4.6 Rules are trusted code
 
-Rule contracts are called on every transfer and can revert or consume arbitrary gas. Treat them as trusted
-business logic. Do not grant `RULES_MANAGEMENT_ROLE` to a rule contract — the engine blocks granting any role
-to an address currently configured as a rule, but the check is one-directional and does not stop an already
-privileged address from later being added as a rule.
+Rule contracts are called on every transfer and can revert or consume arbitrary gas. Treat them as trusted business logic. 
+
+Do not grant `RULES_MANAGEMENT_ROLE` to a rule contract — the engine blocks granting any role
+to an address currently configured as a rule, but the check is one-directional and does not stop an already privileged address from later being added as a rule.
 
 ## 5. What is tested
 
@@ -188,13 +180,11 @@ privileged address from later being added as a rule.
 | Reverting rule, CMTAT v3.0.0 | `RuleEngine/RulesManagementModuleTest/RuleEngineOperationRevertV3.t.sol` | 1 |
 | Deployment script | `script/CMTATWithRuleEngineScript.t.sol` | 1 |
 
-**31 CMTAT-specific tests.** Coverage includes: a real `CMTATStandardStandalone` bound to the engine,
-transfers accepted and rejected through the whitelist, restriction-code propagation back to the token, and a
-rule that reverts mid-transfer.
+**31 CMTAT-specific tests.** Coverage includes: a real `CMTATStandardStandalone` bound to the engine, transfers accepted and rejected through the whitelist, restriction-code propagation back to the token, and a rule that reverts mid-transfer.
 
-**Backward compatibility is tested against two CMTAT versions.** The `…V3` suites deploy a real CMTAT
-**v3.0.0** token (submodule `lib/CMTATv3.0.0`, remapped `CMTATv3.0.0/`) alongside the current
-**v3.3.0-rc3** token (`lib/CMTAT`). Both are bound to the same engine implementation.
+**Backward compatibility is tested against two CMTAT versions.** The `…V3` suites deploy a real CMTAT **v3.0.0** token (submodule `lib/CMTATv3.0.0`, remapped `CMTATv3.0.0/`) alongside the current **v3.3.0-rc3** token (`lib/CMTAT`). 
+
+Both are bound to the same engine implementation.
 
 ### Version compatibility
 

@@ -1,5 +1,3 @@
-> This project has not undergone an audit and is provided as-is without any warranties.
-
 # RuleEngine
 
 RuleEngine applies transfer restrictions to [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens.
@@ -12,6 +10,8 @@ It is an *external controller*: the token calls the engine on every transfer, mi
 - **License:** MPL-2.0
 
 **Full documentation: [doc/README.md](./doc/README.md)** — interfaces, Ethereum API, deployment, UML and call graphs, audits, and toolchain usage.
+
+> This project has not undergone an audit and is provided as-is without any warranties.
 
 ## Contract Variants
 
