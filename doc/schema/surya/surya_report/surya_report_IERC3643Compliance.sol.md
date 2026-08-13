@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./interfaces/IERC3643Compliance.sol | 6a206df8531bc148ae65b3061fe56bd91d64440e |
+| ./interfaces/IERC3643Compliance.sol | 4d09fcc03d7fd3d2abf18728a9623f7d6af9dfbf |
 
 
 ### Contracts Description Table

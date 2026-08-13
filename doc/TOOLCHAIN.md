@@ -114,7 +114,7 @@ npm run-script surya:graph
 ```
 
 ```bash
-npx surya graph  src/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png
+npx surya graph  src/deployment/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png
 ```
 
 #### Report
