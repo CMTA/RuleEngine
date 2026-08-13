@@ -33,7 +33,14 @@ All three support ERC-1404 transfer restrictions, the ERC-3643 compliance interf
 
 The token calls `transferred(...)` on the engine, which checks the caller is a bound token and then runs each configured rule in order. A rule that forbids the transfer reverts, and the whole transaction reverts with it — remaining rules are never reached.
 
-CMTAT selects the overload on whether there is a spender: a plain `transfer` passes `address(0)` and therefore uses the 3-argument `transferred(from, to, value)`, while `transferFrom`, `mint` and `burn` pass `_msgSender()` and use the 4-argument `transferred(spender, from, to, value)`. ERC-3643 tokens instead call the dedicated `created` / `destroyed` entry points, which run the same rule loop without a spender.
+**CMTAT and ERC-3643 use disjoint entry points.** The 4-argument overload is declared by CMTAT's `IRuleEngine`, so an ERC-3643 token never reaches it; `created` / `destroyed` belong to `IERC3643Compliance`, and CMTAT never calls them.
+
+| Token | Transfer | `transferFrom` | Mint | Burn |
+|-------|----------|----------------|------|------|
+| CMTAT | `transferred(from, to, value)` | `transferred(spender, …)` | `transferred(spender, …)` | `transferred(spender, …)` |
+| ERC-3643 | `transferred(from, to, value)` | `transferred(from, to, value)` | `created(to, value)` | `destroyed(from, value)` |
+
+CMTAT selects between the two overloads on `spender != address(0)`: a plain `transfer` passes `address(0)`, while `transferFrom`, `mint` and `burn` pass `_msgSender()`. Whichever entry point is used, the engine then runs the same rule loop.
 
 The view path, `detectTransferRestriction()`, iterates the same rules and returns the first non-zero ERC-1404 restriction code instead of reverting.
 

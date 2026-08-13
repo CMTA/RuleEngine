@@ -6,70 +6,85 @@ skinparam sequenceMessageAlign direction
 skinparam ParticipantPadding 12
 skinparam BoxPadding 12
 
-actor "Token holder" as Holder
-participant "Token\n(CMTAT / ERC-3643)" as Token
+actor "Token holder\n/ operator" as Holder
+
+box "Token (one or the other, never both)" #FaFaFa
+participant "CMTAT token" as CMTAT
+participant "ERC-3643 token" as T3643
+end box
+
 participant "RuleEngine" as Engine
 collections "Rule contracts\n(IRule)" as Rules
 
-== State-changing path ==
+== Entry points - CMTAT ==
 
 alt standard transfer
-    Holder -> Token : transfer(to, value)
-    activate Token
-    Token -> Token : spender = address(0)
-    Token -> Engine : transferred(from, to, value)
+    Holder -> CMTAT : transfer(to, value)
+    CMTAT -> Engine : transferred(from, to, value)
 else transferFrom, mint or burn
-    Holder -> Token : transferFrom(from, to, value)\nmint(to, value) / burn(from, value)
-    Token -> Token : spender = _msgSender()
-    Token -> Engine : transferred(spender, from, to, value)
+    Holder -> CMTAT : transferFrom(from, to, value)\nmint(to, value) / burn(from, value)
+    CMTAT -> Engine : transferred(spender, from, to, value)\nspender = _msgSender()
 end
 
-note over Token
+note over CMTAT
     CMTAT picks the overload on spender != address(0)
     (ValidationModuleRuleEngine._callRuleEngineTransferred).
-    A plain transfer has no spender, so it uses the
-    3-argument overload.
+    The 4-argument overload is declared by CMTAT's IRuleEngine,
+    not by ERC-3643.
+    CMTAT never calls created() or destroyed().
 end note
+
+== Entry points - ERC-3643 ==
+
+alt transfer or transferFrom
+    Holder -> T3643 : transfer / transferFrom
+    T3643 -> Engine : transferred(from, to, value)
+else mint
+    Holder -> T3643 : mint(to, value)
+    T3643 -> Engine : created(to, value)
+    note right of Engine : runs _transferred(address(0), to, value)
+else burn
+    Holder -> T3643 : burn(from, value)
+    T3643 -> Engine : destroyed(from, value)
+    note right of Engine : runs _transferred(from, address(0), value)
+end
+
+note over T3643
+    ERC-3643 compliance callbacks carry no spender, so an
+    ERC-3643 token never reaches the 4-argument overload.
+    Mint and burn use the dedicated created() / destroyed()
+    entry points instead.
+end note
+
+== Rule evaluation - identical for every entry point above ==
 
 activate Engine
-
 Engine -> Engine : onlyBoundToken
 
-alt caller is not a bound token
-    Engine -->> Token : revert\nRuleEngine_ERC3643Compliance_UnauthorizedCaller
-    Token -->> Holder : transaction reverted
-else caller is bound
-    loop for each rule in _rules (capped by maxRules, default 10)
-        Engine -> Rules : transferred(...)\nsame overload as the incoming call
-        activate Rules
-        alt rule forbids the transfer
-            Rules -->> Engine : revert (no return value)
-            Engine -->> Token : bubble up the revert
-            Token -->> Holder : transaction reverted
-            note right of Rules
-                The whole transaction reverts on the
-                first failing rule. Remaining rules
-                are never reached.
-            end note
-        else rule allows the transfer
-            Rules --> Engine : return
-        end
-        deactivate Rules
-    end
-    Engine --> Token : return
-    Token --> Holder : transfer executed
-end
-deactivate Engine
-deactivate Token
-
-note over Token, Engine
-    ERC-3643 tokens use the dedicated mint/burn entry points instead.
-    Both take no spender and run the 3-argument rule loop:
-    created(to, value)     -> _transferred(address(0), to, value)
-    destroyed(from, value) -> _transferred(from, address(0), value)
+note right of Engine
+    Reverts with RuleEngine_ERC3643Compliance_UnauthorizedCaller
+    if msg.sender is not a bound token.
 end note
 
-== Read-only path (never reverts) ==
+loop for each rule in _rules (capped by maxRules, default 10)
+    Engine -> Rules : transferred(...)\nsame overload as the entry point
+    activate Rules
+    alt rule forbids the transfer
+        Rules -->> Engine : revert (no return value)
+        note right of Rules
+            The revert bubbles up to the token and the whole
+            transaction reverts. Remaining rules never run.
+        end note
+    else rule allows the transfer
+        Rules --> Engine : return
+    end
+    deactivate Rules
+end
+
+Engine --> Holder : transfer executed
+deactivate Engine
+
+== Read-only path - never reverts ==
 
 Holder -> Engine : detectTransferRestriction(from, to, value)\ncanTransfer(from, to, value)
 activate Engine

@@ -146,24 +146,26 @@ function _checkRule(address rule_) internal view virtual override {
 ### Rule Execution Flow
 
 ```
-Token operation → RuleEngine.transferred(spender, from, to, value)   ← transferFrom, mint, burn (spender = _msgSender())
+CMTAT only:       RuleEngine.transferred(spender, from, to, value)   ← transferFrom, mint, burn (spender = _msgSender())
                    ├── onlyBoundToken modifier (caller must be bound)
                    └── for each rule in _rules:
                          rule.transferred(spender, from, to, value)  // reverts if disallowed
 
-                  RuleEngine.transferred(from, to, value)            ← standard transfer (spender == address(0))
+CMTAT + ERC-3643: RuleEngine.transferred(from, to, value)            ← standard transfer (spender == address(0))
                    ├── onlyBoundToken modifier
                    └── for each rule in _rules:
                          rule.transferred(from, to, value)
 
-                  RuleEngine.created(to, value)                      ← ERC-3643 mint entry point
+ERC-3643 only:    RuleEngine.created(to, value)                      ← ERC-3643 mint entry point
                    ├── onlyBoundToken modifier
                    └── calls _transferred(address(0), to, value)
 
-                  RuleEngine.destroyed(from, value)                  ← ERC-3643 burn entry point
+ERC-3643 only:    RuleEngine.destroyed(from, value)                  ← ERC-3643 burn entry point
                    ├── onlyBoundToken modifier
                    └── calls _transferred(from, address(0), value)
 ```
+
+**CMTAT and ERC-3643 use disjoint entry points.** The 4-argument `transferred` is declared by CMTAT's `IRuleEngine` (`lib/CMTAT/contracts/interfaces/engine/IRuleEngine.sol`), so an ERC-3643 token never reaches it. Conversely `created` / `destroyed` are declared by `IERC3643Compliance` and CMTAT never calls them — CMTAT routes mint and burn through the 4-argument `transferred` instead. Only the 3-argument `transferred` is shared by both.
 
 CMTAT selects the overload in `ValidationModuleRuleEngine._callRuleEngineTransferred`, branching on `spender != address(0)`. A standard `transfer` passes `address(0)` as spender (`CMTATBaseCommon.transfer`) and therefore uses the **3-argument** overload; `transferFrom`, `mint` and `burn` pass `_msgSender()` and use the **4-argument** overload. Neither is a fallback — which one is called depends purely on the operation.
 
