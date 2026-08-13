@@ -111,6 +111,8 @@ forge fmt         # format
 
 See [doc/README.md](./doc/README.md) for deployment scripts, the production deployment checklist, and Hardhat usage.
 
+Parts of this project were written with the help of AI coding assistants, principally Claude Code (Anthropic) and Codex (OpenAI).
+
 ## Security
 
 - Vulnerability disclosure: [SECURITY.md](https://github.com/CMTA/CMTAT/blob/master/SECURITY.md) (CMTAT main repository)

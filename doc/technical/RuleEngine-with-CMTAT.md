@@ -4,7 +4,8 @@ How to attach a RuleEngine to a [CMTAT](https://github.com/CMTA/CMTAT) token, wh
 actually calls, how to configure both sides, and the limitations to know about before deploying.
 
 For the ERC-3643 equivalent, see [RuleEngine-with-ERC3643.md](./RuleEngine-with-ERC3643.md). The two token
-standards drive **disjoint entry points** on the engine — that distinction is the single most important thing to carry between these documents.
+standards drive **disjoint entry points** on the engine, so a rule or an integration written against one does
+not automatically hold for the other.
 
 ## 1. Flow
 
@@ -36,7 +37,7 @@ The `spender` value comes from `CMTATBaseCommon`:
 | `mint(to, value)` | `_msgSender()` | 4-argument, with `from == address(0)` |
 | `burn(from, value)` | `_msgSender()` | 4-argument, with `to == address(0)` |
 
-Two consequences worth internalising:
+Two consequences follow:
 
 - A **plain transfer never carries a spender**. The zero address is a branch condition inside CMTAT and is
   never forwarded, so the engine is never called with a zero spender.

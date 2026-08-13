@@ -3,7 +3,8 @@
 How to attach a RuleEngine to an [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) (T-REX) token as its compliance contract, which entry points the token actually calls, how to configure the self-binding handshake, and the limitations to know about before deploying.
 
 For the CMTAT equivalent, see [RuleEngine-with-CMTAT.md](./RuleEngine-with-CMTAT.md). The two standards drive
-**disjoint entry points** on the engine, which is the most important distinction between these documents.
+**disjoint entry points** on the engine, so a rule or an integration written against one does not
+automatically hold for the other.
 
 ## 1. Flow
 
@@ -24,7 +25,7 @@ In ERC-3643 the RuleEngine plays the role of the **compliance contract**. Taken 
 | `burn(from, amount)` | — | `destroyed(from, amount)` |
 | `setCompliance(newCompliance)` | — | `unbindToken(this)` then `bindToken(this)` |
 
-Two consequences worth internalising:
+Two consequences follow:
 
 - **ERC-3643 compliance callbacks carry no spender.** An ERC-3643 token therefore *never* reaches the
   4-argument `transferred(spender, from, to, value)` overload — that one is declared by CMTAT's `IRuleEngine`,
@@ -53,7 +54,8 @@ RuleEngineOwnable engine = new RuleEngineOwnable(owner, forwarder, address(0));
 
 ### 3.2 Grant self-binding approval — required before `setCompliance`
 
-This is the step most integrations miss. `Token.setCompliance` makes the **token** call `bindToken` and`unbindToken` on the compliance contract:
+`Token.setCompliance` makes the **token** call `bindToken` and `unbindToken` on the compliance contract, not
+the operator:
 
 ```solidity
 function setCompliance(address _compliance) public override onlyOwner {
@@ -66,7 +68,7 @@ function setCompliance(address _compliance) public override onlyOwner {
 }
 ```
 
-Those calls come from the token address, not from an operator. To support this without letting arbitrary contracts bind themselves, the engine gates self-binding behind an explicit approval:
+To support that without letting arbitrary contracts bind themselves, the engine gates self-binding behind an explicit approval:
 
 ```solidity
 engine.setTokenSelfBindingApproval(address(token), true);   // COMPLIANCE_MANAGER_ROLE, or owner

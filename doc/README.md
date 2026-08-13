@@ -1541,6 +1541,8 @@ This repository is primarily developed and tested with Foundry.
 
 Hardhat configuration is also present to allow compiling the contracts and running a small smoke test with Hardhat.
 
+Parts of this project were written with the help of AI coding assistants, principally Claude Code (Anthropic) and Codex (OpenAI).
+
 ### Configuration
 
 Here are the settings for [Hardhat](https://hardhat.org) and [Foundry](https://getfoundry.sh).
