@@ -146,12 +146,12 @@ function _checkRule(address rule_) internal view virtual override {
 ### Rule Execution Flow
 
 ```
-Token operation → RuleEngine.transferred(spender, from, to, value)   ← CMTAT v3.3.0+ primary path
+Token operation → RuleEngine.transferred(spender, from, to, value)   ← transferFrom, mint, burn (spender = _msgSender())
                    ├── onlyBoundToken modifier (caller must be bound)
                    └── for each rule in _rules:
                          rule.transferred(spender, from, to, value)  // reverts if disallowed
 
-                  RuleEngine.transferred(from, to, value)            ← 3-arg fallback (spender == address(0))
+                  RuleEngine.transferred(from, to, value)            ← standard transfer (spender == address(0))
                    ├── onlyBoundToken modifier
                    └── for each rule in _rules:
                          rule.transferred(from, to, value)
@@ -165,7 +165,9 @@ Token operation → RuleEngine.transferred(spender, from, to, value)   ← CMTAT
                    └── calls _transferred(from, address(0), value)
 ```
 
-Since CMTAT v3.3.0, mint (`from == address(0)`) and burn (`to == address(0)`) also go through the 4-argument overload with the operator as `spender`. Rules that check `spender` must skip or adapt that check for mint/burn to avoid blocking those operations unintentionally.
+CMTAT selects the overload in `ValidationModuleRuleEngine._callRuleEngineTransferred`, branching on `spender != address(0)`. A standard `transfer` passes `address(0)` as spender (`CMTATBaseCommon.transfer`) and therefore uses the **3-argument** overload; `transferFrom`, `mint` and `burn` pass `_msgSender()` and use the **4-argument** overload. Neither is a fallback — which one is called depends purely on the operation.
+
+Since CMTAT v3.3.0, mint (`from == address(0)`) and burn (`to == address(0)`) therefore also reach the 4-argument overload with the operator as `spender`. Rules that check `spender` must skip or adapt that check for mint/burn to avoid blocking those operations unintentionally.
 
 `created` and `destroyed` use the 3-argument `_transferred` path (no spender), consistent with the ERC-3643 spec which does not carry a spender for mint/burn.
 

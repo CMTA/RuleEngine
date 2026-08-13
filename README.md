@@ -31,7 +31,9 @@ All three support ERC-1404 transfer restrictions, the ERC-3643 compliance interf
 
 ![RuleEngine transfer validation flow](./doc/schema/plantuml/ruleengine-transfer-flow.png)
 
-The token calls `transferred(spender, from, to, value)` on the engine, which checks the caller is a bound token and then runs each configured rule in order. A rule that forbids the transfer reverts, and the whole transaction reverts with it — remaining rules are never reached. Mint and burn (`created` / `destroyed`) go through the same loop.
+The token calls `transferred(...)` on the engine, which checks the caller is a bound token and then runs each configured rule in order. A rule that forbids the transfer reverts, and the whole transaction reverts with it — remaining rules are never reached.
+
+CMTAT selects the overload on whether there is a spender: a plain `transfer` passes `address(0)` and therefore uses the 3-argument `transferred(from, to, value)`, while `transferFrom`, `mint` and `burn` pass `_msgSender()` and use the 4-argument `transferred(spender, from, to, value)`. ERC-3643 tokens instead call the dedicated `created` / `destroyed` entry points, which run the same rule loop without a spender.
 
 The view path, `detectTransferRestriction()`, iterates the same rules and returns the first non-zero ERC-1404 restriction code instead of reverting.
 
