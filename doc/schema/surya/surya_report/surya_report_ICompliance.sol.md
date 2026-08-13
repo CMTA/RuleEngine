@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/ICompliance.sol | ad82538f6d414b1020a82240c7bc7df561b329a1 |
+| ./mocks/ICompliance.sol | d60ed00e5ca3214d76ec4a3611920400a135368e |
 
 
 ### Contracts Description Table
@@ -18,12 +18,12 @@
 | **ICompliance** | Interface |  |||
 | └ | bindToken | External ❗️ | 🛑  |NO❗️ |
 | └ | unbindToken | External ❗️ | 🛑  |NO❗️ |
-| └ | isTokenBound | External ❗️ |   |NO❗️ |
-| └ | getTokenBound | External ❗️ |   |NO❗️ |
-| └ | canTransfer | External ❗️ |   |NO❗️ |
 | └ | transferred | External ❗️ | 🛑  |NO❗️ |
 | └ | created | External ❗️ | 🛑  |NO❗️ |
 | └ | destroyed | External ❗️ | 🛑  |NO❗️ |
+| └ | isTokenBound | External ❗️ |   |NO❗️ |
+| └ | getTokenBound | External ❗️ |   |NO❗️ |
+| └ | canTransfer | External ❗️ |   |NO❗️ |
 
 
 ### Legend

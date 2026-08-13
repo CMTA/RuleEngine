@@ -15,7 +15,7 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
     function setUp() public {
         ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         ruleConditionalTransferLight =
-            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+            new RuleConditionalTransferLightMock(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -48,10 +48,10 @@ contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
 
     function testOwnerCanSetRules() public {
         // Arrange
-        RuleConditionalTransferLight rule1 =
-            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
-        RuleConditionalTransferLight rule2 =
-            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        RuleConditionalTransferLightMock rule1 =
+            new RuleConditionalTransferLightMock(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+        RuleConditionalTransferLightMock rule2 =
+            new RuleConditionalTransferLightMock(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
         IRule[] memory rules = new IRule[](2);
         rules[0] = IRule(rule1);
         rules[1] = IRule(rule2);

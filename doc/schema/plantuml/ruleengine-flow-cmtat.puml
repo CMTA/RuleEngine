@@ -1,0 +1,76 @@
+@startuml
+title RuleEngine with a CMTAT token
+
+skinparam shadowing false
+skinparam sequenceMessageAlign direction
+skinparam ParticipantPadding 12
+
+actor "Token holder\n/ operator" as Holder
+participant "CMTAT token" as Token
+participant "RuleEngine" as Engine
+collections "Rule contracts\n(IRule)" as Rules
+
+== State-changing path ==
+
+alt standard transfer
+    Holder -> Token : transfer(to, value)
+    activate Token
+    Token -> Token : no spender\n(address(0) internally)
+    Token -> Engine : transferred(from, to, value)
+else transferFrom, mint or burn
+    Holder -> Token : transferFrom(from, to, value)\nmint(to, value) / burn(from, value)
+    Token -> Token : spender = _msgSender()
+    Token -> Engine : transferred(spender, from, to, value)
+end
+
+note over Token
+    CMTAT picks the overload on spender != address(0)
+    (ValidationModuleRuleEngine._callRuleEngineTransferred).
+    The zero address is a branch condition only: it is never
+    forwarded, so the engine is never called with a zero spender.
+    The 4-argument overload is declared by CMTAT's IRuleEngine.
+    CMTAT never calls created() or destroyed().
+end note
+
+activate Engine
+Engine -> Engine : onlyBoundToken
+
+alt msg.sender is not a bound token
+    Engine -->> Token : revert\nRuleEngine_ERC3643Compliance_UnauthorizedCaller
+    Token -->> Holder : transaction reverted
+else caller is bound
+    loop for each rule in _rules (capped by maxRules, default 10)
+        Engine -> Rules : transferred(...)\nsame overload as the entry point
+        activate Rules
+        alt rule forbids the transfer
+            Rules -->> Engine : revert (no return value)
+            Engine -->> Token : bubble up the revert
+            Token -->> Holder : transaction reverted
+            note right of Rules
+                Remaining rules never run.
+            end note
+        else rule allows the transfer
+            Rules --> Engine : return
+        end
+        deactivate Rules
+    end
+    Engine --> Token : return
+    Token --> Holder : transfer executed
+end
+deactivate Engine
+deactivate Token
+
+== Read-only path (ERC-1404, never reverts) ==
+
+Holder -> Engine : detectTransferRestriction(from, to, value)\ndetectTransferRestrictionFrom(spender, from, to, value)
+activate Engine
+loop for each rule, until a rule returns a non-zero code
+    Engine -> Rules : detectTransferRestriction(...)
+    activate Rules
+    Rules --> Engine : ERC-1404 restriction code
+    deactivate Rules
+end
+Engine --> Holder : first non-zero code,\nor 0 when the transfer is allowed
+deactivate Engine
+
+@enduml

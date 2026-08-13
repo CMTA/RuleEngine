@@ -15,12 +15,12 @@ import {RulesManagementModule} from "src/RuleEngineBase.sol";
 // forge-lint: disable-next-line(unused-import)
 import {ERC3643ComplianceModuleInvariantStorage} from "src/modules/library/ERC3643ComplianceModuleInvariantStorage.sol";
 // RuleConditionalTransfer
-import {RuleConditionalTransferLight} from "src/mocks/rules/operation/RuleConditionalTransferLight.sol";
+import {RuleConditionalTransferLightMock} from "src/mocks/rules/operation/RuleConditionalTransferLightMock.sol";
 import {
     RuleConditionalTransferLightInvariantStorage
 } from "src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol";
-// RuleWhitelist
-import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
+// RuleWhitelistMock
+import {RuleWhitelistMock} from "src/mocks/rules/validation/RuleWhitelistMock.sol";
 import {
     RuleWhitelistInvariantStorage
 } from "src/mocks/rules/validation/abstract/RuleAddressList/invariantStorage/RuleWhitelistInvariantStorage.sol";
@@ -69,8 +69,8 @@ abstract contract HelperContract is
     string constant DEFAULT_ADMIN_ROLE_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
     // contract
-    RuleWhitelist public ruleWhitelist;
-    RuleConditionalTransferLight public ruleConditionalTransferLight;
+    RuleWhitelistMock public ruleWhitelist;
+    RuleConditionalTransferLightMock public ruleConditionalTransferLight;
 
     // CMTAT
     CMTATDeployment cmtatDeployment;
@@ -85,7 +85,7 @@ abstract contract HelperContract is
     uint8 codeNonexistent = 255;
     // Defined in CMTAT.sol
     uint8 constant TRANSFER_OK = 0;
-    string constant TEXT_TRANSFER_OK = "NoRestriction";
+    // TEXT_TRANSFER_OK ("NoRestriction") comes from RuleCommonInvariantStorage
     // Forwarder
     string ERC2771ForwarderDomain = "ERC2771ForwarderDomain";
 

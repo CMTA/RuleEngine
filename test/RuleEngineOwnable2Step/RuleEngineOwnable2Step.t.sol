@@ -36,7 +36,7 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         ruleEngineMock = new RuleEngineOwnable2Step(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         ruleEngineOwnable2StepExposed = new RuleEngineOwnable2StepExposed(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         ruleConditionalTransferLight =
-            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+            new RuleConditionalTransferLightMock(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
     }
 
     function testDeploymentSetsOwner() public view {
@@ -225,7 +225,9 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
     }
 
     function testCannotSetTokenSelfBindingApprovalForZeroAddress() public {
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
+        );
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setTokenSelfBindingApproval(address(0), true);
     }
@@ -270,7 +272,9 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         tokens[0] = TOKEN_1;
         tokens[1] = address(0);
 
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
+        );
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setTokenSelfBindingApprovalBatch(tokens, true);
     }
@@ -327,7 +331,9 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         tokens[0] = TOKEN_1;
         tokens[1] = address(0);
 
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
+        );
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindTokens(tokens);
     }
@@ -363,5 +369,23 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         assertEq(data.length, 4);
         // forge-lint: disable-next-line(unsafe-typecast)
         assertEq(bytes4(data), ruleEngineOwnable2StepExposed.exposedMsgData.selector);
+    }
+
+    function testMessageForTransferRestrictionWithTransferOKCode() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.addRule(ruleConditionalTransferLight);
+
+        assertEq(ruleEngineMock.messageForTransferRestriction(TRANSFER_OK), TEXT_TRANSFER_OK);
+    }
+
+    function testMessageForTransferRestrictionWithTransferOKCodeNoRule() public view {
+        assertEq(ruleEngineMock.messageForTransferRestriction(TRANSFER_OK), TEXT_TRANSFER_OK);
+    }
+
+    function testMessageForTransferRestrictionWithUnknownRestrictionCode() public {
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.addRule(ruleConditionalTransferLight);
+
+        assertEq(ruleEngineMock.messageForTransferRestriction(CODE_NONEXISTENT), TEXT_CODE_NOT_FOUND);
     }
 }

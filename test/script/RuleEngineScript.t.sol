@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {CMTATDeployment} from "../utils/CMTATDeployment.sol";
 import {CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.sol";
 import {RuleEngineScript} from "../../script/RuleEngineScript.s.sol";
+import {RuleEngine} from "src/deployment/RuleEngine.sol";
 
 /**
  * @title Test for the RuleEngineScript deployment script
@@ -32,5 +33,17 @@ contract RuleEngineScriptTest is Test {
 
         RuleEngineScript deployScript = new RuleEngineScript();
         deployScript.run();
+
+        // The script must leave a *working* deployment, not merely run to completion.
+        RuleEngine engine = RuleEngine(address(cmtat.ruleEngine()));
+        assertTrue(address(engine) != address(0), "the engine must be set on the token");
+        assertTrue(engine.isTokenBound(address(cmtat)), "the token must be bound to the engine");
+        assertEq(engine.getTokenBound(), address(cmtat));
+        assertEq(engine.rulesCount(), 1, "the whitelist rule must be configured");
+
+        // With the token bound and the zero address listed, issuance works end to end.
+        vm.prank(deployer);
+        cmtat.mint(deployer, 100);
+        assertEq(cmtat.balanceOf(deployer), 100);
     }
 }

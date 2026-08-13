@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/IERC173Subset.sol | eb469793804c3dcf7a6f1d29648671dd2bfad5c9 |
+| ./mocks/IERC173Subset.sol | c15447b4467ff1054817bf3296f95a26283975de |
 
 
 ### Contracts Description Table
@@ -16,8 +16,8 @@
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
 | **IERC173Subset** | Interface |  |||
-| └ | owner | External ❗️ |   |NO❗️ |
 | └ | transferOwnership | External ❗️ | 🛑  |NO❗️ |
+| └ | owner | External ❗️ |   |NO❗️ |
 
 
 ### Legend

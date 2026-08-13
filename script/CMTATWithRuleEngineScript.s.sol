@@ -9,10 +9,10 @@ import {ICMTATConstructor, CMTATStandardStandalone} from "CMTAT/deployment/CMTAT
 import {IERC1643CMTAT} from "CMTAT/interfaces/tokenization/draft-IERC1643CMTAT.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {RuleEngine} from "src/deployment/RuleEngine.sol";
-import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
+import {RuleWhitelistMock} from "src/mocks/rules/validation/RuleWhitelistMock.sol";
 
 /**
- * @title Example deployment of a CMTAT, a mock RuleWhitelist and a RuleEngine
+ * @title Example deployment of a CMTAT, a mock RuleWhitelistMock and a RuleEngine
  * @dev This script deploys a reference/mock rule from `src/mocks/` for demo and testing flows.
  * It is not a production deployment recipe for rule contracts.
  */
@@ -39,7 +39,7 @@ contract CMTATWithRuleEngineScript is Script {
             new CMTATStandardStandalone(trustedForwarder, admin, erc20Attributes, extraInformationAttributes, engines);
         console.log("CMTAT cmtatContract : ", address(cmtatContract));
         // whitelist
-        RuleWhitelist ruleWhitelist = new RuleWhitelist(admin, trustedForwarder);
+        RuleWhitelistMock ruleWhitelist = new RuleWhitelistMock(admin, trustedForwarder);
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
         RuleEngine ruleEngine = new RuleEngine(admin, trustedForwarder, address(cmtatContract));

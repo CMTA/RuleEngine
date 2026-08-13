@@ -20,11 +20,25 @@ contract RuleEngineOwnable is RuleEngineOwnableShared, Ownable {
         Ownable(owner_)
     {}
 
+    /**
+     * @notice Transfers ownership of the contract to a new account (`newOwner`).
+     * @dev Reverts when `newOwner` is already configured as a rule.
+     * @param newOwner The address of the new owner.
+     */
+    function transferOwnership(address newOwner) public virtual override onlyOwner {
+        RuleEngineOwnableShared._checkOwnershipTransferTarget(newOwner);
+        Ownable.transferOwnership(newOwner);
+    }
+
     /* ============ ACCESS CONTROL ============ */
     /**
      * @dev Access control check using Ownable pattern
      */
     function _onlyRulesManager() internal virtual override onlyOwner {}
+
+    /**
+     * @dev Access control check using Ownable pattern
+     */
     function _onlyRulesLimitManager() internal virtual override onlyOwner {}
 
     /**
@@ -33,16 +47,8 @@ contract RuleEngineOwnable is RuleEngineOwnableShared, Ownable {
     function _onlyComplianceManager() internal virtual override onlyOwner {}
 
     /**
-     * @notice Transfers ownership of the contract to a new account (`newOwner`).
-     * @dev Reverts when `newOwner` is already configured as a rule.
-     */
-    function transferOwnership(address newOwner) public virtual override onlyOwner {
-        RuleEngineOwnableShared._checkOwnershipTransferTarget(newOwner);
-        Ownable.transferOwnership(newOwner);
-    }
-
-    /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     * @return sender The transaction sender, unwrapped from the forwarder calldata when relayed.
      */
     function _msgSender() internal view virtual override(RuleEngineOwnableShared, Context) returns (address sender) {
         return RuleEngineOwnableShared._msgSender();
@@ -50,6 +56,7 @@ contract RuleEngineOwnable is RuleEngineOwnableShared, Ownable {
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     * @return The transaction calldata, with the appended sender stripped when relayed.
      */
     function _msgData() internal view virtual override(RuleEngineOwnableShared, Context) returns (bytes calldata) {
         return RuleEngineOwnableShared._msgData();
@@ -57,6 +64,7 @@ contract RuleEngineOwnable is RuleEngineOwnableShared, Ownable {
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     * @return The length of the ERC-2771 calldata suffix.
      */
     function _contextSuffixLength() internal view virtual override(RuleEngineOwnableShared, Context) returns (uint256) {
         return RuleEngineOwnableShared._contextSuffixLength();

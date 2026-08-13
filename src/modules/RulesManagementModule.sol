@@ -60,10 +60,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
             _clearRules();
         }
         for (uint256 i = 0; i < rules_.length; ++i) {
-            _checkRule(address(rules_[i]));
-            // Should never revert because we check the presence of the rule before
-            require(_rules.add(address(rules_[i])), RuleEngine_RulesManagementModule_OperationNotSuccessful());
-            emit AddRule(rules_[i]);
+            _addRule(rules_[i]);
         }
     }
 
@@ -83,27 +80,14 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
         if (_rules.length() >= _maxRules) {
             revert RuleEngine_RulesManagementModule_MaxRulesExceeded(_maxRules);
         }
-        _checkRule(address(rule_));
-        require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_OperationNotSuccessful());
-        emit AddRule(rule_);
-    }
-
-    /**
-     * @inheritdoc IRulesManagementModule
-     */
-    function maxRules() public view virtual override(IRulesManagementModule) returns (uint256) {
-        return _maxRules;
+        _addRule(rule_);
     }
 
     /**
      * @inheritdoc IRulesManagementModule
      */
     function setMaxRules(uint256 maxRules_) public virtual override(IRulesManagementModule) onlyRulesLimitManager {
-        if (maxRules_ == 0) {
-            revert RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed();
-        }
-        _maxRules = maxRules_;
-        emit SetMaxRules(maxRules_);
+        _setMaxRules(maxRules_);
     }
 
     /**
@@ -115,6 +99,12 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     }
 
     /* ============ View functions ============ */
+    /**
+     * @inheritdoc IRulesManagementModule
+     */
+    function maxRules() public view virtual override(IRulesManagementModule) returns (uint256) {
+        return _maxRules;
+    }
 
     /**
      * @inheritdoc IRulesManagementModule
@@ -137,7 +127,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
         if (ruleId < _rules.length()) {
             // Note that there are no guarantees on the ordering of values inside the array,
             // and it may change when more values are added or removed.
-            return _rules.at(ruleId);
+            return _rules.pos(ruleId);
         } else {
             return address(0);
         }
@@ -163,6 +153,36 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     }
 
     /**
+     * @notice Set the maximum number of rules and emit the corresponding event
+     * @dev Single point where `_maxRules` is written, so the invariant "every change to the cap emits
+     * {SetMaxRules}" holds structurally rather than by convention. Called by {setMaxRules} and by the
+     * deployable contracts' constructors, which emit the initial cap so the event log alone is enough to
+     * reconstruct it.
+     * @param maxRules_ New maximum number of rules; must not be zero.
+     */
+    function _setMaxRules(uint256 maxRules_) internal virtual {
+        if (maxRules_ == 0) {
+            revert RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed();
+        }
+        _maxRules = maxRules_;
+        emit SetMaxRules(maxRules_);
+    }
+
+    /**
+     * @notice Validate a rule, add it to the array of rules and emit the corresponding event
+     * @dev Single point where a rule is inserted, so the invariant "every rule added emits {AddRule}" holds
+     * structurally. The `maxRules` cap is deliberately *not* checked here: {addRule} checks it per insertion
+     * while {setRules} checks the whole batch up front, so the two callers need different cap logic.
+     * @param rule_ The rule to validate and add.
+     */
+    function _addRule(IRule rule_) internal virtual {
+        _checkRule(address(rule_));
+        // Should never revert because we check the presence of the rule before
+        require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_OperationNotSuccessful());
+        emit AddRule(rule_);
+    }
+
+    /**
      * @notice Remove a rule from the array of rules
      * Revert if the rule found at the specified index does not match the rule in argument
      * @param rule_ address of the target rule
@@ -173,18 +193,6 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
         // Should never revert because we check the presence of the rule before
         require(_rules.remove(address(rule_)), RuleEngine_RulesManagementModule_OperationNotSuccessful());
         emit RemoveRule(rule_);
-    }
-
-    /**
-     * @dev check if a rule is valid, revert otherwise
-     */
-    function _checkRule(address rule_) internal view virtual {
-        if (rule_ == address(0x0)) {
-            revert RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed();
-        }
-        if (_rules.contains(rule_)) {
-            revert RuleEngine_RulesManagementModule_RuleAlreadyExists();
-        }
     }
 
     /* ============ Transferred functions ============ */
@@ -203,7 +211,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     function _transferred(address from, address to, uint256 value) internal virtual {
         uint256 rulesLength = _rules.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            IRule(_rules.at(i)).transferred(from, to, value);
+            IRule(_rules.pos(i)).transferred(from, to, value);
         }
     }
 
@@ -222,10 +230,30 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     function _transferred(address spender, address from, address to, uint256 value) internal virtual {
         uint256 rulesLength = _rules.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            IRule(_rules.at(i)).transferred(spender, from, to, value);
+            IRule(_rules.pos(i)).transferred(spender, from, to, value);
         }
     }
 
+    /**
+     * @dev Access control hook guarding rule management operations.
+     */
     function _onlyRulesManager() internal virtual;
+
+    /**
+     * @dev Access control hook guarding updates to the rule cap.
+     */
     function _onlyRulesLimitManager() internal virtual;
+
+    /**
+     * @dev check if a rule is valid, revert otherwise
+     * @param rule_ The candidate rule address to validate.
+     */
+    function _checkRule(address rule_) internal view virtual {
+        if (rule_ == address(0x0)) {
+            revert RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed();
+        }
+        if (_rules.contains(rule_)) {
+            revert RuleEngine_RulesManagementModule_RuleAlreadyExists();
+        }
+    }
 }

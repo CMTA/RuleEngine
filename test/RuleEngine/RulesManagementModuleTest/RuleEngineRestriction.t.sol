@@ -17,7 +17,7 @@ contract RuleEngineTest is Test, HelperContract {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         ruleConditionalTransferLight =
-            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+            new RuleConditionalTransferLightMock(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight);
@@ -107,5 +107,25 @@ contract RuleEngineTest is Test, HelperContract {
 
         // Assert
         assertEq(resString, TEXT_TRANSFER_REQUEST_NOT_APPROVED);
+    }
+
+    function testMessageForTransferRestrictionWithTransferOKCode() public {
+        // Act
+        resString = ruleEngineMock.messageForTransferRestriction(TRANSFER_OK);
+
+        // Assert
+        assertEq(resString, TEXT_TRANSFER_OK);
+    }
+
+    function testMessageForTransferRestrictionWithTransferOKCodeNoRule() public {
+        // Arrange
+        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
+        ruleEngineMock.clearRules();
+
+        // Act
+        resString = ruleEngineMock.messageForTransferRestriction(TRANSFER_OK);
+
+        // Assert
+        assertEq(resString, TEXT_TRANSFER_OK);
     }
 }

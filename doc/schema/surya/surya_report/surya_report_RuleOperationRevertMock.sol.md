@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/operation/RuleMintAllowance.sol | e97489d69ef915fa16584bc17a7974c146258901 |
+| ./mocks/rules/operation/RuleOperationRevertMock.sol | 9ad9b2b293ec7c02b687f2d76565a22b47c90c0d |
 
 
 ### Contracts Description Table
@@ -15,18 +15,16 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleMintAllowance** | Implementation | AccessControl, RuleMintAllowanceInvariantStorage, IRule |||
-| └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
+| **RuleOperationRevertMock** | Implementation | AccessControl, IRule, RuleCommonInvariantStorage |||
+| └ | canReturnTransferRestrictionCode | External ❗️ |   |NO❗️ |
+| └ | messageForTransferRestriction | External ❗️ |   |NO❗️ |
 | └ | supportsInterface | Public ❗️ |   |NO❗️ |
-| └ | setMintAllowance | External ❗️ | 🛑  | onlyRole |
-| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
-| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
+| └ | transferred | Public ❗️ |   |NO❗️ |
+| └ | transferred | Public ❗️ |   |NO❗️ |
 | └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
 | └ | detectTransferRestrictionFrom | Public ❗️ |   |NO❗️ |
 | └ | canTransfer | Public ❗️ |   |NO❗️ |
 | └ | canTransferFrom | Public ❗️ |   |NO❗️ |
-| └ | canReturnTransferRestrictionCode | External ❗️ |   |NO❗️ |
-| └ | messageForTransferRestriction | External ❗️ |   |NO❗️ |
 
 
 ### Legend

@@ -2,14 +2,12 @@
 
 pragma solidity ^0.8.20;
 
-// forge-lint: disable-next-line(unaliased-plain-import)
-import "@openzeppelin/contracts/access/AccessControl.sol";
-// forge-lint: disable-next-line(unaliased-plain-import)
-import "../../../../../modules/ERC2771ModuleStandalone.sol";
-// forge-lint: disable-next-line(unaliased-plain-import)
-import "./RuleAddressListInternal.sol";
-// forge-lint: disable-next-line(unaliased-plain-import)
-import "./invariantStorage/RuleAddressListInvariantStorage.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {ERC2771Context} from "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+import {ERC2771ModuleStandalone} from "../../../../../modules/ERC2771ModuleStandalone.sol";
+import {RuleAddressListInternal} from "./RuleAddressListInternal.sol";
+import {RuleAddressListInvariantStorage} from "./invariantStorage/RuleAddressListInvariantStorage.sol";
 
 /**
  * @title an addresses list manager
@@ -22,6 +20,9 @@ abstract contract RuleAddressList is
     RuleAddressListInvariantStorage
 {
     // Number of addresses in the list at the moment
+    /**
+     * @notice Number of addresses currently in the list.
+     */
     uint256 private numAddressesWhitelisted;
 
     /**
@@ -101,9 +102,11 @@ abstract contract RuleAddressList is
 
     /**
      * @notice batch version of {addressIsListed}
+     * @param _targetAddresses The addresses to check.
+     * @return One boolean per input address, true when listed.
      *
      */
-    function addressIsListedBatch(address[] memory _targetAddresses) public view returns (bool[] memory) {
+    function addressIsListedBatch(address[] calldata _targetAddresses) public view virtual returns (bool[] memory) {
         bool[] memory isListed = new bool[](_targetAddresses.length);
         for (uint256 i = 0; i < _targetAddresses.length; ++i) {
             isListed[i] = _addressIsListed(_targetAddresses[i]);
@@ -114,6 +117,9 @@ abstract contract RuleAddressList is
     /* ============ ACCESS CONTROL ============ */
     /**
      * @dev Returns `true` if `account` has been granted `role`.
+     * @param role The role identifier to check.
+     * @param account The account to check.
+     * @return True if the account holds the role (or is the default admin), false otherwise.
      */
     function hasRole(bytes32 role, address account) public view virtual override(AccessControl) returns (bool) {
         // The Default Admin has all roles
@@ -129,22 +135,25 @@ abstract contract RuleAddressList is
 
     /**
      * @dev This surcharge is not necessary if you do not use the ERC2771Module
+     * @return sender The transaction sender, unwrapped from the forwarder calldata when relayed.
      */
-    function _msgSender() internal view override(ERC2771Context, Context) returns (address sender) {
+    function _msgSender() internal view virtual override(ERC2771Context, Context) returns (address sender) {
         return ERC2771Context._msgSender();
     }
 
     /**
      * @dev This surcharge is not necessary if you do not use the ERC2771Module
+     * @return The transaction calldata, with the appended sender stripped when relayed.
      */
-    function _msgData() internal view override(ERC2771Context, Context) returns (bytes calldata) {
+    function _msgData() internal view virtual override(ERC2771Context, Context) returns (bytes calldata) {
         return ERC2771Context._msgData();
     }
 
     /**
      * @dev This surcharge is not necessary if you do not use the ERC2771Module
+     * @return The length of the ERC-2771 calldata suffix.
      */
-    function _contextSuffixLength() internal view override(ERC2771Context, Context) returns (uint256) {
+    function _contextSuffixLength() internal view virtual override(ERC2771Context, Context) returns (uint256) {
         return ERC2771Context._contextSuffixLength();
     }
 }

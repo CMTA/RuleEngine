@@ -9,5 +9,8 @@ pragma solidity ^0.8.20;
  *      See src/mocks/IRuleInterfaceIdHelper.sol for the detailed computation.
  */
 library RuleInterfaceId {
+    /**
+     * @notice ERC-165 interface ID advertised by every rule usable by the RuleEngine.
+     */
     bytes4 public constant IRULE_INTERFACE_ID = 0x2497d6cb;
 }

@@ -24,11 +24,42 @@ contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
         Ownable(owner_)
     {}
 
+    /**
+     * @notice Starts ownership transfer to `newOwner`.
+     * @dev Reverts when `newOwner` is already configured as a rule.
+     * @param newOwner The address of the new owner.
+     */
+    function transferOwnership(address newOwner) public virtual override onlyOwner {
+        RuleEngineOwnableShared._checkOwnershipTransferTarget(newOwner);
+        Ownable2Step.transferOwnership(newOwner);
+    }
+
+    /* ============ ERC-165 ============ */
+    /**
+     * @notice ERC-165 interface detection.
+     * @param interfaceId The interface identifier to check.
+     * @return True if the interface is supported, false otherwise.
+     */
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(RuleEngineOwnableShared)
+        returns (bool)
+    {
+        return interfaceId == Ownable2StepInterfaceId.IOWNABLE2STEP_INTERFACE_ID
+            || RuleEngineOwnableShared.supportsInterface(interfaceId);
+    }
+
     /* ============ ACCESS CONTROL ============ */
     /**
      * @dev Access control check using Ownable pattern
      */
     function _onlyRulesManager() internal virtual override onlyOwner {}
+
+    /**
+     * @dev Access control check using Ownable pattern
+     */
     function _onlyRulesLimitManager() internal virtual override onlyOwner {}
 
     /**
@@ -37,22 +68,8 @@ contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
     function _onlyComplianceManager() internal virtual override onlyOwner {}
 
     /**
-     * @notice Starts ownership transfer to `newOwner`.
-     * @dev Reverts when `newOwner` is already configured as a rule.
-     */
-    function transferOwnership(address newOwner) public virtual override onlyOwner {
-        RuleEngineOwnableShared._checkOwnershipTransferTarget(newOwner);
-        Ownable2Step.transferOwnership(newOwner);
-    }
-
-    /* ============ ERC-165 ============ */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(RuleEngineOwnableShared) returns (bool) {
-        return interfaceId == Ownable2StepInterfaceId.IOWNABLE2STEP_INTERFACE_ID
-            || RuleEngineOwnableShared.supportsInterface(interfaceId);
-    }
-
-    /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     * @return sender The transaction sender, unwrapped from the forwarder calldata when relayed.
      */
     function _msgSender() internal view virtual override(RuleEngineOwnableShared, Context) returns (address sender) {
         return RuleEngineOwnableShared._msgSender();
@@ -60,6 +77,7 @@ contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     * @return The transaction calldata, with the appended sender stripped when relayed.
      */
     function _msgData() internal view virtual override(RuleEngineOwnableShared, Context) returns (bytes calldata) {
         return RuleEngineOwnableShared._msgData();
@@ -67,6 +85,7 @@ contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
 
     /**
      * @dev This surcharge is not necessary if you do not use the MetaTxModule
+     * @return The length of the ERC-2771 calldata suffix.
      */
     function _contextSuffixLength() internal view virtual override(RuleEngineOwnableShared, Context) returns (uint256) {
         return RuleEngineOwnableShared._contextSuffixLength();

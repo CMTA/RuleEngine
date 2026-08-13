@@ -10,8 +10,14 @@ abstract contract RuleAddressListInternal {
     error Rulelist_AddressAlreadylisted();
     error Rulelist_AddressNotPresent();
 
+    /**
+     * @notice Membership flag per address.
+     */
     mapping(address => bool) private list;
     // Number of addresses in the list at the moment
+    /**
+     * @notice Number of addresses currently in the list.
+     */
     uint256 private numAddressesList;
 
     /**
@@ -19,7 +25,7 @@ abstract contract RuleAddressListInternal {
      * If one of addresses already exist, there is no change for this address. The transaction remains valid (no revert).
      * @param listTargetAddresses an array with the addresses to list
      */
-    function _addAddressesToThelist(address[] calldata listTargetAddresses) internal {
+    function _addAddressesToThelist(address[] calldata listTargetAddresses) internal virtual {
         uint256 numAddressesListLocal = numAddressesList;
         for (uint256 i = 0; i < listTargetAddresses.length; ++i) {
             if (!list[listTargetAddresses[i]]) {
@@ -36,7 +42,7 @@ abstract contract RuleAddressListInternal {
      * The transaction remains valid (no revert).
      * @param listTargetAddresses an array with the addresses to remove
      */
-    function _removeAddressesFromThelist(address[] calldata listTargetAddresses) internal {
+    function _removeAddressesFromThelist(address[] calldata listTargetAddresses) internal virtual {
         uint256 numAddressesListLocal = numAddressesList;
         for (uint256 i = 0; i < listTargetAddresses.length; ++i) {
             if (list[listTargetAddresses[i]]) {
@@ -52,7 +58,7 @@ abstract contract RuleAddressListInternal {
      * If the address already exists, the transaction is reverted to save gas.
      * @param targetAddress The address to list
      */
-    function _addAddressToThelist(address targetAddress) internal {
+    function _addAddressToThelist(address targetAddress) internal virtual {
         if (list[targetAddress]) {
             revert Rulelist_AddressAlreadylisted();
         }
@@ -66,7 +72,7 @@ abstract contract RuleAddressListInternal {
      * @param targetAddress The address to remove
      *
      */
-    function _removeAddressFromThelist(address targetAddress) internal {
+    function _removeAddressFromThelist(address targetAddress) internal virtual {
         if (!list[targetAddress]) {
             revert Rulelist_AddressNotPresent();
         }
@@ -79,7 +85,7 @@ abstract contract RuleAddressListInternal {
      * @return Number of listed addresses
      *
      */
-    function _numberListedAddress() internal view returns (uint256) {
+    function _numberListedAddress() internal view virtual returns (uint256) {
         return numAddressesList;
     }
 
@@ -89,7 +95,7 @@ abstract contract RuleAddressListInternal {
      * @return True if the address is listed, false otherwise
      *
      */
-    function _addressIsListed(address _targetAddress) internal view returns (bool) {
+    function _addressIsListed(address _targetAddress) internal view virtual returns (bool) {
         return list[_targetAddress];
     }
 }

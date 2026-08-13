@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../../HelperContract.sol";
 
-import {RuleOperationRevert} from "src/mocks/rules/operation/RuleOperationRevert.sol";
+import {RuleOperationRevertMock} from "src/mocks/rules/operation/RuleOperationRevertMock.sol";
 
 /**
  * @title Base test for RuleEngine operation revert with CMTAT
@@ -20,7 +20,7 @@ abstract contract RuleEngineOperationRevertBase is Test, HelperContract {
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, address(cmtatContract));
-        RuleOperationRevert ruleOperationRevert = new RuleOperationRevert();
+        RuleOperationRevertMock ruleOperationRevert = new RuleOperationRevertMock();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleOperationRevert);
@@ -34,7 +34,7 @@ abstract contract RuleEngineOperationRevertBase is Test, HelperContract {
 
     function testRuleEngineTransferredRevert() public {
         // Arrange
-        vm.expectRevert(RuleOperationRevert.RuleConditionalTransferLight_InvalidTransfer.selector);
+        vm.expectRevert(RuleOperationRevertMock.RuleConditionalTransferLight_InvalidTransfer.selector);
         // Act
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         cmtatContract.transfer(ADDRESS2, 21);

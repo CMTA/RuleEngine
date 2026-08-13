@@ -7,9 +7,16 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {IERC3643ComplianceExtended} from "../interfaces/IERC3643ComplianceExtended.sol";
 import {ERC3643ComplianceModule} from "./ERC3643ComplianceModule.sol";
 
+/**
+ * @title ERC3643ComplianceExtendedModule
+ * @notice Extends the core ERC-3643 compliance module with batch binding and token self-binding.
+ */
 abstract contract ERC3643ComplianceExtendedModule is ERC3643ComplianceModule, IERC3643ComplianceExtended {
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    /**
+     * @notice Tracks which tokens are allowed to bind and unbind themselves.
+     */
     mapping(address token => bool approved) private _tokenSelfBindingApproval;
 
     /**
@@ -66,6 +73,7 @@ abstract contract ERC3643ComplianceExtendedModule is ERC3643ComplianceModule, IE
     /**
      * @dev Authorizes bind/unbind operations.
      * Allows compliance manager, or approved token self-calls for T-REX compatibility.
+     * @param token The token being bound or unbound.
      */
     function _authorizeComplianceBindingChange(address token) internal virtual override {
         if (_msgSender() == token && _tokenSelfBindingApproval[token]) {
