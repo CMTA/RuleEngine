@@ -60,10 +60,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
             _clearRules();
         }
         for (uint256 i = 0; i < rules_.length; ++i) {
-            _checkRule(address(rules_[i]));
-            // Should never revert because we check the presence of the rule before
-            require(_rules.add(address(rules_[i])), RuleEngine_RulesManagementModule_OperationNotSuccessful());
-            emit AddRule(rules_[i]);
+            _addRule(rules_[i]);
         }
     }
 
@@ -83,9 +80,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
         if (_rules.length() >= _maxRules) {
             revert RuleEngine_RulesManagementModule_MaxRulesExceeded(_maxRules);
         }
-        _checkRule(address(rule_));
-        require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_OperationNotSuccessful());
-        emit AddRule(rule_);
+        _addRule(rule_);
     }
 
     /**
@@ -171,6 +166,20 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
         }
         _maxRules = maxRules_;
         emit SetMaxRules(maxRules_);
+    }
+
+    /**
+     * @notice Validate a rule, add it to the array of rules and emit the corresponding event
+     * @dev Single point where a rule is inserted, so the invariant "every rule added emits {AddRule}" holds
+     * structurally. The `maxRules` cap is deliberately *not* checked here: {addRule} checks it per insertion
+     * while {setRules} checks the whole batch up front, so the two callers need different cap logic.
+     * @param rule_ The rule to validate and add.
+     */
+    function _addRule(IRule rule_) internal virtual {
+        _checkRule(address(rule_));
+        // Should never revert because we check the presence of the rule before
+        require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_OperationNotSuccessful());
+        emit AddRule(rule_);
     }
 
     /**
