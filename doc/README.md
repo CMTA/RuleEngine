@@ -1528,6 +1528,7 @@ Here a summary of the main documentation
 | Toolchain    | [doc/TOOLCHAIN.md](./TOOLCHAIN.md)  |
 | Surya report | [doc/schema/surya](./schema/surya/) |
 | Code-quality review | [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md](./security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md) |
+| Script review | [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md](./security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md) |
 
 See also [Taurus - Token Transfer Management: How to Apply Restrictions with CMTAT and ERC-1404](https://www.taurushq.com/blog/token-transfer-management-how-to-apply-restrictions-with-cmtat-and-erc-1404/) (RuleEngine v2.02 and CMTAT v2.4.0)
 

@@ -239,7 +239,7 @@ test/
 ├── RuleEngine/                    # Tests for RuleEngine (RBAC)
 ├── RuleEngineOwnable/             # Tests for RuleEngineOwnable
 ├── RuleEngineOwnable2Step/        # Tests for RuleEngineOwnable2Step
-└── RuleWhitelist/                 # Tests for the whitelist mock rule
+└── RuleWhitelistMock/                 # Tests for the whitelist mock rule
 
 script/                            # Foundry example/deployment scripts
 ```

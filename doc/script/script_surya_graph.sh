@@ -1,18 +1,19 @@
-#/bin/bash
+#!/bin/bash
+# Generate a Surya call graph (PNG) for every Solidity file under src/.
+# Output: docOut/surya_graph/
+set -euo pipefail
+
 cd '../../'
 DIR=$(pwd)
 DIR_OUT=${DIR}/docOut/surya_graph
 if ! [ -d "$DIR_OUT" ]; then
-    mkdir -p ./docOut/surya_graph
+    mkdir -p "$DIR_OUT"
 fi
 cd './src'
 DIR=$(pwd)
-for i in $(find $DIR -type f);
+# -print0 / read -d '' so paths containing whitespace are handled correctly
+find "$DIR" -type f -name '*.sol' -print0 | while IFS= read -r -d '' i;
 do
-    #echo $i
     filename=${i##*/}
-    ext=${i##*.}
-    if [[ $ext == 'sol' ]]; then
-        npx surya graph $i | dot -Tpng > ../docOut/surya_graph/surya_graph_$filename.png;
-    fi
+    npx surya graph "$i" | dot -Tpng > "${DIR_OUT}/surya_graph_${filename}.png";
 done;
