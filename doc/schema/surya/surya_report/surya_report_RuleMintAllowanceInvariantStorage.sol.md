@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| /home/ryan/Pictures/dev/RE-new/RuleEngineNew/src/mocks/rules/operation/abstract/RuleMintAllowanceInvariantStorage.sol | 0f5aa4e3b36ede206ea44ee8aa13158e24d5a792 |
+| ./mocks/rules/operation/abstract/RuleMintAllowanceInvariantStorage.sol | 0f5aa4e3b36ede206ea44ee8aa13158e24d5a792 |
 
 
 ### Contracts Description Table

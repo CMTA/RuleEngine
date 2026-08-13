@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| /home/ryan/Pictures/dev/RE-new/RuleEngineNew/src/modules/RulesManagementModule.sol | 1c265e8afb891b7d6a91cb5b47a33958392cd053 |
+| ./modules/RulesManagementModule.sol | f382772b9cd31d5d61f03a4f3e6804cd4896e9c5 |
 
 
 ### Contracts Description Table
@@ -27,6 +27,8 @@
 | └ | rule | Public ❗️ |   |NO❗️ |
 | └ | rules | Public ❗️ |   |NO❗️ |
 | └ | _clearRules | Internal 🔒 | 🛑  | |
+| └ | _setMaxRules | Internal 🔒 | 🛑  | |
+| └ | _addRule | Internal 🔒 | 🛑  | |
 | └ | _removeRule | Internal 🔒 | 🛑  | |
 | └ | _transferred | Internal 🔒 | 🛑  | |
 | └ | _transferred | Internal 🔒 | 🛑  | |

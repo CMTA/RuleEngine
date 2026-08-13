@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| /home/ryan/Pictures/dev/RE-new/RuleEngineNew/src/mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol | 4219a1d62f201226260a2598de2f4313e5257049 |
+| ./mocks/rules/operation/abstract/RuleConditionalTransferLightInvariantStorage.sol | 4219a1d62f201226260a2598de2f4313e5257049 |
 
 
 ### Contracts Description Table
