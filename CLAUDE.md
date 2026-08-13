@@ -2,14 +2,14 @@
 
 This file helps AI agents (Cursor, Claude Code, etc.) understand and work with this codebase.
 
-AGENTS.md and CLAUDE.md files must always be identical
+AGENTS.md and CLAUDE.md files must always be identical — always update both together.
 
 ## Project Summary
 
 **RuleEngine** is a Solidity smart contract system that enforces transfer restrictions for [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens. It acts as an external controller that calls pluggable rule contracts on each token transfer, mint, or burn.
 
 - **Version:** 3.0.0 (defined in `src/modules/VersionModule.sol`)
-- **Solidity:** ^0.8.20 (compiled with 0.8.34)
+- **Solidity:** ^0.8.20 (compiled with 0.8.36)
 - **EVM target:** Prague
 - **License:** MPL-2.0
 
@@ -27,6 +27,20 @@ forge fmt                # Format code
 
 Dependencies are git submodules. Initialize with `forge install`, update with `forge update`.
 CMTAT submodule also needs `cd lib/CMTAT && npm install` for its OpenZeppelin deps.
+
+## Agent Workflow
+
+- **Never create git commits.** Provide commit messages only when they are requested.
+- **Always run the full test suite (`forge test`) after any code modification** — including lint-driven or mechanical refactors — before reporting completion.
+- **Always update `README.md`** to reflect the latest change.
+- After each implemented feature or fix, provide a **one-line GitHub commit message** covering all changes since the last commit.
+
+### When implementing a new rule or feature
+
+1. Create or update the technical documentation in `doc/technical`
+2. Update `README.md`
+3. Create or update tests, targeting **100% code coverage** — check with `forge coverage --report summary`
+4. Update `CHANGELOG.md`
 
 ## Import Remappings
 
@@ -255,8 +269,11 @@ Key points:
 - NatSpec comments on all public/external functions
 - Function ordering: constructor, receive, fallback, external, public, internal, private (view/pure last within each group)
 - Function declaration order: visibility, mutability, virtual, override, custom modifiers
+- All `internal` functions must be marked `virtual`, so inheriting contracts can override them.
+- Use `require(condition, CustomError(...))` for custom errors; avoid direct `revert CustomError(...)`.
 - In `src/`, avoid `super` calls and prefer explicit parent-contract calls (e.g., `AccessControl.grantRole(...)`) for readability and deterministic inheritance behavior.
 - Section headers: `/* ============ SECTION ============ */`
+- **No emoji in code comments or NatSpec.** Use a plain word marker instead: `WARNING:`, `NOTE:`, `IMPORTANT:`. Emoji render inconsistently across editors, terminals, `forge doc` output and diffs; they are not searchable (`grep WARNING` finds the marker, `grep ⚠️` depends on the shell); and they encode as multi-byte sequences that can be silently mangled by tooling. This applies to `src/`, `test/` and `script/`. Markdown documentation may use emoji freely — the restriction is Solidity comments only.
 - Run `forge fmt` before committing
 
 ## Common Tasks
