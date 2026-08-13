@@ -17,25 +17,83 @@ import {RuleInterfaceId} from "../modules/library/RuleInterfaceId.sol";
  *      type(IRuleAllFunctions).interfaceId covers the full hierarchy.
  */
 interface IRuleAllFunctions {
-    // From IRule
+    /**
+     * @notice From IRuleEngine: applies the rule to a transfer carrying a spender.
+     * @param spender The account moving the tokens on behalf of `from`.
+     * @param from The origin address.
+     * @param to The destination address.
+     * @param value The number of tokens transferred.
+     */
+    function transferred(address spender, address from, address to, uint256 value) external;
+
+    /**
+     * @notice From IERC3643IComplianceContract: applies the rule to a transfer without a spender.
+     * @param from The origin address.
+     * @param to The destination address.
+     * @param value The number of tokens transferred.
+     */
+    function transferred(address from, address to, uint256 value) external;
+
+    /**
+     * @notice From IRule: tells whether the restriction code belongs to this rule.
+     * @param restrictionCode The target restriction code.
+     * @return True if the restriction code is known by the rule.
+     */
     function canReturnTransferRestrictionCode(uint8 restrictionCode) external view returns (bool);
-    // From IERC1404
+
+    /**
+     * @notice From IERC1404: returns the restriction code applying to a transfer.
+     * @param from The origin address.
+     * @param to The destination address.
+     * @param value The number of tokens to transfer.
+     * @return The ERC-1404 restriction code, zero when the transfer is allowed.
+     */
     function detectTransferRestriction(address from, address to, uint256 value) external view returns (uint8);
+
+    /**
+     * @notice From IERC1404: returns the human readable message for a restriction code.
+     * @param restrictionCode The target restriction code.
+     * @return The message describing the restriction.
+     */
     function messageForTransferRestriction(uint8 restrictionCode) external view returns (string memory);
-    // From IERC1404Extend
+
+    /**
+     * @notice From IERC1404Extend: returns the restriction code for a spender-initiated transfer.
+     * @param spender The account moving the tokens on behalf of `from`.
+     * @param from The origin address.
+     * @param to The destination address.
+     * @param value The number of tokens to transfer.
+     * @return The ERC-1404 restriction code, zero when the transfer is allowed.
+     */
     function detectTransferRestrictionFrom(address spender, address from, address to, uint256 value)
         external
         view
         returns (uint8);
-    // From IRuleEngine
-    function transferred(address spender, address from, address to, uint256 value) external;
-    // From IERC3643IComplianceContract
-    function transferred(address from, address to, uint256 value) external;
-    // From IERC3643ComplianceRead
+
+    /**
+     * @notice From IERC3643ComplianceRead: tells whether a transfer is allowed.
+     * @param from The origin address.
+     * @param to The destination address.
+     * @param value The number of tokens to transfer.
+     * @return True if the transfer is allowed, false otherwise.
+     */
     function canTransfer(address from, address to, uint256 value) external view returns (bool);
-    // From IERC7551Compliance
+
+    /**
+     * @notice From IERC7551Compliance: tells whether a spender-initiated transfer is allowed.
+     * @param spender The account moving the tokens on behalf of `from`.
+     * @param from The origin address.
+     * @param to The destination address.
+     * @param value The number of tokens to transfer.
+     * @return True if the transfer is allowed, false otherwise.
+     */
     function canTransferFrom(address spender, address from, address to, uint256 value) external view returns (bool);
-    // From IERC165
+
+    /**
+     * @notice From IERC165: ERC-165 interface detection.
+     * @param interfaceId The interface identifier to check.
+     * @return True if the interface is supported, false otherwise.
+     */
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
@@ -44,22 +102,42 @@ interface IRuleAllFunctions {
  * @dev Helper contract to expose IRule interface IDs and verify computation.
  */
 contract IRuleInterfaceIdHelper {
-    /// @notice Returns type(IRule).interfaceId (only directly defined functions)
+    /**
+     * @notice Returns type(IRule).interfaceId (only directly defined functions)
+     * @return The ERC-165 interface ID of IRule alone.
+     */
     function getIRuleInterfaceId() external pure returns (bytes4) {
         return type(IRule).interfaceId;
     }
 
-    /// @notice Returns the XOR of ALL function selectors in the IRule hierarchy (flattened)
+    /**
+     * @notice Returns the XOR of ALL function selectors in the IRule hierarchy (flattened)
+     * @return The ERC-165 interface ID covering the full IRule hierarchy.
+     */
     function getIRuleAllFunctionsInterfaceId() external pure returns (bytes4) {
         return type(IRuleAllFunctions).interfaceId;
     }
 
-    /// @notice Returns the constant defined in RuleInterfaceId library
+    /**
+     * @notice Returns the constant defined in RuleInterfaceId library
+     * @return The interface ID constant shipped in RuleInterfaceId.
+     */
     function getRuleInterfaceIdConstant() external pure returns (bytes4) {
         return RuleInterfaceId.IRULE_INTERFACE_ID;
     }
 
-    /// @notice Returns individual interface IDs from each parent interface
+    /**
+     * @notice Returns individual interface IDs from each parent interface
+     * @return iRuleId The interface ID of IRule.
+     * @return iRuleEngineERC1404Id The interface ID of IRuleEngineERC1404.
+     * @return iRuleEngineId The interface ID of IRuleEngine.
+     * @return iERC1404Id The interface ID of IERC1404.
+     * @return iERC1404ExtendId The interface ID of IERC1404Extend.
+     * @return iERC3643ComplianceReadId The interface ID of IERC3643ComplianceRead.
+     * @return iERC3643IComplianceContractId The interface ID of IERC3643IComplianceContract.
+     * @return iERC7551ComplianceId The interface ID of IERC7551Compliance.
+     * @return iERC165Id The interface ID of IERC165.
+     */
     function getParentInterfaceIds()
         external
         pure
@@ -86,8 +164,11 @@ contract IRuleInterfaceIdHelper {
         iERC165Id = type(IERC165).interfaceId;
     }
 
-    /// @notice Manually computes the XOR of all function selectors and returns it
     // forge-lint: disable-next-line(mixed-case-function)
+    /**
+     * @notice Manually computes the XOR of all function selectors and returns it
+     * @return The interface ID obtained by XOR-ing every selector by hand.
+     */
     function computeManualXOR() external pure returns (bytes4) {
         return IRule.canReturnTransferRestrictionCode.selector ^ IERC1404.detectTransferRestriction.selector
             ^ IERC1404.messageForTransferRestriction.selector ^ IERC1404Extend.detectTransferRestrictionFrom.selector

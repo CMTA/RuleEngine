@@ -4,7 +4,15 @@ pragma solidity ^0.8.20;
 
 import {IRule} from "../../interfaces/IRule.sol";
 
+/**
+ * @title RulesManagementModuleInvariantStorage
+ * @notice Holds the errors, events and default limits used by the rules management module.
+ */
 abstract contract RulesManagementModuleInvariantStorage {
+    /**
+     * @notice Default upper bound on the number of rules a RuleEngine may hold.
+     * @dev Bounds the per-transfer gas cost of iterating the rule set.
+     */
     uint256 public constant DEFAULT_MAX_RULES = 10;
 
     /* ==== Errors === */

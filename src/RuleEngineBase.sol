@@ -47,7 +47,7 @@ abstract contract RuleEngineBase is
     string private constant TEXT_CODE_NOT_FOUND = "Unknown restriction code";
 
     /* ============ State functions ============ */
-    /*
+    /**
      * @inheritdoc IRuleEngine
      */
     function transferred(address spender, address from, address to, uint256 value)
@@ -156,6 +156,13 @@ abstract contract RuleEngineBase is
     /*//////////////////////////////////////////////////////////////
                             INTERNAL/PRIVATE FUNCTIONS
     //////////////////////////////////////////////////////////////*/
+    /**
+     * @notice Returns the first non-zero restriction code reported by the configured rules.
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount to transfer
+     * @return The first non-zero ERC-1404 restriction code, or TRANSFER_OK when every rule allows it.
+     */
     function _detectTransferRestriction(address from, address to, uint256 value) internal view virtual returns (uint8) {
         uint256 rulesLength = rulesCount();
         for (uint256 i = 0; i < rulesLength; ++i) {
@@ -167,6 +174,14 @@ abstract contract RuleEngineBase is
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
+    /**
+     * @notice Returns the first non-zero restriction code for a spender-initiated transfer.
+     * @param spender the spender address (transferFrom)
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount to transfer
+     * @return The first non-zero ERC-1404 restriction code, or TRANSFER_OK when every rule allows it.
+     */
     function _detectTransferRestrictionFrom(address spender, address from, address to, uint256 value)
         internal
         view
@@ -190,6 +205,8 @@ abstract contract RuleEngineBase is
      * the same message to avoid ambiguous operator feedback.
      * The reserved code 0 (REJECTED_CODE_BASE.TRANSFER_OK) is answered before the rules are queried,
      * so that a valid transfer is never reported as an unknown restriction code.
+     * @param restrictionCode The target restriction code.
+     * @return The message of the first rule claiming the code, or a default message when none does.
      */
     function _messageForTransferRestriction(uint8 restrictionCode) internal view virtual returns (string memory) {
         if (restrictionCode == uint8(REJECTED_CODE_BASE.TRANSFER_OK)) {
@@ -206,6 +223,7 @@ abstract contract RuleEngineBase is
 
     /**
      * @dev Override to add ERC-165 interface check for the full IRule hierarchy.
+     * @param rule_ The candidate rule address to validate.
      */
     function _checkRule(address rule_) internal view virtual override {
         RulesManagementModule._checkRule(rule_);
@@ -217,6 +235,8 @@ abstract contract RuleEngineBase is
     /**
      * @dev Shared ERC-165 checks common to all RuleEngine deployment variants.
      * Concrete deployments can extend this with access-control-specific interfaces.
+     * @param interfaceId The interface identifier to check.
+     * @return True if the interface is part of the shared RuleEngine base, false otherwise.
      */
     function _supportsRuleEngineBaseInterface(bytes4 interfaceId) internal pure returns (bool) {
         return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID

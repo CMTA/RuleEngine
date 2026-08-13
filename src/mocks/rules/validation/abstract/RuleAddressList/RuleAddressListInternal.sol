@@ -10,8 +10,14 @@ abstract contract RuleAddressListInternal {
     error Rulelist_AddressAlreadylisted();
     error Rulelist_AddressNotPresent();
 
+    /**
+     * @notice Membership flag per address.
+     */
     mapping(address => bool) private list;
     // Number of addresses in the list at the moment
+    /**
+     * @notice Number of addresses currently in the list.
+     */
     uint256 private numAddressesList;
 
     /**

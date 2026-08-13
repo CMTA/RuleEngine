@@ -4,6 +4,10 @@ pragma solidity ^0.8.20;
 
 import {IERC3643Compliance} from "./IERC3643Compliance.sol";
 
+/**
+ * @title IERC3643ComplianceExtended
+ * @notice Extends the ERC-3643 compliance interface with token self-binding management.
+ */
 interface IERC3643ComplianceExtended is IERC3643Compliance {
     /**
      * @notice Emitted when self-binding permission is updated for a token.

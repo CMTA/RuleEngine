@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-// forge-lint: disable-next-line(unaliased-plain-import)
-import "../validation/abstract/RuleCommonInvariantStorage.sol";
+import {RuleCommonInvariantStorage} from "../validation/abstract/RuleCommonInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
@@ -16,11 +15,51 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 contract RuleOperationRevert is AccessControl, IRule, RuleCommonInvariantStorage {
     error RuleConditionalTransferLight_InvalidTransfer();
     // It is very important that each rule uses an unique code
+    /**
+     * @notice Restriction code raised when the transfer request was not approved.
+     */
     uint8 public constant CODE_TRANSFER_REQUEST_NOT_APPROVED = 71;
 
+    /**
+     * @notice ERC-165 interface ID of the CMTAT RuleEngine interface.
+     */
     bytes4 private constant RULE_ENGINE_INTERFACE_ID = 0x20c49ce7;
+    /**
+     * @notice ERC-165 interface ID of the extended ERC-1404 interface.
+     */
     bytes4 private constant ERC1404EXTEND_INTERFACE_ID = 0x78a8de7d;
 
+    /**
+     * @notice To know if the restriction code is valid for this rule or not.
+     * @param restrictionCode The target restriction code
+     * @return true if the restriction code is known, false otherwise
+     *
+     */
+    function canReturnTransferRestrictionCode(uint8 restrictionCode) external pure override returns (bool) {
+        return restrictionCode == CODE_TRANSFER_REQUEST_NOT_APPROVED;
+    }
+
+    /**
+     * @notice Return the corresponding message
+     * @return true if the transfer is valid, false otherwise
+     *
+     */
+    function messageForTransferRestriction(
+        uint8 /* restrictionCode */
+    )
+        external
+        pure
+        override
+        returns (string memory)
+    {
+        return TEXT_CODE_NOT_FOUND;
+    }
+
+    /**
+     * @notice ERC-165 interface detection.
+     * @param interfaceId The interface identifier to check.
+     * @return True if the interface is supported, false otherwise.
+     */
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
         return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID
             || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || AccessControl.supportsInterface(interfaceId);
@@ -43,6 +82,9 @@ contract RuleOperationRevert is AccessControl, IRule, RuleCommonInvariantStorage
         revert RuleConditionalTransferLight_InvalidTransfer();
     }
 
+    /**
+     * @notice Always reverts; used to test how the engine propagates a failing rule.
+     */
     function transferred(
         address,
         /* spender */
@@ -82,6 +124,7 @@ contract RuleOperationRevert is AccessControl, IRule, RuleCommonInvariantStorage
      * @notice Check if the transfer is valid
      * @param from the origin address
      * @param to the destination address
+     * @param value the amount to transfer
      * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
      *
      */
@@ -101,32 +144,6 @@ contract RuleOperationRevert is AccessControl, IRule, RuleCommonInvariantStorage
     }
 
     /**
-     * @notice To know if the restriction code is valid for this rule or not.
-     * @param restrictionCode The target restriction code
-     * @return true if the restriction code is known, false otherwise
-     *
-     */
-    function canReturnTransferRestrictionCode(uint8 restrictionCode) external pure override returns (bool) {
-        return restrictionCode == CODE_TRANSFER_REQUEST_NOT_APPROVED;
-    }
-
-    /**
-     * @notice Return the corresponding message
-     * @return true if the transfer is valid, false otherwise
-     *
-     */
-    function messageForTransferRestriction(
-        uint8 /* restrictionCode */
-    )
-        external
-        pure
-        override
-        returns (string memory)
-    {
-        return TEXT_CODE_NOT_FOUND;
-    }
-
-    /**
      * @notice Validate a transfer
      * @param _from the origin address
      * @param _to the destination address
@@ -138,6 +155,14 @@ contract RuleOperationRevert is AccessControl, IRule, RuleCommonInvariantStorage
         return detectTransferRestriction(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
+    /**
+     * @notice Validate a spender-initiated transfer
+     * @param spender the spender address (transferFrom)
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount to transfer
+     * @return true if the transfer is valid, false otherwise
+     */
     function canTransferFrom(address spender, address from, address to, uint256 value)
         public
         view

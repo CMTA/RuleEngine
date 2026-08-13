@@ -91,13 +91,6 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     /**
      * @inheritdoc IRulesManagementModule
      */
-    function maxRules() public view virtual override(IRulesManagementModule) returns (uint256) {
-        return _maxRules;
-    }
-
-    /**
-     * @inheritdoc IRulesManagementModule
-     */
     function setMaxRules(uint256 maxRules_) public virtual override(IRulesManagementModule) onlyRulesLimitManager {
         if (maxRules_ == 0) {
             revert RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed();
@@ -115,6 +108,12 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     }
 
     /* ============ View functions ============ */
+    /**
+     * @inheritdoc IRulesManagementModule
+     */
+    function maxRules() public view virtual override(IRulesManagementModule) returns (uint256) {
+        return _maxRules;
+    }
 
     /**
      * @inheritdoc IRulesManagementModule
@@ -175,18 +174,6 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
         emit RemoveRule(rule_);
     }
 
-    /**
-     * @dev check if a rule is valid, revert otherwise
-     */
-    function _checkRule(address rule_) internal view virtual {
-        if (rule_ == address(0x0)) {
-            revert RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed();
-        }
-        if (_rules.contains(rule_)) {
-            revert RuleEngine_RulesManagementModule_RuleAlreadyExists();
-        }
-    }
-
     /* ============ Transferred functions ============ */
 
     /**
@@ -226,6 +213,26 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
         }
     }
 
+    /**
+     * @dev Access control hook guarding rule management operations.
+     */
     function _onlyRulesManager() internal virtual;
+
+    /**
+     * @dev Access control hook guarding updates to the rule cap.
+     */
     function _onlyRulesLimitManager() internal virtual;
+
+    /**
+     * @dev check if a rule is valid, revert otherwise
+     * @param rule_ The candidate rule address to validate.
+     */
+    function _checkRule(address rule_) internal view virtual {
+        if (rule_ == address(0x0)) {
+            revert RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed();
+        }
+        if (_rules.contains(rule_)) {
+            revert RuleEngine_RulesManagementModule_RuleAlreadyExists();
+        }
+    }
 }

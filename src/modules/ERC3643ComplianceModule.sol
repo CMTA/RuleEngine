@@ -9,11 +9,18 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
 import {ERC3643ComplianceModuleInvariantStorage} from "./library/ERC3643ComplianceModuleInvariantStorage.sol";
 
+/**
+ * @title ERC3643ComplianceModule
+ * @notice Core ERC-3643 compliance module: tracks the tokens bound to this engine.
+ */
 abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC3643ComplianceModuleInvariantStorage {
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
     /* ==== State Variables === */
     // Token binding tracking
+    /**
+     * @notice Set of tokens allowed to call the compliance callbacks.
+     */
     EnumerableSet.AddressSet internal _boundTokens;
 
     /* ==== Modifier === */
@@ -78,6 +85,10 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC364
                             INTERNAL/PRIVATE FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
+    /**
+     * @dev Removes a token from the bound set.
+     * @param token The token to unbind; reverts when it is not currently bound.
+     */
     function _unbindToken(address token) internal {
         require(_boundTokens.contains(token), RuleEngine_ERC3643Compliance_TokenNotBound());
         // Should never revert because we check if the token address is already set before
@@ -86,6 +97,10 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC364
         emit TokenUnbound(token);
     }
 
+    /**
+     * @dev Adds a token to the bound set.
+     * @param token The token to bind; reverts on the zero address or when already bound.
+     */
     function _bindToken(address token) internal {
         require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
         require(!_boundTokens.contains(token), RuleEngine_ERC3643Compliance_TokenAlreadyBound());
@@ -94,12 +109,23 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC364
         emit TokenBound(token);
     }
 
+    /**
+     * @dev Authorization hook for bind/unbind, implemented by the deployable contracts.
+     * @param token The token being bound or unbound.
+     */
+    function _authorizeComplianceBindingChange(address token) internal virtual;
+
+    /**
+     * @dev Access control hook guarding compliance management operations.
+     */
+    function _onlyComplianceManager() internal virtual;
+
+    /**
+     * @dev Reverts when the caller is not a bound token.
+     */
     function _checkBoundToken() internal view virtual {
         if (!_boundTokens.contains(_msgSender())) {
             revert RuleEngine_ERC3643Compliance_UnauthorizedCaller();
         }
     }
-
-    function _authorizeComplianceBindingChange(address token) internal virtual;
-    function _onlyComplianceManager() internal virtual;
 }

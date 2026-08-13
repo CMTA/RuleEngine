@@ -7,5 +7,8 @@ pragma solidity ^0.8.20;
  * @dev ERC-165 interface IDs for ERC-1404 interfaces.
  */
 library ERC1404InterfaceId {
+    /**
+     * @notice ERC-165 interface ID of the ERC-1404 restriction interface.
+     */
     bytes4 public constant IERC1404_INTERFACE_ID = 0xab84a5c8;
 }
