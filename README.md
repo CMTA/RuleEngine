@@ -40,7 +40,7 @@ The token calls the engine on every transfer, mint and burn. The engine checks t
 | CMTAT | `transferred(from, to, value)` | `transferred(spender, …)` | `transferred(spender, …)` | `transferred(spender, …)` |
 | ERC-3643 | `transferred(from, to, value)` | `transferred(from, to, value)` | `created(to, value)` | `destroyed(from, value)` |
 
-CMTAT selects between the two overloads on `spender != address(0)`: a plain `transfer` passes `address(0)`, while `transferFrom`, `mint` and `burn` pass `_msgSender()`. Whichever entry point is used, the engine then runs the same rule loop.
+CMTAT picks the overload according to whether the operation has a spender. A plain `transfer` has none, so CMTAT calls the 3-argument `transferred(from, to, value)` — the engine is never called with a zero spender. `transferFrom`, `mint` and `burn` do have one (`_msgSender()`), so those call the 4-argument `transferred(spender, from, to, value)`. Whichever entry point is used, the engine then runs the same rule loop.
 
 The view path, `detectTransferRestriction()`, iterates the same rules and returns the first non-zero ERC-1404 restriction code instead of reverting.
 

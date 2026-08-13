@@ -15,7 +15,7 @@ collections "Rule contracts\n(IRule)" as Rules
 alt standard transfer
     Holder -> Token : transfer(to, value)
     activate Token
-    Token -> Token : spender = address(0)
+    Token -> Token : no spender\n(address(0) internally)
     Token -> Engine : transferred(from, to, value)
 else transferFrom, mint or burn
     Holder -> Token : transferFrom(from, to, value)\nmint(to, value) / burn(from, value)
@@ -26,6 +26,8 @@ end
 note over Token
     CMTAT picks the overload on spender != address(0)
     (ValidationModuleRuleEngine._callRuleEngineTransferred).
+    The zero address is a branch condition only: it is never
+    forwarded, so the engine is never called with a zero spender.
     The 4-argument overload is declared by CMTAT's IRuleEngine.
     CMTAT never calls created() or destroyed().
 end note
