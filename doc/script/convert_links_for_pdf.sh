@@ -15,7 +15,8 @@ if [ -z "$1" ]; then
 fi
 
 GITHUB_LINK="${1%/}"  # Remove trailing slash if present
-INPUT_FILE="${2:-../../README.md}"
+# Defaults to the full documentation (doc/README.md), not the short root overview.
+INPUT_FILE="${2:-../README.md}"
 OUTPUT_FILE="${3:-README_UPDATE.md}"
 
 if [ ! -f "$INPUT_FILE" ]; then

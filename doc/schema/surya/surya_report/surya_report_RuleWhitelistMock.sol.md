@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/validation/RuleWhitelist.sol | a5f2223286e30d05a0444ab0cc7cfd0a2aef7080 |
+| ./mocks/rules/validation/RuleWhitelistMock.sol | 269a711aa637cfd9640a7cbb83a5d34c963c1d17 |
 
 
 ### Contracts Description Table
@@ -15,15 +15,15 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleWhitelist** | Implementation | RuleAddressList, RuleWhitelistCommon |||
-| └ | supportsInterface | Public ❗️ |   |NO❗️ |
+| **RuleWhitelistMock** | Implementation | RuleAddressList, RuleWhitelistCommon |||
 | └ | <Constructor> | Public ❗️ | 🛑  | RuleAddressList |
+| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
+| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
+| └ | supportsInterface | Public ❗️ |   |NO❗️ |
 | └ | canTransfer | Public ❗️ |   |NO❗️ |
 | └ | canTransferFrom | Public ❗️ |   |NO❗️ |
 | └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
 | └ | detectTransferRestrictionFrom | Public ❗️ |   |NO❗️ |
-| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
-| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
 
 
 ### Legend

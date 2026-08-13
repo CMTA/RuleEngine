@@ -1,11 +1,11 @@
 {
   "scripts": {
     "test:hardhat": "npx hardhat test test/hardhat/RuleEngine.smoke.js",
-    "uml": "npx sol2uml class src",
-    "uml:ruleEngine": "npx sol2uml class src/deployment/RuleEngine.sol",
-    "uml:test": "npx sol2uml class test",
-    "surya:report": "npx surya mdreport surya_report_ruleEngine.md src/deployment/RuleEngine.sol",
-    "surya:graph": "npx surya graph src/deployment/RuleEngine.sol | dot -Tpng > surya_graph_RuleEngine.png"
+    "uml": "mkdir -p docOut/uml && npx sol2uml class src -o docOut/uml/uml_src.svg",
+    "uml:ruleEngine": "mkdir -p docOut/uml && npx sol2uml class src/deployment/RuleEngine.sol -o docOut/uml/uml_RuleEngine.svg",
+    "uml:test": "mkdir -p docOut/uml && npx sol2uml class test -o docOut/uml/uml_test.svg",
+    "surya:report": "mkdir -p docOut/npm && npx surya mdreport docOut/npm/surya_report_ruleEngine.md src/deployment/RuleEngine.sol",
+    "surya:graph": "mkdir -p docOut/npm && npx surya graph src/deployment/RuleEngine.sol | dot -Tpng > docOut/npm/surya_graph_RuleEngine.png"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-foundry": "^1.2.1",

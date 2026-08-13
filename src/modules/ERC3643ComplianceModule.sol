@@ -9,15 +9,18 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
 import {ERC3643ComplianceModuleInvariantStorage} from "./library/ERC3643ComplianceModuleInvariantStorage.sol";
 
-abstract contract ERC3643ComplianceModule is
-    Context,
-    IERC3643Compliance,
-    ERC3643ComplianceModuleInvariantStorage
-{
+/**
+ * @title ERC3643ComplianceModule
+ * @notice Core ERC-3643 compliance module: tracks the tokens bound to this engine.
+ */
+abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC3643ComplianceModuleInvariantStorage {
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
     /* ==== State Variables === */
     // Token binding tracking
+    /**
+     * @notice Set of tokens allowed to call the compliance callbacks.
+     */
     EnumerableSet.AddressSet internal _boundTokens;
 
     /* ==== Modifier === */
@@ -41,8 +44,8 @@ abstract contract ERC3643ComplianceModule is
      * @dev Operator warning: "multi-tenant" means one RuleEngine is shared by
      * multiple token contracts. In that setup, bind only tokens that are equally
      * trusted and governed together.
-     * @custom:security-note Operation rules (stateful rules such as `RuleConditionalTransferLight`
-     * or `RuleMintAllowance`) maintain per-address accounting that is shared across all bound tokens.
+     * @custom:security-note Operation rules (stateful rules such as `RuleConditionalTransferLightMock`
+     * or `RuleMintAllowanceMock`) maintain per-address accounting that is shared across all bound tokens.
      * Binding tokens from different issuers to the same engine will silently cross-contaminate
      * their accounting. Only bind tokens that are equally trusted and governed together.
      */
@@ -72,7 +75,7 @@ abstract contract ERC3643ComplianceModule is
         if (_boundTokens.length() > 0) {
             // Note that there are no guarantees on the ordering of values inside the array,
             // and it may change when more values are added or removed.
-            return _boundTokens.at(0);
+            return _boundTokens.pos(0);
         } else {
             return address(0);
         }
@@ -82,28 +85,47 @@ abstract contract ERC3643ComplianceModule is
                             INTERNAL/PRIVATE FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function _unbindToken(address token) internal {
-        require(_boundTokens.contains(token), RuleEngine_ERC3643Compliance_TokenNotBound());
-        // Should never revert because we check if the token address is already set before
-        require(_boundTokens.remove(token), RuleEngine_ERC3643Compliance_OperationNotSuccessful());
+    /**
+     * @dev Removes a token from the bound set.
+     * @param token The token to unbind; reverts when it is not currently bound.
+     */
+    function _unbindToken(address token) internal virtual {
+        // remove() returns false when the token was not bound, so a separate
+        // contains() lookup is unnecessary.
+        require(_boundTokens.remove(token), RuleEngine_ERC3643Compliance_TokenNotBound());
 
         emit TokenUnbound(token);
     }
 
-    function _bindToken(address token) internal {
+    /**
+     * @dev Adds a token to the bound set.
+     * @param token The token to bind; reverts on the zero address or when already bound.
+     */
+    function _bindToken(address token) internal virtual {
         require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
-        require(!_boundTokens.contains(token), RuleEngine_ERC3643Compliance_TokenAlreadyBound());
-        // Should never revert because we check if the token address is already set before
-        require(_boundTokens.add(token), RuleEngine_ERC3643Compliance_OperationNotSuccessful());
+        // add() returns false when the token is already bound, so a separate
+        // contains() lookup is unnecessary.
+        require(_boundTokens.add(token), RuleEngine_ERC3643Compliance_TokenAlreadyBound());
         emit TokenBound(token);
     }
 
+    /**
+     * @dev Authorization hook for bind/unbind, implemented by the deployable contracts.
+     * @param token The token being bound or unbound.
+     */
+    function _authorizeComplianceBindingChange(address token) internal virtual;
+
+    /**
+     * @dev Access control hook guarding compliance management operations.
+     */
+    function _onlyComplianceManager() internal virtual;
+
+    /**
+     * @dev Reverts when the caller is not a bound token.
+     */
     function _checkBoundToken() internal view virtual {
         if (!_boundTokens.contains(_msgSender())) {
             revert RuleEngine_ERC3643Compliance_UnauthorizedCaller();
         }
     }
-
-    function _authorizeComplianceBindingChange(address token) internal virtual;
-    function _onlyComplianceManager() internal virtual;
 }

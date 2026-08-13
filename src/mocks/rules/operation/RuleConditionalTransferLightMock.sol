@@ -15,110 +15,34 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  * @dev Requires operator approval for each ERC20 transfer.
  *      Same transfer (from, to, value) can be approved multiple times.
  */
-contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferLightInvariantStorage, IRule {
+contract RuleConditionalTransferLightMock is AccessControl, RuleConditionalTransferLightInvariantStorage, IRule {
+    /**
+     * @notice ERC-165 interface ID of the CMTAT RuleEngine interface.
+     */
     bytes4 private constant RULE_ENGINE_INTERFACE_ID = 0x20c49ce7;
+    /**
+     * @notice ERC-165 interface ID of the extended ERC-1404 interface.
+     */
     bytes4 private constant ERC1404EXTEND_INTERFACE_ID = 0x78a8de7d;
     // Mapping from transfer hash to approval count
+    /**
+     * @notice Number of outstanding approvals per transfer hash.
+     */
     mapping(bytes32 => uint256) public approvalCounts;
 
+    /**
+     * @notice Deploys the conditional-transfer rule.
+     * @param admin Address granted OPERATOR_ROLE.
+     * @param ruleEngineContract RuleEngine granted RULE_ENGINE_CONTRACT_ROLE, or the zero address.
+     */
     constructor(address admin, IRuleEngine ruleEngineContract) {
-        require(admin != address(0), "Invalid operator");
+        require(admin != address(0), RuleConditionalTransferLight_AdminAddressZeroNotAllowed());
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(OPERATOR_ROLE, admin);
         if (address(ruleEngineContract) != address(0x0)) {
             _grantRole(RULE_ENGINE_CONTRACT_ROLE, address(ruleEngineContract));
         }
-    }
-
-    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
-        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID
-            || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || AccessControl.supportsInterface(interfaceId);
-    }
-
-    /**
-     * @notice Approve a specific transfer. Can be approved multiple times.
-     */
-    function approveTransfer(address from, address to, uint256 value) public onlyRole(OPERATOR_ROLE) {
-        // forge-lint: disable-next-line(asm-keccak256)
-        bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
-        approvalCounts[transferHash] += 1;
-        emit TransferApproved(from, to, value, approvalCounts[transferHash]);
-    }
-
-    /**
-     * @notice Returns number of times a transfer is approved.
-     */
-    function approvedCount(address from, address to, uint256 value) public view returns (uint256) {
-        // forge-lint: disable-next-line(asm-keccak256)
-        bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
-        return approvalCounts[transferHash];
-    }
-
-    /**
-     * @notice Called when a transfer occurs. Decrements approval count if allowed.
-     * @dev `spender` is part of the interface but unused.
-     */
-    function transferred(address from, address to, uint256 value) public {
-        // forge-lint: disable-next-line(asm-keccak256)
-        bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
-        uint256 count = approvalCounts[transferHash];
-
-        if (count == 0) revert TransferNotApproved();
-
-        approvalCounts[transferHash] = count - 1;
-        emit TransferExecuted(from, to, value, approvalCounts[transferHash]);
-    }
-
-    function transferred(
-        address,
-        /* spender */
-        address from,
-        address to,
-        uint256 value
-    )
-        public
-    {
-        transferred(from, to, value);
-    }
-
-    /**
-     * @notice Check if the transfer is valid
-     * @param from the origin address
-     * @param to the destination address
-     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
-     *
-     */
-    function detectTransferRestriction(address from, address to, uint256 value) public view override returns (uint8) {
-        // forge-lint: disable-next-line(asm-keccak256)
-        bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
-        uint256 count = approvalCounts[transferHash];
-        if (count == 0) {
-            return CODE_TRANSFER_REQUEST_NOT_APPROVED;
-        }
-        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-    }
-
-    /**
-     * @notice Check if the transfer is valid
-     * @param from the origin address
-     * @param to the destination address
-     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
-     *
-     */
-    function detectTransferRestrictionFrom(
-        address,
-        /* spender*/
-        address from,
-        address to,
-        uint256 value
-    )
-        public
-        view
-        override
-        returns (uint8)
-    {
-        return detectTransferRestriction(from, to, value);
     }
 
     /**
@@ -138,11 +62,127 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
      *
      */
     function messageForTransferRestriction(uint8 restrictionCode) external pure override returns (string memory) {
-        if (restrictionCode == CODE_TRANSFER_REQUEST_NOT_APPROVED) {
+        if (restrictionCode == uint8(REJECTED_CODE_BASE.TRANSFER_OK)) {
+            return TEXT_TRANSFER_OK;
+        } else if (restrictionCode == CODE_TRANSFER_REQUEST_NOT_APPROVED) {
             return TEXT_TRANSFER_REQUEST_NOT_APPROVED;
         } else {
             return TEXT_CODE_NOT_FOUND;
         }
+    }
+
+    /**
+     * @notice Approve a specific transfer. Can be approved multiple times.
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount approved for transfer
+     */
+    function approveTransfer(address from, address to, uint256 value) public onlyRole(OPERATOR_ROLE) {
+        // forge-lint: disable-next-line(asm-keccak256)
+        bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
+        approvalCounts[transferHash] += 1;
+        emit TransferApproved(from, to, value, approvalCounts[transferHash]);
+    }
+
+    /**
+     * @notice Called when a transfer occurs. Decrements approval count if allowed.
+     * @dev `spender` is part of the interface but unused.
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount transferred
+     */
+    function transferred(address from, address to, uint256 value) public {
+        // forge-lint: disable-next-line(asm-keccak256)
+        bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
+        uint256 count = approvalCounts[transferHash];
+
+        if (count == 0) revert TransferNotApproved();
+
+        approvalCounts[transferHash] = count - 1;
+        emit TransferExecuted(from, to, value, approvalCounts[transferHash]);
+    }
+
+    /**
+     * @notice Called when a transfer occurs, ignoring the spender.
+     * @dev Delegates to the 3-argument overload.
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount transferred
+     */
+    function transferred(
+        address,
+        /* spender */
+        address from,
+        address to,
+        uint256 value
+    )
+        public
+    {
+        transferred(from, to, value);
+    }
+
+    /**
+     * @notice ERC-165 interface detection.
+     * @param interfaceId The interface identifier to check.
+     * @return True if the interface is supported, false otherwise.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
+        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID
+            || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || AccessControl.supportsInterface(interfaceId);
+    }
+
+    /**
+     * @notice Returns number of times a transfer is approved.
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount of the approved transfer
+     * @return The number of outstanding approvals for this exact transfer.
+     */
+    function approvedCount(address from, address to, uint256 value) public view returns (uint256) {
+        // forge-lint: disable-next-line(asm-keccak256)
+        bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
+        return approvalCounts[transferHash];
+    }
+
+    /**
+     * @notice Check if the transfer is valid
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount to transfer
+     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     *
+     */
+    function detectTransferRestriction(address from, address to, uint256 value) public view override returns (uint8) {
+        // forge-lint: disable-next-line(asm-keccak256)
+        bytes32 transferHash = keccak256(abi.encodePacked(from, to, value));
+        uint256 count = approvalCounts[transferHash];
+        if (count == 0) {
+            return CODE_TRANSFER_REQUEST_NOT_APPROVED;
+        }
+        return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+    }
+
+    /**
+     * @notice Check if the transfer is valid
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount to transfer
+     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     *
+     */
+    function detectTransferRestrictionFrom(
+        address,
+        /* spender*/
+        address from,
+        address to,
+        uint256 value
+    )
+        public
+        view
+        override
+        returns (uint8)
+    {
+        return detectTransferRestriction(from, to, value);
     }
 
     /**
@@ -157,6 +197,14 @@ contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferL
         return detectTransferRestriction(_from, _to, _amount) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
+    /**
+     * @notice Validate a spender-initiated transfer
+     * @param spender the spender address (transferFrom)
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount to transfer
+     * @return true if the transfer is valid, false otherwise
+     */
     function canTransferFrom(address spender, address from, address to, uint256 value)
         public
         view

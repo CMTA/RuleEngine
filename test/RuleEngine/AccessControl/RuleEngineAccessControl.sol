@@ -14,7 +14,7 @@ contract RuleEngineTest is Test, HelperContract {
 
     // Arrange
     function setUp() public {
-        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        ruleWhitelist = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         resUint256 = ruleEngineMock.rulesCount();
@@ -29,9 +29,9 @@ contract RuleEngineTest is Test, HelperContract {
     function testCannotAttackerSetRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist2 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         IRule[] memory ruleWhitelistTab = new IRule[](2);
         ruleWhitelistTab[0] = ruleWhitelist1;
         ruleWhitelistTab[1] = ruleWhitelist2;
@@ -91,7 +91,9 @@ contract RuleEngineTest is Test, HelperContract {
     function testCannotAttackerOperateOnTransfer() public {
         // Act
         vm.prank(ATTACKER);
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector
+        );
         ruleEngineMock.transferred(address(0), ADDRESS1, ADDRESS2, 10);
     }
 

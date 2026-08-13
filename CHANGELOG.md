@@ -47,7 +47,55 @@ forge lint
 
 
 
+### v3.0.0-rc5
+
+### Changed
+
+- `ERC3643ComplianceModule._bindToken` / `_unbindToken`: rely on the `EnumerableSet` mutation return value instead of a preceding `contains()` lookup, keeping the `TokenAlreadyBound` / `TokenNotBound` diagnostics (269 gas measured).
+- `_bindToken`, `_unbindToken` and `RuleEngineBase._supportsRuleEngineBaseInterface` are now `virtual`, along with the remaining non-`virtual` internals in the mock rules, per the project convention.
+- `RuleAddressList.addressIsListedBatch`: `memory` parameter changed to `calldata` (587 gas measured for 10 addresses).
+- Deployment now emits `SetMaxRules` with the initial cap, so the event log alone is sufficient to reconstruct `maxRules`.
+- `RulesManagementModule`: the rule-cap write and its event moved into a new `internal virtual _setMaxRules(uint256)`, called by `setMaxRules` and by the deployable contracts' constructors. `_maxRules` is now written from a single place, so the invariant "every change to the cap emits `SetMaxRules`" holds structurally rather than by convention, and the non-zero check guards every path including construction.
+- `RulesManagementModule`: rule insertion moved into a new `internal virtual _addRule(IRule)`, called by `addRule` and by the `setRules` loop. `AddRule` is now emitted from a single site. The `maxRules` cap is deliberately checked by the callers, since `addRule` checks per insertion while `setRules` checks the whole batch up front.
+
+### Added
+
+- Add `ERC3643TokenMock`: a minimal ERC-3643 (T-REX) style token whose compliance interaction mirrors `Token.sol` from the reference implementation, used to test the RuleEngine through the ERC-3643 entry points (`setCompliance` self-binding, `transferred`, `created`, `destroyed`).
+- Add `ERC3643TokenIntegration.t.sol` (11 tests), including a regression guard for the H-1 mint pre-check fail-open and one pinning the requirement that `address(0)` be whitelisted for an ERC-3643 token to mint.
+
+- **Renamed the reference rules in `src/mocks/rules/` with a `Mock` suffix**, so a reader cannot mistake them for the production rules of the same name maintained in [CMTA/Rules](https://github.com/CMTA/Rules): `RuleWhitelist` -> `RuleWhitelistMock`, `RuleConditionalTransferLight` -> `RuleConditionalTransferLightMock`, `RuleMintAllowance` -> `RuleMintAllowanceMock`, `RuleOperationRevert` -> `RuleOperationRevertMock`. Files renamed to match. The abstract bases and invariant-storage contracts they build on are unchanged, as they are not themselves rules.
+
+### Removed
+
+- `RuleEngine_ERC3643Compliance_OperationNotSuccessful`: unreachable after the bind/unbind simplification and referenced nowhere else.
+
+### Documentation
+
+- Document that the ERC-1404 3-argument `canTransfer` / `detectTransferRestriction` path fails open for spender-dependent rules, and that `canTransferFrom` / `detectTransferRestrictionFrom` must be used to pre-check an operation that has an operator.
+- Add the code-quality review in [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md](./doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md).
+- Add integration guides in `doc/technical`: [RuleEngine-with-CMTAT.md](./doc/technical/RuleEngine-with-CMTAT.md) and [RuleEngine-with-ERC3643.md](./doc/technical/RuleEngine-with-ERC3643.md), covering entry points, configuration, warnings, limitations and test coverage for each token standard.
+- Add the script review in [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md](./doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md).
+- Add the v3.0.0-rc5 Slither and Aderyn reports with their assessment feedback, each prefixed with a summary table of findings and dispositions.
+- Add [doc/security/audits/AUDIT_OVERVIEW.md](./doc/security/audits/AUDIT_OVERVIEW.md) indexing every analysis performed, the static-analysis results per tool, and the substantive findings that were fixed.
+
+### Fixed
+
+- `RuleEngineScript.s.sol`: the CMTAT token is now bound to the engine (passed to the constructor). Previously the script produced a deployment in which every transfer, mint and burn reverted with `RuleEngine_ERC3643Compliance_UnauthorizedCaller`, because the token was never bound.
+- `RuleEngineScript.s.sol`: `setRuleEngine` is now called through the typed interface instead of a low-level `.call` guarded by a bare `require(success)`. The previous form returned success when `CMTAT_ADDRESS` held no code, silently producing an unconfigured deployment, and discarded the revert reason on failure.
+- `RuleEngineScript.s.sol`: the demo whitelist is now seeded with the deployer and `address(0)`, so the resulting deployment can transfer, mint and burn as-is.
+- `test/script/RuleEngineScript.t.sol`: asserts the resulting deployment works (engine set, token bound, rule configured, a real mint) instead of only that `run()` does not revert.
+- `doc/script/script_surya_*.sh`: fixed the shebang (`#/bin/bash` -> `#!/bin/bash`), the undefined `$dir` loop variable, `mkdir` without `-p` in the report script, and the output-directory guard in the inheritance script; added `set -euo pipefail` and null-delimited `find` iteration to all three. The loop iterates `find .` rather than an absolute path on purpose: `surya mdreport` embeds the path it is given, so an absolute one would write machine-specific paths into the committed reports under `doc/schema/surya/surya_report`.
+- `package.json`: the `surya:*` and `uml:*` scripts now write beneath `docOut/` (gitignored) instead of the repository root.
+- `doc/script/convert_links_for_pdf.sh`: the default input is now `doc/README.md` (the full documentation) rather than the short root README.
+
+### Dependencies
+
+- Update CMTAT submodule to [v3.3.0-rc3](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3).
+- Update OpenZeppelin Contracts and OpenZeppelin Contracts Upgradeable submodules to [v5.7.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.7.0).
+
 ### v3.0.0-rc4 - 2026-05-22
+
+Commit: `66fcf2aafebd1f9d9de8a81dec92b88da071c9b3`
 
 ### Added
 

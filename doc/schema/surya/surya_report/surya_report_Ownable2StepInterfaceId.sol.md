@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/library/Ownable2StepInterfaceId.sol | 9dc1aa65e4981b2e01c444ca69f0a56555b72fe7 |
+| ./modules/library/Ownable2StepInterfaceId.sol | a716d6c074ff158d21f882a5295f9c7b0bcefd38 |
 
 
 ### Contracts Description Table

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/library/ERC3643ComplianceRolesStorage.sol | ec28eadaae97c5a875fda91cc2af884e4bb2f395 |
+| ./modules/library/ERC3643ComplianceRolesStorage.sol | 0554655baf30dbb890e6975a632b059ee909643f |
 
 
 ### Contracts Description Table

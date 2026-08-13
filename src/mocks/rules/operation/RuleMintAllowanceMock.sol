@@ -8,31 +8,33 @@ import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
 import {RuleMintAllowanceInvariantStorage} from "./abstract/RuleMintAllowanceInvariantStorage.sol";
 
 /**
- * @title RuleMintAllowance
+ * @title RuleMintAllowanceMock
  * @notice Rule that enforces per-minter mint allowances set by the contract admin.
  *         The admin grants each minter address a maximum amount they may mint in total.
  *         Each mint deducts from the minter's remaining allowance.
  *         Burns and regular transfers are unrestricted by this rule.
  */
-contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, IRule {
+contract RuleMintAllowanceMock is AccessControl, RuleMintAllowanceInvariantStorage, IRule {
+    /**
+     * @notice ERC-165 interface ID of the CMTAT RuleEngine interface.
+     */
     bytes4 private constant RULE_ENGINE_INTERFACE_ID = 0x20c49ce7;
+    /**
+     * @notice ERC-165 interface ID of the extended ERC-1404 interface.
+     */
     bytes4 private constant ERC1404EXTEND_INTERFACE_ID = 0x78a8de7d;
 
+    /**
+     * @notice Remaining mint allowance per minter.
+     */
     mapping(address minter => uint256 allowance) public mintAllowance;
 
     /**
      * @param admin Address granted DEFAULT_ADMIN_ROLE
      */
     constructor(address admin) {
-        require(admin != address(0), "RuleMintAllowance: zero admin");
+        require(admin != address(0), RuleMintAllowance_AdminAddressZeroNotAllowed());
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-    }
-
-    /* ============ ERC-165 ============ */
-
-    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
-        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID
-            || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || AccessControl.supportsInterface(interfaceId);
     }
 
     /* ============ Admin ============ */
@@ -47,11 +49,40 @@ contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, 
         emit MintAllowanceSet(minter, amount);
     }
 
+    /* ============ IRule — external view ============ */
+
+    /**
+     * @notice To know if the restriction code is valid for this rule or not.
+     * @param restrictionCode The target restriction code.
+     * @return True if the restriction code is known by this rule, false otherwise.
+     */
+    function canReturnTransferRestrictionCode(uint8 restrictionCode) external pure override returns (bool) {
+        return restrictionCode == CODE_MINTER_INSUFFICIENT_ALLOWANCE;
+    }
+
+    /**
+     * @notice Returns the message matching a restriction code.
+     * @param restrictionCode The target restriction code.
+     * @return The message describing the restriction code.
+     */
+    function messageForTransferRestriction(uint8 restrictionCode) external pure override returns (string memory) {
+        if (restrictionCode == uint8(REJECTED_CODE_BASE.TRANSFER_OK)) {
+            return TEXT_TRANSFER_OK;
+        }
+        if (restrictionCode == CODE_MINTER_INSUFFICIENT_ALLOWANCE) {
+            return TEXT_MINTER_INSUFFICIENT_ALLOWANCE;
+        }
+        return TEXT_CODE_NOT_FOUND;
+    }
+
     /* ============ IRule — state-changing ============ */
 
     /**
      * @notice Called for transfers where no spender context is available.
      *         Mint allowance cannot be enforced without a spender; passes through.
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount transferred
      */
     function transferred(address from, address to, uint256 value) public {
         // no-op: spender unknown, enforcement requires transferred(spender,...)
@@ -60,8 +91,19 @@ contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, 
     /**
      * @notice Called for every token operation (transfer, mint, burn) with spender context.
      *         Deducts from the minter's allowance for mints; passes through for burns and transfers.
+     * @param spender the account performing the operation (the minter on a mint)
+     * @param from the origin address, zero on a mint
+     * @param value the amount transferred
      */
-    function transferred(address spender, address from, address /* to */, uint256 value) public {
+    function transferred(
+        address spender,
+        address from,
+        address,
+        /* to */
+        uint256 value
+    )
+        public
+    {
         if (from == address(0)) {
             uint256 allowance = mintAllowance[spender];
             if (allowance < value) {
@@ -75,7 +117,24 @@ contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, 
     /* ============ IRule — view ============ */
 
     /**
+     * @notice ERC-165 interface detection.
+     * @param interfaceId The interface identifier to check.
+     * @return True if the interface is supported, false otherwise.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
+        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID
+            || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || AccessControl.supportsInterface(interfaceId);
+    }
+
+    /**
      * @notice Returns TRANSFER_OK; without spender context mint allowance cannot be evaluated.
+     * @dev WARNING: this path fails open. The ERC-1404 3-argument signature carries no spender,
+     * and the mint allowance is keyed by spender, so this rule cannot evaluate a mint here and
+     * answers TRANSFER_OK. The engine aggregates that answer, so `detectTransferRestriction` and
+     * `canTransfer` on the RuleEngine can report a mint as allowed that `transferred(spender, ...)`
+     * will revert. Integrators must use the 4-argument `detectTransferRestrictionFrom` /
+     * `canTransferFrom` to pre-check a mint.
+     * @return Always REJECTED_CODE_BASE.TRANSFER_OK.
      */
     function detectTransferRestriction(address, address, uint256) public pure override returns (uint8) {
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
@@ -84,6 +143,10 @@ contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, 
     /**
      * @notice Returns CODE_MINTER_INSUFFICIENT_ALLOWANCE when a minter's allowance would be
      *         exceeded. Burns and regular transfers always return TRANSFER_OK.
+     * @param spender the account performing the operation (the minter on a mint)
+     * @param from the origin address, zero on a mint
+     * @param value the amount to transfer
+     * @return The restriction code, or REJECTED_CODE_BASE.TRANSFER_OK when allowed.
      */
     function detectTransferRestrictionFrom(address spender, address from, address, uint256 value)
         public
@@ -97,10 +160,25 @@ contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, 
         return uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
+    /**
+     * @notice Validate a transfer
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount to transfer
+     * @return true if the transfer is valid, false otherwise
+     */
     function canTransfer(address from, address to, uint256 value) public pure override returns (bool) {
         return detectTransferRestriction(from, to, value) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
+    /**
+     * @notice Validate a spender-initiated transfer
+     * @param spender the spender address (transferFrom)
+     * @param from the origin address
+     * @param to the destination address
+     * @param value the amount to transfer
+     * @return true if the transfer is valid, false otherwise
+     */
     function canTransferFrom(address spender, address from, address to, uint256 value)
         public
         view
@@ -108,16 +186,5 @@ contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, 
         returns (bool)
     {
         return detectTransferRestrictionFrom(spender, from, to, value) == uint8(REJECTED_CODE_BASE.TRANSFER_OK);
-    }
-
-    function canReturnTransferRestrictionCode(uint8 restrictionCode) external pure override returns (bool) {
-        return restrictionCode == CODE_MINTER_INSUFFICIENT_ALLOWANCE;
-    }
-
-    function messageForTransferRestriction(uint8 restrictionCode) external pure override returns (string memory) {
-        if (restrictionCode == CODE_MINTER_INSUFFICIENT_ALLOWANCE) {
-            return TEXT_MINTER_INSUFFICIENT_ALLOWANCE;
-        }
-        return TEXT_CODE_NOT_FOUND;
     }
 }

@@ -2,14 +2,14 @@
 
 This file helps AI agents (Cursor, Claude Code, etc.) understand and work with this codebase.
 
-AGENTS.md and CLAUDE.md files must always be identical
+AGENTS.md and CLAUDE.md files must always be identical — always update both together.
 
 ## Project Summary
 
 **RuleEngine** is a Solidity smart contract system that enforces transfer restrictions for [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens. It acts as an external controller that calls pluggable rule contracts on each token transfer, mint, or burn.
 
 - **Version:** 3.0.0 (defined in `src/modules/VersionModule.sol`)
-- **Solidity:** ^0.8.20 (compiled with 0.8.34)
+- **Solidity:** ^0.8.20 (compiled with 0.8.36)
 - **EVM target:** Prague
 - **License:** MPL-2.0
 
@@ -21,12 +21,26 @@ forge test               # Run all tests
 forge test -vvv          # Verbose test output
 forge test --match-contract <Name> --match-test <fn>  # Run specific test
 forge coverage           # Code coverage
-forge coverage --no-match-coverage "(script|mocks|test)" --report lcov  # Production coverage
+forge coverage --no-match-coverage "(mocks|test)" --report lcov  # Production coverage (src/ + script/)
 forge fmt                # Format code
 ```
 
 Dependencies are git submodules. Initialize with `forge install`, update with `forge update`.
 CMTAT submodule also needs `cd lib/CMTAT && npm install` for its OpenZeppelin deps.
+
+## Agent Workflow
+
+- **Never create git commits.** Provide commit messages only when they are requested.
+- **Always run the full test suite (`forge test`) after any code modification** — including lint-driven or mechanical refactors — before reporting completion.
+- **Always update the documentation** to reflect the latest change. There are two READMEs: `README.md` at the root is the short overview (project, architecture, main files, quick start); `doc/README.md` is the full reference (interfaces, Ethereum API, deployment, UML, audits). Update whichever the change affects — often both.
+- After each implemented feature or fix, provide a **one-line GitHub commit message** covering all changes since the last commit.
+
+### When implementing a new rule or feature
+
+1. Create or update the technical documentation in `doc/technical`
+2. Update `README.md` (root overview) and `doc/README.md` (full reference) as applicable
+3. Create or update tests, targeting **100% code coverage** — check with `forge coverage --report summary`
+4. Update `CHANGELOG.md`
 
 ## Import Remappings
 
@@ -132,30 +146,41 @@ function _checkRule(address rule_) internal view virtual override {
 ### Rule Execution Flow
 
 ```
-Token operation → RuleEngine.transferred(spender, from, to, value)   ← CMTAT v3.3.0+ primary path
+CMTAT only:       RuleEngine.transferred(spender, from, to, value)   ← transferFrom, mint, burn (spender = _msgSender())
                    ├── onlyBoundToken modifier (caller must be bound)
                    └── for each rule in _rules:
                          rule.transferred(spender, from, to, value)  // reverts if disallowed
 
-                  RuleEngine.transferred(from, to, value)            ← 3-arg fallback (spender == address(0))
+CMTAT + ERC-3643: RuleEngine.transferred(from, to, value)            ← standard transfer (spender == address(0))
                    ├── onlyBoundToken modifier
                    └── for each rule in _rules:
                          rule.transferred(from, to, value)
 
-                  RuleEngine.created(to, value)                      ← ERC-3643 mint entry point
+ERC-3643 only:    RuleEngine.created(to, value)                      ← ERC-3643 mint entry point
                    ├── onlyBoundToken modifier
                    └── calls _transferred(address(0), to, value)
 
-                  RuleEngine.destroyed(from, value)                  ← ERC-3643 burn entry point
+ERC-3643 only:    RuleEngine.destroyed(from, value)                  ← ERC-3643 burn entry point
                    ├── onlyBoundToken modifier
                    └── calls _transferred(from, address(0), value)
 ```
 
-Since CMTAT v3.3.0, mint (`from == address(0)`) and burn (`to == address(0)`) also go through the 4-argument overload with the operator as `spender`. Rules that check `spender` must skip or adapt that check for mint/burn to avoid blocking those operations unintentionally.
+**CMTAT and ERC-3643 use disjoint entry points.** The 4-argument `transferred` is declared by CMTAT's `IRuleEngine` (`lib/CMTAT/contracts/interfaces/engine/IRuleEngine.sol`), so an ERC-3643 token never reaches it. Conversely `created` / `destroyed` are declared by `IERC3643Compliance` and CMTAT never calls them — CMTAT routes mint and burn through the 4-argument `transferred` instead. Only the 3-argument `transferred` is shared by both.
+
+CMTAT selects the overload in `ValidationModuleRuleEngine._callRuleEngineTransferred`, branching on `spender != address(0)`. A standard `transfer` has no spender (`CMTATBaseCommon.transfer` passes `address(0)` internally), so the `else` branch calls the **3-argument** `transferred(from, to, value)` — the zero address is a branch condition only and is never forwarded to the engine. `transferFrom`, `mint` and `burn` carry `_msgSender()` as spender and take the **4-argument** overload. Neither is a fallback: which one is called depends purely on the operation.
+
+Since CMTAT v3.3.0, mint (`from == address(0)`) and burn (`to == address(0)`) therefore also reach the 4-argument overload with the operator as `spender`. Rules that check `spender` must skip or adapt that check for mint/burn to avoid blocking those operations unintentionally.
 
 `created` and `destroyed` use the 3-argument `_transferred` path (no spender), consistent with the ERC-3643 spec which does not carry a spender for mint/burn.
 
 View path: `detectTransferRestriction()` iterates rules, returns first non-zero code.
+
+**The 3-argument view path fails open for spender-dependent rules.** `detectTransferRestriction` and
+`canTransfer` carry no `spender`, so a rule keyed by spender (e.g. a per-minter mint allowance) cannot
+evaluate the operation and must answer "no restriction". The engine aggregates that answer, so these two views
+can report a mint as allowed that `transferred(spender, ...)` will revert. Use the 4-argument
+`detectTransferRestrictionFrom` / `canTransferFrom` to pre-check an operation that has an operator. See
+`H-1` in `doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md`.
 
 ### Storage: EnumerableSet
 
@@ -255,8 +280,11 @@ Key points:
 - NatSpec comments on all public/external functions
 - Function ordering: constructor, receive, fallback, external, public, internal, private (view/pure last within each group)
 - Function declaration order: visibility, mutability, virtual, override, custom modifiers
+- All `internal` functions must be marked `virtual`, so inheriting contracts can override them.
+- Use `require(condition, CustomError(...))` for custom errors; avoid direct `revert CustomError(...)`.
 - In `src/`, avoid `super` calls and prefer explicit parent-contract calls (e.g., `AccessControl.grantRole(...)`) for readability and deterministic inheritance behavior.
 - Section headers: `/* ============ SECTION ============ */`
+- **No emoji in code comments or NatSpec.** Use a plain word marker instead: `WARNING:`, `NOTE:`, `IMPORTANT:`. Emoji render inconsistently across editors, terminals, `forge doc` output and diffs; they are not searchable (`grep WARNING` finds the marker, `grep ⚠️` depends on the shell); and they encode as multi-byte sequences that can be silently mangled by tooling. This applies to `src/`, `test/` and `script/`. Markdown documentation may use emoji freely — the restriction is Solidity comments only.
 - Run `forge fmt` before committing
 
 ## Common Tasks

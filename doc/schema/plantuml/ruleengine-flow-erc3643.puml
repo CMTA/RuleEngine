@@ -1,0 +1,78 @@
+@startuml
+title RuleEngine with an ERC-3643 token
+
+skinparam shadowing false
+skinparam sequenceMessageAlign direction
+skinparam ParticipantPadding 12
+
+actor "Token holder\n/ agent" as Holder
+participant "ERC-3643 token" as Token
+participant "RuleEngine\n(compliance contract)" as Engine
+collections "Rule contracts\n(IRule)" as Rules
+
+== State-changing path ==
+
+alt transfer or transferFrom
+    Holder -> Token : transfer(to, value)\ntransferFrom(from, to, value)
+    activate Token
+    Token -> Engine : transferred(from, to, value)
+else mint
+    Holder -> Token : mint(to, value)
+    Token -> Engine : created(to, value)
+    note right of Engine : runs _transferred(address(0), to, value)
+else burn
+    Holder -> Token : burn(from, value)
+    Token -> Engine : destroyed(from, value)
+    note right of Engine : runs _transferred(from, address(0), value)
+end
+
+note over Token
+    ERC-3643 compliance callbacks carry no spender, so an
+    ERC-3643 token never reaches the 4-argument
+    transferred(spender, from, to, value) overload -
+    that one is declared by CMTAT's IRuleEngine.
+    Mint and burn use created() / destroyed() instead.
+end note
+
+activate Engine
+Engine -> Engine : onlyBoundToken
+
+alt msg.sender is not a bound token
+    Engine -->> Token : revert\nRuleEngine_ERC3643Compliance_UnauthorizedCaller
+    Token -->> Holder : transaction reverted
+else caller is bound
+    loop for each rule in _rules (capped by maxRules, default 10)
+        Engine -> Rules : transferred(from, to, value)
+        activate Rules
+        alt rule forbids the transfer
+            Rules -->> Engine : revert (no return value)
+            Engine -->> Token : bubble up the revert
+            Token -->> Holder : transaction reverted
+            note right of Rules
+                Remaining rules never run.
+            end note
+        else rule allows the transfer
+            Rules --> Engine : return
+        end
+        deactivate Rules
+    end
+    Engine --> Token : return
+    Token --> Holder : operation executed
+end
+deactivate Engine
+deactivate Token
+
+== Read-only path (ERC-3643, never reverts) ==
+
+Holder -> Engine : canTransfer(from, to, value)
+activate Engine
+loop for each rule, until a rule reports a restriction
+    Engine -> Rules : detectTransferRestriction(...)
+    activate Rules
+    Rules --> Engine : ERC-1404 restriction code
+    deactivate Rules
+end
+Engine --> Holder : true when every rule allows the transfer,\nfalse otherwise
+deactivate Engine
+
+@enduml

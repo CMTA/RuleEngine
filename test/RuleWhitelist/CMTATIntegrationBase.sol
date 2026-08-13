@@ -21,7 +21,7 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
     // Arrange
     function setUp() public virtual {
         vm.prank(DEFAULT_ADMIN_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
+        ruleWhitelist = new RuleWhitelistMock(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
         // global arrange
         cmtatContract = _deployCmtat();
 
@@ -53,7 +53,9 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
         // Arrange
         vm.prank(ADDRESS1);
         vm.expectRevert(
-            abi.encodeWithSelector(RuleWhitelist.RuleWhitelist_InvalidTransfer.selector, ADDRESS1, ADDRESS2, 21, code)
+            abi.encodeWithSelector(
+                RuleWhitelistMock.RuleWhitelist_InvalidTransfer.selector, ADDRESS1, ADDRESS2, 21, code
+            )
         );
         // Act
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
@@ -70,7 +72,7 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
         vm.prank(ADDRESS1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                RuleWhitelist.RuleWhitelist_InvalidTransfer.selector, ADDRESS1, ADDRESS2, amount, code
+                RuleWhitelistMock.RuleWhitelist_InvalidTransfer.selector, ADDRESS1, ADDRESS2, amount, code
             )
         );
         // Act
@@ -88,7 +90,7 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
         vm.prank(ADDRESS1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                RuleWhitelist.RuleWhitelist_InvalidTransfer.selector, ADDRESS1, ADDRESS2, amount, code
+                RuleWhitelistMock.RuleWhitelist_InvalidTransfer.selector, ADDRESS1, ADDRESS2, amount, code
             )
         );
         // Act
@@ -111,7 +113,7 @@ abstract contract CMTATIntegrationBase is Test, HelperContract {
         vm.prank(ADDRESS3);
         vm.expectRevert(
             abi.encodeWithSelector(
-                RuleWhitelist.RuleWhitelist_InvalidTransfer.selector, ADDRESS1, ADDRESS2, amount, code
+                RuleWhitelistMock.RuleWhitelist_InvalidTransfer.selector, ADDRESS1, ADDRESS2, amount, code
             )
         );
         // Act

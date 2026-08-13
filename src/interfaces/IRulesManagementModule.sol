@@ -5,12 +5,11 @@ pragma solidity ^0.8.20;
 /* ==== Interfaces === */
 import {IRule} from "./IRule.sol";
 
+/**
+ * @title IRulesManagementModule
+ * @notice Rule CRUD operations exposed by the RuleEngine.
+ */
 interface IRulesManagementModule {
-    /**
-     * @notice Returns the maximum number of rules allowed in the engine.
-     */
-    function maxRules() external view returns (uint256);
-
     /**
      * @notice Updates the maximum number of rules allowed in the engine.
      * @dev Access control is implementation specific (admin/owner).
@@ -30,6 +29,37 @@ interface IRulesManagementModule {
      * This function calls _clearRules if at least one rule is still configured
      */
     function setRules(IRule[] calldata rules_) external;
+
+    /**
+     * @notice Removes all configured rules.
+     * @dev After calling this function, no rules will remain set.
+     * Cost is O(n) in the number of configured rules. With the default cap of 10 this is
+     * negligible, but a high {maxRules} setting re-exposes unbounded cost here even though
+     * per-transfer cost remains bounded.
+     */
+    function clearRules() external;
+
+    /**
+     * @notice Adds a new rule to the current rule set.
+     * @dev Reverts if the rule address is zero or already exists in the set.
+     * Complexity: O(1).
+     * @param rule_ The IRule contract to add.
+     */
+    function addRule(IRule rule_) external;
+
+    /**
+     * @notice Removes a specific rule from the current rule set.
+     * @dev Reverts if the provided rule is not found or does not match the stored rule at its index.
+     * Complexity: O(1).
+     * @param rule_ The IRule contract to remove.
+     */
+    function removeRule(IRule rule_) external;
+
+    /**
+     * @notice Returns the maximum number of rules allowed in the engine.
+     * @return The maximum number of rules that can be configured.
+     */
+    function maxRules() external view returns (uint256);
 
     /**
      * @notice Returns the total number of currently configured rules.
@@ -58,31 +88,6 @@ interface IRulesManagementModule {
      * @return ruleAddresses An array of all active rule contract addresses.
      */
     function rules() external view returns (address[] memory ruleAddresses);
-
-    /**
-     * @notice Removes all configured rules.
-     * @dev After calling this function, no rules will remain set.
-     * Cost is O(n) in the number of configured rules. With the default cap of 10 this is
-     * negligible, but a high {maxRules} setting re-exposes unbounded cost here even though
-     * per-transfer cost remains bounded.
-     */
-    function clearRules() external;
-
-    /**
-     * @notice Adds a new rule to the current rule set.
-     * @dev Reverts if the rule address is zero or already exists in the set.
-     * Complexity: O(1).
-     * @param rule_ The IRule contract to add.
-     */
-    function addRule(IRule rule_) external;
-
-    /**
-     * @notice Removes a specific rule from the current rule set.
-     * @dev Reverts if the provided rule is not found or does not match the stored rule at its index.
-     * Complexity: O(1).
-     * @param rule_ The IRule contract to remove.
-     */
-    function removeRule(IRule rule_) external;
 
     /**
      * @notice Checks whether a specific rule is currently configured.

@@ -1,0 +1,44 @@
+@startuml
+title RuleEngine - overview
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+left to right direction
+
+actor "Token holder" as Holder
+
+rectangle "Token" {
+    component "CMTAT" as CMTAT
+    component "ERC-3643 token" as T3643
+}
+
+component "RuleEngine" as Engine
+
+rectangle "Rules" {
+    component "Rule 0\n(e.g. whitelist rule)" as R0
+    component "Rule 1" as R1
+    component "..." as Rdots
+    component "Rule n" as Rn
+}
+
+Holder --> CMTAT : 1. transfer(to, value)
+Holder --> T3643 : 1. transfer(to, value)
+
+CMTAT --> Engine : 2. transferred(from, to, value)
+T3643 --> Engine : 2. transferred(from, to, value)
+
+Engine --> R0 : 3a. transferred(...)
+Engine --> R1 : 3b. transferred(...)
+Engine --> Rn : 3c. transferred(...)
+
+note bottom of Engine
+    The engine runs every configured rule in order and
+    reverts on the first rule that forbids the transfer.
+
+    A plain transfer carries no spender and uses the
+    3-argument transferred(). Other operations differ
+    per token standard - see the per-token sequence
+    diagrams for the exact entry points.
+end note
+
+@enduml

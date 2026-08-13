@@ -28,7 +28,7 @@ abstract contract RuleEngineCMTATIntegrationBase is Test, HelperContract {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, address(cmtatContract));
         ruleConditionalTransferLight =
-            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+            new RuleConditionalTransferLightMock(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleConditionalTransferLight);

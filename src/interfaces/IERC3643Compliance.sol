@@ -5,6 +5,10 @@ pragma solidity ^0.8.20;
 /* ==== CMTAT === */
 import {IERC3643ComplianceRead, IERC3643IComplianceContract} from "CMTAT/interfaces/tokenization/IERC3643Partial.sol";
 
+/**
+ * @title IERC3643Compliance
+ * @notice Compliance interface implemented by the RuleEngine for ERC-3643 tokens.
+ */
 interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContract {
     /* ============ Events ============ */
     /**
@@ -47,6 +51,23 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      */
     function unbindToken(address token) external;
 
+    /**
+     * @notice Updates the compliance contract state when tokens are created (minted).
+     * @dev Called by the token contract when new tokens are issued to an account.
+     *      Reverts if the minting does not comply with the rules.
+     * @param to The address receiving the minted tokens.
+     * @param value The number of tokens created.
+     */
+    function created(address to, uint256 value) external;
+
+    /**
+     * @notice Updates the compliance contract state when tokens are destroyed (burned).
+     * @dev Called by the token contract when tokens are redeemed or burned.
+     *      Reverts if the burning does not comply with the rules.
+     * @param from The address whose tokens are being destroyed.
+     * @param value The number of tokens destroyed.
+     */
+    function destroyed(address from, uint256 value) external;
 
     /**
      * @notice Checks whether a token is currently bound to this compliance contract.
@@ -65,22 +86,4 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      * @return token The address of the currently bound token.
      */
     function getTokenBound() external view returns (address token);
-
-    /**
-     * @notice Updates the compliance contract state when tokens are created (minted).
-     * @dev Called by the token contract when new tokens are issued to an account.
-     *      Reverts if the minting does not comply with the rules.
-     * @param to The address receiving the minted tokens.
-     * @param value The number of tokens created.
-     */
-    function created(address to, uint256 value) external;
-
-    /**
-     * @notice Updates the compliance contract state when tokens are destroyed (burned).
-     * @dev Called by the token contract when tokens are redeemed or burned.
-     *      Reverts if the burning does not comply with the rules.
-     * @param from The address whose tokens are being destroyed.
-     * @param value The number of tokens destroyed.
-     */
-    function destroyed(address from, uint256 value) external;
 }
