@@ -106,7 +106,9 @@ When may the use of `RuleEngine` not be appropriate?
 
 This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a RuleEngine works:
 
-![RuleEngine.drawio](./schema/RuleEngine.drawio.png)
+![RuleEngine overview](./schema/plantuml/ruleengine-overview.png)
+
+_Diagram source: [doc/schema/plantuml/ruleengine-overview.puml](./schema/plantuml/ruleengine-overview.puml)._
 
  
 
