@@ -29,6 +29,8 @@ All three support ERC-1404 transfer restrictions, the ERC-3643 compliance interf
 
 ## How it works
 
+![RuleEngine overview](./doc/schema/plantuml/ruleengine-overview.png)
+
 The token calls the engine on every transfer, mint and burn. The engine checks the caller is a bound token, then runs each configured rule in order. A rule that forbids the transfer reverts, and the whole transaction reverts with it — remaining rules are never reached.
 
 **CMTAT and ERC-3643 use disjoint entry points.** The 4-argument overload is declared by CMTAT's `IRuleEngine`, so an ERC-3643 token never reaches it; `created` / `destroyed` belong to `IERC3643Compliance`, and CMTAT never calls them.
