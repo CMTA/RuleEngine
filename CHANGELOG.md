@@ -63,7 +63,7 @@ forge lint
 ### Documentation
 
 - Document that the ERC-1404 3-argument `canTransfer` / `detectTransferRestriction` path fails open for spender-dependent rules, and that `canTransferFrom` / `detectTransferRestrictionFrom` must be used to pre-check an operation that has an operator.
-- Add the code-quality review in [doc/security/audits/CLAUDE_ANALYSIS.md](./doc/security/audits/CLAUDE_ANALYSIS.md).
+- Add the code-quality review in [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md](./doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md).
 
 ### Dependencies
 

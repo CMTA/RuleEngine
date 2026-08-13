@@ -180,7 +180,7 @@ View path: `detectTransferRestriction()` iterates rules, returns first non-zero 
 evaluate the operation and must answer "no restriction". The engine aggregates that answer, so these two views
 can report a mint as allowed that `transferred(spender, ...)` will revert. Use the 4-argument
 `detectTransferRestrictionFrom` / `canTransferFrom` to pre-check an operation that has an operator. See
-`H-1` in `doc/security/audits/CLAUDE_ANALYSIS.md`.
+`H-1` in `doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md`.
 
 ### Storage: EnumerableSet
 
