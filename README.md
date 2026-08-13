@@ -29,9 +29,7 @@ All three support ERC-1404 transfer restrictions, the ERC-3643 compliance interf
 
 ## How it works
 
-![RuleEngine transfer validation flow](./doc/schema/plantuml/ruleengine-transfer-flow.png)
-
-The token calls `transferred(...)` on the engine, which checks the caller is a bound token and then runs each configured rule in order. A rule that forbids the transfer reverts, and the whole transaction reverts with it — remaining rules are never reached.
+The token calls the engine on every transfer, mint and burn. The engine checks the caller is a bound token, then runs each configured rule in order. A rule that forbids the transfer reverts, and the whole transaction reverts with it — remaining rules are never reached.
 
 **CMTAT and ERC-3643 use disjoint entry points.** The 4-argument overload is declared by CMTAT's `IRuleEngine`, so an ERC-3643 token never reaches it; `created` / `destroyed` belong to `IERC3643Compliance`, and CMTAT never calls them.
 
@@ -44,7 +42,7 @@ CMTAT selects between the two overloads on `spender != address(0)`: a plain `tra
 
 The view path, `detectTransferRestriction()`, iterates the same rules and returns the first non-zero ERC-1404 restriction code instead of reverting.
 
-_Diagram source: [doc/schema/plantuml/ruleengine-transfer-flow.puml](./doc/schema/plantuml/ruleengine-transfer-flow.puml)._
+Sequence diagrams for each token type: [CMTAT](./doc/schema/plantuml/ruleengine-flow-cmtat.png) — [ERC-3643](./doc/schema/plantuml/ruleengine-flow-erc3643.png) (sources in [doc/schema/plantuml](./doc/schema/plantuml/)).
 
 ## Architecture
 

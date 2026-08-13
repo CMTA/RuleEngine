@@ -114,11 +114,19 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 2. The transfer function inside the token calls the ERC-3643 function `transferred` from the RuleEngine with the following parameters inside: `from, to, value`.
 3. The Rule Engine calls each rule separately. If the transfer is not authorized by the rule, the rule must directly revert (no return value).
 
-The following sequence diagram details both the state-changing path (`transferred`, `created`, `destroyed`) and the read-only path (`detectTransferRestriction`, `canTransfer`):
+CMTAT and ERC-3643 tokens use **disjoint entry points** on the RuleEngine, so each has its own sequence diagram. The 4-argument `transferred(spender, from, to, value)` is declared by CMTAT's `IRuleEngine` and is never reached by an ERC-3643 token; conversely `created` / `destroyed` are declared by `IERC3643Compliance` and are never called by CMTAT. Only the 3-argument `transferred(from, to, value)` is shared.
 
-![RuleEngine transfer validation flow](./schema/plantuml/ruleengine-transfer-flow.png)
+#### With a CMTAT token
 
-_Diagram source: [doc/schema/plantuml/ruleengine-transfer-flow.puml](./schema/plantuml/ruleengine-transfer-flow.puml)._
+![RuleEngine flow with a CMTAT token](./schema/plantuml/ruleengine-flow-cmtat.png)
+
+_Diagram source: [doc/schema/plantuml/ruleengine-flow-cmtat.puml](./schema/plantuml/ruleengine-flow-cmtat.puml)._
+
+#### With an ERC-3643 token
+
+![RuleEngine flow with an ERC-3643 token](./schema/plantuml/ruleengine-flow-erc3643.png)
+
+_Diagram source: [doc/schema/plantuml/ruleengine-flow-erc3643.puml](./schema/plantuml/ruleengine-flow-erc3643.puml)._
 
 > **Warning:** The RuleEngine iterates over all configured rules on every transfer (and on every call to `detectTransferRestriction`, `canTransfer`, etc.). Adding a large number of rules increases gas consumption for each transfer and may eventually exceed the block gas limit, effectively preventing any transfer from succeeding. An on-chain rule cap is enforced (`maxRules`), set to `10` by default, and can be changed by governance (`DEFAULT_ADMIN_ROLE` on `RuleEngine`, owner on ownable variants). A misconfigured or gas-heavy rule can still impact all transfers.
 
