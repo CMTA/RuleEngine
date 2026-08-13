@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/operation/RuleOperationRevert.sol | 689fae1c2576424be3fe4e39fada0425dd0c3025 |
+| /home/ryan/Pictures/dev/RE-new/RuleEngineNew/src/mocks/rules/validation/RuleWhitelistMock.sol | 269a711aa637cfd9640a7cbb83a5d34c963c1d17 |
 
 
 ### Contracts Description Table
@@ -15,16 +15,15 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleOperationRevert** | Implementation | AccessControl, IRule, RuleCommonInvariantStorage |||
+| **RuleWhitelistMock** | Implementation | RuleAddressList, RuleWhitelistCommon |||
+| └ | <Constructor> | Public ❗️ | 🛑  | RuleAddressList |
+| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
+| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
 | └ | supportsInterface | Public ❗️ |   |NO❗️ |
-| └ | transferred | Public ❗️ |   |NO❗️ |
-| └ | transferred | Public ❗️ |   |NO❗️ |
-| └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
-| └ | detectTransferRestrictionFrom | Public ❗️ |   |NO❗️ |
-| └ | canReturnTransferRestrictionCode | External ❗️ |   |NO❗️ |
-| └ | messageForTransferRestriction | External ❗️ |   |NO❗️ |
 | └ | canTransfer | Public ❗️ |   |NO❗️ |
 | └ | canTransferFrom | Public ❗️ |   |NO❗️ |
+| └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
+| └ | detectTransferRestrictionFrom | Public ❗️ |   |NO❗️ |
 
 
 ### Legend

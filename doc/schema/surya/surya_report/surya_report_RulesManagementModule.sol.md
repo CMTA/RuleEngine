@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/RulesManagementModule.sol | 37770ddc935b8cb3f90cf79c8b8ca9be4f8717b5 |
+| /home/ryan/Pictures/dev/RE-new/RuleEngineNew/src/modules/RulesManagementModule.sol | 1c265e8afb891b7d6a91cb5b47a33958392cd053 |
 
 
 ### Contracts Description Table
@@ -19,20 +19,20 @@
 | └ | setRules | Public ❗️ | 🛑  | onlyRulesManager |
 | └ | clearRules | Public ❗️ | 🛑  | onlyRulesManager |
 | └ | addRule | Public ❗️ | 🛑  | onlyRulesManager |
-| └ | maxRules | Public ❗️ |   |NO❗️ |
 | └ | setMaxRules | Public ❗️ | 🛑  | onlyRulesLimitManager |
 | └ | removeRule | Public ❗️ | 🛑  | onlyRulesManager |
+| └ | maxRules | Public ❗️ |   |NO❗️ |
 | └ | rulesCount | Public ❗️ |   |NO❗️ |
 | └ | containsRule | Public ❗️ |   |NO❗️ |
 | └ | rule | Public ❗️ |   |NO❗️ |
 | └ | rules | Public ❗️ |   |NO❗️ |
 | └ | _clearRules | Internal 🔒 | 🛑  | |
 | └ | _removeRule | Internal 🔒 | 🛑  | |
-| └ | _checkRule | Internal 🔒 |   | |
 | └ | _transferred | Internal 🔒 | 🛑  | |
 | └ | _transferred | Internal 🔒 | 🛑  | |
 | └ | _onlyRulesManager | Internal 🔒 | 🛑  | |
 | └ | _onlyRulesLimitManager | Internal 🔒 | 🛑  | |
+| └ | _checkRule | Internal 🔒 |   | |
 
 
 ### Legend

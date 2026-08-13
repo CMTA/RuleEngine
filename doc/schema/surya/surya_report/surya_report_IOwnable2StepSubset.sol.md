@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/IOwnable2StepSubset.sol | 7b5a95bf02e01599484430bab2d3f038e1a26c12 |
+| /home/ryan/Pictures/dev/RE-new/RuleEngineNew/src/mocks/IOwnable2StepSubset.sol | 2c0b4a4eccfda2aa49f81039a5f5ae8f826dbe50 |
 
 
 ### Contracts Description Table
@@ -16,8 +16,8 @@
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
 | **IOwnable2StepSubset** | Interface |  |||
-| └ | pendingOwner | External ❗️ |   |NO❗️ |
 | └ | acceptOwnership | External ❗️ | 🛑  |NO❗️ |
+| └ | pendingOwner | External ❗️ |   |NO❗️ |
 
 
 ### Legend

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/validation/RuleWhitelist.sol | a5f2223286e30d05a0444ab0cc7cfd0a2aef7080 |
+| /home/ryan/Pictures/dev/RE-new/RuleEngineNew/src/mocks/rules/operation/RuleMintAllowanceMock.sol | 8624614de65b7b571307995c38ac3911f2355e2f |
 
 
 ### Contracts Description Table
@@ -15,15 +15,18 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleWhitelist** | Implementation | RuleAddressList, RuleWhitelistCommon |||
+| **RuleMintAllowanceMock** | Implementation | AccessControl, RuleMintAllowanceInvariantStorage, IRule |||
+| └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
+| └ | setMintAllowance | External ❗️ | 🛑  | onlyRole |
+| └ | canReturnTransferRestrictionCode | External ❗️ |   |NO❗️ |
+| └ | messageForTransferRestriction | External ❗️ |   |NO❗️ |
+| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
+| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
 | └ | supportsInterface | Public ❗️ |   |NO❗️ |
-| └ | <Constructor> | Public ❗️ | 🛑  | RuleAddressList |
-| └ | canTransfer | Public ❗️ |   |NO❗️ |
-| └ | canTransferFrom | Public ❗️ |   |NO❗️ |
 | └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
 | └ | detectTransferRestrictionFrom | Public ❗️ |   |NO❗️ |
-| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
-| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
+| └ | canTransfer | Public ❗️ |   |NO❗️ |
+| └ | canTransferFrom | Public ❗️ |   |NO❗️ |
 
 
 ### Legend

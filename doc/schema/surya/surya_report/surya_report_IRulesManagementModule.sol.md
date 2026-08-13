@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./interfaces/IRulesManagementModule.sol | c51bcceecca4f78a7bbe5b394786eec2416afe84 |
+| /home/ryan/Pictures/dev/RE-new/RuleEngineNew/src/interfaces/IRulesManagementModule.sol | 19be4f04f6f4a4d36f36f3a7b0e4304b14c8a4b6 |
 
 
 ### Contracts Description Table
@@ -16,15 +16,15 @@
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
 | **IRulesManagementModule** | Interface |  |||
-| └ | maxRules | External ❗️ |   |NO❗️ |
 | └ | setMaxRules | External ❗️ | 🛑  |NO❗️ |
 | └ | setRules | External ❗️ | 🛑  |NO❗️ |
-| └ | rulesCount | External ❗️ |   |NO❗️ |
-| └ | rule | External ❗️ |   |NO❗️ |
-| └ | rules | External ❗️ |   |NO❗️ |
 | └ | clearRules | External ❗️ | 🛑  |NO❗️ |
 | └ | addRule | External ❗️ | 🛑  |NO❗️ |
 | └ | removeRule | External ❗️ | 🛑  |NO❗️ |
+| └ | maxRules | External ❗️ |   |NO❗️ |
+| └ | rulesCount | External ❗️ |   |NO❗️ |
+| └ | rule | External ❗️ |   |NO❗️ |
+| └ | rules | External ❗️ |   |NO❗️ |
 | └ | containsRule | External ❗️ |   |NO❗️ |
 
 

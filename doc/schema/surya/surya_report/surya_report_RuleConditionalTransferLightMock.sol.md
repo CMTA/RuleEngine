@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/operation/RuleConditionalTransferLight.sol | c8ef930da443dd79107fd5b80f7bd0d5e0bc85e2 |
+| /home/ryan/Pictures/dev/RE-new/RuleEngineNew/src/mocks/rules/operation/RuleConditionalTransferLightMock.sol | 1d6b8e8765e6de04eaa66f46b9f753f58e9a11de |
 
 
 ### Contracts Description Table
@@ -15,17 +15,17 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleConditionalTransferLight** | Implementation | AccessControl, RuleConditionalTransferLightInvariantStorage, IRule |||
+| **RuleConditionalTransferLightMock** | Implementation | AccessControl, RuleConditionalTransferLightInvariantStorage, IRule |||
 | └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
-| └ | supportsInterface | Public ❗️ |   |NO❗️ |
-| └ | approveTransfer | Public ❗️ | 🛑  | onlyRole |
-| └ | approvedCount | Public ❗️ |   |NO❗️ |
-| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
-| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
-| └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
-| └ | detectTransferRestrictionFrom | Public ❗️ |   |NO❗️ |
 | └ | canReturnTransferRestrictionCode | External ❗️ |   |NO❗️ |
 | └ | messageForTransferRestriction | External ❗️ |   |NO❗️ |
+| └ | approveTransfer | Public ❗️ | 🛑  | onlyRole |
+| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
+| └ | transferred | Public ❗️ | 🛑  |NO❗️ |
+| └ | supportsInterface | Public ❗️ |   |NO❗️ |
+| └ | approvedCount | Public ❗️ |   |NO❗️ |
+| └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
+| └ | detectTransferRestrictionFrom | Public ❗️ |   |NO❗️ |
 | └ | canTransfer | Public ❗️ |   |NO❗️ |
 | └ | canTransferFrom | Public ❗️ |   |NO❗️ |
 

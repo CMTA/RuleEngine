@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/ERC3643ComplianceModule.sol | 69e2765f6876d799d9de6a4dc5a10da3d749485d |
+| /home/ryan/Pictures/dev/RE-new/RuleEngineNew/src/modules/ERC3643ComplianceModule.sol | 20481b94eee7c734ad6866811f4708824db63461 |
 
 
 ### Contracts Description Table
@@ -22,9 +22,9 @@
 | └ | getTokenBound | Public ❗️ |   |NO❗️ |
 | └ | _unbindToken | Internal 🔒 | 🛑  | |
 | └ | _bindToken | Internal 🔒 | 🛑  | |
-| └ | _checkBoundToken | Internal 🔒 |   | |
 | └ | _authorizeComplianceBindingChange | Internal 🔒 | 🛑  | |
 | └ | _onlyComplianceManager | Internal 🔒 | 🛑  | |
+| └ | _checkBoundToken | Internal 🔒 |   | |
 
 
 ### Legend
