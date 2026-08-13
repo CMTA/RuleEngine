@@ -29,17 +29,13 @@ All three support ERC-1404 transfer restrictions, the ERC-3643 compliance interf
 
 ## How it works
 
-```
-Token operation ─→ RuleEngine.transferred(spender, from, to, value)
-                    ├── onlyBoundToken (caller must be bound via bindToken)
-                    └── for each rule in _rules:
-                          rule.transferred(...)   // reverts on the first failing rule
+![RuleEngine transfer validation flow](./doc/schema/plantuml/ruleengine-transfer-flow.png)
 
-                   RuleEngine.created(to, value)      ← ERC-3643 mint
-                   RuleEngine.destroyed(from, value)  ← ERC-3643 burn
-```
+The token calls `transferred(spender, from, to, value)` on the engine, which checks the caller is a bound token and then runs each configured rule in order. A rule that forbids the transfer reverts, and the whole transaction reverts with it — remaining rules are never reached. Mint and burn (`created` / `destroyed`) go through the same loop.
 
 The view path, `detectTransferRestriction()`, iterates the same rules and returns the first non-zero ERC-1404 restriction code instead of reverting.
+
+_Diagram source: [doc/schema/plantuml/ruleengine-transfer-flow.puml](./doc/schema/plantuml/ruleengine-transfer-flow.puml)._
 
 ## Architecture
 

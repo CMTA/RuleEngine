@@ -1,0 +1,70 @@
+@startuml
+title RuleEngine - how a transfer is validated
+
+skinparam shadowing false
+skinparam sequenceMessageAlign direction
+skinparam ParticipantPadding 12
+skinparam BoxPadding 12
+
+actor "Token holder" as Holder
+participant "Token\n(CMTAT / ERC-3643)" as Token
+participant "RuleEngine" as Engine
+collections "Rule contracts\n(IRule)" as Rules
+
+== State-changing path ==
+
+Holder -> Token : transfer(to, value)\ntransferFrom(from, to, value)
+activate Token
+
+Token -> Engine : transferred(spender, from, to, value)
+activate Engine
+
+Engine -> Engine : onlyBoundToken
+
+alt caller is not a bound token
+    Engine -->> Token : revert\nRuleEngine_ERC3643Compliance_UnauthorizedCaller
+    Token -->> Holder : transaction reverted
+else caller is bound
+    loop for each rule in _rules (capped by maxRules, default 10)
+        Engine -> Rules : transferred(spender, from, to, value)
+        activate Rules
+        alt rule forbids the transfer
+            Rules -->> Engine : revert (no return value)
+            Engine -->> Token : bubble up the revert
+            Token -->> Holder : transaction reverted
+            note right of Rules
+                The whole transaction reverts on the
+                first failing rule. Remaining rules
+                are never reached.
+            end note
+        else rule allows the transfer
+            Rules --> Engine : return
+        end
+        deactivate Rules
+    end
+    Engine --> Token : return
+    Token --> Holder : transfer executed
+end
+deactivate Engine
+deactivate Token
+
+note over Token, Engine
+    Mint and burn use the same rule loop:
+    created(to, value)     -> _transferred(address(0), to, value)
+    destroyed(from, value) -> _transferred(from, address(0), value)
+end note
+
+== Read-only path (never reverts) ==
+
+Holder -> Engine : detectTransferRestriction(from, to, value)\ncanTransfer(from, to, value)
+activate Engine
+loop for each rule, until a rule returns a non-zero code
+    Engine -> Rules : detectTransferRestriction(...)
+    activate Rules
+    Rules --> Engine : ERC-1404 restriction code
+    deactivate Rules
+end
+Engine --> Holder : first non-zero code,\nor 0 when the transfer is allowed
+deactivate Engine
+
+@enduml

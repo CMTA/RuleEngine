@@ -114,6 +114,12 @@ This diagram illustrates how a transfer with a CMTAT or ERC-3643 token with a Ru
 2. The transfer function inside the token calls the ERC-3643 function `transferred` from the RuleEngine with the following parameters inside: `from, to, value`.
 3. The Rule Engine calls each rule separately. If the transfer is not authorized by the rule, the rule must directly revert (no return value).
 
+The following sequence diagram details both the state-changing path (`transferred`, `created`, `destroyed`) and the read-only path (`detectTransferRestriction`, `canTransfer`):
+
+![RuleEngine transfer validation flow](./schema/plantuml/ruleengine-transfer-flow.png)
+
+_Diagram source: [doc/schema/plantuml/ruleengine-transfer-flow.puml](./schema/plantuml/ruleengine-transfer-flow.puml)._
+
 > **Warning:** The RuleEngine iterates over all configured rules on every transfer (and on every call to `detectTransferRestriction`, `canTransfer`, etc.). Adding a large number of rules increases gas consumption for each transfer and may eventually exceed the block gas limit, effectively preventing any transfer from succeeding. An on-chain rule cap is enforced (`maxRules`), set to `10` by default, and can be changed by governance (`DEFAULT_ADMIN_ROLE` on `RuleEngine`, owner on ownable variants). A misconfigured or gas-heavy rule can still impact all transfers.
 
 > **Warning (restriction code conventions):** Rule implementations should use unique ERC-1404 restriction codes across the rule set. If several rules intentionally share the same restriction code, they should return the exact same `messageForTransferRestriction` text for that code to avoid inconsistent operator/user feedback.
