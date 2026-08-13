@@ -56,6 +56,11 @@ forge lint
 - `RuleAddressList.addressIsListedBatch`: `memory` parameter changed to `calldata` (587 gas measured for 10 addresses).
 - Deployment now emits `SetMaxRules` with the initial cap, so the event log alone is sufficient to reconstruct `maxRules`.
 
+### Added
+
+- Add `ERC3643TokenMock`: a minimal ERC-3643 (T-REX) style token whose compliance interaction mirrors `Token.sol` from the reference implementation, used to test the RuleEngine through the ERC-3643 entry points (`setCompliance` self-binding, `transferred`, `created`, `destroyed`).
+- Add `ERC3643TokenIntegration.t.sol` (11 tests), including a regression guard for the H-1 mint pre-check fail-open and one pinning the requirement that `address(0)` be whitelisted for an ERC-3643 token to mint.
+
 ### Removed
 
 - `RuleEngine_ERC3643Compliance_OperationNotSuccessful`: unreachable after the bind/unbind simplification and referenced nowhere else.

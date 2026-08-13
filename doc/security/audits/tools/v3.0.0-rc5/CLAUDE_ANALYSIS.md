@@ -38,10 +38,11 @@ regression tests).
 | E-2 | `_supportsRuleEngineBaseInterface` not `virtual` | ✅ fixed |
 | E-3 | 10 mock internals not `virtual` | ✅ fixed |
 | F-1 | ERC-165 flattened interface-ID computation | ⬜ no finding — verified correct |
+| F-2 | `RuleWhitelist` treats `address(0)` as a participant, blocking ERC-3643 mint | ⬜ left as is — pinned by test, operational note |
 | G-1 | `canTransfer` docs omit the fail-open case | ✅ fixed — warning added |
 | H-1 | View approves a mint that enforcement rejects | ✅ documented — behaviour left, see below |
 
-**Counted: 14 rows — 7 fixed, 5 left as is, 1 no-finding, 1 open decision.**
+**Counted: 15 rows — 7 fixed, 6 left as is, 1 no-finding, 1 open decision.**
 
 ## Outstanding
 
@@ -321,6 +322,37 @@ XOR over that flattened set, and `IRuleInterfaceId.t.sol` asserts the constant m
 (`testConstantMatchesAllFunctionsXOR`, plus a manual hand-XOR cross-check in `computeManualXOR`). All pass.
 
 **Verdict: no change.** Recorded as verified rather than omitted, so the next reviewer does not re-derive it.
+
+### F-2. `RuleWhitelist` treats `address(0)` as a participant, so an ERC-3643 token cannot mint
+
+Found while writing the ERC-3643 integration tests — this path had no prior test coverage.
+
+`RuleWhitelist.detectTransferRestriction` checks both endpoints without exempting the zero-address
+sentinel:
+
+```solidity
+if (!addressIsListed(from)) {
+    return CODE_ADDRESS_FROM_NOT_WHITELISTED;
+} else if (!addressIsListed(to)) {
+    return CODE_ADDRESS_TO_NOT_WHITELISTED;
+}
+```
+
+The ERC-3643 reference token pre-checks a mint as `canTransfer(address(0), _to, _amount)`
+(`Token.sol:456` in `lib/ERC-3643`, tag 4.1.3). Since `address(0)` is not a listed holder, the whitelist
+returns `CODE_ADDRESS_FROM_NOT_WHITELISTED` and **the mint is refused**. An issuer who whitelists only real
+holders — the natural reading of "whitelist" — cannot mint at all.
+
+The asymmetry is what makes this notable: `detectTransferRestrictionFrom` *was* deliberately taught about the
+sentinel (rc4 skipped the **spender** check for mint and burn), but the `from` / `to` checks on the 3-argument
+path were not given the same treatment.
+
+**Verdict: leave, and pin it with a test.** Whitelisting `address(0)` is a legitimate way for an issuer to
+express "minting is permitted", and changing the rule to auto-exempt the sentinel would silently widen every
+existing deployment's whitelist semantics — a larger behavioural change than this review should make
+unilaterally. `testMintIsBlockedWhenZeroAddressNotListed` now documents and pins the requirement, and the
+integration `setUp` shows the working configuration. Note that `RuleWhitelist` lives in `src/mocks/` and is a
+reference rule, not a production one.
 
 ---
 
