@@ -58,8 +58,7 @@ RuleEngineOwnable engine = new RuleEngineOwnable(owner, forwarder, address(0));
 
 ### 3.2 Grant self-binding approval — required before `setCompliance`
 
-This is the step most integrations miss. `Token.setCompliance` makes the **token** call `bindToken` and
-`unbindToken` on the compliance contract:
+This is the step most integrations miss. `Token.setCompliance` makes the **token** call `bindToken` and`unbindToken` on the compliance contract:
 
 ```solidity
 function setCompliance(address _compliance) public override onlyOwner {
@@ -72,8 +71,7 @@ function setCompliance(address _compliance) public override onlyOwner {
 }
 ```
 
-Those calls come from the token address, not from an operator. To support this without letting arbitrary
-contracts bind themselves, the engine gates self-binding behind an explicit approval:
+Those calls come from the token address, not from an operator. To support this without letting arbitrary contracts bind themselves, the engine gates self-binding behind an explicit approval:
 
 ```solidity
 engine.setTokenSelfBindingApproval(address(token), true);   // COMPLIANCE_MANAGER_ROLE, or owner
@@ -89,14 +87,13 @@ engine.isTokenSelfBindingApproved(address(token));          // -> true
 Without step 1, `setCompliance` reverts. This is exercised by
 `testSetComplianceRevertsWithoutSelfBindingApproval`.
 
-An operator can equally bind the token directly with `engine.bindToken(address(token))` and skip the approval
-entirely — self-binding approval exists specifically to support the T-REX `setCompliance` pattern.
+An operator can equally bind the token directly with `engine.bindToken(address(token))` and skip the approval entirely — self-binding approval exists specifically to support the T-REX `setCompliance` pattern.
 
 ### 3.3 Migrating between engines
 
-`setCompliance` unbinds from the old compliance and binds to the new one in a single transaction. The **new**
-engine must have granted self-binding approval for the token before the call; the old one does not need it
-still granted for the unbind to succeed. Verified by `testSetComplianceUnbindsThePreviousEngine`.
+`setCompliance` unbinds from the old compliance and binds to the new one in a single transaction. The **new** engine must have granted self-binding approval for the token before the call; the old one does not need it still granted for the unbind to succeed. 
+
+Verified by `testSetComplianceUnbindsThePreviousEngine`.
 
 ### 3.4 Add rules
 
@@ -106,8 +103,7 @@ Identical to the CMTAT case:
 engine.addRule(IRule(address(rule)));
 ```
 
-Rules must implement `IRule` and advertise `RuleInterfaceId.IRULE_INTERFACE_ID` via ERC-165. They run in
-declaration order; the first to revert aborts the transaction.
+Rules must implement `IRule` and advertise `RuleInterfaceId.IRULE_INTERFACE_ID` via ERC-165. They run in declaration order; the first to revert aborts the transaction.
 
 ### 3.5 Batch helpers
 
@@ -124,26 +120,26 @@ engine.getTokenBounds();                               // every bound token
 
 ### 4.1 The mint pre-check fails open for spender-dependent rules
 
-`Token.mint` pre-checks with `canTransfer(address(0), _to, _amount)`. That signature carries **no spender**, so
-a rule keyed by spender — a per-minter allowance, for instance — cannot evaluate the mint and must answer "no
-restriction". The engine aggregates that answer, so the pre-check reports the mint as allowed even when a
-spender-aware rule would reject it.
+`Token.mint` pre-checks with `canTransfer(address(0), _to, _amount)`. That signature carries **no spender**, so a rule keyed by spender — a per-minter allowance, for instance — cannot evaluate the mint and must answer "no restriction". 
 
-The state-changing path is unaffected and still enforces correctly; the damage is to anything that trusts the
-pre-check. Pinned by `testMintPreCheckFailsOpenForSpenderKeyedRule`, and recorded as finding `H-1` in
-[CLAUDE_ANALYSIS.md](../security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md).
+The engine aggregates that answer, so the pre-check reports the mint as allowed even when a spender-aware rule would reject it.
+
+The state-changing path is unaffected and still enforces correctly; the damage is to anything that trusts the pre-check. Pinned by `testMintPreCheckFailsOpenForSpenderKeyedRule`, and recorded as finding `H-1` in [CLAUDE_ANALYSIS.md](../security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md).
 
 ### 4.2 `address(0)` must be whitelisted for minting to work
 
-`RuleWhitelist` treats the zero address as an ordinary participant:
+**This concerns `RuleWhitelistMock`, a reference rule in `src/mocks/`, not a production rule.** Production
+rules live in [CMTA/Rules](https://github.com/CMTA/Rules) and may handle the sentinel differently — check the
+rule you actually deploy. The behaviour is described here because the mock is what the examples, scripts and
+tests in this repository use, and because integrators copy it.
+
+`RuleWhitelistMock` treats the zero address as an ordinary participant:
 
 ```solidity
 if (!addressIsListed(from)) { return CODE_ADDRESS_FROM_NOT_WHITELISTED; }
 ```
 
-Because the mint pre-check passes `address(0)` as `from`, **an issuer who whitelists only real holders cannot
-mint at all** — every mint is refused with `CODE_ADDRESS_FROM_NOT_WHITELISTED`. Whitelist `address(0)`
-explicitly to permit issuance.
+Because the mint pre-check passes `address(0)` as `from`, **an issuer who whitelists only real holders cannot mint at all** — every mint is refused with `CODE_ADDRESS_FROM_NOT_WHITELISTED`. Whitelist `address(0)` explicitly to permit issuance.
 
 Pinned by `testMintIsBlockedWhenZeroAddressNotListed`, recorded as finding `F-2`.
 
@@ -178,8 +174,7 @@ inconsistent operator feedback unless they share the same message.
 
 ### 4.8 The reference T-REX token cannot be compiled into this test suite
 
-Relevant if you intend to add tests against the vendored implementation in `lib/ERC-3643`. Three independent
-blockers:
+Relevant if you intend to add tests against the vendored implementation in `lib/ERC-3643`. Three independent blockers:
 
 - it pins `pragma solidity 0.8.17` (exact), while this project compiles with **0.8.36**;
 - it requires **OpenZeppelin 4.8.x**, while this project uses **5.7.0**;

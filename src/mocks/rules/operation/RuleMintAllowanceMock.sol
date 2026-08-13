@@ -8,13 +8,13 @@ import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
 import {RuleMintAllowanceInvariantStorage} from "./abstract/RuleMintAllowanceInvariantStorage.sol";
 
 /**
- * @title RuleMintAllowance
+ * @title RuleMintAllowanceMock
  * @notice Rule that enforces per-minter mint allowances set by the contract admin.
  *         The admin grants each minter address a maximum amount they may mint in total.
  *         Each mint deducts from the minter's remaining allowance.
  *         Burns and regular transfers are unrestricted by this rule.
  */
-contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, IRule {
+contract RuleMintAllowanceMock is AccessControl, RuleMintAllowanceInvariantStorage, IRule {
     /**
      * @notice ERC-165 interface ID of the CMTAT RuleEngine interface.
      */

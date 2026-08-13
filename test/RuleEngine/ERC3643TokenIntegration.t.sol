@@ -5,8 +5,8 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/Test.sol";
 import {RuleEngine} from "src/deployment/RuleEngine.sol";
 import {ERC3643TokenMock} from "src/mocks/ERC3643TokenMock.sol";
-import {RuleWhitelist} from "src/mocks/rules/validation/RuleWhitelist.sol";
-import {RuleMintAllowance} from "src/mocks/rules/operation/RuleMintAllowance.sol";
+import {RuleWhitelistMock} from "src/mocks/rules/validation/RuleWhitelistMock.sol";
+import {RuleMintAllowanceMock} from "src/mocks/rules/operation/RuleMintAllowanceMock.sol";
 import {IRule} from "src/interfaces/IRule.sol";
 import {ERC3643ComplianceModuleInvariantStorage} from "src/modules/library/ERC3643ComplianceModuleInvariantStorage.sol";
 
@@ -22,7 +22,7 @@ import {ERC3643ComplianceModuleInvariantStorage} from "src/modules/library/ERC36
 contract ERC3643TokenIntegrationTest is Test, ERC3643ComplianceModuleInvariantStorage {
     RuleEngine engine;
     ERC3643TokenMock token;
-    RuleWhitelist whitelist;
+    RuleWhitelistMock whitelist;
 
     address constant ADMIN = address(1);
     address constant ALICE = address(2);
@@ -34,7 +34,7 @@ contract ERC3643TokenIntegrationTest is Test, ERC3643ComplianceModuleInvariantSt
         engine = new RuleEngine(ADMIN, address(0), address(0));
         token = new ERC3643TokenMock();
 
-        whitelist = new RuleWhitelist(ADMIN, address(0));
+        whitelist = new RuleWhitelistMock(ADMIN, address(0));
         address[] memory listed = new address[](3);
         listed[0] = ALICE;
         listed[1] = BOB;
@@ -140,7 +140,7 @@ contract ERC3643TokenIntegrationTest is Test, ERC3643ComplianceModuleInvariantSt
 
     /**
      * @notice The zero address must be whitelisted for an ERC-3643 token to mint.
-     * @dev {RuleWhitelist} treats `address(0)` as an ordinary participant, and the reference
+     * @dev {RuleWhitelistMock} treats `address(0)` as an ordinary participant, and the reference
      * ERC-3643 token pre-checks a mint as `canTransfer(address(0), to, amount)`. An issuer who
      * whitelists only real holders therefore cannot mint at all. This test pins that operational
      * requirement so the behaviour is not changed unnoticed.
@@ -148,7 +148,7 @@ contract ERC3643TokenIntegrationTest is Test, ERC3643ComplianceModuleInvariantSt
     function testMintIsBlockedWhenZeroAddressNotListed() public {
         vm.startPrank(ADMIN);
         RuleEngine engine2 = new RuleEngine(ADMIN, address(0), address(0));
-        RuleWhitelist whitelist2 = new RuleWhitelist(ADMIN, address(0));
+        RuleWhitelistMock whitelist2 = new RuleWhitelistMock(ADMIN, address(0));
         address[] memory listed = new address[](1);
         listed[0] = BOB; // real holder only, zero address deliberately omitted
         whitelist2.addAddressesToTheList(listed);
@@ -178,7 +178,7 @@ contract ERC3643TokenIntegrationTest is Test, ERC3643ComplianceModuleInvariantSt
      */
     function testMintPreCheckFailsOpenForSpenderKeyedRule() public {
         vm.startPrank(ADMIN);
-        RuleMintAllowance mintRule = new RuleMintAllowance(ADMIN);
+        RuleMintAllowanceMock mintRule = new RuleMintAllowanceMock(ADMIN);
         mintRule.setMintAllowance(address(token), 10);
         engine.addRule(IRule(address(mintRule)));
         vm.stopPrank();

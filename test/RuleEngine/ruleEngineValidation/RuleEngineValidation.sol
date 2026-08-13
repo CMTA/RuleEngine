@@ -13,7 +13,7 @@ contract RuleEngineTest is Test, HelperContract {
 
     // Arrange
     function setUp() public {
-        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        ruleWhitelist = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
 
@@ -27,9 +27,9 @@ contract RuleEngineTest is Test, HelperContract {
     function testCanSetRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist2 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         // Act
@@ -48,7 +48,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testCannotSetRuleWithSameRulePresentTwice() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         ruleWhitelistTab[0] = ruleWhitelist1;
         ruleWhitelistTab[1] = ruleWhitelist1;
 
@@ -64,7 +64,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testCanSetWithTheSameRuleAlreadyPresent() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         ruleWhitelistTab = new IRule[](1);
         ruleWhitelistTab[0] = ruleWhitelist1;
 
@@ -132,9 +132,9 @@ contract RuleEngineTest is Test, HelperContract {
     function testCanClearRules() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist2 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
 
@@ -159,9 +159,9 @@ contract RuleEngineTest is Test, HelperContract {
     function testCanClearRulesAndAddAgain() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist2 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
 
@@ -201,7 +201,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testCanAddRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
 
         // Act
         vm.expectEmit(true, false, false, false);
@@ -260,7 +260,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testCanRemoveNonExistantRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
 
         // Act
         vm.expectRevert(RuleEngine_RulesManagementModule_RuleDoNotMatch.selector);
@@ -275,7 +275,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testCanRemoveLatestRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist1);
 
@@ -293,7 +293,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testCanRemoveFirstRule() public {
         // Arrange
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist1);
 
@@ -312,12 +312,12 @@ contract RuleEngineTest is Test, HelperContract {
         // Arrange
         // First rule
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist1);
         // Second rule
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist2 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock.addRule(ruleWhitelist2);
 
@@ -345,8 +345,8 @@ contract RuleEngineTest is Test, HelperContract {
         assertEq(resUint256, 1);
 
         // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist2 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -361,8 +361,8 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testGetRule() public {
         // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist2 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -377,8 +377,8 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testGetRules() public {
         // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist2 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -396,8 +396,8 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testCanGetRuleIndex() public {
         // Arrange
-        RuleWhitelist ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
-        RuleWhitelist ruleWhitelist2 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        RuleWhitelistMock ruleWhitelist2 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         ruleWhitelistTab[0] = IRule(ruleWhitelist1);
         ruleWhitelistTab[1] = IRule(ruleWhitelist2);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);

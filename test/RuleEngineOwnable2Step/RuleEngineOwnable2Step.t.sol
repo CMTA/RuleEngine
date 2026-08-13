@@ -36,7 +36,7 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         ruleEngineMock = new RuleEngineOwnable2Step(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         ruleEngineOwnable2StepExposed = new RuleEngineOwnable2StepExposed(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         ruleConditionalTransferLight =
-            new RuleConditionalTransferLight(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
+            new RuleConditionalTransferLightMock(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
     }
 
     function testDeploymentSetsOwner() public view {

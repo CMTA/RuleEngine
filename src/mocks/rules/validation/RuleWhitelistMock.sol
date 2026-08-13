@@ -12,7 +12,7 @@ import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
 /**
  * @title a whitelist manager
  */
-contract RuleWhitelist is RuleAddressList, RuleWhitelistCommon {
+contract RuleWhitelistMock is RuleAddressList, RuleWhitelistCommon {
     /**
      * @notice ERC-165 interface ID of the CMTAT RuleEngine interface.
      */

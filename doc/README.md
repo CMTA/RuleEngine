@@ -1674,7 +1674,7 @@ The official documentation is available in the Foundry [website](https://getfoun
 
 The scripts in `script/` are example deployment flows.
 
-> Warning: `RuleEngineScript.s.sol` and `CMTATWithRuleEngineScript.s.sol` deploy `RuleWhitelist` from `src/mocks/`. That contract is a reference/mock rule for testing and demos, not a production rule contract.
+> Warning: `RuleEngineScript.s.sol` and `CMTATWithRuleEngineScript.s.sol` deploy `RuleWhitelistMock` from `src/mocks/`. That contract is a reference/mock rule for testing and demos, not a production rule contract.
 
 For production deployments, source rule contracts from the dedicated [CMTA/Rules](https://github.com/CMTA/Rules) repository and adapt the script parameters accordingly.
 
@@ -1704,7 +1704,7 @@ forge script script/CMTATWithRuleEngineScript.s.sol:CMTATWithRuleEngineScript --
 forge script script/CMTATWithRuleEngineScript.s.sol:CMTATWithRuleEngineScript --rpc-url=127.0.0.1:8545  --broadcast --verify -vvv
 ```
 
-Only RuleEngine with the mock/reference `RuleWhitelist` contract
+Only RuleEngine with the mock/reference `RuleWhitelistMock` contract
 
 ```bash
 forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=$RPC_URL  --broadcast --verify -vvv

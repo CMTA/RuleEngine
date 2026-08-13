@@ -12,7 +12,7 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  * @dev Requires operator approval for each ERC20 transfer.
  *      Same transfer (from, to, value) can be approved multiple times.
  */
-contract RuleOperationRevert is AccessControl, IRule, RuleCommonInvariantStorage {
+contract RuleOperationRevertMock is AccessControl, IRule, RuleCommonInvariantStorage {
     error RuleConditionalTransferLight_InvalidTransfer();
     // It is very important that each rule uses an unique code
     /**

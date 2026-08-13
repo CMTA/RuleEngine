@@ -147,7 +147,11 @@ Recorded as finding `H-1` in
 
 ### 4.3 Address-list rules treat `address(0)` as a participant
 
-`RuleWhitelist` checks both endpoints without exempting the zero-address sentinel. Because CMTAT routes mint
+**This concerns `RuleWhitelistMock`, a reference rule in `src/mocks/`, not a production rule.** Production
+rules live in [CMTA/Rules](https://github.com/CMTA/Rules) and may handle the sentinel differently — check the
+rule you actually deploy.
+
+`RuleWhitelistMock` checks both endpoints without exempting the zero-address sentinel. Because CMTAT routes mint
 through the 4-argument overload with `from == address(0)`, and the whitelist's `from`/`to` checks still apply,
 **the zero address must be whitelisted for minting to be permitted**. Whitelisting only real holders silently
 blocks issuance. Recorded as finding `F-2`.

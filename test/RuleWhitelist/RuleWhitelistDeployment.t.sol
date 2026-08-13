@@ -7,7 +7,7 @@ import "../HelperContract.sol";
 import {MinimalForwarderMock} from "CMTAT/mocks/MinimalForwarderMock.sol";
 
 /**
- * @title General functions of the RuleWhitelist
+ * @title General functions of the RuleWhitelistMock
  */
 contract RuleWhitelistDeploymentTest is Test, HelperContract {
     // Arrange
@@ -19,7 +19,7 @@ contract RuleWhitelistDeploymentTest is Test, HelperContract {
         MinimalForwarderMock forwarder = new MinimalForwarderMock();
         forwarder.initialize(ERC2771ForwarderDomain);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, address(forwarder));
+        ruleWhitelist = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, address(forwarder));
 
         // assert
         resBool = ruleWhitelist.hasRole(ADDRESS_LIST_ADD_ROLE, WHITELIST_OPERATOR_ADDRESS);
@@ -37,6 +37,6 @@ contract RuleWhitelistDeploymentTest is Test, HelperContract {
         forwarder.initialize(ERC2771ForwarderDomain);
         vm.expectRevert(RuleAddressList_AdminWithAddressZeroNotAllowed.selector);
         vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        ruleWhitelist = new RuleWhitelist(address(0), address(forwarder));
+        ruleWhitelist = new RuleWhitelistMock(address(0), address(forwarder));
     }
 }

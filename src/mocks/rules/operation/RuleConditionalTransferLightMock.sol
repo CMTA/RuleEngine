@@ -15,7 +15,7 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  * @dev Requires operator approval for each ERC20 transfer.
  *      Same transfer (from, to, value) can be approved multiple times.
  */
-contract RuleConditionalTransferLight is AccessControl, RuleConditionalTransferLightInvariantStorage, IRule {
+contract RuleConditionalTransferLightMock is AccessControl, RuleConditionalTransferLightInvariantStorage, IRule {
     /**
      * @notice ERC-165 interface ID of the CMTAT RuleEngine interface.
      */

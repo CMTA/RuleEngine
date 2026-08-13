@@ -44,8 +44,8 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC364
      * @dev Operator warning: "multi-tenant" means one RuleEngine is shared by
      * multiple token contracts. In that setup, bind only tokens that are equally
      * trusted and governed together.
-     * @custom:security-note Operation rules (stateful rules such as `RuleConditionalTransferLight`
-     * or `RuleMintAllowance`) maintain per-address accounting that is shared across all bound tokens.
+     * @custom:security-note Operation rules (stateful rules such as `RuleConditionalTransferLightMock`
+     * or `RuleMintAllowanceMock`) maintain per-address accounting that is shared across all bound tokens.
      * Binding tokens from different issuers to the same engine will silently cross-contaminate
      * their accounting. Only bind tokens that are equally trusted and governed together.
      */

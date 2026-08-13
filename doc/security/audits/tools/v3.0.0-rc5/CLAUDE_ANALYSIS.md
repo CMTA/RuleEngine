@@ -38,7 +38,7 @@ regression tests).
 | E-2 | `_supportsRuleEngineBaseInterface` not `virtual` | ✅ fixed |
 | E-3 | 10 mock internals not `virtual` | ✅ fixed |
 | F-1 | ERC-165 flattened interface-ID computation | ⬜ no finding — verified correct |
-| F-2 | `RuleWhitelist` treats `address(0)` as a participant, blocking ERC-3643 mint | ⬜ left as is — pinned by test, operational note |
+| F-2 | `RuleWhitelistMock` treats `address(0)` as a participant, blocking ERC-3643 mint | ⬜ left as is — pinned by test, operational note |
 | G-1 | `canTransfer` docs omit the fail-open case | ✅ fixed — warning added |
 | H-1 | View approves a mint that enforcement rejects | ✅ documented — behaviour left, see below |
 
@@ -323,11 +323,17 @@ XOR over that flattened set, and `IRuleInterfaceId.t.sol` asserts the constant m
 
 **Verdict: no change.** Recorded as verified rather than omitted, so the next reviewer does not re-derive it.
 
-### F-2. `RuleWhitelist` treats `address(0)` as a participant, so an ERC-3643 token cannot mint
+### F-2. `RuleWhitelistMock` treats `address(0)` as a participant, so an ERC-3643 token cannot mint
+
+**Scope: this is a mock.** `RuleWhitelistMock` lives in `src/mocks/rules/validation/` and is a reference
+implementation for tests, scripts and examples — not a production rule. The production `RuleWhitelist` is
+maintained separately in [CMTA/Rules](https://github.com/CMTA/Rules) and is not covered by this review. The
+finding is recorded because the mock is what this repository's own scripts and integration tests deploy, and
+because reference code is what integrators copy.
 
 Found while writing the ERC-3643 integration tests — this path had no prior test coverage.
 
-`RuleWhitelist.detectTransferRestriction` checks both endpoints without exempting the zero-address
+`RuleWhitelistMock.detectTransferRestriction` checks both endpoints without exempting the zero-address
 sentinel:
 
 ```solidity
@@ -351,7 +357,7 @@ path were not given the same treatment.
 express "minting is permitted", and changing the rule to auto-exempt the sentinel would silently widen every
 existing deployment's whitelist semantics — a larger behavioural change than this review should make
 unilaterally. `testMintIsBlockedWhenZeroAddressNotListed` now documents and pins the requirement, and the
-integration `setUp` shows the working configuration. Note that `RuleWhitelist` lives in `src/mocks/` and is a
+integration `setUp` shows the working configuration. Note that `RuleWhitelistMock` lives in `src/mocks/` and is a
 reference rule, not a production one.
 
 ---
@@ -370,7 +376,7 @@ be evaluated at all** on this signature — which is the case demonstrated in H-
 `true` for a mint that reverts.
 
 **Verdict: implement.** A warning block was added to that section, and the same caveat was added to
-`RuleMintAllowance.detectTransferRestriction`'s NatSpec using the project's plain-word `WARNING:` marker
+`RuleMintAllowanceMock.detectTransferRestriction`'s NatSpec using the project's plain-word `WARNING:` marker
 (no emoji, per the project's Solidity comment convention).
 
 ---
@@ -381,7 +387,7 @@ be evaluated at all** on this signature — which is the case demonstrated in H-
 
 This is the highest-value finding and the reason to read this report.
 
-`RuleMintAllowance` keys its allowance by **spender** (the minter). The ERC-1404 3-argument
+`RuleMintAllowanceMock` keys its allowance by **spender** (the minter). The ERC-1404 3-argument
 `detectTransferRestriction(from, to, value)` carries no spender, so the rule cannot evaluate a mint on that
 path and answers "no restriction":
 
@@ -396,7 +402,7 @@ first non-zero code; a rule answering `0` contributes nothing. `canTransfer` is 
 So the hardcoded "everything is fine" propagates all the way to the two view functions an integrator actually
 calls on the **engine**, not just on the rule.
 
-Verified with a harness (since deleted), against a `RuleEngine` holding one `RuleMintAllowance` with a minter
+Verified with a harness (since deleted), against a `RuleEngine` holding one `RuleMintAllowanceMock` with a minter
 allowance of 100, querying a mint of 500:
 
 | Call | Result |

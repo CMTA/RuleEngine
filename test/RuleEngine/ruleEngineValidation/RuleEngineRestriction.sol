@@ -9,11 +9,11 @@ import "../../HelperContract.sol";
  * @title tests concerning the restrictions and  for the transfers
  */
 contract RuleEngineRestrictionTest is Test, HelperContract {
-    RuleWhitelist ruleWhitelist1;
+    RuleWhitelistMock ruleWhitelist1;
 
     // Arrange
     function setUp() public {
-        ruleWhitelist = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        ruleWhitelist = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
         ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
@@ -23,7 +23,7 @@ contract RuleEngineRestrictionTest is Test, HelperContract {
         assertEq(resUint256, 1);
 
         // Arrange
-        ruleWhitelist1 = new RuleWhitelist(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
+        ruleWhitelist1 = new RuleWhitelistMock(WHITELIST_OPERATOR_ADDRESS, ZERO_ADDRESS);
         IRule[] memory ruleWhitelistTab = new IRule[](1);
         ruleWhitelistTab[0] = ruleWhitelist1;
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
