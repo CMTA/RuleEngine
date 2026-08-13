@@ -47,7 +47,15 @@ forge lint
 
 
 
+### v3.0.0-rc5
+
+### Dependencies
+
+- Update CMTAT submodule to [v3.3.0-rc3](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3).
+
 ### v3.0.0-rc4 - 2026-05-22
+
+Commit: `66fcf2aafebd1f9d9de8a81dec92b88da071c9b3`
 
 ### Added
 
