@@ -84,7 +84,7 @@ forge lint
 - `RuleEngineScript.s.sol`: `setRuleEngine` is now called through the typed interface instead of a low-level `.call` guarded by a bare `require(success)`. The previous form returned success when `CMTAT_ADDRESS` held no code, silently producing an unconfigured deployment, and discarded the revert reason on failure.
 - `RuleEngineScript.s.sol`: the demo whitelist is now seeded with the deployer and `address(0)`, so the resulting deployment can transfer, mint and burn as-is.
 - `test/script/RuleEngineScript.t.sol`: asserts the resulting deployment works (engine set, token bound, rule configured, a real mint) instead of only that `run()` does not revert.
-- `doc/script/script_surya_*.sh`: fixed the shebang (`#/bin/bash` -> `#!/bin/bash`), the undefined `$dir` loop variable, `mkdir` without `-p` in the report script, and the output-directory guard in the inheritance script; added `set -euo pipefail` and null-delimited `find` iteration to all three.
+- `doc/script/script_surya_*.sh`: fixed the shebang (`#/bin/bash` -> `#!/bin/bash`), the undefined `$dir` loop variable, `mkdir` without `-p` in the report script, and the output-directory guard in the inheritance script; added `set -euo pipefail` and null-delimited `find` iteration to all three. The loop iterates `find .` rather than an absolute path on purpose: `surya mdreport` embeds the path it is given, so an absolute one would write machine-specific paths into the committed reports under `doc/schema/surya/surya_report`.
 - `package.json`: the `surya:*` and `uml:*` scripts now write beneath `docOut/` (gitignored) instead of the repository root.
 - `doc/script/convert_links_for_pdf.sh`: the default input is now `doc/README.md` (the full documentation) rather than the short root README.
 
