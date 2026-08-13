@@ -52,6 +52,7 @@ forge lint
 ### Dependencies
 
 - Update CMTAT submodule to [v3.3.0-rc3](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3).
+- Update OpenZeppelin Contracts and OpenZeppelin Contracts Upgradeable submodules to [v5.7.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.7.0).
 
 ### v3.0.0-rc4 - 2026-05-22
 

@@ -46,7 +46,13 @@ contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
     }
 
     /* ============ ERC-165 ============ */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(RuleEngineOwnableShared) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(RuleEngineOwnableShared)
+        returns (bool)
+    {
         return interfaceId == Ownable2StepInterfaceId.IOWNABLE2STEP_INTERFACE_ID
             || RuleEngineOwnableShared.supportsInterface(interfaceId);
     }

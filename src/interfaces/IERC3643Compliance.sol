@@ -47,7 +47,6 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      */
     function unbindToken(address token) external;
 
-
     /**
      * @notice Checks whether a token is currently bound to this compliance contract.
      * @dev

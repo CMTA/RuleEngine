@@ -6,7 +6,9 @@ import {Vm} from "forge-std/Vm.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
 import {IERC3643Compliance} from "../../src/interfaces/IERC3643Compliance.sol";
-import {ERC3643ComplianceModuleInvariantStorage} from "../../src/modules/library/ERC3643ComplianceModuleInvariantStorage.sol";
+import {
+    ERC3643ComplianceModuleInvariantStorage
+} from "../../src/modules/library/ERC3643ComplianceModuleInvariantStorage.sol";
 
 // Minimal mock ERC-3643 token to simulate calls to RuleEngine
 contract ERC3643MockToken {
@@ -166,7 +168,9 @@ contract RuleEngineTest is Test, HelperContract {
     }
 
     function testCannotBoundIfInvalidAddress() public {
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
+        );
         vm.prank(admin);
         ruleEngine.bindToken(address(ZERO_ADDRESS));
     }
@@ -214,9 +218,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testTokenCannotBindItselfWithoutApproval() public {
         vm.expectRevert(
             abi.encodeWithSelector(
-                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR,
-                address(token1),
-                ruleEngine.COMPLIANCE_MANAGER_ROLE()
+                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR, address(token1), ruleEngine.COMPLIANCE_MANAGER_ROLE()
             )
         );
         vm.prank(address(token1));
@@ -229,9 +231,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR,
-                address(token1),
-                ruleEngine.COMPLIANCE_MANAGER_ROLE()
+                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR, address(token1), ruleEngine.COMPLIANCE_MANAGER_ROLE()
             )
         );
         vm.prank(address(token1));
@@ -241,9 +241,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testTokenCannotBindAnotherToken() public {
         vm.expectRevert(
             abi.encodeWithSelector(
-                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR,
-                address(token1),
-                ruleEngine.COMPLIANCE_MANAGER_ROLE()
+                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR, address(token1), ruleEngine.COMPLIANCE_MANAGER_ROLE()
             )
         );
         vm.prank(address(token1));
@@ -256,9 +254,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR,
-                address(token1),
-                ruleEngine.COMPLIANCE_MANAGER_ROLE()
+                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR, address(token1), ruleEngine.COMPLIANCE_MANAGER_ROLE()
             )
         );
         vm.prank(address(token1));
@@ -268,9 +264,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testOnlyComplianceManagerCanSetTokenSelfBindingApproval() public {
         vm.expectRevert(
             abi.encodeWithSelector(
-                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR,
-                user1,
-                ruleEngine.COMPLIANCE_MANAGER_ROLE()
+                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR, user1, ruleEngine.COMPLIANCE_MANAGER_ROLE()
             )
         );
         vm.prank(user1);
@@ -278,7 +272,9 @@ contract RuleEngineTest is Test, HelperContract {
     }
 
     function testCannotSetTokenSelfBindingApprovalForZeroAddress() public {
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
+        );
         vm.prank(operator);
         ruleEngine.setTokenSelfBindingApproval(address(0), true);
     }
@@ -315,9 +311,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR,
-                user1,
-                ruleEngine.COMPLIANCE_MANAGER_ROLE()
+                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR, user1, ruleEngine.COMPLIANCE_MANAGER_ROLE()
             )
         );
         vm.prank(user1);
@@ -329,7 +323,9 @@ contract RuleEngineTest is Test, HelperContract {
         tokens[0] = address(token1);
         tokens[1] = address(0);
 
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
+        );
         vm.prank(operator);
         ruleEngine.setTokenSelfBindingApprovalBatch(tokens, true);
     }
@@ -366,9 +362,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR,
-                user1,
-                ruleEngine.COMPLIANCE_MANAGER_ROLE()
+                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR, user1, ruleEngine.COMPLIANCE_MANAGER_ROLE()
             )
         );
         vm.prank(user1);
@@ -384,9 +378,7 @@ contract RuleEngineTest is Test, HelperContract {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR,
-                user1,
-                ruleEngine.COMPLIANCE_MANAGER_ROLE()
+                ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT_SELECTOR, user1, ruleEngine.COMPLIANCE_MANAGER_ROLE()
             )
         );
         vm.prank(user1);
@@ -398,7 +390,9 @@ contract RuleEngineTest is Test, HelperContract {
         tokens[0] = address(token1);
         tokens[1] = address(0);
 
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
+        );
         vm.prank(operator);
         ruleEngine.bindTokens(tokens);
     }
@@ -430,17 +424,23 @@ contract RuleEngineTest is Test, HelperContract {
     }
 
     function testCannotCreatedIfNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector
+        );
         ruleEngine.created(user1, 100);
     }
 
     function testCannotDestroyedIfNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector
+        );
         ruleEngine.destroyed(user2, 50);
     }
 
     function testCannotTransferredIfNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector
+        );
         ruleEngine.transferred(user1, user2, 200);
     }
 

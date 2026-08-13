@@ -225,7 +225,9 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
     }
 
     function testCannotSetTokenSelfBindingApprovalForZeroAddress() public {
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
+        );
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setTokenSelfBindingApproval(address(0), true);
     }
@@ -270,7 +272,9 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         tokens[0] = TOKEN_1;
         tokens[1] = address(0);
 
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
+        );
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setTokenSelfBindingApprovalBatch(tokens, true);
     }
@@ -327,7 +331,9 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         tokens[0] = TOKEN_1;
         tokens[1] = address(0);
 
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector);
+        vm.expectRevert(
+            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
+        );
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindTokens(tokens);
     }

@@ -9,11 +9,7 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
 import {ERC3643ComplianceModuleInvariantStorage} from "./library/ERC3643ComplianceModuleInvariantStorage.sol";
 
-abstract contract ERC3643ComplianceModule is
-    Context,
-    IERC3643Compliance,
-    ERC3643ComplianceModuleInvariantStorage
-{
+abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC3643ComplianceModuleInvariantStorage {
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
     /* ==== State Variables === */
@@ -72,7 +68,7 @@ abstract contract ERC3643ComplianceModule is
         if (_boundTokens.length() > 0) {
             // Note that there are no guarantees on the ordering of values inside the array,
             // and it may change when more values are added or removed.
-            return _boundTokens.at(0);
+            return _boundTokens.pos(0);
         } else {
             return address(0);
         }

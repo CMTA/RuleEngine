@@ -40,5 +40,4 @@ abstract contract RulesManagementModuleInvariantStorage {
      * @param maxRules The new rule cap.
      */
     event SetMaxRules(uint256 maxRules);
-
 }

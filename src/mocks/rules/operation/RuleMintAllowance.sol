@@ -61,7 +61,15 @@ contract RuleMintAllowance is AccessControl, RuleMintAllowanceInvariantStorage, 
      * @notice Called for every token operation (transfer, mint, burn) with spender context.
      *         Deducts from the minter's allowance for mints; passes through for burns and transfers.
      */
-    function transferred(address spender, address from, address /* to */, uint256 value) public {
+    function transferred(
+        address spender,
+        address from,
+        address,
+        /* to */
+        uint256 value
+    )
+        public
+    {
         if (from == address(0)) {
             uint256 allowance = mintAllowance[spender];
             if (allowance < value) {

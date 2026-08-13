@@ -137,7 +137,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
         if (ruleId < _rules.length()) {
             // Note that there are no guarantees on the ordering of values inside the array,
             // and it may change when more values are added or removed.
-            return _rules.at(ruleId);
+            return _rules.pos(ruleId);
         } else {
             return address(0);
         }
@@ -203,7 +203,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     function _transferred(address from, address to, uint256 value) internal virtual {
         uint256 rulesLength = _rules.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            IRule(_rules.at(i)).transferred(from, to, value);
+            IRule(_rules.pos(i)).transferred(from, to, value);
         }
     }
 
@@ -222,7 +222,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     function _transferred(address spender, address from, address to, uint256 value) internal virtual {
         uint256 rulesLength = _rules.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            IRule(_rules.at(i)).transferred(spender, from, to, value);
+            IRule(_rules.pos(i)).transferred(spender, from, to, value);
         }
     }
 
