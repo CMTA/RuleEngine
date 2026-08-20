@@ -66,6 +66,8 @@ forge lint
 
 - Add [doc/technical/TokenBinding-module.md](./doc/technical/TokenBinding-module.md): the layering, the two hooks a deployment implements, how to reuse the module in another project, and the operational warnings of the registry.
 - Update `README.md`, `doc/README.md`, `doc/technical/RuleEngine-with-ERC3643.md`, `CLAUDE.md` and `AGENTS.md` for the new layering.
+- Replace the access-control schema of `doc/README.md` (a drawio export, `doc/security/accessControl/access-control-RuleEngine.png`) with a PlantUML diagram, [doc/schema/plantuml/ruleengine-access-control.puml](./doc/schema/plantuml/ruleengine-access-control.puml), following the convention of the other diagrams: a text source is versioned next to the rendered PNG. The new diagram is up to date with the current code — it shows `setMaxRules` under `DEFAULT_ADMIN_ROLE`, the extended binding functions, the token self-binding path and the `onlyBoundToken` data plane, and it names `TokenBindingModule` / `TokenBindingExtendedModule` rather than the compliance modules.
+- `doc/README.md`: the "Role by modules" table now lists `bindToken` / `unbindToken` under `TokenBindingModule` and the batch and self-binding functions under `TokenBindingExtendedModule`, adds the missing `setMaxRules` row, and points `COMPLIANCE_MANAGER_ROLE` to `ERC3643ComplianceRolesStorage`, where it is actually declared.
 
 ### v3.0.0-rc5
 

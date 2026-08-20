@@ -420,7 +420,7 @@ It is set in the constructor when the contract is deployed.
 | ----------------------- | -------------------------------- | ------------------------------------------------------------ |
 | DEFAULT_ADMIN_ROLE      | OpenZeppelin<br />AccessControl  | 0x0000000000000000000000000000000000000000000000000000000000000000 |
 | **Modules**             |                                  |                                                              |
-| COMPLIANCE_MANAGER_ROLE | ERC3643ComplianceModule          | 0xe5c50d0927e06141e032cb9a67e1d7092dc85c0b0825191f7e1cede600028568 |
+| COMPLIANCE_MANAGER_ROLE | ERC3643ComplianceRolesStorage    | 0xe5c50d0927e06141e032cb9a67e1d7092dc85c0b0825191f7e1cede600028568 |
 | RULES_MANAGEMENT_ROLE   | RulesManagementModuleInvariantStorage | 0xea5f4eb72290e50c32abd6c23e45de3d8300b3286e1cbc2e293114b92e034e5e |
 
 
@@ -428,7 +428,10 @@ It is set in the constructor when the contract is deployed.
 #### Schema (RuleEngine)
 
 Here is a schema of the Access Control for `RuleEngine`.
-![alt text](./security/accessControl/access-control-RuleEngine.png)
+
+![RuleEngine access control](./schema/plantuml/ruleengine-access-control.png)
+
+_Diagram source: [doc/schema/plantuml/ruleengine-access-control.puml](./schema/plantuml/ruleengine-access-control.puml)._
 
 #### Role by modules (RuleEngine)
 
@@ -445,10 +448,11 @@ For function signatures, struct arguments are represented with their correspondi
 |                         | `clearRules()`                                               | public                              | - |-|RULES_MANAGEMENT_ROLE|
 |                         | `addRule(address rule_)`                                     | public | `IRule rule_` |-|RULES_MANAGEMENT_ROLE|
 |                         | `removeRule(address rule_)`                                  | public | `IRule rule_` |-|RULES_MANAGEMENT_ROLE|
-| ERC3643ComplianceModule |  |                              |                                      |                                      |               |
+|                         | `setMaxRules(uint256 maxRules_)`                             | public | `uint256 maxRules_` |-|DEFAULT_ADMIN_ROLE|
+| TokenBindingModule |  |                              |                                      |                                      |               |
 |  | `bindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE or approved token self-call |
 |  | `unbindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE or approved token self-call |
-| ERC3643ComplianceExtendedModule |  |                              |                                      |                                      |               |
+| TokenBindingExtendedModule |  |                              |                                      |                                      |               |
 |  | `bindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |
 |  | `unbindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |
 |  | `setTokenSelfBindingApproval(address token,bool approved)` | public | `address token,bool approved` | - | COMPLIANCE_MANAGER_ROLE |

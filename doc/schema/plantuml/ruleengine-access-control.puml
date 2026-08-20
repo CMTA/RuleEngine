@@ -1,0 +1,103 @@
+@startuml
+title RuleEngine - access control (RBAC deployment)
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+left to right direction
+skinparam ArrowFontSize 11
+skinparam NoteFontSize 11
+
+skinparam usecase {
+    BackgroundColor #F5F7FA
+    BorderColor #4A6785
+}
+skinparam rectangle {
+    BackgroundColor<<fn>> #FFFFFF
+    BorderColor<<fn>> #4A6785
+    BackgroundColor<<caller>> #FBF6E9
+    BorderColor<<caller>> #B08B2E
+}
+
+usecase "DEFAULT_ADMIN_ROLE" as ADMIN
+usecase "RULES_MANAGEMENT_ROLE" as RULES
+usecase "COMPLIANCE_MANAGER_ROLE" as COMPLIANCE
+
+rectangle "Rule management\n(RulesManagementModule)" {
+    rectangle "setRules" <<fn>> as setRules
+    rectangle "clearRules" <<fn>> as clearRules
+    rectangle "addRule" <<fn>> as addRule
+    rectangle "removeRule" <<fn>> as removeRule
+}
+
+rectangle "Rule cap\n(RulesManagementModule)" {
+    rectangle "setMaxRules" <<fn>> as setMaxRules
+}
+
+rectangle "Token binding\n(TokenBindingModule)" {
+    rectangle "bindToken" <<fn>> as bindToken
+    rectangle "unbindToken" <<fn>> as unbindToken
+}
+
+rectangle "Token binding, extended\n(TokenBindingExtendedModule)" {
+    rectangle "bindTokens" <<fn>> as bindTokens
+    rectangle "unbindTokens" <<fn>> as unbindTokens
+    rectangle "setTokenSelfBindingApproval" <<fn>> as setApproval
+    rectangle "setTokenSelfBindingApprovalBatch" <<fn>> as setApprovalBatch
+}
+
+rectangle "Compliance callbacks\n(RuleEngineBase)" {
+    rectangle "transferred" <<fn>> as transferred
+    rectangle "created" <<fn>> as created
+    rectangle "destroyed" <<fn>> as destroyed
+}
+
+rectangle "Bound token" <<caller>> as BoundToken
+rectangle "Token approved\nfor self-binding" <<caller>> as SelfBindToken
+
+ADMIN --> RULES : manage / is
+ADMIN --> COMPLIANCE : manage / is
+
+RULES --> setRules
+RULES --> clearRules
+RULES --> addRule
+RULES --> removeRule
+
+ADMIN --> setMaxRules
+
+COMPLIANCE --> bindToken
+COMPLIANCE --> unbindToken
+COMPLIANCE --> bindTokens
+COMPLIANCE --> unbindTokens
+COMPLIANCE --> setApproval
+COMPLIANCE --> setApprovalBatch
+
+SelfBindToken ..> bindToken : self-bind
+SelfBindToken ..> unbindToken : self-unbind
+
+BoundToken ..> transferred : onlyBoundToken
+BoundToken ..> created : onlyBoundToken
+BoundToken ..> destroyed : onlyBoundToken
+
+note bottom of ADMIN
+    The default admin holds every role: RuleEngine
+    overrides hasRole() to answer true for any role.
+end note
+
+note bottom of SelfBindToken
+    Self-binding is opt-in per token, granted by the
+    compliance manager with setTokenSelfBindingApproval.
+    It exists for the ERC-3643 setCompliance handshake.
+end note
+
+note bottom of BoundToken
+    Data plane, not a role: the compliance callbacks are
+    guarded by the caller being a bound token.
+end note
+
+legend bottom
+    RuleEngineOwnable / RuleEngineOwnable2Step: the same functions are
+    guarded by onlyOwner instead of roles, so the single owner replaces
+    the three role nodes above.
+endlegend
+
+@enduml
