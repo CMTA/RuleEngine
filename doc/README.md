@@ -324,20 +324,20 @@ external;
 
 ### ERC-3643
 
-The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is defined in [IERC3643Compliance.sol](../src/interfaces/IERC3643Compliance.sol).
-Non-standard helper functions are defined in [IERC3643ComplianceExtended.sol](../src/interfaces/IERC3643ComplianceExtended.sol).
+The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is defined in [IERC3643Compliance.sol](https://github.com/CMTA/RuleEngine/blob/main/src/interfaces/IERC3643Compliance.sol).
+Non-standard helper functions are defined in [IERC3643ComplianceExtended.sol](https://github.com/CMTA/RuleEngine/blob/main/src/interfaces/IERC3643ComplianceExtended.sol).
 
 Token binding itself is not specific to ERC-3643, so it is declared in the standard-agnostic
-[ITokenBinding.sol](../src/interfaces/ITokenBinding.sol) (`bindToken`, `unbindToken`, `isTokenBound`,
-`TokenBound` / `TokenUnbound`) and [ITokenBindingExtended.sol](../src/interfaces/ITokenBindingExtended.sol)
+[ITokenBinding.sol](https://github.com/CMTA/RuleEngine/blob/main/src/interfaces/ITokenBinding.sol) (`bindToken`, `unbindToken`, `isTokenBound`,
+`TokenBound` / `TokenUnbound`) and [ITokenBindingExtended.sol](https://github.com/CMTA/RuleEngine/blob/main/src/interfaces/ITokenBindingExtended.sol)
 (batch binding, token self-binding, `getTokenBounds`), which the two ERC-3643 interfaces above extend.
 
 The RuleEngine modules are split as follows:
-- Token binding registry, reusable outside any compliance context: [TokenBindingModule.sol](../src/modules/TokenBindingModule.sol) and [TokenBindingExtendedModule.sol](../src/modules/TokenBindingExtendedModule.sol)
-- Base ERC-3643 surface: [ERC3643ComplianceModule.sol](../src/modules/ERC3643ComplianceModule.sol)
-- Non-standard extensions: [ERC3643ComplianceExtendedModule.sol](../src/modules/ERC3643ComplianceExtendedModule.sol)
+- Token binding registry, reusable outside any compliance context: [TokenBindingModule.sol](https://github.com/CMTA/RuleEngine/blob/main/src/modules/TokenBindingModule.sol) and [TokenBindingExtendedModule.sol](https://github.com/CMTA/RuleEngine/blob/main/src/modules/TokenBindingExtendedModule.sol)
+- Base ERC-3643 surface: [ERC3643ComplianceModule.sol](https://github.com/CMTA/RuleEngine/blob/main/src/modules/ERC3643ComplianceModule.sol)
+- Non-standard extensions: [ERC3643ComplianceExtendedModule.sol](https://github.com/CMTA/RuleEngine/blob/main/src/modules/ERC3643ComplianceExtendedModule.sol)
 
-![ERC3643ComplianceModuleUML](./schema/vscode-uml/ERC3643ComplianceModuleUML.png)
+![ERC3643ComplianceModuleUML](./schema/sol2uml/ERC3643ComplianceModuleUML.png)
 
 ## Technical
 
@@ -465,14 +465,17 @@ For function signatures, struct arguments are represented with their correspondi
 
 ### UML
 
-Here is the UML of the main contracts:
+Here is the UML of the main contracts. The diagrams are generated with
+[sol2uml](https://github.com/naddison36/sol2uml), one per contract or interface, by
+[doc/script/script_sol2uml.sh](./script/script_sol2uml.sh); rerun that script after changing a
+contract's surface.
 
 #### RuleEngine
-![RuleEngineUML](./schema/vscode-uml/RuleEngineUML.png)
+![RuleEngineUML](./schema/sol2uml/RuleEngineUML.png)
 
 #### RuleEngineOwnable
 
-![RuleEngineOwnableUML](./schema/vscode-uml/RuleEngineOwnableUML.png)
+![RuleEngineOwnableUML](./schema/sol2uml/RuleEngineOwnableUML.png)
 
 `RuleEngineOwnable` shares the same base functionality as `RuleEngine` but uses ERC-173 ownership instead of RBAC.
 
@@ -496,7 +499,7 @@ RuleEngineOwnable
 
 #### RuleEngineOwnable2Step
 
-![RuleEngineOwnable2StepUML](./schema/vscode-uml/RuleEngineOwnable2StepUML.png)
+![RuleEngineOwnable2StepUML](./schema/sol2uml/RuleEngineOwnable2StepUML.png)
 
 `RuleEngineOwnable2Step` shares the same base functionality as `RuleEngineOwnable` but uses OpenZeppelin's `Ownable2Step` for safer ownership handover.
 
@@ -658,7 +661,7 @@ constructor(
 
 ### RuleEngineBase
 
-![RuleEngineBaseUML](./schema/vscode-uml/RuleEngineBaseUML.png)
+![RuleEngineBaseUML](./schema/sol2uml/RuleEngineBaseUML.png)
 
 #### Contracts Description Table
 
@@ -689,7 +692,7 @@ constructor(
 
 #### IRuleEngine
 
-![IRuleEngineUML](./schema/vscode-uml/IRuleEngineUML.png)
+![IRuleEngineUML](./schema/sol2uml/IRuleEngineUML.png)
 
 ##### transferred(address spender, address from, address to, uint256 value)
 
@@ -717,7 +720,7 @@ Must revert if the transfer is invalid.
 
 #### IERC7551Compliance
 
-![IERC7551ComplianceUML](./schema/vscode-uml/IERC7551ComplianceUML.png)
+![IERC7551ComplianceUML](./schema/sol2uml/IERC7551ComplianceUML.png)
 
 > Note: ERC-7551 is draft (not final). The `IERC7551Compliance` interface used here is a subset interface exposing the compliance check `canTransferFrom`.
 
@@ -746,7 +749,7 @@ Does not check balances or access rights (Access Control).
 
 #### IERC3643ComplianceRead
 
-![IERC3643ComplianceReadUML](./schema/vscode-uml/IERC3643ComplianceReadUML.png)
+![IERC3643ComplianceReadUML](./schema/sol2uml/IERC3643ComplianceReadUML.png)
 
 ------
 
@@ -781,7 +784,7 @@ Does not check balances or access rights (Access Control).
 
 #### IERC3643IComplianceContract
 
-![IERC3643IComplianceContractUML](./schema/vscode-uml/IERC3643IComplianceContractUML.png)
+![IERC3643IComplianceContractUML](./schema/sol2uml/IERC3643IComplianceContractUML.png)
 
 ------
 
@@ -860,7 +863,7 @@ Called by the token contract when tokens are redeemed or burned.
 
 #### IERC1404
 
-![IERC1404UML](./schema/vscode-uml/IERC1404UML.png)
+![IERC1404UML](./schema/sol2uml/IERC1404UML.png)
 
 ------
 
@@ -920,7 +923,7 @@ Implements {ERC-1404} standard message accessor.
 
 #### IERC1404Extend
 
-![IERC1404ExtendUML](./schema/vscode-uml/IERC1404ExtendUML.png)
+![IERC1404ExtendUML](./schema/sol2uml/IERC1404ExtendUML.png)
 
 ##### enum REJECTED_CODE_BASE
 
@@ -973,7 +976,7 @@ This is an extension of {ERC-1404} with an additional `spender` parameter to enf
 
 ### VersionModule
 
-![VersionModuleUML](./schema/vscode-uml/VersionModuleUML.png)
+![VersionModuleUML](./schema/sol2uml/VersionModuleUML.png)
 
 #### Contracts Description Table
 
@@ -1012,6 +1015,8 @@ Useful for identifying which version of the smart contract is deployed and in us
 
 ### TokenBindingModule
 
+![TokenBindingModuleUML](./schema/sol2uml/TokenBindingModuleUML.png)
+
 `TokenBindingModule` holds the token binding registry itself: the set of tokens allowed to call the
 bound-token entry points, `bindToken` / `unbindToken` / `isTokenBound`, and the `onlyBoundToken`
 guard. It is standard-agnostic — it contains no ERC-3643, ERC-1404 or rule logic and depends only on
@@ -1019,6 +1024,8 @@ OpenZeppelin's `Context` and `EnumerableSet` — so it can be reused as-is by an
 bind tokens. A deployment only has to provide the access control by implementing
 `_onlyTokenBindingManager()`; `src/mocks/TokenBindingStandaloneMock.sol` is a minimal example of such
 a reuse, outside any compliance context.
+
+![TokenBindingExtendedModuleUML](./schema/sol2uml/TokenBindingExtendedModuleUML.png)
 
 `TokenBindingExtendedModule` adds the conveniences of the registry that are not part of any token
 standard: batch bind/unbind, token self-binding approval (used by ERC-3643 `setCompliance`), and
@@ -1051,7 +1058,7 @@ under `ERC3643ComplianceExtendedModule`, since that is the form in which the Rul
 
 ### ERC3643ComplianceModule
 
-![ERC3643ComplianceModuleUML](./schema/vscode-uml/ERC3643ComplianceModuleUML.png)
+![ERC3643ComplianceModuleUML](./schema/sol2uml/ERC3643ComplianceModuleUML.png)
 
 `ERC3643ComplianceModule` is a thin ERC-3643 adapter over `TokenBindingModule`: it adds the
 ERC-3643 specific view `getTokenBound()` and names the binding manager in compliance terms, wiring
@@ -1072,6 +1079,8 @@ variants). The compliance callbacks `transferred`, `created` and `destroyed` are
 |              └              | _onlyTokenBindingManager |      Internal 🔒            |       🛑        |               |
 
 ### ERC3643ComplianceExtendedModule
+
+![ERC3643ComplianceExtendedModuleUML](./schema/sol2uml/ERC3643ComplianceExtendedModuleUML.png)
 
 `ERC3643ComplianceExtendedModule` combines `ERC3643ComplianceModule` with `TokenBindingExtendedModule` and declares `IERC3643ComplianceExtended`. It carries no logic of its own: the project-specific helpers that are not part of the ERC-3643 base interface (`IERC3643Compliance`) — batch bind/unbind, self-binding approval APIs and `getTokenBounds()` — are standard-agnostic and therefore implemented in `TokenBindingExtendedModule`.
 
@@ -1243,7 +1252,7 @@ This is designed to mostly be used by view accessors that are queried without an
 
 ### RulesManagementModule
 
-![RuleManagementModuleUML](./schema/vscode-uml/RuleManagementModuleUML.png)
+![RuleManagementModuleUML](./schema/sol2uml/RuleManagementModuleUML.png)
 
 #### Events
 
