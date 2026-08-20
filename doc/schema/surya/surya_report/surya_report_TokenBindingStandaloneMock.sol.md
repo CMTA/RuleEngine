@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/ERC3643ComplianceExtendedModule.sol | 889c64f0f42969f3ddbf09e19b350058bc8cc955 |
+| ./mocks/TokenBindingStandaloneMock.sol | 69481db2ed47a2c69e7263f690fc92c9aa442070 |
 
 
 ### Contracts Description Table
@@ -15,8 +15,10 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **ERC3643ComplianceExtendedModule** | Implementation | TokenBindingExtendedModule, ERC3643ComplianceModule, IERC3643ComplianceExtended |||
-| └ | _authorizeTokenBindingChange | Internal 🔒 | 🛑  | |
+| **TokenBindingStandaloneMock** | Implementation | TokenBindingModule, Ownable |||
+| └ | <Constructor> | Public ❗️ | 🛑  | Ownable |
+| └ | notify | Public ❗️ | 🛑  | onlyBoundToken |
+| └ | _onlyTokenBindingManager | Internal 🔒 | 🛑  | onlyOwner |
 
 
 ### Legend

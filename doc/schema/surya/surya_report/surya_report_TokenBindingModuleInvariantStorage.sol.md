@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/library/ERC3643ComplianceModuleInvariantStorage.sol | 8ba2ee79d1f96d691db5ac2bf939b8a93b715195 |
+| ./modules/library/TokenBindingModuleInvariantStorage.sol | c1ae50c8c8acc84cdf06c1ef436e4d1bf03b554b |
 
 
 ### Contracts Description Table
@@ -15,7 +15,7 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **ERC3643ComplianceModuleInvariantStorage** | Implementation |  |||
+| **TokenBindingModuleInvariantStorage** | Implementation |  |||
 
 
 ### Legend

@@ -2,83 +2,38 @@
 
 pragma solidity ^0.8.20;
 
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+/* ==== Modules === */
+import {ERC3643ComplianceModule} from "./ERC3643ComplianceModule.sol";
+import {TokenBindingExtendedModule} from "./TokenBindingExtendedModule.sol";
+import {TokenBindingModule} from "./TokenBindingModule.sol";
 /* ==== Interface and other library === */
 import {IERC3643ComplianceExtended} from "../interfaces/IERC3643ComplianceExtended.sol";
-import {ERC3643ComplianceModule} from "./ERC3643ComplianceModule.sol";
 
 /**
  * @title ERC3643ComplianceExtendedModule
- * @notice Extends the core ERC-3643 compliance module with batch binding and token self-binding.
+ * @notice ERC-3643 flavour of the extended token binding registry: it combines the ERC-3643
+ * adapter {ERC3643ComplianceModule} with the batch binding and token self-binding provided by
+ * {TokenBindingExtendedModule}.
+ * @dev No logic of its own. Batch binding, self-binding approval and {getTokenBounds} are
+ * standard-agnostic and therefore implemented in {TokenBindingExtendedModule}; this contract only
+ * declares that the ERC-3643 deployment exposes them through {IERC3643ComplianceExtended}.
  */
-abstract contract ERC3643ComplianceExtendedModule is ERC3643ComplianceModule, IERC3643ComplianceExtended {
-    using EnumerableSet for EnumerableSet.AddressSet;
-
+abstract contract ERC3643ComplianceExtendedModule is
+    TokenBindingExtendedModule,
+    ERC3643ComplianceModule,
+    IERC3643ComplianceExtended
+{
     /**
-     * @notice Tracks which tokens are allowed to bind and unbind themselves.
-     */
-    mapping(address token => bool approved) private _tokenSelfBindingApproval;
-
-    /**
-     * @inheritdoc IERC3643ComplianceExtended
-     * @custom:security-note See {bindToken} for multi-tenant accounting risks. All tokens bound
-     * in this batch share the same rule state. Only bind tokens that are equally trusted and
-     * governed together.
-     */
-    function bindTokens(address[] calldata tokens) public virtual override onlyComplianceManager {
-        for (uint256 i = 0; i < tokens.length; ++i) {
-            _bindToken(tokens[i]);
-        }
-    }
-
-    /// @inheritdoc IERC3643ComplianceExtended
-    function unbindTokens(address[] calldata tokens) public virtual override onlyComplianceManager {
-        for (uint256 i = 0; i < tokens.length; ++i) {
-            _unbindToken(tokens[i]);
-        }
-    }
-
-    /// @inheritdoc IERC3643ComplianceExtended
-    function setTokenSelfBindingApproval(address token, bool approved) public virtual override onlyComplianceManager {
-        require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
-        _tokenSelfBindingApproval[token] = approved;
-        emit TokenSelfBindingApprovalSet(token, approved);
-    }
-
-    /// @inheritdoc IERC3643ComplianceExtended
-    function setTokenSelfBindingApprovalBatch(address[] calldata tokens, bool approved)
-        public
-        virtual
-        override
-        onlyComplianceManager
-    {
-        for (uint256 i = 0; i < tokens.length; ++i) {
-            address token = tokens[i];
-            require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
-            _tokenSelfBindingApproval[token] = approved;
-        }
-        emit TokenSelfBindingApprovalBatchSet(tokens, approved);
-    }
-
-    /// @inheritdoc IERC3643ComplianceExtended
-    function isTokenSelfBindingApproved(address token) public view virtual override returns (bool) {
-        return _tokenSelfBindingApproval[token];
-    }
-
-    /// @inheritdoc IERC3643ComplianceExtended
-    function getTokenBounds() public view virtual override returns (address[] memory) {
-        return _boundTokens.values();
-    }
-
-    /**
-     * @dev Authorizes bind/unbind operations.
-     * Allows compliance manager, or approved token self-calls for T-REX compatibility.
+     * @dev Resolves the two inherited definitions of the binding authorization hook, reached
+     * through {TokenBindingExtendedModule} and through {ERC3643ComplianceModule}. The extended
+     * behaviour wins: the compliance manager, or an approved token binding itself.
      * @param token The token being bound or unbound.
      */
-    function _authorizeComplianceBindingChange(address token) internal virtual override {
-        if (_msgSender() == token && _tokenSelfBindingApproval[token]) {
-            return;
-        }
-        _onlyComplianceManager();
+    function _authorizeTokenBindingChange(address token)
+        internal
+        virtual
+        override(TokenBindingModule, TokenBindingExtendedModule)
+    {
+        TokenBindingExtendedModule._authorizeTokenBindingChange(token);
     }
 }

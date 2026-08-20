@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/ERC3643ComplianceExtendedModule.sol | 889c64f0f42969f3ddbf09e19b350058bc8cc955 |
+| ./modules/TokenBindingExtendedModule.sol | d04d9b119b3a34f264d56830a6f41e57d9bc11de |
 
 
 ### Contracts Description Table
@@ -15,7 +15,13 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **ERC3643ComplianceExtendedModule** | Implementation | TokenBindingExtendedModule, ERC3643ComplianceModule, IERC3643ComplianceExtended |||
+| **TokenBindingExtendedModule** | Implementation | TokenBindingModule, ITokenBindingExtended |||
+| └ | bindTokens | Public ❗️ | 🛑  | onlyTokenBindingManager |
+| └ | unbindTokens | Public ❗️ | 🛑  | onlyTokenBindingManager |
+| └ | setTokenSelfBindingApproval | Public ❗️ | 🛑  | onlyTokenBindingManager |
+| └ | setTokenSelfBindingApprovalBatch | Public ❗️ | 🛑  | onlyTokenBindingManager |
+| └ | isTokenSelfBindingApproved | Public ❗️ |   |NO❗️ |
+| └ | getTokenBounds | Public ❗️ |   |NO❗️ |
 | └ | _authorizeTokenBindingChange | Internal 🔒 | 🛑  | |
 
 

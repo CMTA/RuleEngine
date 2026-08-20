@@ -8,7 +8,7 @@ import {ERC3643TokenMock} from "src/mocks/ERC3643TokenMock.sol";
 import {RuleWhitelistMock} from "src/mocks/rules/validation/RuleWhitelistMock.sol";
 import {RuleMintAllowanceMock} from "src/mocks/rules/operation/RuleMintAllowanceMock.sol";
 import {IRule} from "src/interfaces/IRule.sol";
-import {ERC3643ComplianceModuleInvariantStorage} from "src/modules/library/ERC3643ComplianceModuleInvariantStorage.sol";
+import {TokenBindingModuleInvariantStorage} from "src/modules/library/TokenBindingModuleInvariantStorage.sol";
 
 /**
  * @title ERC3643TokenIntegrationTest
@@ -19,7 +19,7 @@ import {ERC3643ComplianceModuleInvariantStorage} from "src/modules/library/ERC36
  * burn. An ERC-3643 token never reaches the 4-argument `transferred(spender, ...)` overload, which
  * belongs to CMTAT's `IRuleEngine`.
  */
-contract ERC3643TokenIntegrationTest is Test, ERC3643ComplianceModuleInvariantStorage {
+contract ERC3643TokenIntegrationTest is Test, TokenBindingModuleInvariantStorage {
     RuleEngine engine;
     ERC3643TokenMock token;
     RuleWhitelistMock whitelist;
@@ -108,7 +108,7 @@ contract ERC3643TokenIntegrationTest is Test, ERC3643ComplianceModuleInvariantSt
     /// @notice Only a bound token may call the ERC-3643 callbacks.
     function testUnboundCallerCannotCallTransferred() public {
         vm.prank(CAROL);
-        vm.expectRevert(RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(TokenBinding_UnauthorizedCaller.selector);
         engine.transferred(ALICE, BOB, 1);
     }
 
@@ -130,10 +130,10 @@ contract ERC3643TokenIntegrationTest is Test, ERC3643ComplianceModuleInvariantSt
     /// @notice created() and destroyed() are restricted to bound tokens.
     function testUnboundCallerCannotCallCreatedOrDestroyed() public {
         vm.startPrank(CAROL);
-        vm.expectRevert(RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(TokenBinding_UnauthorizedCaller.selector);
         engine.created(BOB, 1);
 
-        vm.expectRevert(RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector);
+        vm.expectRevert(TokenBinding_UnauthorizedCaller.selector);
         engine.destroyed(ALICE, 1);
         vm.stopPrank();
     }

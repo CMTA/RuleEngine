@@ -34,6 +34,7 @@ The RuleEngine is an external contract used to apply transfer restrictions to an
   - [Contract Constructors](#contract-constructors)
   - [RuleEngineBase](#ruleenginebase)
   - [VersionModule](#versionmodule)
+  - [TokenBindingModule](#tokenbindingmodule)
   - [ERC3643ComplianceModule](#erc3643compliancemodule)
   - [ERC3643ComplianceExtendedModule](#erc3643complianceextendedmodule)
   - [RulesManagementModule](#rulesmanagementmodule)
@@ -326,7 +327,13 @@ external;
 The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is defined in [IERC3643Compliance.sol](../src/interfaces/IERC3643Compliance.sol).
 Non-standard helper functions are defined in [IERC3643ComplianceExtended.sol](../src/interfaces/IERC3643ComplianceExtended.sol).
 
+Token binding itself is not specific to ERC-3643, so it is declared in the standard-agnostic
+[ITokenBinding.sol](../src/interfaces/ITokenBinding.sol) (`bindToken`, `unbindToken`, `isTokenBound`,
+`TokenBound` / `TokenUnbound`) and [ITokenBindingExtended.sol](../src/interfaces/ITokenBindingExtended.sol)
+(batch binding, token self-binding, `getTokenBounds`), which the two ERC-3643 interfaces above extend.
+
 The RuleEngine modules are split as follows:
+- Token binding registry, reusable outside any compliance context: [TokenBindingModule.sol](../src/modules/TokenBindingModule.sol) and [TokenBindingExtendedModule.sol](../src/modules/TokenBindingExtendedModule.sol)
 - Base ERC-3643 surface: [ERC3643ComplianceModule.sol](../src/modules/ERC3643ComplianceModule.sol)
 - Non-standard extensions: [ERC3643ComplianceExtendedModule.sol](../src/modules/ERC3643ComplianceExtendedModule.sol)
 
@@ -999,9 +1006,55 @@ Useful for identifying which version of the smart contract is deployed and in us
 
 
 
+### TokenBindingModule
+
+`TokenBindingModule` holds the token binding registry itself: the set of tokens allowed to call the
+bound-token entry points, `bindToken` / `unbindToken` / `isTokenBound`, and the `onlyBoundToken`
+guard. It is standard-agnostic — it contains no ERC-3643, ERC-1404 or rule logic and depends only on
+OpenZeppelin's `Context` and `EnumerableSet` — so it can be reused as-is by any project that has to
+bind tokens. A deployment only has to provide the access control by implementing
+`_onlyTokenBindingManager()`; `src/mocks/TokenBindingStandaloneMock.sol` is a minimal example of such
+a reuse, outside any compliance context.
+
+`TokenBindingExtendedModule` adds the conveniences of the registry that are not part of any token
+standard: batch bind/unbind, token self-binding approval (used by ERC-3643 `setCompliance`), and
+`getTokenBounds()`. It also replaces the default binding authorization with one that accepts an
+approved token binding itself.
+
+The events and functions of both modules are documented in the events and functions reference below,
+under `ERC3643ComplianceExtendedModule`, since that is the form in which the RuleEngine exposes them.
+
+#### Contracts Description Table
+
+
+|            Contract            |       Type        |                     Bases                     |                |                          |
+| :----------------------------: | :---------------: | :-------------------------------------------: | :------------: | :----------------------: |
+|               └                | **Function Name** |                **Visibility**                 | **Mutability** |      **Modifiers**       |
+|                                |                   |                                               |                |                          |
+|     **TokenBindingModule**     |  Implementation   |    Context, ITokenBinding                     |                |                          |
+|               └                |     bindToken     |                   Public ❗️                    |       🛑        |          NO❗️           |
+|               └                |    unbindToken    |                   Public ❗️                    |       🛑        |          NO❗️           |
+|               └                |   isTokenBound    |                   Public ❗️                    |                |          NO❗️           |
+|               └                |    _bindToken     |                  Internal 🔒                   |       🛑        |                          |
+|               └                |   _unbindToken    |                  Internal 🔒                   |       🛑        |                          |
+| **TokenBindingExtendedModule** |  Implementation   | TokenBindingModule, ITokenBindingExtended      |                |                          |
+|               └                |    bindTokens     |                   Public ❗️                    |       🛑        | onlyTokenBindingManager  |
+|               └                |   unbindTokens    |                   Public ❗️                    |       🛑        | onlyTokenBindingManager  |
+|               └                | setTokenSelfBindingApproval |         Public ❗️                    |       🛑        | onlyTokenBindingManager  |
+|               └                | setTokenSelfBindingApprovalBatch |    Public ❗️                    |       🛑        | onlyTokenBindingManager  |
+|               └                | isTokenSelfBindingApproved |          Public ❗️                    |                |          NO❗️           |
+|               └                |  getTokenBounds   |                   Public ❗️                    |                |          NO❗️           |
+
 ### ERC3643ComplianceModule
 
 ![ERC3643ComplianceModuleUML](./schema/vscode-uml/ERC3643ComplianceModuleUML.png)
+
+`ERC3643ComplianceModule` is a thin ERC-3643 adapter over `TokenBindingModule`: it adds the
+ERC-3643 specific view `getTokenBound()` and names the binding manager in compliance terms, wiring
+the generic `_onlyTokenBindingManager()` hook to `_onlyComplianceManager()`, which the deployable
+contracts implement (`COMPLIANCE_MANAGER_ROLE` for `RuleEngine`, `onlyOwner` for the ownable
+variants). The compliance callbacks `transferred`, `created` and `destroyed` are implemented by
+`RuleEngineBase`, since they depend on the rules rather than on the binding.
 
 #### Contracts Description Table
 
@@ -1010,17 +1063,13 @@ Useful for identifying which version of the smart contract is deployed and in us
 | :-------------------------: | :---------------: | :-------------------------------: | :------------: | :-----------: |
 |              └              | **Function Name** |          **Visibility**           | **Mutability** | **Modifiers** |
 |                             |                   |                                   |                |               |
-| **ERC3643ComplianceModule** |  Implementation   | Context, IERC3643Compliance |                |               |
-|              └              |     bindToken     |             Public ❗️              |       🛑        |   onlyRole    |
-|              └              |    unbindToken    |             Public ❗️              |       🛑        |   onlyRole    |
-|              └              |   isTokenBound    |             Public ❗️              |                |      NO❗️      |
+| **ERC3643ComplianceModule** |  Implementation   | TokenBindingModule, IERC3643Compliance |           |               |
 |              └              |   getTokenBound   |             Public ❗️              |                |      NO❗️      |
+|              └              | _onlyTokenBindingManager |      Internal 🔒            |       🛑        |               |
 
 ### ERC3643ComplianceExtendedModule
 
-`ERC3643ComplianceExtendedModule` inherits `ERC3643ComplianceModule` and contains project-specific helpers not part of the ERC-3643 base interface (`IERC3643Compliance`): batch bind/unbind, self-binding approval APIs, and `getTokenBounds()`.
-|              └              |   _unbindToken    |            Internal 🔒             |       🛑        |               |
-|              └              |    _bindToken     |            Internal 🔒             |       🛑        |               |
+`ERC3643ComplianceExtendedModule` combines `ERC3643ComplianceModule` with `TokenBindingExtendedModule` and declares `IERC3643ComplianceExtended`. It carries no logic of its own: the project-specific helpers that are not part of the ERC-3643 base interface (`IERC3643Compliance`) — batch bind/unbind, self-binding approval APIs and `getTokenBounds()` — are standard-agnostic and therefore implemented in `TokenBindingExtendedModule`.
 
 #### Events
 
@@ -1067,10 +1116,13 @@ Emitted when a token is successfully unbound from the compliance contract.
 ```solidity
 function bindToken(address token) 
 public override virtual 
-onlyRole(COMPLIANCE_MANAGER_ROLE)
 ```
 
 Associates a token contract with this compliance contract.
+
+Implemented by `TokenBindingModule`. Authorization goes through `_authorizeTokenBindingChange`, which
+accepts the compliance manager (`COMPLIANCE_MANAGER_ROLE` for `RuleEngine`, the owner for the ownable
+variants), or the token itself when its self-binding has been approved.
 
 The compliance contract may restrict operations on the bound token according to its internal compliance logic.
  Reverts if the token is already bound.
@@ -1090,10 +1142,11 @@ The compliance contract may restrict operations on the bound token according to 
 ```solidity
 function unbindToken(address token) 
 public override virtual 
-onlyRole(COMPLIANCE_MANAGER_ROLE)
 ```
 
 Removes the association of a token contract from this compliance contract.
+
+Implemented by `TokenBindingModule`, with the same authorization as `bindToken`.
 
 Reverts if the token is not currently bound.
 
@@ -1527,6 +1580,7 @@ Here a summary of the main documentation
 | ------------ | --------------------------------------- |
 | Integration with CMTAT | [doc/technical/RuleEngine-with-CMTAT.md](./technical/RuleEngine-with-CMTAT.md) |
 | Integration with ERC-3643 | [doc/technical/RuleEngine-with-ERC3643.md](./technical/RuleEngine-with-ERC3643.md) |
+| Token binding module (reusable outside this project) | [doc/technical/TokenBinding-module.md](./technical/TokenBinding-module.md) |
 | Toolchain    | [doc/TOOLCHAIN.md](./TOOLCHAIN.md)  |
 | Surya report | [doc/schema/surya](./schema/surya/) |
 | Code-quality review | [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md](./security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md) |

@@ -72,10 +72,14 @@ RuleEngineBase (abstract)
 ├── RulesManagementModule                 → add/remove/set/clear rules, maxRules cap
 │   ├── AccessControl (OZ)
 │   └── RulesManagementModuleInvariantStorage  → errors, events, roles
-├── ERC3643ComplianceExtendedModule       → bind/unbind tokens (extended API)
-│   └── ERC3643ComplianceModule           → core ERC-3643 compliance
-│       ├── IERC3643Compliance
-│       └── ERC3643ComplianceModuleInvariantStorage  → errors
+├── ERC3643ComplianceExtendedModule       → ERC-3643 flavour of the binding registry
+│   ├── ERC3643ComplianceModule           → ERC-3643 adapter: getTokenBound(), compliance naming
+│   │   ├── IERC3643Compliance
+│   │   └── TokenBindingModule            → bind/unbind tokens (standard-agnostic registry)
+│   │       ├── ITokenBinding
+│   │       └── TokenBindingModuleInvariantStorage  → errors
+│   └── TokenBindingExtendedModule        → batch binding, token self-binding (standard-agnostic)
+│       └── ITokenBindingExtended
 ├── RuleEngineInvariantStorage            → errors
 └── IRuleEngineERC1404                    → CMTAT interface
 
@@ -105,7 +109,9 @@ Modules define **virtual internal hooks** for access control. Concrete contracts
 function _onlyRulesManager() internal virtual;
 function _onlyRulesLimitManager() internal virtual;  // guards setMaxRules
 
-// In ERC3643ComplianceModule (abstract):
+// In TokenBindingModule (abstract):
+function _onlyTokenBindingManager() internal virtual;
+// wired by ERC3643ComplianceModule to its own abstract hook:
 function _onlyComplianceManager() internal virtual;
 
 // RuleEngine overrides with RBAC:
@@ -182,11 +188,25 @@ can report a mint as allowed that `transferred(spender, ...)` will revert. Use t
 `detectTransferRestrictionFrom` / `canTransferFrom` to pre-check an operation that has an operator. See
 `H-1` in `doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md`.
 
+### Token Binding Layering
+
+Token binding is split so it can be reused outside this project:
+
+- `TokenBindingModule` / `TokenBindingExtendedModule` (+ `ITokenBinding` / `ITokenBindingExtended`,
+  `TokenBindingModuleInvariantStorage`) hold the whole registry and depend only on OpenZeppelin
+  (`Context`, `EnumerableSet`). No rule, ERC-1404 or ERC-3643 code.
+- `ERC3643ComplianceModule` / `ERC3643ComplianceExtendedModule` are thin ERC-3643 adapters: they add
+  `getTokenBound()` and wire `_onlyTokenBindingManager()` to `_onlyComplianceManager()`.
+
+**Keep new binding logic in the generic modules and new ERC-3643 logic in the adapters.**
+`src/mocks/TokenBindingStandaloneMock.sol` (+ `test/TokenBinding/`) pins that the registry still works
+standalone. See `doc/technical/TokenBinding-module.md`.
+
 ### Storage: EnumerableSet
 
 Both rules and bound tokens use `EnumerableSet.AddressSet`:
 - `_rules` in `RulesManagementModule` — the set of active rules
-- `_boundTokens` in `ERC3643ComplianceModule` — tokens allowed to call `transferred`
+- `_boundTokens` in `TokenBindingModule` — tokens allowed to call `transferred`
 
 This gives O(1) add/remove/contains and iterable storage.
 
@@ -196,7 +216,9 @@ This gives O(1) add/remove/contains and iterable storage.
 |-----------|---------|---------------|
 | `IRule` | What every rule must implement (extends `IRuleEngineERC1404`) | `src/interfaces/IRule.sol` |
 | `IRulesManagementModule` | Rule CRUD operations | `src/interfaces/IRulesManagementModule.sol` |
-| `IERC3643Compliance` | Token binding + compliance hooks | `src/interfaces/IERC3643Compliance.sol` |
+| `ITokenBinding` | Token binding registry, standard-agnostic | `src/interfaces/ITokenBinding.sol` |
+| `ITokenBindingExtended` | Batch binding, token self-binding, `getTokenBounds` | `src/interfaces/ITokenBindingExtended.sol` |
+| `IERC3643Compliance` | ERC-3643 compliance hooks (extends `ITokenBinding`) | `src/interfaces/IERC3643Compliance.sol` |
 | `IRuleEngine` | Full CMTAT integration interface | `lib/CMTAT/contracts/interfaces/engine/IRuleEngine.sol` |
 
 **ERC-165 interface IDs:**
@@ -213,6 +235,7 @@ Errors, events, and role constants are centralized in "invariant storage" abstra
 |----------|----------|
 | `RuleEngineInvariantStorage` | `RuleEngine_AdminWithAddressZeroNotAllowed`, `RuleEngine_RuleInvalidInterface` |
 | `RulesManagementModuleInvariantStorage` | Rule errors, `AddRule`/`RemoveRule`/`ClearRules` events, `RULES_MANAGEMENT_ROLE` |
+| `TokenBindingModuleInvariantStorage` | `TokenBinding_*` binding errors (standard-agnostic, no `RuleEngine_` prefix) |
 
 **Convention:** Error names follow `Contract_Module_ErrorName` pattern. Test contracts inherit these to access `.selector` for `vm.expectRevert`.
 
@@ -226,8 +249,9 @@ src/
 │   └── RuleEngineOwnable2Step.sol # Ownable2Step variant (deploy this)
 ├── RuleEngineBase.sol             # Abstract core logic (do not deploy)
 ├── RuleEngineOwnableShared.sol    # Shared logic for ownable variants
-├── interfaces/                    # IRule, IRulesManagementModule, IERC3643Compliance
-├── modules/                       # VersionModule, RulesManagementModule, ERC3643ComplianceModule, ERC2771ModuleStandalone
+├── interfaces/                    # IRule, IRulesManagementModule, ITokenBinding(Extended), IERC3643Compliance(Extended)
+├── modules/                       # VersionModule, RulesManagementModule, TokenBinding(Extended)Module,
+│                                  # ERC3643Compliance(Extended)Module, ERC2771ModuleStandalone
 │   └── library/                   # InvariantStorage contracts, RuleInterfaceId
 └── mocks/                         # Test-only/reference contracts
 

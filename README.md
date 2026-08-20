@@ -49,17 +49,21 @@ Sequence diagrams for each token type: [CMTAT](./doc/schema/plantuml/ruleengine-
 ## Architecture
 
 ```
-RuleEngineBase (abstract)          — core logic, shared by all variants
-├── VersionModule                  — version()
-├── RulesManagementModule          — add/remove/set/clear rules, maxRules cap
-├── ERC3643ComplianceExtendedModule
-│   └── ERC3643ComplianceModule    — bind/unbind tokens, compliance hooks
-└── IRuleEngineERC1404             — CMTAT interface
+RuleEngineBase (abstract)              — core logic, shared by all variants
+├── VersionModule                      — version()
+├── RulesManagementModule              — add/remove/set/clear rules, maxRules cap
+├── ERC3643ComplianceExtendedModule    — ERC-3643 flavour of the binding registry
+│   ├── ERC3643ComplianceModule        — getTokenBound(), compliance manager hook
+│   │   └── TokenBindingModule         — bind/unbind tokens (standard-agnostic)
+│   └── TokenBindingExtendedModule     — batch binding, token self-binding
+└── IRuleEngineERC1404                 — CMTAT interface
 
 RuleEngine               = RuleEngineBase + AccessControl + ERC2771ModuleStandalone
 RuleEngineOwnable        = RuleEngineOwnableShared + Ownable      + ERC2771ModuleStandalone
 RuleEngineOwnable2Step   = RuleEngineOwnableShared + Ownable2Step + ERC2771ModuleStandalone
 ```
+
+Token binding is deliberately split in two layers: `TokenBindingModule` / `TokenBindingExtendedModule` hold the whole registry (storage, `bindToken` / `unbindToken` / `isTokenBound`, batch binding, self-binding, the `onlyBoundToken` guard) and depend on nothing but OpenZeppelin, so they can be reused by any project that has to bind tokens; `ERC3643ComplianceModule` / `ERC3643ComplianceExtendedModule` are thin ERC-3643 adapters on top, adding `getTokenBound()` and the compliance-manager vocabulary. `src/mocks/TokenBindingStandaloneMock.sol` shows the registry used on its own, outside any compliance context.
 
 Modules declare access control as **virtual internal hooks** (`_onlyRulesManager`, `_onlyComplianceManager`, `_onlyRulesLimitManager`); each deployable contract overrides them with either RBAC roles or `onlyOwner`. Rules and bound tokens are stored in OpenZeppelin `EnumerableSet.AddressSet` for O(1) add/remove/contains plus iteration.
 
@@ -73,8 +77,9 @@ src/
 │   ├── RuleEngine.sol
 │   ├── RuleEngineOwnable.sol
 │   └── RuleEngineOwnable2Step.sol
-├── interfaces/                     # IRule, IRulesManagementModule, IERC3643Compliance(Extended)
-├── modules/                        # VersionModule, RulesManagementModule,
+├── interfaces/                     # IRule, IRulesManagementModule, ITokenBinding(Extended),
+│                                   # IERC3643Compliance(Extended)
+├── modules/                        # VersionModule, RulesManagementModule, TokenBinding(Extended)Module,
 │   │                               # ERC3643Compliance(Extended)Module, ERC2771ModuleStandalone
 │   └── library/                    # invariant storage (errors/events), role constants, interface IDs
 └── mocks/                          # reference rules and test doubles — not for production

@@ -21,7 +21,7 @@ import {
  * on that token, otherwise {setRuleEngine} reverts.
  *
  * The token is bound to the engine through the constructor: without it, every transfer, mint and burn
- * reverts with `RuleEngine_ERC3643Compliance_UnauthorizedCaller`, because the compliance callbacks are
+ * reverts with `TokenBinding_UnauthorizedCaller`, because the compliance callbacks are
  * guarded by `onlyBoundToken`.
  *
  * The deployer and the zero address are added to the whitelist so the resulting deployment is usable

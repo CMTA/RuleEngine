@@ -47,7 +47,29 @@ forge lint
 
 
 
+### Unreleased
+
+### Changed
+
+- **Token binding is now separated from the ERC-3643 compliance code**, so the registry can be reused in another project as-is. `TokenBindingModule` (+ `TokenBindingExtendedModule`) holds the whole binding logic — bound token set, `bindToken` / `unbindToken` / `isTokenBound`, the `onlyBoundToken` guard, batch binding, token self-binding and `getTokenBounds()` — and depends only on OpenZeppelin's `Context` and `EnumerableSet`. `ERC3643ComplianceModule` / `ERC3643ComplianceExtendedModule` become thin ERC-3643 adapters, keeping only `getTokenBound()` and the compliance-manager vocabulary (`_onlyTokenBindingManager()` is wired to `_onlyComplianceManager()`).
+- The binding functions and events moved to the standard-agnostic `ITokenBinding` / `ITokenBindingExtended`, which `IERC3643Compliance` / `IERC3643ComplianceExtended` now extend. **The external API and the advertised ERC-165 interface IDs are unchanged**: same functions, same selectors, same events, same access control.
+- **Renamed the binding errors** `RuleEngine_ERC3643Compliance_*` to `TokenBinding_*` (`TokenBinding_InvalidTokenAddress`, `TokenBinding_TokenAlreadyBound`, `TokenBinding_TokenNotBound`, `TokenBinding_UnauthorizedCaller`), so a reused module carries no RuleEngine or ERC-3643 wording. This changes the error selectors. `ERC3643ComplianceModuleInvariantStorage` is replaced by `TokenBindingModuleInvariantStorage`.
+- `_authorizeComplianceBindingChange(address)` renamed to `_authorizeTokenBindingChange(address)` and is no longer abstract: `TokenBindingModule` defaults it to the binding manager check, and `TokenBindingExtendedModule` overrides it with the self-binding aware variant. The deployable contracts are unchanged — they still implement `_onlyComplianceManager()` only.
+- Removed the unused `onlyComplianceManager` modifier from `ERC3643ComplianceModule`; the generic `onlyTokenBindingManager` modifier of `TokenBindingModule` guards the binding administration functions.
+
+### Added
+
+- Add `TokenBindingStandaloneMock`: a minimal engine embedding `TokenBindingModule` alone with `Ownable` access control, showing what another project has to provide to reuse the registry, and pinning that it works with no compliance code around it.
+- Add `test/TokenBinding/TokenBindingStandalone.t.sol` (10 tests) covering the standalone registry: bind, unbind, events, manager-only administration, zero address, already-bound / not-bound, the `onlyBoundToken` guard, and that self-binding is rejected without `TokenBindingExtendedModule`.
+
+### Documentation
+
+- Add [doc/technical/TokenBinding-module.md](./doc/technical/TokenBinding-module.md): the layering, the two hooks a deployment implements, how to reuse the module in another project, and the operational warnings of the registry.
+- Update `README.md`, `doc/README.md`, `doc/technical/RuleEngine-with-ERC3643.md`, `CLAUDE.md` and `AGENTS.md` for the new layering.
+
 ### v3.0.0-rc5
+
+Commit: `ab9def2f19ae71af304127f42d20d9831cad1a2b`
 
 ### Changed
 
