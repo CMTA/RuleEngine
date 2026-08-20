@@ -3,6 +3,11 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {IRuleInterfaceIdHelper} from "src/mocks/IRuleInterfaceIdHelper.sol";
+import {ComplianceInterfaceId} from "src/modules/library/ComplianceInterfaceId.sol";
+import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
+import {IERC3643ComplianceExtended} from "src/interfaces/IERC3643ComplianceExtended.sol";
+import {ITokenBindingExtended} from "src/interfaces/ITokenBindingExtended.sol";
+import {RuleInterfaceId} from "src/modules/library/RuleInterfaceId.sol";
 
 /**
  * @title Tests to verify IRule ERC-165 interface ID computation
@@ -62,5 +67,40 @@ contract IRuleInterfaceIdTest is Test {
         emit log_named_bytes32("IERC3643IComplianceContract", bytes32(iERC3643IComplianceContract));
         emit log_named_bytes32("IERC7551Compliance", bytes32(iERC7551Compliance));
         emit log_named_bytes32("IERC165", bytes32(iERC165));
+    }
+
+    /**
+     * @notice Pins every advertised interface ID to the wire value integrators depend on.
+     * @dev The constants are computed from the interfaces (see `ComplianceInterfaceId`,
+     * `RuleInterfaceId`, `ERC1404InterfaceId`) rather than hardcoded, so this test is what turns an
+     * upstream interface change into a failure here instead of a silent change in what
+     * `supportsInterface` answers. These literals must never change without a major version.
+     */
+    function testInterfaceIdConstantsMatchTheirWireValues() public pure {
+        assertEq(RuleInterfaceId.IRULE_INTERFACE_ID, bytes4(0x2497d6cb), "IRule");
+        assertEq(ComplianceInterfaceId.ERC3643_COMPLIANCE_INTERFACE_ID, bytes4(0x3144991c), "IERC3643Compliance");
+        assertEq(
+            ComplianceInterfaceId.ERC3643_COMPLIANCE_EXTENDED_INTERFACE_ID,
+            bytes4(0x646ba2be),
+            "IERC3643ComplianceExtended"
+        );
+        assertEq(ComplianceInterfaceId.IERC7551_COMPLIANCE_INTERFACE_ID, bytes4(0x7157797f), "IERC7551Compliance");
+        assertEq(ERC1404InterfaceId.IERC1404_INTERFACE_ID, bytes4(0xab84a5c8), "IERC1404");
+    }
+
+    /**
+     * @notice Pins the reason the extended compliance ID is computed from {ITokenBindingExtended}.
+     * @dev `IERC3643ComplianceExtended` declares no function of its own, so `type(...).interfaceId`
+     * is `0x00000000` — a trap for an integrator who uses it instead of the constant. The extended
+     * surface is declared in full by `ITokenBindingExtended`, whose own ID is therefore already the
+     * flattened one.
+     */
+    function testMarkerInterfaceHasZeroNaiveIdAndIsNotUsedAsSuch() public pure {
+        assertEq(type(IERC3643ComplianceExtended).interfaceId, bytes4(0x00000000), "marker declares nothing");
+        assertEq(
+            ComplianceInterfaceId.ERC3643_COMPLIANCE_EXTENDED_INTERFACE_ID,
+            type(ITokenBindingExtended).interfaceId,
+            "extended ID comes from ITokenBindingExtended"
+        );
     }
 }

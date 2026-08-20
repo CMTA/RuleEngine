@@ -222,10 +222,19 @@ This gives O(1) add/remove/contains and iterable storage.
 | `IRuleEngine` | Full CMTAT integration interface | `lib/CMTAT/contracts/interfaces/engine/IRuleEngine.sol` |
 
 **ERC-165 interface IDs:**
-- `IRule`: `0x2497d6cb` (defined in `src/modules/library/RuleInterfaceId.sol`)
+- `IRule`: `0x2497d6cb` (`src/modules/library/RuleInterfaceId.sol`)
+- `IERC3643Compliance`: `0x3144991c`, extended: `0x646ba2be`, `IERC7551Compliance`: `0x7157797f` (`ComplianceInterfaceId.sol`)
+- `IERC1404`: `0xab84a5c8` (`ERC1404InterfaceId.sol`)
 - `IRuleEngine`: from `CMTAT/library/RuleEngineInterfaceId.sol`
 - `IERC1404Extend`: from `CMTAT/library/ERC1404ExtendInterfaceId.sol`
-- `ERC-173`: `0x7f5828d0` (hardcoded in `RuleEngineOwnable`)
+- `ERC-173`: `0x7f5828d0` (`OwnableInterfaceId.sol`); `Ownable2Step` subset: `0x9ab669ef`
+
+**The project's IDs are computed, not hardcoded.** `type(I).interfaceId` covers only the functions `I`
+declares *directly*, so each constant XORs the interface with its parents; a marker interface that declares
+nothing of its own — `IERC3643ComplianceExtended` — has a `type(...).interfaceId` of `0x00000000` and must
+never be used for an ERC-165 check. `test/RuleEngine/IRuleInterfaceId.t.sol` pins every constant to its wire
+value, so an upstream interface change fails a test instead of silently changing what `supportsInterface`
+answers. ERC-173 and the `Ownable2Step` subset stay literal: neither has an interface declaration in scope.
 
 ## Invariant Storage Pattern
 

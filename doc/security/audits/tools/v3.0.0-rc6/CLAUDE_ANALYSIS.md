@@ -18,7 +18,8 @@ Every gas number was measured with a benchmark harness, not derived from opcode 
 own contract with an identically-named function so selector-dispatch depth could not skew the comparison, and
 both were measured after an identical warm-up. The modularity verdict is a **compile result**, not an opinion:
 two probe contracts were written and built. All probe and benchmark files were deleted afterwards; the test
-count reconciles exactly (346 before, 346 after — no fixture left behind).
+count reconciles exactly: 346 before, 348 after — the two added being the `F-2` interface-id pins, with every
+probe and benchmark file deleted.
 
 ## Disposition summary
 
@@ -32,21 +33,20 @@ count reconciles exactly (346 before, 346 after — no fixture left behind).
 | D-1 | Duplication across the three deployables | ⬜ no finding — reduced by the split, remainder is compiler-mandated |
 | E-1 | `virtual` on every internal function | ⬜ no finding — 0 non-`virtual` internals in `src/` |
 | F-1 | Advertised ERC-165 ids unchanged by the split | ⬜ verified — `0x3144991c` / `0x646ba2be` both hold |
-| F-2 | `type(IERC3643ComplianceExtended).interfaceId` is `0x00000000`, and the extended id is now derivable | ⚠️ decide — see below |
+| F-2 | `type(IERC3643ComplianceExtended).interfaceId` is `0x00000000`, and the ids were hardcoded literals | ✅ fixed — all five ids now computed from the interfaces, values unchanged, pinned by 2 new tests |
 | G-1 | NatSpec length and doc pointers in contract comments | ⬜ no finding — median 4 lines, max 19, zero `.md` pointers |
 | H-1 | View approves a mint that enforcement rejects | ⬜ documented — carried from rc5, unchanged |
 | I-1 | `IRule` demands two functions the engine never calls | ⚠️ decide — least-privilege, affects every rule author |
 | J-1 | Binding registry embeddable in a foreign host | ⬜ verified by compile probe — inconvenience only, no blocker |
 | J-2 | ERC-3643 adapter indirection costs 35 gas per bind | ⬜ left as is — measured, negligible |
 
-**Counted: 14 rows — 0 fixed, 3 left as is, 8 no-finding/verified, 3 open decisions.**
+**Counted: 14 rows — 1 fixed, 3 left as is, 8 no-finding/verified, 2 open decisions.**
 
 ## Outstanding
 
 | ID | Item | Why it is still open |
 |----|------|----------------------|
 | C-2 | `setTokenSelfBindingApprovalBatch` emits only a batch event | Unchanged since rc5. Fixing it alters the emitted event stream, which is API-visible to indexers. Product call. |
-| F-2 | The extended interface id is hand-maintained through a mock | The literal is correct today; changing how it is derived touches a constant that deployed contracts advertise. |
 | I-1 | `IRule` requires `canTransfer` / `canTransferFrom` | Narrowing it is a breaking change for the separate [CMTA/Rules](https://github.com/CMTA/Rules) repository. |
 | H-1 | The view/enforcement divergence | Inherent to the ERC-1404 3-argument signature. Documented rather than fixed — see the rc5 report. |
 
@@ -155,30 +155,73 @@ interfaces, so they are unaffected — measured, not assumed:
 An integrator's `supportsInterface` call therefore behaves exactly as in rc5. This is the check that would have
 caught the split silently breaking ERC-165 detection, and it passes.
 
-### F-2. The marker interface's naive id is zero, and the extended id is now derivable — decide
+### F-2. The ids were hardcoded literals, and the marker interface computes to zero — fixed
 
-Two related observations from the same measurement:
+Two related observations from the same measurement, and one fix for both.
 
 **`type(IERC3643ComplianceExtended).interfaceId` is `0x00000000`.** The interface is a pure marker — it declares
 no function of its own and only combines `IERC3643Compliance` and `ITokenBindingExtended` — so the XOR over its
-*directly declared* selectors is over the empty set. Any integrator who reaches for that expression instead of
-the advertised constant gets a meaningless id, and `supportsInterface(0x00000000)` returns false. It is a
-footgun created by the split, not a defect in the engine, and it argues for a one-line NatSpec note on the
-interface pointing at `ComplianceInterfaceId`.
+*directly declared* selectors is over the empty set. Any integrator reaching for that expression instead of the
+advertised constant gets a meaningless id, and `supportsInterface(0x00000000)` returns false.
 
-**`type(ITokenBindingExtended).interfaceId` is `0x646ba2be` — exactly the advertised extended constant.** Because
-`ITokenBindingExtended` declares precisely the six extended functions and inherits the rest, its naive id and the
-flattened id coincide. The project can therefore replace the hand-maintained literal, and retire the
-`IERC3643ComplianceExtendedSubset` mock that exists only to reproduce it:
+**Every project id was a hardcoded literal.** `IRULE_INTERFACE_ID`, the three `ComplianceInterfaceId` constants
+and `IERC1404_INTERFACE_ID` were written out by hand, with the correspondence to the actual interfaces held by a
+comment and, for two of them, by a test double (`IRuleInterfaceIdHelper`, `IERC3643ComplianceExtendedSubset`)
+kept in sync manually. The naive expression could not be used because it never counts inherited selectors — which
+is precisely the reason the literals existed.
+
+**Fix: compute each id from the interfaces, XOR-ing in the parents explicitly.**
 
 ```solidity
+// ComplianceInterfaceId.sol
+bytes4 public constant ERC3643_COMPLIANCE_INTERFACE_ID = type(IERC3643Compliance).interfaceId
+    ^ type(ITokenBinding).interfaceId ^ type(IERC3643ComplianceRead).interfaceId
+    ^ type(IERC3643IComplianceContract).interfaceId;                        // 0x3144991c
+
 bytes4 public constant ERC3643_COMPLIANCE_EXTENDED_INTERFACE_ID = type(ITokenBindingExtended).interfaceId;
+                                                                            // 0x646ba2be
+bytes4 public constant IERC7551_COMPLIANCE_INTERFACE_ID = type(IERC7551Compliance).interfaceId;
+                                                                            // 0x7157797f
+// RuleInterfaceId.sol — eight parents, IERC165 included
+bytes4 public constant IRULE_INTERFACE_ID = type(IRule).interfaceId ^ type(IRuleEngine).interfaceId
+    ^ type(IERC7551Compliance).interfaceId ^ type(IERC3643ComplianceRead).interfaceId
+    ^ type(IERC3643IComplianceContract).interfaceId ^ type(IERC1404).interfaceId
+    ^ type(IERC1404Extend).interfaceId ^ type(IERC165).interfaceId;         // 0x2497d6cb
+
+// ERC1404InterfaceId.sol
+bytes4 public constant IERC1404_INTERFACE_ID = type(IERC1404).interfaceId;  // 0xab84a5c8
 ```
 
-The value is identical, so no deployed behaviour changes, and the constant becomes derived from a real
-`src/interfaces/` file rather than from a test double kept in sync by hand. **Verdict: decide.** It is a
-maintainability improvement touching a constant that deployed contracts advertise, so it belongs to a release
-where the interface ids are being reviewed anyway rather than to a patch.
+**Every value is unchanged**, which is the property that matters: these constants are advertised by deployed
+contracts, so a different number would silently break `supportsInterface` for existing integrators. Two details
+were easy to get wrong and are worth recording:
+
+- The rule id needs **`IERC165`**. Without it the expression computes `0x25681f6c`; `supportsInterface` is part
+  of the flattened hierarchy because `IRuleEngine` inherits `IERC165`.
+- `IRuleEngineERC1404` contributes **nothing** — it declares no function, its own id is `0x00000000`, and its
+  parents are XOR-ed in individually. The same marker-interface property that made the extended compliance id a
+  trap.
+
+The extended compliance id is now derived from `ITokenBindingExtended`, which declares the six extended
+functions in full, so its own id *is* the flattened one — a consequence of the rc6 split that did not exist
+before it.
+
+**Verification.** Two tests were added to `IRuleInterfaceId.t.sol`:
+`testInterfaceIdConstantsMatchTheirWireValues` pins all five constants to their literal values, so an upstream
+CMTAT interface change fails a test rather than silently altering what the engine advertises; and
+`testMarkerInterfaceHasZeroNaiveIdAndIsNotUsedAsSuch` pins `type(IERC3643ComplianceExtended).interfaceId == 0`
+together with the fact that the constant comes from `ITokenBindingExtended` instead. The existing
+`supportsInterface` suites and the `ICompliance` / `IERC3643ComplianceExtendedSubset` flattened helpers still
+pass unchanged, giving a second, independent check on the values. 346 -> 348 tests.
+
+`IERC3643ComplianceExtended` also gained a NatSpec `WARNING:` stating that its naive id is `0x00000000` and
+naming the constant to use instead — the part of this finding that a reader of the verified source needs.
+
+**Not converted:** `OwnableInterfaceId` (ERC-173, `0x7f5828d0`) and `Ownable2StepInterfaceId` (`0x9ab669ef`).
+Neither has an interface declaration in scope — OpenZeppelin ships `Ownable` as a contract, and the
+`Ownable2Step` subset is this project's own selection of two functions. The only declarations available are
+test doubles under `src/mocks/`, and importing a mock into `src/` to compute a production constant would be
+worse than the literal. Both keep their derivation in NatSpec.
 
 ## G. Code / documentation mismatch
 
