@@ -47,7 +47,14 @@ forge lint
 
 
 
-### Unreleased
+### v3.0.0-rc6
+
+### Summary
+
+Token binding is separated from the ERC-3643 compliance code: `TokenBindingModule` and
+`TokenBindingExtendedModule` now hold the whole binding registry and depend only on OpenZeppelin, so they can be reused in another project, while the compliance modules become thin ERC-3643 adapters. 
+
+The external API and the advertised ERC-165 interface IDs are unchanged; the only breaking change is the rename of the binding errors `RuleEngine_ERC3643Compliance_*` to `TokenBinding_*`, which changes their selectors.
 
 ### Changed
 
@@ -71,7 +78,7 @@ forge lint
 - `doc/README.md`: the eight `[...](../src/...)` links now use absolute GitHub URLs. `doc/script/convert_links_for_pdf.sh` only rewrites the `./` form and its base URL points at the `doc/` directory, so a `../` link cannot be rewritten and stayed dead in the generated specification PDF.
 - `doc/README.md`: the "Role by modules" table now lists `bindToken` / `unbindToken` under `TokenBindingModule` and the batch and self-binding functions under `TokenBindingExtendedModule`, adds the missing `setMaxRules` row, and points `COMPLIANCE_MANAGER_ROLE` to `ERC3643ComplianceRolesStorage`, where it is actually declared.
 
-### v3.0.0-rc5
+### v3.0.0-rc5-2026-08-13
 
 Commit: `ab9def2f19ae71af304127f42d20d9831cad1a2b`
 
