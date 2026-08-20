@@ -7,7 +7,7 @@ This is an *overview of analyses*. For vulnerability reporting, see
 
 | | |
 |---|---|
-| **Current version** | v3.0.0-rc5 |
+| **Current version** | v3.0.0-rc6 |
 | **Compiler** | solc 0.8.36, EVM Prague, optimizer on (200 runs) |
 | **Audited?** | **No.** v1.0.2 was audited by ABDK in March 2022; the 3.0.0 line has not been audited. |
 
@@ -25,6 +25,8 @@ concern a mock are labelled as such and do not apply to production deployments.
 
 | Analysis | Version | Report | Assessment |
 |---|---|---|---|
+| Slither | v3.0.0-rc6 | [slither-report.md](./tools/v3.0.0-rc6/slither-report.md) | [feedback](./tools/v3.0.0-rc6/slither-report-feedback.md) |
+| Aderyn | v3.0.0-rc6 | [aderyn-report.md](./tools/v3.0.0-rc6/aderyn-report.md) | [feedback](./tools/v3.0.0-rc6/aderyn-report-feedback.md) |
 | Slither | v3.0.0-rc5 | [slither-report.md](./tools/v3.0.0-rc5/slither-report.md) | [feedback](./tools/v3.0.0-rc5/slither-report-feedback.md) |
 | Aderyn | v3.0.0-rc5 | [aderyn-report.md](./tools/v3.0.0-rc5/aderyn-report.md) | [feedback](./tools/v3.0.0-rc5/aderyn-report-feedback.md) |
 | Code-quality review | v3.0.0-rc5 | [CLAUDE_ANALYSIS.md](./tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md) | — |
@@ -34,22 +36,24 @@ concern a mock are labelled as such and do not apply to production deployments.
 | Nethermind AuditAgent | v3.0.0-rc1 | [report](./tools/nethermind-audit-agent/v3.0.0-rc1/audit_agent_report_1_v3.0.0-rc1.pdf) | [feedback](./tools/nethermind-audit-agent/v3.0.0-rc1/audit_agent_report_1_v3.0.0-rc1-feedback.md) |
 | ABDK (external audit) | v1.0.1 -> v1.0.2 | [ABDK report (CMTAT repo)](https://github.com/CMTA/CMTAT/blob/master/doc/audits/ABDK_CMTA_CMTATRuleEngine_v_1_0/ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf) | — |
 
-## Static analysis results — v3.0.0-rc5
+## Static analysis results — v3.0.0-rc6
 
 | Tool | High | Medium | Low | Info | Relevant to fix? |
 |---|---|---|---|---|---|
 | Slither 0.11.5 | 0 | 0 | 10 | 2 | **No** |
-| Aderyn 0.6.5 | 0 | — | 8 (76 instances) | — | **No** |
+| Aderyn 0.6.5 | 0 | — | 8 (84 instances) | — | **No** |
 
 Every finding is by design, cosmetic, or a verified false positive. Highlights:
 
 - **`calls-loop` (Slither, 10)** — the engine iterating its rule set is the product. Bounded on-chain by
   `maxRules` (default 10).
-- **`unindexed-event-address` (Slither, 2)** — `TokenBound` / `TokenUnbound` match the ERC-3643 reference
-  interface, which declares them unindexed. Conformance, not an oversight.
+- **`unindexed-event-address` (Slither, 2)** — `TokenBound` / `TokenUnbound`, now declared in `ITokenBinding`,
+  match the ERC-3643 reference interface, which declares them unindexed. Conformance, not an oversight.
 - **`L-8 Unchecked Return` (Aderyn, 1)** — `_grantRole` in a constructor cannot return `false`. False positive.
 
-No change in counts from v3.0.0-rc4 for either tool.
+Slither: no change in counts from v3.0.0-rc5. Aderyn: same 8 findings, 76 -> 84 instances, entirely from the
+file count — the token binding split added a net four files, and the two per-file detectors (`L-2` pragma,
+`L-3` PUSH0) each moved by exactly four. No new finding came from the refactor.
 
 ## Substantive findings that were fixed
 
