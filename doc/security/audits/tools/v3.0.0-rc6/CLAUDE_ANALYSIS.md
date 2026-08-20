@@ -36,18 +36,20 @@ probe and benchmark file deleted.
 | F-2 | `type(IERC3643ComplianceExtended).interfaceId` is `0x00000000`, and the ids were hardcoded literals | ✅ fixed — all five ids now computed from the interfaces, values unchanged, pinned by 2 new tests |
 | G-1 | NatSpec length and doc pointers in contract comments | ⬜ no finding — median 4 lines, max 19, zero `.md` pointers |
 | H-1 | View approves a mint that enforcement rejects | ⬜ documented — carried from rc5, unchanged |
-| I-1 | `IRule` demands two functions the engine never calls | ⚠️ decide — least-privilege, affects every rule author |
+| I-1 | `IRule` demands two functions the engine never calls | ⚠️ **corrected** — they are called, by the token, when a rule is used directly as the engine |
+| I-2 | That standalone-rule configuration is advertised by ERC-165 but untested and undocumented | ⚠️ decide — test and document it, or stop advertising it |
+| I-3 | Should the engine call a rule's `canTransfer` rather than `detectTransferRestriction`? | ⬜ no — the code is the stronger primitive, and the engine owes the token a code |
 | J-1 | Binding registry embeddable in a foreign host | ⬜ verified by compile probe — inconvenience only, no blocker |
 | J-2 | ERC-3643 adapter indirection costs 35 gas per bind | ⬜ left as is — measured, negligible |
 
-**Counted: 14 rows — 1 fixed, 3 left as is, 8 no-finding/verified, 2 open decisions.**
+**Counted: 16 rows — 1 fixed, 3 left as is, 9 no-finding/verified, 1 corrected, 2 open decisions.**
 
 ## Outstanding
 
 | ID | Item | Why it is still open |
 |----|------|----------------------|
 | C-2 | `setTokenSelfBindingApprovalBatch` emits only a batch event | Unchanged since rc5. Fixing it alters the emitted event stream, which is API-visible to indexers. Product call. |
-| I-1 | `IRule` requires `canTransfer` / `canTransferFrom` | Narrowing it is a breaking change for the separate [CMTA/Rules](https://github.com/CMTA/Rules) repository. |
+| I-2 | A rule attached directly to a token as its engine | Every rule advertises `RULE_ENGINE_INTERFACE_ID`, so the configuration works, but no test exercises it and no document mentions it. Support it deliberately or drop the claim. |
 | H-1 | The view/enforcement divergence | Inherent to the ERC-1404 3-argument signature. Documented rather than fixed — see the rc5 report. |
 
 ---
@@ -251,7 +253,7 @@ rc6 split touched neither path.
 
 ## I. Interface granularity
 
-### I-1. `IRule` demands two functions the engine never calls — decide
+### I-1. `IRule` demands two functions the engine never calls — withdrawn, see the correction below
 
 `_checkRule` gates every rule on the flattened `IRULE_INTERFACE_ID` (`0x2497d6cb`). Flattened, `IRule` requires
 eight functional selectors. The engine calls six of them:
@@ -293,8 +295,75 @@ interface, and gate on that id. Three details decide whether it is worth doing:
   deny-list. That remains configuration discipline and must stay documented; the change must not be presented
   as closing that hole.
 
-**Verdict: decide**, at a release where CMTA/Rules moves in step. Not a defect today — the current gate is
-sound, merely broader than necessary.
+**Verdict: withdrawn — see the correction below.**
+
+### I-1 correction: the two functions are called, by the token
+
+The finding above is wrong, and the error was in its scope: it verified that *the engine* never calls
+`canTransfer` / `canTransferFrom` on a rule, then concluded nothing does. A rule is not only reachable through
+the engine.
+
+Every reference rule advertises **`RULE_ENGINE_INTERFACE_ID`** alongside `IRULE_INTERFACE_ID`:
+
+```solidity
+// RuleWhitelistMock.supportsInterface, and identically in the three other rule mocks
+return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID
+    || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || AccessControl.supportsInterface(interfaceId);
+```
+
+Because `IRule is IRuleEngineERC1404`, a rule implements the whole engine-facing surface, and CMTAT's
+`setRuleEngine(IRuleEngine)` accepts it with no further check. A single rule can therefore be attached to a
+token **as its rule engine**, with no RuleEngine in between — a legitimate deployment for an issuer who needs
+exactly one rule. In that configuration the token calls the rule directly:
+
+```solidity
+// ValidationModuleRuleEngine._canTransferWithRuleEngine
+return ruleEngine_.canTransfer(from, to, value);
+```
+
+So `canTransfer` and `canTransferFrom` are the token-facing half of the interface, not dead weight. Narrowing
+`IRule` to the six selectors the engine consumes would **remove that configuration**, which is a capability
+loss, not a least-privilege gain. The rc5 and rc6 reports should be read together on this point: the interface
+is wider than the engine needs *by design*, because the engine is not its only consumer.
+
+What survives from the original finding is much smaller and is recorded as `I-2`.
+
+### I-2. The standalone-rule configuration is advertised but never exercised — decide
+
+The capability above rests entirely on an ERC-165 id each rule advertises. Against that:
+
+- **No test attaches a rule directly to a token as its engine.** The suite always goes through a RuleEngine.
+- **No document mentions it.** Neither `doc/technical/RuleEngine-with-CMTAT.md`, `RuleEngine-with-ERC3643.md`
+  nor `doc/README.md` describes a rule being used without an engine.
+- The rules that matter in production live in [CMTA/Rules](https://github.com/CMTA/Rules), and whether they
+  advertise `RULE_ENGINE_INTERFACE_ID` is a separate question this review did not check.
+
+An advertised interface with no test is a claim nobody has verified: an integrator reading `supportsInterface`
+is entitled to wire a rule straight into `setRuleEngine`, and nothing here proves the four reference rules
+behave correctly in that role — in particular that a rule's `transferred` accepts being called by the token
+rather than by the engine, and that its restriction codes and messages reach the token intact.
+
+**Verdict: decide.** Either support it deliberately — one integration test per reference rule plus a paragraph
+in the CMTAT integration guide — or stop advertising `RULE_ENGINE_INTERFACE_ID` from rules that are only ever
+meant to sit behind an engine. The first is the smaller change and matches what the interface already says.
+
+### I-3. Should the engine call the rule's `canTransfer` instead of `detectTransferRestriction`? — no
+
+Raised while reviewing `I-1`, and recorded because the answer is not obvious from the interfaces alone.
+
+**No, and the current direction is the correct one.** Three reasons:
+
+- **The code is the stronger primitive.** `bool` is derivable from the code (`code == 0`); the code is not
+  derivable from the bool. The engine's own `canTransfer` is exactly `detectTransferRestriction(...) == 0`.
+- **The engine owes the token a code.** `RuleEngineBase` implements ERC-1404's `detectTransferRestriction` and
+  `messageForTransferRestriction`. If rules answered only a boolean, the engine could not produce a restriction
+  code at all, and the token would lose the reason a transfer was refused.
+- **Calling both would double the external calls per rule and let a rule contradict itself.** `canTransfer` and
+  `detectTransferRestriction` are separately implemented in every rule; nothing forces them to agree. Today the
+  engine has one source of truth per rule per operation, and the answer cannot depend on which entrypoint the
+  caller used.
+
+**Verdict: leave as is.**
 
 ## J. Modularity
 
