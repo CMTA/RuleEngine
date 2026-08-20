@@ -27,6 +27,7 @@ concern a mock are labelled as such and do not apply to production deployments.
 |---|---|---|---|
 | Slither | v3.0.0-rc6 | [slither-report.md](./tools/v3.0.0-rc6/slither-report.md) | [feedback](./tools/v3.0.0-rc6/slither-report-feedback.md) |
 | Aderyn | v3.0.0-rc6 | [aderyn-report.md](./tools/v3.0.0-rc6/aderyn-report.md) | [feedback](./tools/v3.0.0-rc6/aderyn-report-feedback.md) |
+| Code-quality review | v3.0.0-rc6 | [CLAUDE_ANALYSIS.md](./tools/v3.0.0-rc6/CLAUDE_ANALYSIS.md) | — |
 | Slither | v3.0.0-rc5 | [slither-report.md](./tools/v3.0.0-rc5/slither-report.md) | [feedback](./tools/v3.0.0-rc5/slither-report-feedback.md) |
 | Aderyn | v3.0.0-rc5 | [aderyn-report.md](./tools/v3.0.0-rc5/aderyn-report.md) | [feedback](./tools/v3.0.0-rc5/aderyn-report-feedback.md) |
 | Code-quality review | v3.0.0-rc5 | [CLAUDE_ANALYSIS.md](./tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md) | — |

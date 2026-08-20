@@ -5,8 +5,8 @@
 pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
-import {RuleEngine} from "src/deployment/RuleEngine.sol";
-import {RuleWhitelistMock} from "src/mocks/rules/validation/RuleWhitelistMock.sol";
+import {RuleEngine} from "../src/deployment/RuleEngine.sol";
+import {RuleWhitelistMock} from "../src/mocks/rules/validation/RuleWhitelistMock.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {
     ValidationModuleRuleEngine
@@ -29,6 +29,11 @@ import {
  * participant. Replace this with the real address list for anything beyond a demo.
  */
 contract RuleEngineScript is Script {
+    /**
+     * @notice Deploys the demo whitelist rule and a RuleEngine bound to `CMTAT_ADDRESS`, then sets
+     * the engine on that token.
+     * @dev Reads the deployer key from `PRIVATE_KEY` and the token address from `CMTAT_ADDRESS`.
+     */
     function run() external {
         // Get env variable
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");

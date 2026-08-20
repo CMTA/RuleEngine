@@ -50,7 +50,7 @@ CMTAT submodule also needs `cd lib/CMTAT && npm install` for its OpenZeppelin de
 | `CMTATv3.0.0/` | `lib/CMTATv3.0.0/contracts/` |
 | `@openzeppelin/contracts/` | `lib/openzeppelin-contracts/contracts` |
 
-Use `@openzeppelin/contracts/` for OpenZeppelin imports, `CMTAT/` for CMTAT imports, `src/` for local imports.
+Use `@openzeppelin/contracts/` for OpenZeppelin imports and `CMTAT/` for CMTAT imports. For project files, `src/` and `script/` import **relatively** (`./modules/...`, `../src/...`); the `src/` remapping is used by the tests.
 
 ## Architecture
 

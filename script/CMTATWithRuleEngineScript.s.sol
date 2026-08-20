@@ -8,8 +8,8 @@ import {Script, console} from "forge-std/Script.sol";
 import {ICMTATConstructor, CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.sol";
 import {IERC1643CMTAT} from "CMTAT/interfaces/tokenization/draft-IERC1643CMTAT.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
-import {RuleEngine} from "src/deployment/RuleEngine.sol";
-import {RuleWhitelistMock} from "src/mocks/rules/validation/RuleWhitelistMock.sol";
+import {RuleEngine} from "../src/deployment/RuleEngine.sol";
+import {RuleWhitelistMock} from "../src/mocks/rules/validation/RuleWhitelistMock.sol";
 
 /**
  * @title Example deployment of a CMTAT, a mock RuleWhitelistMock and a RuleEngine
@@ -17,6 +17,12 @@ import {RuleWhitelistMock} from "src/mocks/rules/validation/RuleWhitelistMock.so
  * It is not a production deployment recipe for rule contracts.
  */
 contract CMTATWithRuleEngineScript is Script {
+    /**
+     * @notice Deploys a CMTAT token, the demo whitelist rule and a RuleEngine, and wires them
+     * together.
+     * @dev Reads the deployer key from `PRIVATE_KEY`; the deployer becomes the token and engine
+     * admin.
+     */
     function run() external {
         // Get env variable
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
