@@ -393,16 +393,31 @@ The table below summarizes which ERC-165 interfaces are advertised by each deplo
 | `IERC1404` | `0xab84a5c8` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `IERC1404Extend` | `0x78a8de7d` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `IERC3643Compliance` | `0x3144991c` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC3643ComplianceExtended` | `0x646ba2be` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `IERC7551Compliance` (subset) | `0x7157797f` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `IERC173` | `0x7f5828d0` | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `Ownable2Step` specific (`pendingOwner()`, `acceptOwnership()`) | `0x9ab669ef` | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `IAccessControl` | `0x7965db0b` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> |
 | `IAccessControlEnumerable` | `0x5a05180f` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> |
 
+The six interfaces common to all three variants come from `RuleEngineBase._supportsRuleEngineBaseInterface`;
+each deployable adds the IDs of its own access-control model on top.
+
 Notes:
 - `RuleEngine` advertises OpenZeppelin RBAC interfaces because it inherits `AccessControlEnumerable`.
 - `RuleEngineOwnable` / `RuleEngineOwnable2Step` intentionally do not advertise `IAccessControl`.
 - `Ownable2Step` specific interface ID is defined in `Ownable2StepInterfaceId` and includes only `pendingOwner()` and `acceptOwnership()`.
+- **`IRule` (`0x2497d6cb`) is deliberately absent from this table.** The engine does not implement `IRule`; it
+  *requires* it of every rule, checking it in `_checkRule` before a rule is added. Do not expect
+  `ruleEngine.supportsInterface(0x2497d6cb)` to return true.
+- **The IDs are computed from the interfaces, not hardcoded** — see `ComplianceInterfaceId`, `RuleInterfaceId`
+  and `ERC1404InterfaceId`, and `test/RuleEngine/IRuleInterfaceId.t.sol`, which pins each one to the wire value
+  above. `type(I).interfaceId` counts only the functions `I` declares *directly*, so every constant XORs the
+  interface with its parents.
+- **Never use `type(IERC3643ComplianceExtended).interfaceId`.** That interface declares no function of its own —
+  it only combines `IERC3643Compliance` and `ITokenBindingExtended` — so the expression evaluates to
+  `0x00000000`. Use `ComplianceInterfaceId.ERC3643_COMPLIANCE_EXTENDED_INTERFACE_ID` (`0x646ba2be`), which is
+  computed from `ITokenBindingExtended`.
 
 #### Role list (RuleEngine only)
 

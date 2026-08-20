@@ -36,19 +36,21 @@ probe and benchmark file deleted.
 | F-2 | `type(IERC3643ComplianceExtended).interfaceId` is `0x00000000`, and the ids were hardcoded literals | ✅ fixed — all five ids now computed from the interfaces, values unchanged, pinned by 2 new tests |
 | G-1 | NatSpec length and doc pointers in contract comments | ⬜ no finding — median 4 lines, max 19, zero `.md` pointers |
 | H-1 | View approves a mint that enforcement rejects | ⬜ documented — carried from rc5, unchanged |
-| I-1 | `IRule` demands two functions the engine never calls | ⚠️ **corrected** — they are called, by the token, when a rule is used directly as the engine |
+| I-1 | `IRule` demands two functions the engine never calls | ⚠️ decide — stands; the narrowed id would be `0xb1a69752` |
 | I-2 | That standalone-rule configuration is advertised by ERC-165 but untested and undocumented | ⚠️ decide — test and document it, or stop advertising it |
 | I-3 | Should the engine call a rule's `canTransfer` rather than `detectTransferRestriction`? | ⬜ no — the code is the stronger primitive, and the engine owes the token a code |
 | J-1 | Binding registry embeddable in a foreign host | ⬜ verified by compile probe — inconvenience only, no blocker |
 | J-2 | ERC-3643 adapter indirection costs 35 gas per bind | ⬜ left as is — measured, negligible |
 
-**Counted: 16 rows — 1 fixed, 3 left as is, 9 no-finding/verified, 1 corrected, 2 open decisions.**
+**Counted: 16 rows — 1 fixed, 3 left as is, 9 no-finding/verified, 3 open decisions.** One superseded correction
+is kept visible under `I-1`.
 
 ## Outstanding
 
 | ID | Item | Why it is still open |
 |----|------|----------------------|
 | C-2 | `setTokenSelfBindingApprovalBatch` emits only a batch event | Unchanged since rc5. Fixing it alters the emitted event stream, which is API-visible to indexers. Product call. |
+| I-1 | `IRule` requires `canTransfer` / `canTransferFrom` | Narrowing to `0xb1a69752` is a breaking change for the separate [CMTA/Rules](https://github.com/CMTA/Rules) repository: every rule must advertise the new id before an updated engine accepts it. |
 | I-2 | A rule attached directly to a token as its engine | Every rule advertises `RULE_ENGINE_INTERFACE_ID`, so the configuration works, but no test exercises it and no document mentions it. Support it deliberately or drop the claim. |
 | H-1 | The view/enforcement divergence | Inherent to the ERC-1404 3-argument signature. Documented rather than fixed — see the rc5 report. |
 
@@ -253,7 +255,7 @@ rc6 split touched neither path.
 
 ## I. Interface granularity
 
-### I-1. `IRule` demands two functions the engine never calls — withdrawn, see the correction below
+### I-1. `IRule` demands two functions the engine never calls — stands
 
 `_checkRule` gates every rule on the flattened `IRULE_INTERFACE_ID` (`0x2497d6cb`). Flattened, `IRule` requires
 eight functional selectors. The engine calls six of them:
@@ -295,9 +297,11 @@ interface, and gate on that id. Three details decide whether it is worth doing:
   deny-list. That remains configuration discipline and must stay documented; the change must not be presented
   as closing that hole.
 
-**Verdict: withdrawn — see the correction below.**
+**Verdict: decide**, at a release where CMTA/Rules moves in step. Not a defect today — the current gate is
+sound, merely broader than necessary. The narrowed id and the migration are specified below, after a correction
+that was itself wrong.
 
-### I-1 correction: the two functions are called, by the token
+### I-1 correction (superseded): "the two functions are called, by the token"
 
 The finding above is wrong, and the error was in its scope: it verified that *the engine* never calls
 `canTransfer` / `canTransferFrom` on a rule, then concluded nothing does. A rule is not only reachable through
@@ -321,12 +325,50 @@ exactly one rule. In that configuration the token calls the rule directly:
 return ruleEngine_.canTransfer(from, to, value);
 ```
 
-So `canTransfer` and `canTransferFrom` are the token-facing half of the interface, not dead weight. Narrowing
-`IRule` to the six selectors the engine consumes would **remove that configuration**, which is a capability
-loss, not a least-privilege gain. The rc5 and rc6 reports should be read together on this point: the interface
-is wider than the engine needs *by design*, because the engine is not its only consumer.
+That much is true: `canTransfer` and `canTransferFrom` are the token-facing half of the interface, and in the
+standalone configuration a token does call them on a rule.
 
-What survives from the original finding is much smaller and is recorded as `I-2`.
+**The conclusion drawn from it was wrong.** It slid from "some consumer calls them" to "the engine's gate must
+demand them", and those are independent obligations:
+
+- **The engine's gate** is `_checkRule` -> `IRULE_INTERFACE_ID`. It exists so the engine knows the rule answers
+  the six questions *the engine* asks.
+- **The standalone role** is not gated by that id at all. CMTAT's `setRuleEngine(IRuleEngine)` performs **no
+  ERC-165 check** — the obligation is a Solidity type at the call site. A rule that wants that role implements
+  `IRuleEngineERC1404` and advertises `RULE_ENGINE_INTERFACE_ID` on its own account, which is exactly what the
+  four reference rules already do.
+
+Narrowing `IRULE_INTERFACE_ID` therefore removes nothing. A rule that wants to be usable both behind an engine
+and directly by a token keeps implementing both interfaces and advertising both ids — opt-in, per rule, as
+today. What changes is that a rule which will only ever sit behind an engine stops being forced to implement
+the token-facing half. **`I-1` stands as originally written.**
+
+### I-1 migration: the narrowed interface
+
+The six selectors the engine consumes, plus ERC-165, give:
+
+| Interface | ID |
+|---|---|
+| Current `IRULE_INTERFACE_ID` (8 selectors + ERC-165) | `0x2497d6cb` |
+| Narrowed (6 selectors + ERC-165) | **`0xb1a69752`** |
+
+Cross-checked two ways, which is worth doing before anyone edits a constant: computing the candidate interface
+directly gives `0xb0595ef5` for its six declared selectors, and `0xb0595ef5 ^ 0x01ffc9a7` (ERC-165) equals
+`0x2497d6cb ^ canTransfer ^ canTransferFrom` — the same `0xb1a69752` from both directions.
+
+The migration is the part that makes this a coordinated release rather than a local edit:
+
+1. `IRule` stops inheriting `IRuleEngineERC1404` and declares the six selectors itself.
+2. `RuleInterfaceId.IRULE_INTERFACE_ID` becomes `type(IRule).interfaceId ^ type(IERC165).interfaceId` —
+   computable outright, since the narrowed `IRule` inherits only `IERC165` (see `F-2`).
+3. **Every rule in [CMTA/Rules](https://github.com/CMTA/Rules) must advertise the new id before an engine
+   running the new code will accept it.** Missing this step rejects rules that work today. Rules keep
+   advertising `RULE_ENGINE_INTERFACE_ID` as well if they support the standalone role.
+4. The reference rules under `src/mocks/rules/` drop `canTransfer` / `canTransferFrom` only if they give up the
+   standalone role; otherwise they keep both interfaces and both ids, and gain the `I-2` tests.
+
+The limit stated in the original finding still holds: ERC-165 expresses shape, never semantics, so a narrower
+id does not tell the engine an allow-list from a deny-list. That remains configuration discipline.
 
 ### I-2. The standalone-rule configuration is advertised but never exercised — decide
 
