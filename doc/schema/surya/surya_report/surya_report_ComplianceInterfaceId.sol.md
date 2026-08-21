@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/library/ComplianceInterfaceId.sol | 11d4725317d16e41444556546ee0f3c584b4d1f2 |
+| ./modules/library/ComplianceInterfaceId.sol | 1d2e44d2adb90df418028c279d4c2c52b49d4219 |
 
 
 ### Contracts Description Table
