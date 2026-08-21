@@ -197,6 +197,7 @@ Both are bound to the same engine implementation.
 
 ## 6. Related documents
 
+- [TokenBinding-module.md](./TokenBinding-module.md) — the standard-agnostic binding registry used to bind the token to the engine
 - [RuleEngine-with-ERC3643.md](./RuleEngine-with-ERC3643.md) — the ERC-3643 counterpart
 - [../README.md](../README.md) — full interface and API reference
 - [CLAUDE_ANALYSIS.md](../security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md) — code-quality review, findings `H-1` and `F-2`

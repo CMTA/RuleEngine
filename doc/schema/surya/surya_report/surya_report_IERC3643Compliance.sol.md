@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./interfaces/IERC3643Compliance.sol | 10b359e1a7dacc574ca3f3b1b4924a55ca25447a |
+| ./interfaces/IERC3643Compliance.sol | c7bae1e0e5bd1e565e9c2fb3177577618f0cb9b6 |
 
 
 ### Contracts Description Table
@@ -15,12 +15,9 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **IERC3643Compliance** | Interface | IERC3643ComplianceRead, IERC3643IComplianceContract |||
-| └ | bindToken | External ❗️ | 🛑  |NO❗️ |
-| └ | unbindToken | External ❗️ | 🛑  |NO❗️ |
+| **IERC3643Compliance** | Interface | IERC3643ComplianceRead, IERC3643IComplianceContract, ITokenBinding |||
 | └ | created | External ❗️ | 🛑  |NO❗️ |
 | └ | destroyed | External ❗️ | 🛑  |NO❗️ |
-| └ | isTokenBound | External ❗️ |   |NO❗️ |
 | └ | getTokenBound | External ❗️ |   |NO❗️ |
 
 

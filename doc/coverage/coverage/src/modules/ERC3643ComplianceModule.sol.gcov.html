@@ -31,26 +31,26 @@
             <td class="headerValue">lcov.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">26</td>
-            <td class="headerCovTableEntry">28</td>
-            <td class="headerCovTableEntryHi">92.9 %</td>
+            <td class="headerCovTableEntry">6</td>
+            <td class="headerCovTableEntry">7</td>
+            <td class="headerCovTableEntryMed">85.7 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2026-08-13 15:50:18</td>
+            <td class="headerValue">2026-08-20 17:53:43</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntry">9</td>
-            <td class="headerCovTableEntry">11</td>
-            <td class="headerCovTableEntryMed">81.8 %</td>
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">3</td>
+            <td class="headerCovTableEntryLo">66.7 %</td>
           </tr>
           <tr>
             <td></td>
             <td></td>
             <td></td>
             <td class="headerItem">Branches:</td>
-            <td class="headerCovTableEntry">9</td>
-            <td class="headerCovTableEntry">9</td>
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">2</td>
             <td class="headerCovTableEntryHi">100.0 %</td>
           </tr>
           <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
@@ -75,131 +75,70 @@
 <a name="4"><span class="lineNum">       4 </span>                :            : </a>
 <a name="5"><span class="lineNum">       5 </span>                :            : /* ==== OpenZeppelin === */</a>
 <a name="6"><span class="lineNum">       6 </span>                :            : import {EnumerableSet} from &quot;@openzeppelin/contracts/utils/structs/EnumerableSet.sol&quot;;</a>
-<a name="7"><span class="lineNum">       7 </span>                :            : import {Context} from &quot;@openzeppelin/contracts/utils/Context.sol&quot;;</a>
-<a name="8"><span class="lineNum">       8 </span>                :            : /* ==== Interface and other library === */</a>
-<a name="9"><span class="lineNum">       9 </span>                :            : import {IERC3643Compliance} from &quot;../interfaces/IERC3643Compliance.sol&quot;;</a>
-<a name="10"><span class="lineNum">      10 </span>                :            : import {ERC3643ComplianceModuleInvariantStorage} from &quot;./library/ERC3643ComplianceModuleInvariantStorage.sol&quot;;</a>
+<a name="7"><span class="lineNum">       7 </span>                :            : /* ==== Modules === */</a>
+<a name="8"><span class="lineNum">       8 </span>                :            : import {TokenBindingModule} from &quot;./TokenBindingModule.sol&quot;;</a>
+<a name="9"><span class="lineNum">       9 </span>                :            : /* ==== Interface and other library === */</a>
+<a name="10"><span class="lineNum">      10 </span>                :            : import {IERC3643Compliance} from &quot;../interfaces/IERC3643Compliance.sol&quot;;</a>
 <a name="11"><span class="lineNum">      11 </span>                :            : </a>
 <a name="12"><span class="lineNum">      12 </span>                :            : /**</a>
 <a name="13"><span class="lineNum">      13 </span>                :            :  * @title ERC3643ComplianceModule</a>
-<a name="14"><span class="lineNum">      14 </span>                :            :  * @notice Core ERC-3643 compliance module: tracks the tokens bound to this engine.</a>
-<a name="15"><span class="lineNum">      15 </span>                :            :  */</a>
-<a name="16"><span class="lineNum">      16 </span>                :            : abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC3643ComplianceModuleInvariantStorage {</a>
-<a name="17"><span class="lineNum">      17 </span>                :            :     /* ==== Type declaration === */</a>
-<a name="18"><span class="lineNum">      18 </span>                :            :     using EnumerableSet for EnumerableSet.AddressSet;</a>
-<a name="19"><span class="lineNum">      19 </span>                :            :     /* ==== State Variables === */</a>
-<a name="20"><span class="lineNum">      20 </span>                :            :     // Token binding tracking</a>
-<a name="21"><span class="lineNum">      21 </span>                :            :     /**</a>
-<a name="22"><span class="lineNum">      22 </span>                :            :      * @notice Set of tokens allowed to call the compliance callbacks.</a>
-<a name="23"><span class="lineNum">      23 </span>                :            :      */</a>
-<a name="24"><span class="lineNum">      24 </span>                :            :     EnumerableSet.AddressSet internal _boundTokens;</a>
-<a name="25"><span class="lineNum">      25 </span>                :            : </a>
-<a name="26"><span class="lineNum">      26 </span>                :            :     /* ==== Modifier === */</a>
-<a name="27"><span class="lineNum">      27 </span>                :<span class="lineCov">          7 :     modifier onlyBoundToken() {</span></a>
-<a name="28"><span class="lineNum">      28 </span>                :<span class="lineCov">          7 :         _checkBoundToken();</span></a>
-<a name="29"><span class="lineNum">      29 </span>                :            :         _;</a>
-<a name="30"><span class="lineNum">      30 </span>                :            :     }</a>
-<a name="31"><span class="lineNum">      31 </span>                :            : </a>
-<a name="32"><span class="lineNum">      32 </span>                :<span class="lineCov">          9 :     modifier onlyComplianceManager() {</span></a>
-<a name="33"><span class="lineNum">      33 </span>                :<span class="lineCov">          9 :         _onlyComplianceManager();</span></a>
-<a name="34"><span class="lineNum">      34 </span>                :            :         _;</a>
-<a name="35"><span class="lineNum">      35 </span>                :            :     }</a>
-<a name="36"><span class="lineNum">      36 </span>                :            : </a>
-<a name="37"><span class="lineNum">      37 </span>                :            :     /*//////////////////////////////////////////////////////////////</a>
-<a name="38"><span class="lineNum">      38 </span>                :            :                             PUBLIC/public FUNCTIONS</a>
-<a name="39"><span class="lineNum">      39 </span>                :            :     //////////////////////////////////////////////////////////////*/</a>
-<a name="40"><span class="lineNum">      40 </span>                :            : </a>
-<a name="41"><span class="lineNum">      41 </span>                :            :     /* ============ State functions ============ */</a>
-<a name="42"><span class="lineNum">      42 </span>                :            :     /**</a>
-<a name="43"><span class="lineNum">      43 </span>                :            :      * @inheritdoc IERC3643Compliance</a>
-<a name="44"><span class="lineNum">      44 </span>                :            :      * @dev Operator warning: &quot;multi-tenant&quot; means one RuleEngine is shared by</a>
-<a name="45"><span class="lineNum">      45 </span>                :            :      * multiple token contracts. In that setup, bind only tokens that are equally</a>
-<a name="46"><span class="lineNum">      46 </span>                :            :      * trusted and governed together.</a>
-<a name="47"><span class="lineNum">      47 </span>                :            :      * @custom:security-note Operation rules (stateful rules such as `RuleConditionalTransferLightMock`</a>
-<a name="48"><span class="lineNum">      48 </span>                :            :      * or `RuleMintAllowanceMock`) maintain per-address accounting that is shared across all bound tokens.</a>
-<a name="49"><span class="lineNum">      49 </span>                :            :      * Binding tokens from different issuers to the same engine will silently cross-contaminate</a>
-<a name="50"><span class="lineNum">      50 </span>                :            :      * their accounting. Only bind tokens that are equally trusted and governed together.</a>
-<a name="51"><span class="lineNum">      51 </span>                :            :      */</a>
-<a name="52"><span class="lineNum">      52 </span>                :<span class="lineCov">         66 :     function bindToken(address token) public virtual override {</span></a>
-<a name="53"><span class="lineNum">      53 </span>                :<span class="lineCov">         66 :         _authorizeComplianceBindingChange(token);</span></a>
-<a name="54"><span class="lineNum">      54 </span>                :<span class="lineCov">         58 :         _bindToken(token);</span></a>
-<a name="55"><span class="lineNum">      55 </span>                :            :     }</a>
-<a name="56"><span class="lineNum">      56 </span>                :            : </a>
-<a name="57"><span class="lineNum">      57 </span>                :            :     /**</a>
-<a name="58"><span class="lineNum">      58 </span>                :            :      * @inheritdoc IERC3643Compliance</a>
-<a name="59"><span class="lineNum">      59 </span>                :            :      * @dev Operator warning: unbinding is an administrative operation and does not</a>
-<a name="60"><span class="lineNum">      60 </span>                :            :      * erase any state already stored by external rule contracts in a previously</a>
-<a name="61"><span class="lineNum">      61 </span>                :            :      * shared (&quot;multi-tenant&quot;) setup.</a>
-<a name="62"><span class="lineNum">      62 </span>                :            :      */</a>
-<a name="63"><span class="lineNum">      63 </span>                :<span class="lineCov">         21 :     function unbindToken(address token) public virtual override {</span></a>
-<a name="64"><span class="lineNum">      64 </span>                :<span class="lineCov">         21 :         _authorizeComplianceBindingChange(token);</span></a>
-<a name="65"><span class="lineNum">      65 </span>                :<span class="lineCov">         14 :         _unbindToken(token);</span></a>
-<a name="66"><span class="lineNum">      66 </span>                :            :     }</a>
-<a name="67"><span class="lineNum">      67 </span>                :            : </a>
-<a name="68"><span class="lineNum">      68 </span>                :            :     /// @inheritdoc IERC3643Compliance</a>
-<a name="69"><span class="lineNum">      69 </span>                :<span class="lineCov">         41 :     function isTokenBound(address token) public view virtual override returns (bool) {</span></a>
-<a name="70"><span class="lineNum">      70 </span>                :<span class="lineCov">         41 :         return _boundTokens.contains(token);</span></a>
-<a name="71"><span class="lineNum">      71 </span>                :            :     }</a>
-<a name="72"><span class="lineNum">      72 </span>                :            : </a>
-<a name="73"><span class="lineNum">      73 </span>                :            :     /// @inheritdoc IERC3643Compliance</a>
-<a name="74"><span class="lineNum">      74 </span>                :<span class="lineCov">          7 :     function getTokenBound() public view virtual override returns (address) {</span></a>
-<a name="75"><span class="lineNum">      75 </span>        [<span class="branchCov" title="Branch 0 was taken 5 times"> + </span><span class="branchCov" title="Branch 1 was taken 2 times"> + </span>]:<span class="lineCov">          7 :         if (_boundTokens.length() &gt; 0) {</span></a>
-<a name="76"><span class="lineNum">      76 </span>                :            :             // Note that there are no guarantees on the ordering of values inside the array,</a>
-<a name="77"><span class="lineNum">      77 </span>                :            :             // and it may change when more values are added or removed.</a>
-<a name="78"><span class="lineNum">      78 </span>                :<span class="lineCov">          5 :             return _boundTokens.pos(0);</span></a>
-<a name="79"><span class="lineNum">      79 </span>                :            :         } else {</a>
-<a name="80"><span class="lineNum">      80 </span>                :<span class="lineCov">          2 :             return address(0);</span></a>
-<a name="81"><span class="lineNum">      81 </span>                :            :         }</a>
-<a name="82"><span class="lineNum">      82 </span>                :            :     }</a>
-<a name="83"><span class="lineNum">      83 </span>                :            : </a>
-<a name="84"><span class="lineNum">      84 </span>                :            :     /*//////////////////////////////////////////////////////////////</a>
-<a name="85"><span class="lineNum">      85 </span>                :            :                             INTERNAL/PRIVATE FUNCTIONS</a>
-<a name="86"><span class="lineNum">      86 </span>                :            :     //////////////////////////////////////////////////////////////*/</a>
-<a name="87"><span class="lineNum">      87 </span>                :            : </a>
-<a name="88"><span class="lineNum">      88 </span>                :            :     /**</a>
-<a name="89"><span class="lineNum">      89 </span>                :            :      * @dev Removes a token from the bound set.</a>
-<a name="90"><span class="lineNum">      90 </span>                :            :      * @param token The token to unbind; reverts when it is not currently bound.</a>
-<a name="91"><span class="lineNum">      91 </span>                :            :      */</a>
-<a name="92"><span class="lineNum">      92 </span>                :<span class="lineCov">         26 :     function _unbindToken(address token) internal virtual {</span></a>
-<a name="93"><span class="lineNum">      93 </span>                :            :         // remove() returns false when the token was not bound, so a separate</a>
-<a name="94"><span class="lineNum">      94 </span>                :            :         // contains() lookup is unnecessary.</a>
-<a name="95"><span class="lineNum">      95 </span>        [<span class="branchCov" title="Branch 0 was taken 5 times"> + </span><span class="branchCov" title="Branch 1 was taken 21 times"> + </span>]:<span class="lineCov">         26 :         require(_boundTokens.remove(token), RuleEngine_ERC3643Compliance_TokenNotBound());</span></a>
-<a name="96"><span class="lineNum">      96 </span>                :            : </a>
-<a name="97"><span class="lineNum">      97 </span>                :<span class="lineCov">         21 :         emit TokenUnbound(token);</span></a>
-<a name="98"><span class="lineNum">      98 </span>                :            :     }</a>
-<a name="99"><span class="lineNum">      99 </span>                :            : </a>
-<a name="100"><span class="lineNum">     100 </span>                :            :     /**</a>
-<a name="101"><span class="lineNum">     101 </span>                :            :      * @dev Adds a token to the bound set.</a>
-<a name="102"><span class="lineNum">     102 </span>                :            :      * @param token The token to bind; reverts on the zero address or when already bound.</a>
-<a name="103"><span class="lineNum">     103 </span>                :            :      */</a>
-<a name="104"><span class="lineNum">     104 </span>                :<span class="lineCov">        115 :     function _bindToken(address token) internal virtual {</span></a>
-<a name="105"><span class="lineNum">     105 </span>        [<span class="branchCov" title="Branch 0 was taken 5 times"> + </span><span class="branchCov" title="Branch 1 was taken 110 times"> + </span>]:<span class="lineCov">        115 :         require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());</span></a>
-<a name="106"><span class="lineNum">     106 </span>                :            :         // add() returns false when the token is already bound, so a separate</a>
-<a name="107"><span class="lineNum">     107 </span>                :            :         // contains() lookup is unnecessary.</a>
-<a name="108"><span class="lineNum">     108 </span>        [<span class="branchCov" title="Branch 0 was taken 5 times"> + </span><span class="branchCov" title="Branch 1 was taken 105 times"> + </span>]:<span class="lineCov">        110 :         require(_boundTokens.add(token), RuleEngine_ERC3643Compliance_TokenAlreadyBound());</span></a>
-<a name="109"><span class="lineNum">     109 </span>                :<span class="lineCov">        105 :         emit TokenBound(token);</span></a>
-<a name="110"><span class="lineNum">     110 </span>                :            :     }</a>
-<a name="111"><span class="lineNum">     111 </span>                :            : </a>
-<a name="112"><span class="lineNum">     112 </span>                :            :     /**</a>
-<a name="113"><span class="lineNum">     113 </span>                :            :      * @dev Authorization hook for bind/unbind, implemented by the deployable contracts.</a>
-<a name="114"><span class="lineNum">     114 </span>                :            :      * @param token The token being bound or unbound.</a>
-<a name="115"><span class="lineNum">     115 </span>                :            :      */</a>
-<a name="116"><span class="lineNum">     116 </span>                :<span class="lineNoCov">          0 :     function _authorizeComplianceBindingChange(address token) internal virtual;</span></a>
-<a name="117"><span class="lineNum">     117 </span>                :            : </a>
-<a name="118"><span class="lineNum">     118 </span>                :            :     /**</a>
-<a name="119"><span class="lineNum">     119 </span>                :            :      * @dev Access control hook guarding compliance management operations.</a>
-<a name="120"><span class="lineNum">     120 </span>                :            :      */</a>
-<a name="121"><span class="lineNum">     121 </span>                :<span class="lineNoCov">          0 :     function _onlyComplianceManager() internal virtual;</span></a>
-<a name="122"><span class="lineNum">     122 </span>                :            : </a>
-<a name="123"><span class="lineNum">     123 </span>                :            :     /**</a>
-<a name="124"><span class="lineNum">     124 </span>                :            :      * @dev Reverts when the caller is not a bound token.</a>
-<a name="125"><span class="lineNum">     125 </span>                :            :      */</a>
-<a name="126"><span class="lineNum">     126 </span>                :<span class="lineCov">         41 :     function _checkBoundToken() internal view virtual {</span></a>
-<a name="127"><span class="lineNum">     127 </span>           [<span class="branchCov" title="Branch 0 was taken 10 times"> + </span>]:<span class="lineCov">         41 :         if (!_boundTokens.contains(_msgSender())) {</span></a>
-<a name="128"><span class="lineNum">     128 </span>                :<span class="lineCov">         10 :             revert RuleEngine_ERC3643Compliance_UnauthorizedCaller();</span></a>
-<a name="129"><span class="lineNum">     129 </span>                :            :         }</a>
-<a name="130"><span class="lineNum">     130 </span>                :            :     }</a>
-<a name="131"><span class="lineNum">     131 </span>                :            : }</a>
+<a name="14"><span class="lineNum">      14 </span>                :            :  * @notice ERC-3643 adapter over the standard-agnostic {TokenBindingModule}: it adds the</a>
+<a name="15"><span class="lineNum">      15 </span>                :            :  * ERC-3643 specific view {getTokenBound} and names the binding manager in compliance terms.</a>
+<a name="16"><span class="lineNum">      16 </span>                :            :  * @dev The binding registry itself (storage, `bindToken` / `unbindToken` / `isTokenBound`, the</a>
+<a name="17"><span class="lineNum">      17 </span>                :            :  * `onlyBoundToken` modifier) lives in {TokenBindingModule} and can be reused outside any</a>
+<a name="18"><span class="lineNum">      18 </span>                :            :  * compliance context. Everything ERC-3643 specific is here:</a>
+<a name="19"><span class="lineNum">      19 </span>                :            :  *  - {getTokenBound}, the single-token view required by the ERC-3643 compliance interface;</a>
+<a name="20"><span class="lineNum">      20 </span>                :            :  *  - {_onlyComplianceManager}, the access control hook the deployable contracts implement, wired</a>
+<a name="21"><span class="lineNum">      21 </span>                :            :  *    to the generic {_onlyTokenBindingManager} hook.</a>
+<a name="22"><span class="lineNum">      22 </span>                :            :  *</a>
+<a name="23"><span class="lineNum">      23 </span>                :            :  * The ERC-3643 compliance callbacks themselves (`transferred`, `created`, `destroyed`) are</a>
+<a name="24"><span class="lineNum">      24 </span>                :            :  * implemented by `RuleEngineBase`, since they depend on the rules rather than on the binding.</a>
+<a name="25"><span class="lineNum">      25 </span>                :            :  * @custom:security-note Operation rules (stateful rules such as `RuleConditionalTransferLightMock`</a>
+<a name="26"><span class="lineNum">      26 </span>                :            :  * or `RuleMintAllowanceMock`) maintain per-address accounting that is shared across all bound</a>
+<a name="27"><span class="lineNum">      27 </span>                :            :  * tokens, and the ERC-3643 callbacks do not carry the calling token address to the rules.</a>
+<a name="28"><span class="lineNum">      28 </span>                :            :  * Binding tokens from different issuers to the same engine will silently cross-contaminate their</a>
+<a name="29"><span class="lineNum">      29 </span>                :            :  * accounting. Only bind tokens that are equally trusted and governed together.</a>
+<a name="30"><span class="lineNum">      30 </span>                :            :  */</a>
+<a name="31"><span class="lineNum">      31 </span>                :            : abstract contract ERC3643ComplianceModule is TokenBindingModule, IERC3643Compliance {</a>
+<a name="32"><span class="lineNum">      32 </span>                :            :     /* ==== Type declaration === */</a>
+<a name="33"><span class="lineNum">      33 </span>                :            :     using EnumerableSet for EnumerableSet.AddressSet;</a>
+<a name="34"><span class="lineNum">      34 </span>                :            : </a>
+<a name="35"><span class="lineNum">      35 </span>                :            :     /*//////////////////////////////////////////////////////////////</a>
+<a name="36"><span class="lineNum">      36 </span>                :            :                             PUBLIC/public FUNCTIONS</a>
+<a name="37"><span class="lineNum">      37 </span>                :            :     //////////////////////////////////////////////////////////////*/</a>
+<a name="38"><span class="lineNum">      38 </span>                :            : </a>
+<a name="39"><span class="lineNum">      39 </span>                :            :     /* ============ View functions ============ */</a>
+<a name="40"><span class="lineNum">      40 </span>                :            :     /// @inheritdoc IERC3643Compliance</a>
+<a name="41"><span class="lineNum">      41 </span>                :<span class="lineCov">          7 :     function getTokenBound() public view virtual override returns (address) {</span></a>
+<a name="42"><span class="lineNum">      42 </span>        [<span class="branchCov" title="Branch 0 was taken 5 times"> + </span><span class="branchCov" title="Branch 1 was taken 2 times"> + </span>]:<span class="lineCov">          7 :         if (_boundTokens.length() &gt; 0) {</span></a>
+<a name="43"><span class="lineNum">      43 </span>                :            :             // Note that there are no guarantees on the ordering of values inside the array,</a>
+<a name="44"><span class="lineNum">      44 </span>                :            :             // and it may change when more values are added or removed.</a>
+<a name="45"><span class="lineNum">      45 </span>                :<span class="lineCov">          5 :             return _boundTokens.pos(0);</span></a>
+<a name="46"><span class="lineNum">      46 </span>                :            :         } else {</a>
+<a name="47"><span class="lineNum">      47 </span>                :<span class="lineCov">          2 :             return address(0);</span></a>
+<a name="48"><span class="lineNum">      48 </span>                :            :         }</a>
+<a name="49"><span class="lineNum">      49 </span>                :            :     }</a>
+<a name="50"><span class="lineNum">      50 </span>                :            : </a>
+<a name="51"><span class="lineNum">      51 </span>                :            :     /*//////////////////////////////////////////////////////////////</a>
+<a name="52"><span class="lineNum">      52 </span>                :            :                             INTERNAL/PRIVATE FUNCTIONS</a>
+<a name="53"><span class="lineNum">      53 </span>                :            :     //////////////////////////////////////////////////////////////*/</a>
+<a name="54"><span class="lineNum">      54 </span>                :            : </a>
+<a name="55"><span class="lineNum">      55 </span>                :            :     /**</a>
+<a name="56"><span class="lineNum">      56 </span>                :            :      * @dev In an ERC-3643 deployment, the account managing the token bindings is the compliance</a>
+<a name="57"><span class="lineNum">      57 </span>                :            :      * manager, so the generic binding manager hook delegates to {_onlyComplianceManager}.</a>
+<a name="58"><span class="lineNum">      58 </span>                :            :      */</a>
+<a name="59"><span class="lineNum">      59 </span>                :<span class="lineCov">        127 :     function _onlyTokenBindingManager() internal virtual override {</span></a>
+<a name="60"><span class="lineNum">      60 </span>                :<span class="lineCov">        127 :         _onlyComplianceManager();</span></a>
+<a name="61"><span class="lineNum">      61 </span>                :            :     }</a>
+<a name="62"><span class="lineNum">      62 </span>                :            : </a>
+<a name="63"><span class="lineNum">      63 </span>                :            :     /**</a>
+<a name="64"><span class="lineNum">      64 </span>                :            :      * @dev Access control hook guarding compliance management operations, implemented by the</a>
+<a name="65"><span class="lineNum">      65 </span>                :            :      * deployable contracts. Binding management is gated by this hook through</a>
+<a name="66"><span class="lineNum">      66 </span>                :            :      * {_onlyTokenBindingManager}; the generic `onlyTokenBindingManager` modifier of</a>
+<a name="67"><span class="lineNum">      67 </span>                :            :      * {TokenBindingModule} is therefore the compliance manager check in an ERC-3643 deployment.</a>
+<a name="68"><span class="lineNum">      68 </span>                :            :      */</a>
+<a name="69"><span class="lineNum">      69 </span>                :<span class="lineNoCov">          0 :     function _onlyComplianceManager() internal virtual;</span></a>
+<a name="70"><span class="lineNum">      70 </span>                :            : }</a>
 </pre>
       </td>
     </tr>

@@ -47,7 +47,46 @@ forge lint
 
 
 
-### v3.0.0-rc5
+### v3.0.0-rc6
+
+### Summary
+
+Token binding is separated from the ERC-3643 compliance code: `TokenBindingModule` and
+`TokenBindingExtendedModule` now hold the whole binding registry and depend only on OpenZeppelin, so they can be reused in another project, while the compliance modules become thin ERC-3643 adapters. 
+
+The external API and the advertised ERC-165 interface IDs are unchanged; the only breaking change is the rename of the binding errors `RuleEngine_ERC3643Compliance_*` to `TokenBinding_*`, which changes their selectors.
+
+### Changed
+
+- **Token binding is now separated from the ERC-3643 compliance code**, so the registry can be reused in another project as-is. `TokenBindingModule` (+ `TokenBindingExtendedModule`) holds the whole binding logic — bound token set, `bindToken` / `unbindToken` / `isTokenBound`, the `onlyBoundToken` guard, batch binding, token self-binding and `getTokenBounds()` — and depends only on OpenZeppelin's `Context` and `EnumerableSet`. `ERC3643ComplianceModule` / `ERC3643ComplianceExtendedModule` become thin ERC-3643 adapters, keeping only `getTokenBound()` and the compliance-manager vocabulary (`_onlyTokenBindingManager()` is wired to `_onlyComplianceManager()`).
+- The binding functions and events moved to the standard-agnostic `ITokenBinding` / `ITokenBindingExtended`, which `IERC3643Compliance` / `IERC3643ComplianceExtended` now extend. **The external API and the advertised ERC-165 interface IDs are unchanged**: same functions, same selectors, same events, same access control.
+- **Renamed the binding errors** `RuleEngine_ERC3643Compliance_*` to `TokenBinding_*` (`TokenBinding_InvalidTokenAddress`, `TokenBinding_TokenAlreadyBound`, `TokenBinding_TokenNotBound`, `TokenBinding_UnauthorizedCaller`), so a reused module carries no RuleEngine or ERC-3643 wording. This changes the error selectors. `ERC3643ComplianceModuleInvariantStorage` is replaced by `TokenBindingModuleInvariantStorage`.
+- `_authorizeComplianceBindingChange(address)` renamed to `_authorizeTokenBindingChange(address)` and is no longer abstract: `TokenBindingModule` defaults it to the binding manager check, and `TokenBindingExtendedModule` overrides it with the self-binding aware variant. The deployable contracts are unchanged — they still implement `_onlyComplianceManager()` only.
+- `script/`: the two deployment scripts now import project files relatively (`../src/...`) instead of through the `src/` remapping, and `run()` carries NatSpec in both. `src/` and `script/` are clean against the project style checks (function order, modifier order, NatSpec, revert strings, imports, emoji); the test suite is deliberately left on the `src/` remapping and on Foundry test-naming conventions.
+- **The ERC-165 interface IDs are now computed from the interfaces instead of hardcoded** (`CLAUDE_ANALYSIS.md` `F-2`): `RuleInterfaceId.IRULE_INTERFACE_ID`, the three `ComplianceInterfaceId` constants and `ERC1404InterfaceId.IERC1404_INTERFACE_ID` XOR each interface with its parents, since `type(I).interfaceId` counts only directly declared selectors. **Every value is unchanged** (`0x2497d6cb`, `0x3144991c`, `0x646ba2be`, `0x7157797f`, `0xab84a5c8`) and is now pinned by a test, so an upstream CMTAT interface change fails the suite instead of silently altering what `supportsInterface` advertises. `IERC3643ComplianceExtended` declares no function of its own, so `type(IERC3643ComplianceExtended).interfaceId` is `0x00000000`: a NatSpec warning now says so and names the constant to use. `OwnableInterfaceId` and `Ownable2StepInterfaceId` stay literal — neither has an interface declaration outside `src/mocks/`.
+- Removed the unused `onlyComplianceManager` modifier from `ERC3643ComplianceModule`; the generic `onlyTokenBindingManager` modifier of `TokenBindingModule` guards the binding administration functions.
+
+### Added
+
+- Add `TokenBindingStandaloneMock`: a minimal engine embedding `TokenBindingModule` alone with `Ownable` access control, showing what another project has to provide to reuse the registry, and pinning that it works with no compliance code around it.
+- Add `test/TokenBinding/TokenBindingStandalone.t.sol` (10 tests) covering the standalone registry: bind, unbind, events, manager-only administration, zero address, already-bound / not-bound, the `onlyBoundToken` guard, and that self-binding is rejected without `TokenBindingExtendedModule`.
+
+### Documentation
+
+- Add `testInterfaceIdConstantsMatchTheirWireValues` and `testMarkerInterfaceHasZeroNaiveIdAndIsNotUsedAsSuch` to `test/RuleEngine/IRuleInterfaceId.t.sol`, pinning the five advertised interface IDs to their wire values and the marker interface's naive ID to `0x00000000` (346 -> 348 tests).
+- Add the v3.0.0-rc6 code-quality review in [doc/security/audits/tools/v3.0.0-rc6/CLAUDE_ANALYSIS.md](./doc/security/audits/tools/v3.0.0-rc6/CLAUDE_ANALYSIS.md): 14 findings, none a vulnerability, one fixed in this release. The reusability claim behind the token binding split is verified by two compile probes (a foreign ERC-2771 + RBAC host, and a CMTAT token embedding the registry) — both build, with no linearization conflict — and the ERC-3643 adapter indirection is measured at 35 gas per binding operation. `F-2` (hardcoded interface IDs) is fixed in this release; two items are left open for a decision: `C-2` (batch approval event, carried from rc5) and `I-2` (a rule advertises `RULE_ENGINE_INTERFACE_ID`, so it can be attached to a token as its engine with no RuleEngine in between, but no test or document covers that configuration). `I-1` (`IRule` requires `canTransfer` / `canTransferFrom`, which the engine never calls) stands, with the narrowed interface ID computed as `0xb1a69752`; an intermediate correction claiming the finding was void is kept in the report, marked superseded, with the reasoning error explained.
+- Add the v3.0.0-rc6 Slither and Aderyn reports with their assessment feedback in [doc/security/audits/tools/v3.0.0-rc6](./doc/security/audits/tools/v3.0.0-rc6), each prefixed with a summary table of findings and dispositions, and refresh [AUDIT_OVERVIEW.md](./doc/security/audits/AUDIT_OVERVIEW.md). Slither: 0 High / 0 Medium / 10 Low / 2 Informational, unchanged from rc5. Aderyn: 0 High / 8 Low, 76 -> 84 instances, the growth coming entirely from the net four files added by the token binding split (the per-file pragma and PUSH0 detectors). Nothing to fix in either.
+- Add [doc/technical/TokenBinding-module.md](./doc/technical/TokenBinding-module.md): the layering, the two hooks a deployment implements, how to reuse the module in another project, and the operational warnings of the registry.
+- `doc/README.md` "ERC-165 Support by Deployment Version": add the missing `IERC3643ComplianceExtended` (`0x646ba2be`) row — all three variants advertise it and five tests assert it, but the table never listed it — and note that `IRule` (`0x2497d6cb`) is deliberately absent because the engine *requires* it of rules rather than implementing it, that the IDs are computed and pinned, and that `type(IERC3643ComplianceExtended).interfaceId` is `0x00000000` and must not be used.
+- Update `README.md`, `doc/README.md`, `doc/technical/RuleEngine-with-ERC3643.md`, `CLAUDE.md` and `AGENTS.md` for the new layering.
+- Replace the access-control schema of `doc/README.md` (a drawio export, `doc/security/accessControl/access-control-RuleEngine.png`) with a PlantUML diagram, [doc/schema/plantuml/ruleengine-access-control.puml](./doc/schema/plantuml/ruleengine-access-control.puml), following the convention of the other diagrams: a text source is versioned next to the rendered PNG. The new diagram is up to date with the current code — it shows `setMaxRules` under `DEFAULT_ADMIN_ROLE`, the extended binding functions, the token self-binding path and the `onlyBoundToken` data plane, and it names `TokenBindingModule` / `TokenBindingExtendedModule` rather than the compliance modules.
+- Regenerate the contract UML diagrams with [sol2uml](https://github.com/naddison36/sol2uml) into `doc/schema/sol2uml/`, replacing the `doc/schema/vscode-uml/` images removed in `d6621e2` — the 14 references left in `doc/README.md` pointed at deleted files. Added [doc/script/script_sol2uml.sh](./doc/script/script_sol2uml.sh), which regenerates the whole set from relative source paths, so the diagrams are reproducible like the Surya ones. New diagrams for `TokenBindingModule`, `TokenBindingExtendedModule` and `ERC3643ComplianceExtendedModule` were added to their sections.
+- `doc/README.md`: the eight `[...](../src/...)` links now use absolute GitHub URLs. `doc/script/convert_links_for_pdf.sh` only rewrites the `./` form and its base URL points at the `doc/` directory, so a `../` link cannot be rewritten and stayed dead in the generated specification PDF.
+- `doc/README.md`: the "Role by modules" table now lists `bindToken` / `unbindToken` under `TokenBindingModule` and the batch and self-binding functions under `TokenBindingExtendedModule`, adds the missing `setMaxRules` row, and points `COMPLIANCE_MANAGER_ROLE` to `ERC3643ComplianceRolesStorage`, where it is actually declared.
+
+### v3.0.0-rc5-2026-08-13
+
+Commit: `ab9def2f19ae71af304127f42d20d9831cad1a2b`
 
 ### Changed
 

@@ -4,53 +4,26 @@ pragma solidity ^0.8.20;
 
 /* ==== CMTAT === */
 import {IERC3643ComplianceRead, IERC3643IComplianceContract} from "CMTAT/interfaces/tokenization/IERC3643Partial.sol";
+/* ==== Interface === */
+import {ITokenBinding} from "./ITokenBinding.sol";
 
 /**
  * @title IERC3643Compliance
  * @notice Compliance interface implemented by the RuleEngine for ERC-3643 tokens.
+ * @dev Token binding (`bindToken`, `unbindToken`, `isTokenBound`, and the `TokenBound` /
+ * `TokenUnbound` events) is inherited from the standard-agnostic {ITokenBinding}, so the
+ * registry can be reused outside a compliance context. Only the ERC-3643 specific parts are
+ * declared here.
+ *
+ * Security note: a "multi-tenant" setup means multiple token contracts share one RuleEngine
+ * instance (all are bound via {ITokenBinding-bindToken}). ERC-3643 callbacks do not carry the
+ * token address to rules, so stateful rules with per-address accounting are unsafe across
+ * mutually untrusted tokens. In that setup, all bound tokens must be equally trusted and
+ * governed together, and unbinding does not retroactively isolate rule state accumulated while
+ * they were shared.
  */
-interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContract {
-    /* ============ Events ============ */
-    /**
-     * @notice Emitted when a token is successfully bound to the compliance contract.
-     * @param token The address of the token that was bound.
-     */
-    event TokenBound(address token);
-
-    /**
-     * @notice Emitted when a token is successfully unbound from the compliance contract.
-     * @param token The address of the token that was unbound.
-     */
-    event TokenUnbound(address token);
-
+interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContract, ITokenBinding {
     /* ============ Functions ============ */
-    /**
-     * @notice Associates a token contract with this compliance contract.
-     * @dev The compliance contract may restrict operations on the bound token
-     *      according to the compliance logic.
-     *      Security note: a "multi-tenant" setup means multiple token contracts
-     *      share one RuleEngine instance (all are bound via {bindToken}).
-     *      In that setup, all bound tokens must be equally trusted and governed together.
-     *      ERC-3643 callbacks do not carry the token address to rules, so stateful
-     *      rules with per-address accounting are unsafe across mutually untrusted tokens.
-     *      Reverts if the token is already bound.
-     *      Complexity: O(1).
-     * @param token The address of the token to bind.
-     */
-    function bindToken(address token) external;
-
-    /**
-     * @notice Removes the association of a token contract from this compliance contract.
-     * @dev Security note: unbinding does not retroactively isolate rule state from
-     *      previously shared multi-token operation. "Multi-tenant" means one RuleEngine
-     *      shared by multiple token contracts. Avoid multi-tenant binding unless
-     *      all tokens are equally trusted and governed together.
-     *      Reverts if the token is not currently bound.
-     * Complexity: O(1).
-     * @param token The address of the token to unbind.
-     */
-    function unbindToken(address token) external;
-
     /**
      * @notice Updates the compliance contract state when tokens are created (minted).
      * @dev Called by the token contract when new tokens are issued to an account.
@@ -68,17 +41,6 @@ interface IERC3643Compliance is IERC3643ComplianceRead, IERC3643IComplianceContr
      * @param value The number of tokens destroyed.
      */
     function destroyed(address from, uint256 value) external;
-
-    /**
-     * @notice Checks whether a token is currently bound to this compliance contract.
-     * @dev
-     * Complexity: O(1).
-     * Note that there are no guarantees on the ordering of values inside the array,
-     * and it may change when more values are added or removed.
-     * @param token The token address to verify.
-     * @return isBound True if the token is bound, false otherwise.
-     */
-    function isTokenBound(address token) external view returns (bool isBound);
 
     /**
      * @notice Returns the single token currently bound to this compliance contract.

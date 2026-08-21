@@ -7,9 +7,8 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContractOwnable.sol";
 import {IERC3643Compliance} from "../../src/interfaces/IERC3643Compliance.sol";
-import {
-    ERC3643ComplianceModuleInvariantStorage
-} from "../../src/modules/library/ERC3643ComplianceModuleInvariantStorage.sol";
+import {ITokenBinding} from "../../src/interfaces/ITokenBinding.sol";
+import {TokenBindingModuleInvariantStorage} from "../../src/modules/library/TokenBindingModuleInvariantStorage.sol";
 
 // Minimal mock ERC-3643 token to simulate calls to RuleEngine
 contract ERC3643MockTokenOwnable {
@@ -55,15 +54,15 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         vm.startPrank(OWNER_ADDRESS);
 
         vm.expectEmit(true, false, false, true);
-        emit IERC3643Compliance.TokenBound(address(token1));
+        emit ITokenBinding.TokenBound(address(token1));
         ruleEngineMock.bindToken(address(token1));
 
         vm.expectEmit(true, false, false, true);
-        emit IERC3643Compliance.TokenBound(address(token2));
+        emit ITokenBinding.TokenBound(address(token2));
         ruleEngineMock.bindToken(address(token2));
 
         vm.expectEmit(true, false, false, true);
-        emit IERC3643Compliance.TokenBound(address(token3));
+        emit ITokenBinding.TokenBound(address(token3));
         ruleEngineMock.bindToken(address(token3));
 
         vm.stopPrank();
@@ -95,15 +94,15 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
 
         // Expect events for each unbind
         vm.expectEmit(true, false, false, true);
-        emit IERC3643Compliance.TokenUnbound(address(token2));
+        emit ITokenBinding.TokenUnbound(address(token2));
         ruleEngineMock.unbindToken(address(token2));
 
         vm.expectEmit(true, false, false, true);
-        emit IERC3643Compliance.TokenUnbound(address(token1));
+        emit ITokenBinding.TokenUnbound(address(token1));
         ruleEngineMock.unbindToken(address(token1));
 
         vm.expectEmit(true, false, false, true);
-        emit IERC3643Compliance.TokenUnbound(address(token3));
+        emit ITokenBinding.TokenUnbound(address(token3));
         ruleEngineMock.unbindToken(address(token3));
 
         vm.stopPrank();
@@ -137,15 +136,13 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
     }
 
     function testCannotBoundIfInvalidAddress() public {
-        vm.expectRevert(
-            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
-        );
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_InvalidTokenAddress.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindToken(address(ZERO_ADDRESS));
     }
 
     function testCannotUnBoundIfTokenIsNotBound() public {
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_TokenNotBound.selector);
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenNotBound.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.unbindToken(address(0x100));
     }
@@ -156,7 +153,7 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         ruleEngineMock.bindToken(address(0x1));
 
         // Assert
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_TokenAlreadyBound.selector);
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenAlreadyBound.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindToken(address(0x1));
     }
@@ -221,9 +218,7 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
     }
 
     function testCannotSetTokenSelfBindingApprovalForZeroAddress() public {
-        vm.expectRevert(
-            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
-        );
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_InvalidTokenAddress.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setTokenSelfBindingApproval(address(0), true);
     }
@@ -268,9 +263,7 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         tokens[0] = address(token1);
         tokens[1] = address(0);
 
-        vm.expectRevert(
-            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
-        );
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_InvalidTokenAddress.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.setTokenSelfBindingApprovalBatch(tokens, true);
     }
@@ -327,9 +320,7 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         tokens[0] = address(token1);
         tokens[1] = address(0);
 
-        vm.expectRevert(
-            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_InvalidTokenAddress.selector
-        );
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_InvalidTokenAddress.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindTokens(tokens);
     }
@@ -342,7 +333,7 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindToken(address(token1));
 
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_TokenAlreadyBound.selector);
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenAlreadyBound.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindTokens(tokens);
     }
@@ -355,29 +346,23 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindToken(address(token1));
 
-        vm.expectRevert(ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_TokenNotBound.selector);
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenNotBound.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.unbindTokens(tokens);
     }
 
     function testCannotCreatedIfNotBound() public {
-        vm.expectRevert(
-            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector
-        );
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_UnauthorizedCaller.selector);
         ruleEngineMock.created(user1, 100);
     }
 
     function testCannotDestroyedIfNotBound() public {
-        vm.expectRevert(
-            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector
-        );
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_UnauthorizedCaller.selector);
         ruleEngineMock.destroyed(user2, 50);
     }
 
     function testCannotTransferredIfNotBound() public {
-        vm.expectRevert(
-            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector
-        );
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_UnauthorizedCaller.selector);
         ruleEngineMock.transferred(user1, user2, 200);
     }
 }

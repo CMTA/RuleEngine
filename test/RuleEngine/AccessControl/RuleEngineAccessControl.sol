@@ -91,9 +91,7 @@ contract RuleEngineTest is Test, HelperContract {
     function testCannotAttackerOperateOnTransfer() public {
         // Act
         vm.prank(ATTACKER);
-        vm.expectRevert(
-            ERC3643ComplianceModuleInvariantStorage.RuleEngine_ERC3643Compliance_UnauthorizedCaller.selector
-        );
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_UnauthorizedCaller.selector);
         ruleEngineMock.transferred(address(0), ADDRESS1, ADDRESS2, 10);
     }
 

@@ -13,7 +13,7 @@ import {RuleEngine} from "src/deployment/RuleEngine.sol";
 // forge-lint: disable-next-line(unused-import)
 import {RulesManagementModule} from "src/RuleEngineBase.sol";
 // forge-lint: disable-next-line(unused-import)
-import {ERC3643ComplianceModuleInvariantStorage} from "src/modules/library/ERC3643ComplianceModuleInvariantStorage.sol";
+import {TokenBindingModuleInvariantStorage} from "src/modules/library/TokenBindingModuleInvariantStorage.sol";
 // RuleConditionalTransfer
 import {RuleConditionalTransferLightMock} from "src/mocks/rules/operation/RuleConditionalTransferLightMock.sol";
 import {

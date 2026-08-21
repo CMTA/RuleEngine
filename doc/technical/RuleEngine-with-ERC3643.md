@@ -113,6 +113,14 @@ engine.setTokenSelfBindingApprovalBatch(tokens, true);
 engine.getTokenBounds();                               // every bound token
 ```
 
+### 3.6 Where binding is implemented
+
+The binding registry itself is standard-agnostic and lives in `TokenBindingModule` /
+`TokenBindingExtendedModule`; `ERC3643ComplianceModule` / `ERC3643ComplianceExtendedModule` are thin
+ERC-3643 adapters over it, adding `getTokenBound()` and the compliance manager vocabulary. This matters
+here only for reading the code and for reusing the registry elsewhere: the engine's external API is
+unchanged. See [TokenBinding-module.md](./TokenBinding-module.md).
+
 ## 4. Warnings and limitations
 
 ### 4.1 The mint pre-check fails open for spender-dependent rules
@@ -159,7 +167,7 @@ A gas-heavy rule affects every operation on every bound token.
 ### 4.5 Only bound tokens may call the callbacks
 
 `transferred`, `created` and `destroyed` all revert with
-`RuleEngine_ERC3643Compliance_UnauthorizedCaller` for any caller that is not a bound token. Verified by
+`TokenBinding_UnauthorizedCaller` for any caller that is not a bound token. Verified by
 `testUnboundCallerCannotCallTransferred` and `testUnboundCallerCannotCallCreatedOrDestroyed`.
 
 ### 4.6 Restriction codes must be unique across the rule set
@@ -212,6 +220,7 @@ The end-to-end suite covers, using a token that drives the engine exactly as `To
 ## 6. Related documents
 
 - [RuleEngine-with-CMTAT.md](./RuleEngine-with-CMTAT.md) — the CMTAT counterpart
+- [TokenBinding-module.md](./TokenBinding-module.md) — the standard-agnostic binding registry underneath
 - [../README.md](../README.md) — full interface and API reference
 - [CLAUDE_ANALYSIS.md](../security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md) — code-quality review, findings `H-1` and `F-2`
 - Production rules: [github.com/CMTA/Rules](https://github.com/CMTA/Rules)

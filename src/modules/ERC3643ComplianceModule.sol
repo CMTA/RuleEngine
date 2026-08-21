@@ -4,72 +4,39 @@ pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+/* ==== Modules === */
+import {TokenBindingModule} from "./TokenBindingModule.sol";
 /* ==== Interface and other library === */
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
-import {ERC3643ComplianceModuleInvariantStorage} from "./library/ERC3643ComplianceModuleInvariantStorage.sol";
 
 /**
  * @title ERC3643ComplianceModule
- * @notice Core ERC-3643 compliance module: tracks the tokens bound to this engine.
+ * @notice ERC-3643 adapter over the standard-agnostic {TokenBindingModule}: it adds the
+ * ERC-3643 specific view {getTokenBound} and names the binding manager in compliance terms.
+ * @dev The binding registry itself (storage, `bindToken` / `unbindToken` / `isTokenBound`, the
+ * `onlyBoundToken` modifier) lives in {TokenBindingModule} and can be reused outside any
+ * compliance context. Everything ERC-3643 specific is here:
+ *  - {getTokenBound}, the single-token view required by the ERC-3643 compliance interface;
+ *  - {_onlyComplianceManager}, the access control hook the deployable contracts implement, wired
+ *    to the generic {_onlyTokenBindingManager} hook.
+ *
+ * The ERC-3643 compliance callbacks themselves (`transferred`, `created`, `destroyed`) are
+ * implemented by `RuleEngineBase`, since they depend on the rules rather than on the binding.
+ * @custom:security-note Operation rules (stateful rules such as `RuleConditionalTransferLightMock`
+ * or `RuleMintAllowanceMock`) maintain per-address accounting that is shared across all bound
+ * tokens, and the ERC-3643 callbacks do not carry the calling token address to the rules.
+ * Binding tokens from different issuers to the same engine will silently cross-contaminate their
+ * accounting. Only bind tokens that are equally trusted and governed together.
  */
-abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC3643ComplianceModuleInvariantStorage {
+abstract contract ERC3643ComplianceModule is TokenBindingModule, IERC3643Compliance {
     /* ==== Type declaration === */
     using EnumerableSet for EnumerableSet.AddressSet;
-    /* ==== State Variables === */
-    // Token binding tracking
-    /**
-     * @notice Set of tokens allowed to call the compliance callbacks.
-     */
-    EnumerableSet.AddressSet internal _boundTokens;
-
-    /* ==== Modifier === */
-    modifier onlyBoundToken() {
-        _checkBoundToken();
-        _;
-    }
-
-    modifier onlyComplianceManager() {
-        _onlyComplianceManager();
-        _;
-    }
 
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/public FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    /* ============ State functions ============ */
-    /**
-     * @inheritdoc IERC3643Compliance
-     * @dev Operator warning: "multi-tenant" means one RuleEngine is shared by
-     * multiple token contracts. In that setup, bind only tokens that are equally
-     * trusted and governed together.
-     * @custom:security-note Operation rules (stateful rules such as `RuleConditionalTransferLightMock`
-     * or `RuleMintAllowanceMock`) maintain per-address accounting that is shared across all bound tokens.
-     * Binding tokens from different issuers to the same engine will silently cross-contaminate
-     * their accounting. Only bind tokens that are equally trusted and governed together.
-     */
-    function bindToken(address token) public virtual override {
-        _authorizeComplianceBindingChange(token);
-        _bindToken(token);
-    }
-
-    /**
-     * @inheritdoc IERC3643Compliance
-     * @dev Operator warning: unbinding is an administrative operation and does not
-     * erase any state already stored by external rule contracts in a previously
-     * shared ("multi-tenant") setup.
-     */
-    function unbindToken(address token) public virtual override {
-        _authorizeComplianceBindingChange(token);
-        _unbindToken(token);
-    }
-
-    /// @inheritdoc IERC3643Compliance
-    function isTokenBound(address token) public view virtual override returns (bool) {
-        return _boundTokens.contains(token);
-    }
-
+    /* ============ View functions ============ */
     /// @inheritdoc IERC3643Compliance
     function getTokenBound() public view virtual override returns (address) {
         if (_boundTokens.length() > 0) {
@@ -86,46 +53,18 @@ abstract contract ERC3643ComplianceModule is Context, IERC3643Compliance, ERC364
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @dev Removes a token from the bound set.
-     * @param token The token to unbind; reverts when it is not currently bound.
+     * @dev In an ERC-3643 deployment, the account managing the token bindings is the compliance
+     * manager, so the generic binding manager hook delegates to {_onlyComplianceManager}.
      */
-    function _unbindToken(address token) internal virtual {
-        // remove() returns false when the token was not bound, so a separate
-        // contains() lookup is unnecessary.
-        require(_boundTokens.remove(token), RuleEngine_ERC3643Compliance_TokenNotBound());
-
-        emit TokenUnbound(token);
+    function _onlyTokenBindingManager() internal virtual override {
+        _onlyComplianceManager();
     }
 
     /**
-     * @dev Adds a token to the bound set.
-     * @param token The token to bind; reverts on the zero address or when already bound.
-     */
-    function _bindToken(address token) internal virtual {
-        require(token != address(0), RuleEngine_ERC3643Compliance_InvalidTokenAddress());
-        // add() returns false when the token is already bound, so a separate
-        // contains() lookup is unnecessary.
-        require(_boundTokens.add(token), RuleEngine_ERC3643Compliance_TokenAlreadyBound());
-        emit TokenBound(token);
-    }
-
-    /**
-     * @dev Authorization hook for bind/unbind, implemented by the deployable contracts.
-     * @param token The token being bound or unbound.
-     */
-    function _authorizeComplianceBindingChange(address token) internal virtual;
-
-    /**
-     * @dev Access control hook guarding compliance management operations.
+     * @dev Access control hook guarding compliance management operations, implemented by the
+     * deployable contracts. Binding management is gated by this hook through
+     * {_onlyTokenBindingManager}; the generic `onlyTokenBindingManager` modifier of
+     * {TokenBindingModule} is therefore the compliance manager check in an ERC-3643 deployment.
      */
     function _onlyComplianceManager() internal virtual;
-
-    /**
-     * @dev Reverts when the caller is not a bound token.
-     */
-    function _checkBoundToken() internal view virtual {
-        if (!_boundTokens.contains(_msgSender())) {
-            revert RuleEngine_ERC3643Compliance_UnauthorizedCaller();
-        }
-    }
 }

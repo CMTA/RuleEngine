@@ -34,6 +34,7 @@ The RuleEngine is an external contract used to apply transfer restrictions to an
   - [Contract Constructors](#contract-constructors)
   - [RuleEngineBase](#ruleenginebase)
   - [VersionModule](#versionmodule)
+  - [TokenBindingModule](#tokenbindingmodule)
   - [ERC3643ComplianceModule](#erc3643compliancemodule)
   - [ERC3643ComplianceExtendedModule](#erc3643complianceextendedmodule)
   - [RulesManagementModule](#rulesmanagementmodule)
@@ -323,14 +324,20 @@ external;
 
 ### ERC-3643
 
-The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is defined in [IERC3643Compliance.sol](../src/interfaces/IERC3643Compliance.sol).
-Non-standard helper functions are defined in [IERC3643ComplianceExtended.sol](../src/interfaces/IERC3643ComplianceExtended.sol).
+The [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) compliance interface is defined in [IERC3643Compliance.sol](https://github.com/CMTA/RuleEngine/blob/main/src/interfaces/IERC3643Compliance.sol).
+Non-standard helper functions are defined in [IERC3643ComplianceExtended.sol](https://github.com/CMTA/RuleEngine/blob/main/src/interfaces/IERC3643ComplianceExtended.sol).
+
+Token binding itself is not specific to ERC-3643, so it is declared in the standard-agnostic
+[ITokenBinding.sol](https://github.com/CMTA/RuleEngine/blob/main/src/interfaces/ITokenBinding.sol) (`bindToken`, `unbindToken`, `isTokenBound`,
+`TokenBound` / `TokenUnbound`) and [ITokenBindingExtended.sol](https://github.com/CMTA/RuleEngine/blob/main/src/interfaces/ITokenBindingExtended.sol)
+(batch binding, token self-binding, `getTokenBounds`), which the two ERC-3643 interfaces above extend.
 
 The RuleEngine modules are split as follows:
-- Base ERC-3643 surface: [ERC3643ComplianceModule.sol](../src/modules/ERC3643ComplianceModule.sol)
-- Non-standard extensions: [ERC3643ComplianceExtendedModule.sol](../src/modules/ERC3643ComplianceExtendedModule.sol)
+- Token binding registry, reusable outside any compliance context: [TokenBindingModule.sol](https://github.com/CMTA/RuleEngine/blob/main/src/modules/TokenBindingModule.sol) and [TokenBindingExtendedModule.sol](https://github.com/CMTA/RuleEngine/blob/main/src/modules/TokenBindingExtendedModule.sol)
+- Base ERC-3643 surface: [ERC3643ComplianceModule.sol](https://github.com/CMTA/RuleEngine/blob/main/src/modules/ERC3643ComplianceModule.sol)
+- Non-standard extensions: [ERC3643ComplianceExtendedModule.sol](https://github.com/CMTA/RuleEngine/blob/main/src/modules/ERC3643ComplianceExtendedModule.sol)
 
-![ERC3643ComplianceModuleUML](./schema/vscode-uml/ERC3643ComplianceModuleUML.png)
+![ERC3643ComplianceModuleUML](./schema/sol2uml/ERC3643ComplianceModuleUML.png)
 
 ## Technical
 
@@ -386,16 +393,31 @@ The table below summarizes which ERC-165 interfaces are advertised by each deplo
 | `IERC1404` | `0xab84a5c8` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `IERC1404Extend` | `0x78a8de7d` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `IERC3643Compliance` | `0x3144991c` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
+| `IERC3643ComplianceExtended` | `0x646ba2be` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `IERC7551Compliance` (subset) | `0x7157797f` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `IERC173` | `0x7f5828d0` | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `Ownable2Step` specific (`pendingOwner()`, `acceptOwnership()`) | `0x9ab669ef` | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `IAccessControl` | `0x7965db0b` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> |
 | `IAccessControlEnumerable` | `0x5a05180f` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> |
 
+The six interfaces common to all three variants come from `RuleEngineBase._supportsRuleEngineBaseInterface`;
+each deployable adds the IDs of its own access-control model on top.
+
 Notes:
 - `RuleEngine` advertises OpenZeppelin RBAC interfaces because it inherits `AccessControlEnumerable`.
 - `RuleEngineOwnable` / `RuleEngineOwnable2Step` intentionally do not advertise `IAccessControl`.
 - `Ownable2Step` specific interface ID is defined in `Ownable2StepInterfaceId` and includes only `pendingOwner()` and `acceptOwnership()`.
+- **`IRule` (`0x2497d6cb`) is deliberately absent from this table.** The engine does not implement `IRule`; it
+  *requires* it of every rule, checking it in `_checkRule` before a rule is added. Do not expect
+  `ruleEngine.supportsInterface(0x2497d6cb)` to return true.
+- **The IDs are computed from the interfaces, not hardcoded** — see `ComplianceInterfaceId`, `RuleInterfaceId`
+  and `ERC1404InterfaceId`, and `test/RuleEngine/IRuleInterfaceId.t.sol`, which pins each one to the wire value
+  above. `type(I).interfaceId` counts only the functions `I` declares *directly*, so every constant XORs the
+  interface with its parents.
+- **Never use `type(IERC3643ComplianceExtended).interfaceId`.** That interface declares no function of its own —
+  it only combines `IERC3643Compliance` and `ITokenBindingExtended` — so the expression evaluates to
+  `0x00000000`. Use `ComplianceInterfaceId.ERC3643_COMPLIANCE_EXTENDED_INTERFACE_ID` (`0x646ba2be`), which is
+  computed from `ITokenBindingExtended`.
 
 #### Role list (RuleEngine only)
 
@@ -413,7 +435,7 @@ It is set in the constructor when the contract is deployed.
 | ----------------------- | -------------------------------- | ------------------------------------------------------------ |
 | DEFAULT_ADMIN_ROLE      | OpenZeppelin<br />AccessControl  | 0x0000000000000000000000000000000000000000000000000000000000000000 |
 | **Modules**             |                                  |                                                              |
-| COMPLIANCE_MANAGER_ROLE | ERC3643ComplianceModule          | 0xe5c50d0927e06141e032cb9a67e1d7092dc85c0b0825191f7e1cede600028568 |
+| COMPLIANCE_MANAGER_ROLE | ERC3643ComplianceRolesStorage    | 0xe5c50d0927e06141e032cb9a67e1d7092dc85c0b0825191f7e1cede600028568 |
 | RULES_MANAGEMENT_ROLE   | RulesManagementModuleInvariantStorage | 0xea5f4eb72290e50c32abd6c23e45de3d8300b3286e1cbc2e293114b92e034e5e |
 
 
@@ -421,7 +443,10 @@ It is set in the constructor when the contract is deployed.
 #### Schema (RuleEngine)
 
 Here is a schema of the Access Control for `RuleEngine`.
-![alt text](./security/accessControl/access-control-RuleEngine.png)
+
+![RuleEngine access control](./schema/plantuml/ruleengine-access-control.png)
+
+_Diagram source: [doc/schema/plantuml/ruleengine-access-control.puml](./schema/plantuml/ruleengine-access-control.puml)._
 
 #### Role by modules (RuleEngine)
 
@@ -438,10 +463,11 @@ For function signatures, struct arguments are represented with their correspondi
 |                         | `clearRules()`                                               | public                              | - |-|RULES_MANAGEMENT_ROLE|
 |                         | `addRule(address rule_)`                                     | public | `IRule rule_` |-|RULES_MANAGEMENT_ROLE|
 |                         | `removeRule(address rule_)`                                  | public | `IRule rule_` |-|RULES_MANAGEMENT_ROLE|
-| ERC3643ComplianceModule |  |                              |                                      |                                      |               |
+|                         | `setMaxRules(uint256 maxRules_)`                             | public | `uint256 maxRules_` |-|DEFAULT_ADMIN_ROLE|
+| TokenBindingModule |  |                              |                                      |                                      |               |
 |  | `bindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE or approved token self-call |
 |  | `unbindToken(address token)` | public | `address token` | - | COMPLIANCE_MANAGER_ROLE or approved token self-call |
-| ERC3643ComplianceExtendedModule |  |                              |                                      |                                      |               |
+| TokenBindingExtendedModule |  |                              |                                      |                                      |               |
 |  | `bindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |
 |  | `unbindTokens(address[] tokens)` | public | `address[] tokens` | - | COMPLIANCE_MANAGER_ROLE |
 |  | `setTokenSelfBindingApproval(address token,bool approved)` | public | `address token,bool approved` | - | COMPLIANCE_MANAGER_ROLE |
@@ -454,14 +480,17 @@ For function signatures, struct arguments are represented with their correspondi
 
 ### UML
 
-Here is the UML of the main contracts:
+Here is the UML of the main contracts. The diagrams are generated with
+[sol2uml](https://github.com/naddison36/sol2uml), one per contract or interface, by
+[doc/script/script_sol2uml.sh](./script/script_sol2uml.sh); rerun that script after changing a
+contract's surface.
 
 #### RuleEngine
-![RuleEngineUML](./schema/vscode-uml/RuleEngineUML.png)
+![RuleEngineUML](./schema/sol2uml/RuleEngineUML.png)
 
 #### RuleEngineOwnable
 
-![RuleEngineOwnableUML](./schema/vscode-uml/RuleEngineOwnableUML.png)
+![RuleEngineOwnableUML](./schema/sol2uml/RuleEngineOwnableUML.png)
 
 `RuleEngineOwnable` shares the same base functionality as `RuleEngine` but uses ERC-173 ownership instead of RBAC.
 
@@ -485,7 +514,7 @@ RuleEngineOwnable
 
 #### RuleEngineOwnable2Step
 
-![RuleEngineOwnable2StepUML](./schema/vscode-uml/RuleEngineOwnable2StepUML.png)
+![RuleEngineOwnable2StepUML](./schema/sol2uml/RuleEngineOwnable2StepUML.png)
 
 `RuleEngineOwnable2Step` shares the same base functionality as `RuleEngineOwnable` but uses OpenZeppelin's `Ownable2Step` for safer ownership handover.
 
@@ -647,7 +676,7 @@ constructor(
 
 ### RuleEngineBase
 
-![RuleEngineBaseUML](./schema/vscode-uml/RuleEngineBaseUML.png)
+![RuleEngineBaseUML](./schema/sol2uml/RuleEngineBaseUML.png)
 
 #### Contracts Description Table
 
@@ -678,7 +707,7 @@ constructor(
 
 #### IRuleEngine
 
-![IRuleEngineUML](./schema/vscode-uml/IRuleEngineUML.png)
+![IRuleEngineUML](./schema/sol2uml/IRuleEngineUML.png)
 
 ##### transferred(address spender, address from, address to, uint256 value)
 
@@ -706,7 +735,7 @@ Must revert if the transfer is invalid.
 
 #### IERC7551Compliance
 
-![IERC7551ComplianceUML](./schema/vscode-uml/IERC7551ComplianceUML.png)
+![IERC7551ComplianceUML](./schema/sol2uml/IERC7551ComplianceUML.png)
 
 > Note: ERC-7551 is draft (not final). The `IERC7551Compliance` interface used here is a subset interface exposing the compliance check `canTransferFrom`.
 
@@ -735,7 +764,7 @@ Does not check balances or access rights (Access Control).
 
 #### IERC3643ComplianceRead
 
-![IERC3643ComplianceReadUML](./schema/vscode-uml/IERC3643ComplianceReadUML.png)
+![IERC3643ComplianceReadUML](./schema/sol2uml/IERC3643ComplianceReadUML.png)
 
 ------
 
@@ -770,7 +799,7 @@ Does not check balances or access rights (Access Control).
 
 #### IERC3643IComplianceContract
 
-![IERC3643IComplianceContractUML](./schema/vscode-uml/IERC3643IComplianceContractUML.png)
+![IERC3643IComplianceContractUML](./schema/sol2uml/IERC3643IComplianceContractUML.png)
 
 ------
 
@@ -849,7 +878,7 @@ Called by the token contract when tokens are redeemed or burned.
 
 #### IERC1404
 
-![IERC1404UML](./schema/vscode-uml/IERC1404UML.png)
+![IERC1404UML](./schema/sol2uml/IERC1404UML.png)
 
 ------
 
@@ -909,7 +938,7 @@ Implements {ERC-1404} standard message accessor.
 
 #### IERC1404Extend
 
-![IERC1404ExtendUML](./schema/vscode-uml/IERC1404ExtendUML.png)
+![IERC1404ExtendUML](./schema/sol2uml/IERC1404ExtendUML.png)
 
 ##### enum REJECTED_CODE_BASE
 
@@ -962,7 +991,7 @@ This is an extension of {ERC-1404} with an additional `spender` parameter to enf
 
 ### VersionModule
 
-![VersionModuleUML](./schema/vscode-uml/VersionModuleUML.png)
+![VersionModuleUML](./schema/sol2uml/VersionModuleUML.png)
 
 #### Contracts Description Table
 
@@ -999,9 +1028,59 @@ Useful for identifying which version of the smart contract is deployed and in us
 
 
 
+### TokenBindingModule
+
+![TokenBindingModuleUML](./schema/sol2uml/TokenBindingModuleUML.png)
+
+`TokenBindingModule` holds the token binding registry itself: the set of tokens allowed to call the
+bound-token entry points, `bindToken` / `unbindToken` / `isTokenBound`, and the `onlyBoundToken`
+guard. It is standard-agnostic — it contains no ERC-3643, ERC-1404 or rule logic and depends only on
+OpenZeppelin's `Context` and `EnumerableSet` — so it can be reused as-is by any project that has to
+bind tokens. A deployment only has to provide the access control by implementing
+`_onlyTokenBindingManager()`; `src/mocks/TokenBindingStandaloneMock.sol` is a minimal example of such
+a reuse, outside any compliance context.
+
+![TokenBindingExtendedModuleUML](./schema/sol2uml/TokenBindingExtendedModuleUML.png)
+
+`TokenBindingExtendedModule` adds the conveniences of the registry that are not part of any token
+standard: batch bind/unbind, token self-binding approval (used by ERC-3643 `setCompliance`), and
+`getTokenBounds()`. It also replaces the default binding authorization with one that accepts an
+approved token binding itself.
+
+The events and functions of both modules are documented in the events and functions reference below,
+under `ERC3643ComplianceExtendedModule`, since that is the form in which the RuleEngine exposes them.
+
+#### Contracts Description Table
+
+
+|            Contract            |       Type        |                     Bases                     |                |                          |
+| :----------------------------: | :---------------: | :-------------------------------------------: | :------------: | :----------------------: |
+|               └                | **Function Name** |                **Visibility**                 | **Mutability** |      **Modifiers**       |
+|                                |                   |                                               |                |                          |
+|     **TokenBindingModule**     |  Implementation   |    Context, ITokenBinding                     |                |                          |
+|               └                |     bindToken     |                   Public ❗️                    |       🛑        |          NO❗️           |
+|               └                |    unbindToken    |                   Public ❗️                    |       🛑        |          NO❗️           |
+|               └                |   isTokenBound    |                   Public ❗️                    |                |          NO❗️           |
+|               └                |    _bindToken     |                  Internal 🔒                   |       🛑        |                          |
+|               └                |   _unbindToken    |                  Internal 🔒                   |       🛑        |                          |
+| **TokenBindingExtendedModule** |  Implementation   | TokenBindingModule, ITokenBindingExtended      |                |                          |
+|               └                |    bindTokens     |                   Public ❗️                    |       🛑        | onlyTokenBindingManager  |
+|               └                |   unbindTokens    |                   Public ❗️                    |       🛑        | onlyTokenBindingManager  |
+|               └                | setTokenSelfBindingApproval |         Public ❗️                    |       🛑        | onlyTokenBindingManager  |
+|               └                | setTokenSelfBindingApprovalBatch |    Public ❗️                    |       🛑        | onlyTokenBindingManager  |
+|               └                | isTokenSelfBindingApproved |          Public ❗️                    |                |          NO❗️           |
+|               └                |  getTokenBounds   |                   Public ❗️                    |                |          NO❗️           |
+
 ### ERC3643ComplianceModule
 
-![ERC3643ComplianceModuleUML](./schema/vscode-uml/ERC3643ComplianceModuleUML.png)
+![ERC3643ComplianceModuleUML](./schema/sol2uml/ERC3643ComplianceModuleUML.png)
+
+`ERC3643ComplianceModule` is a thin ERC-3643 adapter over `TokenBindingModule`: it adds the
+ERC-3643 specific view `getTokenBound()` and names the binding manager in compliance terms, wiring
+the generic `_onlyTokenBindingManager()` hook to `_onlyComplianceManager()`, which the deployable
+contracts implement (`COMPLIANCE_MANAGER_ROLE` for `RuleEngine`, `onlyOwner` for the ownable
+variants). The compliance callbacks `transferred`, `created` and `destroyed` are implemented by
+`RuleEngineBase`, since they depend on the rules rather than on the binding.
 
 #### Contracts Description Table
 
@@ -1010,17 +1089,15 @@ Useful for identifying which version of the smart contract is deployed and in us
 | :-------------------------: | :---------------: | :-------------------------------: | :------------: | :-----------: |
 |              └              | **Function Name** |          **Visibility**           | **Mutability** | **Modifiers** |
 |                             |                   |                                   |                |               |
-| **ERC3643ComplianceModule** |  Implementation   | Context, IERC3643Compliance |                |               |
-|              └              |     bindToken     |             Public ❗️              |       🛑        |   onlyRole    |
-|              └              |    unbindToken    |             Public ❗️              |       🛑        |   onlyRole    |
-|              └              |   isTokenBound    |             Public ❗️              |                |      NO❗️      |
+| **ERC3643ComplianceModule** |  Implementation   | TokenBindingModule, IERC3643Compliance |           |               |
 |              └              |   getTokenBound   |             Public ❗️              |                |      NO❗️      |
+|              └              | _onlyTokenBindingManager |      Internal 🔒            |       🛑        |               |
 
 ### ERC3643ComplianceExtendedModule
 
-`ERC3643ComplianceExtendedModule` inherits `ERC3643ComplianceModule` and contains project-specific helpers not part of the ERC-3643 base interface (`IERC3643Compliance`): batch bind/unbind, self-binding approval APIs, and `getTokenBounds()`.
-|              └              |   _unbindToken    |            Internal 🔒             |       🛑        |               |
-|              └              |    _bindToken     |            Internal 🔒             |       🛑        |               |
+![ERC3643ComplianceExtendedModuleUML](./schema/sol2uml/ERC3643ComplianceExtendedModuleUML.png)
+
+`ERC3643ComplianceExtendedModule` combines `ERC3643ComplianceModule` with `TokenBindingExtendedModule` and declares `IERC3643ComplianceExtended`. It carries no logic of its own: the project-specific helpers that are not part of the ERC-3643 base interface (`IERC3643Compliance`) — batch bind/unbind, self-binding approval APIs and `getTokenBounds()` — are standard-agnostic and therefore implemented in `TokenBindingExtendedModule`.
 
 #### Events
 
@@ -1067,10 +1144,13 @@ Emitted when a token is successfully unbound from the compliance contract.
 ```solidity
 function bindToken(address token) 
 public override virtual 
-onlyRole(COMPLIANCE_MANAGER_ROLE)
 ```
 
 Associates a token contract with this compliance contract.
+
+Implemented by `TokenBindingModule`. Authorization goes through `_authorizeTokenBindingChange`, which
+accepts the compliance manager (`COMPLIANCE_MANAGER_ROLE` for `RuleEngine`, the owner for the ownable
+variants), or the token itself when its self-binding has been approved.
 
 The compliance contract may restrict operations on the bound token according to its internal compliance logic.
  Reverts if the token is already bound.
@@ -1090,10 +1170,11 @@ The compliance contract may restrict operations on the bound token according to 
 ```solidity
 function unbindToken(address token) 
 public override virtual 
-onlyRole(COMPLIANCE_MANAGER_ROLE)
 ```
 
 Removes the association of a token contract from this compliance contract.
+
+Implemented by `TokenBindingModule`, with the same authorization as `bindToken`.
 
 Reverts if the token is not currently bound.
 
@@ -1186,7 +1267,7 @@ This is designed to mostly be used by view accessors that are queried without an
 
 ### RulesManagementModule
 
-![RuleManagementModuleUML](./schema/vscode-uml/RuleManagementModuleUML.png)
+![RuleManagementModuleUML](./schema/sol2uml/RuleManagementModuleUML.png)
 
 #### Events
 
@@ -1473,6 +1554,7 @@ Here is the list of report performed with [Slither](https://github.com/crytic/sl
 
 | Version | Report | Assessment |
 | ------- | ------ | ---------- |
+| v3.0.0-rc6 | [slither-report.md](./security/audits/tools/v3.0.0-rc6/slither-report.md) | [slither-report-feedback.md](./security/audits/tools/v3.0.0-rc6/slither-report-feedback.md) |
 | v3.0.0-rc5 | [slither-report.md](./security/audits/tools/v3.0.0-rc5/slither-report.md) | [slither-report-feedback.md](./security/audits/tools/v3.0.0-rc5/slither-report-feedback.md) |
 | v3.0.0-rc4 | [slither-report.md](./security/audits/tools/v3.0.0-rc4/slither-report.md) | [slither-report-feedback.md](./security/audits/tools/v3.0.0-rc4/slither-report-feedback.md) |
 | v3.0.0-rc3 | [slither-report.md](./security/audits/tools/v3.0.0-rc3/slither-report.md) | [slither-report-feedback.md](./security/audits/tools/v3.0.0-rc3/slither-report-feedback.md) |
@@ -1482,12 +1564,13 @@ Here is the list of report performed with [Slither](https://github.com/crytic/sl
 slither .  --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" > slither-report.md
 ```
 
-2 finding categories — 0 High · 0 Medium · 10 Low · 2 Informational
+Latest run (v3.0.0-rc6, 108 contracts analysed, mocks excluded): 2 finding categories —
+0 High · 0 Medium · 10 Low · 2 Informational. **Nothing to fix.**
 
 | ID | Detector | Impact | Instances | Assessment |
 |----|----------|--------|-----------|------------|
 | 0–9 | `calls-loop` | Low | 10 | Accepted by design — fan-out to rule contracts is the core architecture |
-| 10–11 | `unindexed-event-address` | Informational | 2 | Deferred — adding `indexed` to `TokenBound`/`TokenUnbound` is interface-breaking |
+| 10–11 | `unindexed-event-address` | Informational | 2 | Accepted by design — `TokenBound`/`TokenUnbound` keep the unindexed signature of the ERC-3643 reference |
 
 #### Aderyn
 
@@ -1499,25 +1582,28 @@ aderyn -x mocks --output aderyn-report.md
 
 | Version | Report | Assessment |
 | ------- | ------ | ---------- |
+| v3.0.0-rc6 | [aderyn-report.md](./security/audits/tools/v3.0.0-rc6/aderyn-report.md) | [aderyn-report-feedback.md](./security/audits/tools/v3.0.0-rc6/aderyn-report-feedback.md) |
 | v3.0.0-rc5 | [aderyn-report.md](./security/audits/tools/v3.0.0-rc5/aderyn-report.md) | [aderyn-report-feedback.md](./security/audits/tools/v3.0.0-rc5/aderyn-report-feedback.md) |
 | v3.0.0-rc4 | [aderyn-report.md](./security/audits/tools/v3.0.0-rc4/aderyn-report.md) | [aderyn-report-feedback.md](./security/audits/tools/v3.0.0-rc4/aderyn-report-feedback.md) |
 | v3.0.0-rc3 | [aderyn-report.md](./security/audits/tools/v3.0.0-rc3/aderyn-report.md) | [aderyn-report-feedback.md](./security/audits/tools/v3.0.0-rc3/aderyn-report-feedback.md) |
 | v3.0.0-rc2 | [aderyn-report.md](./security/audits/tools/v3.0.0-rc2/aderyn-report.md) | [aderyn-report-feedback.md](./security/audits/tools/v3.0.0-rc2/aderyn-report-feedback.md) |
 
-Report scope: 24 Solidity files, 629 nSLOC.
+Latest run (v3.0.0-rc6): 28 Solidity files, 683 nSLOC, mocks excluded.
 
-0 High · 8 Low
+0 High · 8 Low (84 instances). **Nothing to fix.**
 
 | ID | Finding | Instances | Assessment |
 |----|---------|-----------|------------|
 | L-1 | Centralization Risk | 14 | Accepted by design — privileged compliance tool |
-| L-2 | Unspecific Solidity Pragma | 19 | Accepted by design — intentional for library reusability |
-| L-3 | PUSH0 Opcode | 24 | Not applicable — project targets Prague EVM |
+| L-2 | Unspecific Solidity Pragma | 23 | Accepted by design — intentional for library reusability |
+| L-3 | PUSH0 Opcode | 28 | Not applicable — project targets Prague EVM |
 | L-4 | Modifier Invoked Only Once | 1 | Accepted by design — keeps hook-style access-control abstraction |
 | L-5 | Empty Block | 9 | Accepted by design — access-control hook pattern |
 | L-6 | Loop Contains `require`/`revert` | 4 | Accepted by design — `setRules` and `bindTokens`/`unbindTokens` are atomic batch operations |
 | L-7 | Costly Operations Inside Loop | 4 | Accepted — unavoidable `SSTORE` in batch operations |
 | L-8 | Unchecked Return | 1 | Accepted — `_grantRole` return is irrelevant in constructor |
+
+Overview of every analysis performed: [AUDIT_OVERVIEW.md](./security/audits/AUDIT_OVERVIEW.md).
 
 ## Documentation
 
@@ -1527,9 +1613,10 @@ Here a summary of the main documentation
 | ------------ | --------------------------------------- |
 | Integration with CMTAT | [doc/technical/RuleEngine-with-CMTAT.md](./technical/RuleEngine-with-CMTAT.md) |
 | Integration with ERC-3643 | [doc/technical/RuleEngine-with-ERC3643.md](./technical/RuleEngine-with-ERC3643.md) |
+| Token binding module (reusable outside this project) | [doc/technical/TokenBinding-module.md](./technical/TokenBinding-module.md) |
 | Toolchain    | [doc/TOOLCHAIN.md](./TOOLCHAIN.md)  |
 | Surya report | [doc/schema/surya](./schema/surya/) |
-| Code-quality review | [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md](./security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS.md) |
+| Code-quality review | [doc/security/audits/tools/v3.0.0-rc6/CLAUDE_ANALYSIS.md](./security/audits/tools/v3.0.0-rc6/CLAUDE_ANALYSIS.md) |
 | Script review | [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md](./security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md) |
 | Audit overview | [doc/security/audits/AUDIT_OVERVIEW.md](./security/audits/AUDIT_OVERVIEW.md) |
 
