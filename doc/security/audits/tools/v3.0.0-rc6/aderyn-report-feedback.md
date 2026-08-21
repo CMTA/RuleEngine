@@ -32,7 +32,7 @@ aderyn -x mocks --output doc/security/audits/tools/v3.0.0-rc6/aderyn-report.md
 | `grep -c 'src/mocks/' aderyn-report.md` | **0** — `-x mocks` applied correctly |
 | `grep -c '/home/' aderyn-report.md` | **0** — no absolute paths committed |
 
-The last check earned its place again. Aderyn computes its source links relative to the `--output` path, so a
+The last check caught a real mistake again. Aderyn computes its source links relative to the `--output` path, so a
 run written outside the repository produces `../../../../../home/<user>/…/src/…` links — machine-specific paths
 in a committed document. This run hit it exactly as rc5 did: the first attempt wrote to a scratch directory and
 produced 84 such links, and it was re-run with the output inside the repository to get the correct relative

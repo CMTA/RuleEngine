@@ -198,7 +198,7 @@ bytes4 public constant IERC1404_INTERFACE_ID = type(IERC1404).interfaceId;  // 0
 
 **Every value is unchanged**, which is the property that matters: these constants are advertised by deployed
 contracts, so a different number would silently break `supportsInterface` for existing integrators. Two details
-were easy to get wrong and are worth recording:
+were easy to get wrong, and are recorded here for the next person to touch these constants:
 
 - The rule id needs **`IERC165`**. Without it the expression computes `0x25681f6c`; `supportsInterface` is part
   of the flattened hierarchy because `IRuleEngine` inherits `IERC165`.
@@ -352,7 +352,7 @@ The six selectors the engine consumes, plus ERC-165, give:
 | Current `IRULE_INTERFACE_ID` (8 selectors + ERC-165) | `0x2497d6cb` |
 | Narrowed (6 selectors + ERC-165) | **`0xb1a69752`** |
 
-Cross-checked two ways, which is worth doing before anyone edits a constant: computing the candidate interface
+Cross-checked two ways, since the value is the whole point of the change: computing the candidate interface
 directly gives `0xb0595ef5` for its six declared selectors, and `0xb0595ef5 ^ 0x01ffc9a7` (ERC-165) equals
 `0x2497d6cb ^ canTransfer ^ canTransferFrom` — the same `0xb1a69752` from both directions.
 
@@ -409,8 +409,8 @@ Raised while reviewing `I-1`, and recorded because the answer is not obvious fro
 
 ## J. Modularity
 
-The rc6 release claims the binding registry is reusable outside this project. That claim is testable, so it was
-tested rather than asserted: two probe contracts were written, compiled, and deleted.
+The rc6 release claims the binding registry is reusable outside this project. Two probe contracts were written
+against that claim, compiled, and deleted; the results are below.
 
 ### J-1. The registry embeds in a foreign host — verified, inconvenience only
 
@@ -456,10 +456,10 @@ same `bindToken`, after an identical warm-up:
 
 **35 gas**, on an administrative operation performed a handful of times in a deployment's life. That is the
 price of keeping the ERC-3643 vocabulary at the ERC-3643 layer and the deployables' `_onlyComplianceManager`
-API unchanged. Worth paying, and worth recording as a measurement rather than a guess.
+API unchanged. Cheap enough to keep, and measured rather than estimated.
 
 ## Method note
 
-The rc5 report's warning about Aderyn writing absolute paths when run outside the repository proved its worth
-again during this release: the first rc6 Aderyn run produced 84 links containing `/home/<user>/…` and had to be
-redone. It is now a checklist item in the rc6 Aderyn feedback file.
+The rc5 report warned that Aderyn writes absolute paths when run outside the repository. It happened again here:
+the first rc6 run produced 84 links containing `/home/<user>/…` and had to be redone. It is now a checklist item
+in the rc6 Aderyn feedback file.
