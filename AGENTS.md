@@ -25,8 +25,9 @@ forge coverage --no-match-coverage "(mocks|test)" --report lcov  # Production co
 forge fmt                # Format code
 ```
 
-Dependencies are git submodules. Initialize with `forge install`, update with `forge update`.
-CMTAT submodule also needs `cd lib/CMTAT && npm install` for its OpenZeppelin deps.
+Dependencies are git submodules. Initialize with `git submodule update --init` (non-recursive is enough), update with `forge update`.
+`remappings.txt` resolves `@openzeppelin/...` to this repo's own submodules for every file, including the CMTAT sources,
+so `cd lib/CMTAT && npm install` and `--recursive` are only needed to run CMTAT's own Hardhat suite.
 
 ## Agent Workflow
 
@@ -334,7 +335,8 @@ Key points:
 1. Create the rule in `src/mocks/rules/`
 2. Implement `IRule` (which extends `IRuleEngineERC1404`)
 3. Implement ERC-165 with `IRULE_INTERFACE_ID`
-4. Add tests using the existing `HelperContract` base
+4. `transferred*` hooks may update the rule's own storage but must not make a state-changing external call; external reads must be `view` (`STATICCALL`). Six CMTAT variants have no reentrancy guard around `transferred` (see `doc/technical/RuleEngine-with-CMTAT.md` §4.6)
+5. Add tests using the existing `HelperContract` base
 
 ### Modifying access control
 1. Update the virtual hook in the relevant module

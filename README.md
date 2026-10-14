@@ -40,7 +40,7 @@ The token calls the engine on every transfer, mint and burn. The engine checks t
 | CMTAT | `transferred(from, to, value)` | `transferred(spender, …)` | `transferred(spender, …)` | `transferred(spender, …)` |
 | ERC-3643 | `transferred(from, to, value)` | `transferred(from, to, value)` | `created(to, value)` | `destroyed(from, value)` |
 
-CMTAT picks the overload according to whether the operation has a spender. A plain `transfer` has none, so CMTAT calls the 3-argument `transferred(from, to, value)` — the engine is never called with a zero spender. `transferFrom`, `mint` and `burn` do have one (`_msgSender()`), so those call the 4-argument `transferred(spender, from, to, value)`. Whichever entry point is used, the engine then runs the same rule loop.
+CMTAT picks the overload according to whether the operation has a spender. A plain `transfer` has none, so CMTAT calls the 3-argument `transferred(from, to, value)` — the engine is never called with a zero spender. `transferFrom`, `mint` and `burn` do have one (`_msgSender()`), so those call the 4-argument `transferred(spender, from, to, value)` — as do `batchMint`, `batchBurn`, `burnFrom`, cross-chain mint/burn and the minter `batchTransfer` (where `spender == from`). CMTAT's `forcedTransfer` does not call the engine at all. Whichever entry point is used, the engine then runs the same rule loop. The complete per-operation table is in [doc/technical/RuleEngine-with-CMTAT.md](./doc/technical/RuleEngine-with-CMTAT.md#2-which-entry-points-cmtat-uses).
 
 The view path, `detectTransferRestriction()`, iterates the same rules and returns the first non-zero ERC-1404 restriction code instead of reverting.
 
@@ -95,8 +95,10 @@ doc/                                # full documentation, schemas, coverage, aud
 
 Production rules are maintained at [github.com/CMTA/Rules](https://github.com/CMTA/Rules), in two families:
 
-- **Validation rules (read-only)** — evaluate eligibility without mutating state: `RuleWhitelist`, `RuleBlacklist`, `RuleSanctionList`, `RuleIdentityRegistry`, `RuleSpenderWhitelist`, `RuleERC2980`, `RuleMaxTotalSupply`
-- **Operation rules (read-write)** — may update rule state on transfer: `RuleConditionalTransferLight`
+- **Validation rules (read-only)** — evaluate eligibility without mutating state: `RuleWhitelist`, `RuleWhitelistWrapper`, `RuleReceiverWhitelist`, `RuleBlacklist`, `RuleSanctionsList`, `RuleIdentityRegistry`, `RuleSpenderWhitelist`, `RuleERC2980`, `RuleMaxTotalSupply` / `RuleMaxTotalSupplyERC3643`, `RuleMaxBalance`, `RuleChainlinkPoR` / `RuleChainlinkPoRERC3643`
+- **Operation rules (read-write)** — may update rule state on transfer: `RuleConditionalTransferLight`, `RuleMintAllowance`, and `RuleConditionalTransferLightMultiToken` (set directly on each token, never behind a RuleEngine)
+
+The Rules repository is the source of truth for this list; see [doc/README.md § Available Rules](./doc/README.md#available-rules) for details and caveats.
 
 To be usable by the engine, a rule must implement `IRule` and advertise it through ERC-165. Restriction codes should stay unique across the composed rule set.
 
@@ -105,14 +107,16 @@ To be usable by the engine, a rule must implement `IRule` and advertise it throu
 Dependencies are git submodules.
 
 ```bash
-git submodule update --init --recursive   # or: forge install
-cd lib/CMTAT && npm install && cd ../..   # CMTAT's own OpenZeppelin deps
+git submodule update --init   # non-recursive is enough: remappings.txt resolves OpenZeppelin
+                              # to this repo's own submodules, including for the CMTAT sources
 
 forge build       # compile
 forge test        # run the test suite
 forge coverage    # code coverage
 forge fmt         # format
 ```
+
+`--recursive` and `cd lib/CMTAT && npm install` are only needed to run CMTAT's own Hardhat suite from inside `lib/CMTAT`.
 
 See [doc/README.md](./doc/README.md) for deployment scripts, the production deployment checklist, and Hardhat usage.
 

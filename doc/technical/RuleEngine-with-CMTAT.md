@@ -28,15 +28,26 @@ if (spender != address(0)) {
 }
 ```
 
-The `spender` value comes from `CMTATBaseCommon`:
+The `spender` value comes from `CMTATBaseCommon`. Every CMTAT path that reaches the engine (CMTAT v3.3.0):
 
-| CMTAT operation | spender passed | Overload called |
-|---|---|---|
-| `transfer(to, value)` | `address(0)` | **3-argument** `transferred(from, to, value)` |
-| `transferFrom(from, to, value)` | `_msgSender()` | 4-argument `transferred(spender, from, to, value)` |
-| `mint(to, value)` | `_msgSender()` | 4-argument, with `from == address(0)` |
-| `burn(from, value)` | `_msgSender()` | 4-argument, with `to == address(0)` |
-| minter `batchTransfer(tos, values)` | `_msgSender()` | 4-argument, with the minter as `from` |
+| CMTAT operation | `spender` passed | `from` | `to` | Overload called |
+|---|---|---|---|---|
+| `transfer(to, value)` | `address(0)` | holder | recipient | **3-argument** `transferred(from, to, value)` |
+| `transferFrom(from, to, value)` | `_msgSender()` | holder | recipient | 4-argument `transferred(spender, from, to, value)` |
+| `mint`, `batchMint`, `crosschainMint`, mint leg of `burnAndMint` | operator (`_msgSender()`) | `address(0)` | recipient | 4-argument |
+| `burn`, `batchBurn`, `burnFrom`, self `burn(uint256)`, `crosschainBurn`, burn leg of `burnAndMint` | operator (`_msgSender()`) | holder | `address(0)` | 4-argument |
+| minter `batchTransfer(tos, values)` | minter (`_msgSender()`) | **minter** | recipient | 4-argument, **`spender == from`** |
+| `forcedTransfer` (enforcer) | — | — | — | **not called** |
+
+Points to note in this table:
+
+- **`spender == from`** happens on two paths: the minter `batchTransfer` and a holder calling
+  `transferFrom` on its own tokens. A rule that screens the spender screens the minter a second time there.
+- **`burn` and `burnFrom` are indistinguishable** to the engine: both arrive as `(operator, holder, address(0), value)`.
+- **`forcedTransfer` bypasses the engine.** Stateful rules are not notified and observing rules are not
+  consulted. This differs from ERC-3643 T-REX, whose `forcedTransfer` notifies the compliance contract.
+
+The reference list is CMTAT's own [`doc/technical/ruleengine-integration.md`](https://github.com/CMTA/CMTAT/blob/v3.3.0-rc4/doc/technical/ruleengine-integration.md) (§"Runtime Call Flow"), whose routing is pinned by CMTAT's `RuleEngineSpenderDispatchCommon.js` tests.
 
 Two consequences follow:
 
@@ -44,6 +55,10 @@ Two consequences follow:
   never forwarded, so the engine is never called with a zero spender.
 - Since CMTAT v3.3.0, **mint, burn and the minter `batchTransfer` go through the 4-argument overload** with the operator as `spender` (documented in the `IRuleEngine.transferred` NatSpec since CMTAT v3.3.0-rc4).
   A rule that rejects unknown spenders must skip or adapt that check when `from == address(0)` (mint) or `to == address(0)` (burn), or it will block issuance and redemption.
+- **On CMTAT v3.0.0 – v3.2.0, mint, burn and the minter transfer arrive on the 3-argument overload**
+  (`_checkTransferred(address(0), ...)` in `lib/CMTATv3.0.0/contracts/modules/0_CMTATBaseCommon.sol`). The engine
+  works with these versions, but a spender-keyed rule (a per-minter mint allowance, minter screening) is inert
+  there: it never sees the operator.
 
 **CMTAT never calls `created()` or `destroyed()`.** Those belong to `IERC3643Compliance` and are used only by ERC-3643 tokens. 
 
@@ -57,6 +72,13 @@ CMTAT exposes the ERC-1404 view path, which the engine answers by iterating the 
 - `detectTransferRestriction(from, to, value)` / `canTransfer(from, to, value)`
 - `detectTransferRestrictionFrom(spender, from, to, value)` / `canTransferFrom(spender, from, to, value)`
 - `messageForTransferRestriction(code)` — resolves the code against the rule that claims it
+
+**Pre-flighting a mint or a burn.** The engine and every rule read `from == address(0)` as a mint and
+`to == address(0)` as a burn. The **token's** `detectTransferRestriction*` does not: CMTAT scopes it to
+`transfer` / `transferFrom` and answers, for example, `TRANSFER_REJECTED_PAUSED` for `from == address(0)` while
+paused, although `mint` proceeds while paused (see the header of CMTAT's `ValidationModuleERC1404.sol`). To
+predict a mint or a burn, call `canTransfer*` on the token, which branches on the zero address, or
+`detectTransferRestriction*` on the engine directly — not `detectTransferRestriction*` on the token.
 
 ## 3. Configuration
 
@@ -167,8 +189,28 @@ If two rules share a code they must return the same message, or operators get in
 
 Rule contracts are called on every transfer and can revert or consume arbitrary gas. Treat them as trusted business logic. 
 
+**Rule `transferred*` hooks must not make a state-changing external call.** Only three CMTAT variants
+(Standard, Snapshot and ERC-7551) wrap the `transferred` callback in a reentrancy guard; on the six others
+(Debt, DebtEngine, Permit, UUPS, ERC-1363 and HolderList), CMTAT's safety rests on the trust model: the
+engine, its rules and every contract they call must not hand control to untrusted code during
+`transferred(...)`. The engine forwards the call to every rule, so the obligation lands on rule authors: a hook
+may update the rule's own storage, but external reads (oracle, registry, price feed, token) must be `view`
+calls, which run as `STATICCALL` and cannot re-enter the token. A called contract that reverts still blocks the
+operation and the token's views, so it is trusted for availability too. See CMTAT's
+[`ruleengine-integration.md`](https://github.com/CMTA/CMTAT/blob/v3.3.0-rc4/doc/technical/ruleengine-integration.md) §"Deployment Coverage".
+
 Do not grant `RULES_MANAGEMENT_ROLE` to a rule contract — the engine blocks granting any role
 to an address currently configured as a rule, but the check is one-directional and does not stop an already privileged address from later being added as a rule.
+
+### 4.7 The trusted forwarder can call the token callbacks
+
+The bound-token gate (`onlyBoundToken`) compares `_msgSender()`, and every deployable inherits
+`ERC2771Context`. When a forwarder is configured, a call relayed by that forwarder with a bound token appended
+as the ERC-2771 sender passes the gate, so the forwarder can reach `transferred` on a bound token's behalf and
+drive stateful rules without any token movement. The forwarder is therefore trusted to the same degree as a bound
+token: deploy with `address(0)` as forwarder unless gasless administration is needed, and otherwise use only a
+signature-verifying ERC-2771 forwarder. CMTAT's integration guide recommends comparing the raw `msg.sender`
+instead; the engine keeps `_msgSender()` for now.
 
 ## 5. What is tested
 

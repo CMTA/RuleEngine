@@ -170,6 +170,10 @@ A gas-heavy rule affects every operation on every bound token.
 `TokenBinding_UnauthorizedCaller` for any caller that is not a bound token. Verified by
 `testUnboundCallerCannotCallTransferred` and `testUnboundCallerCannotCallCreatedOrDestroyed`.
 
+The gate resolves the caller through `_msgSender()` (ERC-2771). If a trusted forwarder is configured, it can
+relay a call with a bound token as the appended sender and pass the gate: the forwarder is trusted to the same
+degree as a bound token. See [RuleEngine-with-CMTAT.md §4.7](./RuleEngine-with-CMTAT.md#47-the-trusted-forwarder-can-call-the-token-callbacks).
+
 ### 4.6 Restriction codes must be unique across the rule set
 
 As with CMTAT: the engine returns the first non-zero code, so overlapping codes across rules produce inconsistent operator feedback unless they share the same message.
@@ -195,6 +199,19 @@ No solc version exists that matches the version requirement: =0.8.17
 ```
 
 The integration tests therefore use `ERC3643TokenMock`, whose compliance interaction is copied from the reference `Token.sol` (the table in section 2 is taken from it directly). Compiling the real token would require unpinning the project compiler and vendoring a second OpenZeppelin major alongside the current one.
+
+### 4.9 Compliance is notified after the state change
+
+The reference `Token.sol` updates balances first and notifies compliance afterwards: `_transfer` then
+`transferred`, `_mint` then `created`, `_burn` then `destroyed`. A rule that reads `totalSupply()` or
+`balanceOf()` from inside the callback therefore sees the amount **already applied**, whereas CMTAT calls the
+engine **before** the update. A supply or balance cap written for CMTAT (current value + amount ≤ cap) counts the
+amount twice on an ERC-3643 token and rejects operations that should pass.
+
+Use the ERC-3643 variants of such rules where the Rules repository provides them
+(`RuleMaxTotalSupplyERC3643`, `RuleChainlinkPoRERC3643`), and check each rule's documentation for ERC-3643
+support before binding an engine to a T-REX token. The pre-check `canTransfer` runs before the update, so it
+does not show the problem.
 
 ## 5. What is tested
 
