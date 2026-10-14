@@ -34,8 +34,8 @@ library RuleInterfaceId {
      * (detectTransferRestriction, messageForTransferRestriction), `IERC1404Extend`
      * (detectTransferRestrictionFrom) and `IERC165` (supportsInterface). Equals `0x2497d6cb`.
      */
-    bytes4 public constant IRULE_INTERFACE_ID =
-        type(IRule).interfaceId ^ type(IRuleEngine).interfaceId ^ type(IERC7551Compliance).interfaceId
-        ^ type(IERC3643ComplianceRead).interfaceId ^ type(IERC3643IComplianceContract).interfaceId
-        ^ type(IERC1404).interfaceId ^ type(IERC1404Extend).interfaceId ^ type(IERC165).interfaceId;
+    bytes4 public constant IRULE_INTERFACE_ID = type(IRule).interfaceId ^ type(IRuleEngine).interfaceId
+        ^ type(IERC7551Compliance).interfaceId ^ type(IERC3643ComplianceRead).interfaceId
+        ^ type(IERC3643IComplianceContract).interfaceId ^ type(IERC1404).interfaceId ^ type(IERC1404Extend).interfaceId
+        ^ type(IERC165).interfaceId;
 }
