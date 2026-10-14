@@ -9,7 +9,7 @@ AGENTS.md and CLAUDE.md files must always be identical — always update both to
 **RuleEngine** is a Solidity smart contract system that enforces transfer restrictions for [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens. It acts as an external controller that calls pluggable rule contracts on each token transfer, mint, or burn.
 
 - **Version:** 3.0.0-rc7 (defined in `src/modules/VersionModule.sol`; the string carries the release-candidate suffix and must be bumped with each tag — update the `version()` assertions in `test/RuleEngine/RuleEngineDeployment.t.sol`, `test/RuleEngineOwnable/RuleEngineOwnableDeployment.t.sol`, `test/RuleEngineOwnable2Step/RuleEngineOwnable2Step.t.sol` and `test/hardhat/RuleEngine.smoke.js` with it)
-- **Solidity:** ^0.8.20 (compiled with 0.8.36)
+- **Solidity:** ^0.8.20 (compiled with 0.8.37)
 - **EVM target:** Prague
 - **License:** MPL-2.0
 

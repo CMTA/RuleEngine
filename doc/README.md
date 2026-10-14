@@ -355,7 +355,7 @@ The RuleEngine modules are split as follows:
 The toolchain includes the following components, where the versions are the latest ones that we tested:
 
 - Foundry (forge-std) [v1.14.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.14.0)
-- Solidity [0.8.36](https://docs.soliditylang.org/en/v0.8.36/)
+- Solidity [0.8.37](https://docs.soliditylang.org/en/v0.8.37/)
 - OpenZeppelin Contracts (submodule) [v5.7.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.7.0)
 - CMTAT [v3.3.0-rc4](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc4)
 
@@ -1656,12 +1656,12 @@ Parts of this project were written with the help of AI coding assistants, princi
 Here are the settings for [Hardhat](https://hardhat.org) and [Foundry](https://getfoundry.sh).
 
 - `hardhat.config.js`
-  - Solidity [v0.8.36](https://docs.soliditylang.org/en/v0.8.36/)
+  - Solidity [v0.8.37](https://docs.soliditylang.org/en/v0.8.37/)
   - EVM version: Prague (Pectra upgrade)
   - Optimizer: true, 200 runs
 
 - `foundry.toml`
-  - Solidity [v0.8.36](https://docs.soliditylang.org/en/v0.8.36/)
+  - Solidity [v0.8.37](https://docs.soliditylang.org/en/v0.8.37/)
   - EVM version: Prague (Pectra upgrade)
   - Optimizer: true, 200 runs
 

@@ -5,7 +5,7 @@ RuleEngine applies transfer restrictions to [CMTAT](https://github.com/CMTA/CMTA
 It is an *external controller*: the token calls the engine on every transfer, mint and burn, and the engine forwards the call to a configurable list of pluggable rule contracts. This keeps compliance logic out of the token, lets each issuer compose the rules they need, and avoids growing the token's already large bytecode.
 
 - **Version:** 3.0.0-rc7 (`version()` returns `"3.0.0-rc7"`)
-- **Solidity:** ^0.8.20 (compiled with 0.8.36)
+- **Solidity:** ^0.8.20 (compiled with 0.8.37)
 - **EVM target:** Prague
 - **License:** MPL-2.0
 

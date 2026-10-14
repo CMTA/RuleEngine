@@ -186,7 +186,7 @@ As with CMTAT: the engine returns the first non-zero code, so overlapping codes 
 ### 4.8 The real T-REX token is tested in a separate Foundry profile
 
 The vendored token (`lib/ERC-3643`, T-REX **4.2.0-beta1**) pins `pragma solidity 0.8.30` exactly, while this
-project compiles with **0.8.36**, and it imports the `@onchain-id/solidity` npm package, which is not a
+project compiles with **0.8.37**, and it imports the `@onchain-id/solidity` npm package, which is not a
 submodule. The suite that deploys it therefore runs in its own profile:
 
 ```bash
