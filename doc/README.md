@@ -1037,14 +1037,14 @@ returns (string memory version_)
 
  **Description**
 
-Returns the current version of the token contract.
-Useful for identifying which version of the smart contract is deployed and in use. 
+Returns the current version of the RuleEngine contract (currently `"3.0.0-rc6"`).
+Useful for identifying which version of the smart contract is deployed and in use. Release candidates carry their `-rcN` suffix, so the string matches the release tag. 
 
 **Return**
 
 | Name       | Type   | Description                                                  |
 | ---------- | ------ | ------------------------------------------------------------ |
-| `version_` | string | The version string of the token implementation (e.g., "1.0.0"). |
+| `version_` | string | The version string of the RuleEngine implementation (e.g., "3.0.0-rc6"). |
 
 
 

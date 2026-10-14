@@ -54,7 +54,7 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, address(0x0), ZERO_ADDRESS);
 
         // Assert
-        assertEq(ruleEngineMock.version(), "3.0.0");
+        assertEq(ruleEngineMock.version(), "3.0.0-rc6");
     }
 
     function testSupportsInterfaces() public {

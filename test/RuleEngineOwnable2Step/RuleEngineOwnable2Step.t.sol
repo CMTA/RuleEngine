@@ -43,6 +43,10 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         assertEq(ruleEngineMock.owner(), OWNER_ADDRESS);
     }
 
+    function testHasRightVersion() public view {
+        assertEq(ruleEngineMock.version(), "3.0.0-rc6");
+    }
+
     function testCannotDeployContractIfOwnerAddressIsZero() public {
         vm.expectRevert(abi.encodeWithSignature("OwnableInvalidOwner(address)", ZERO_ADDRESS));
         new RuleEngineOwnable2Step(ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
