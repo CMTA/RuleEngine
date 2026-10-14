@@ -25,7 +25,12 @@ See [https://semver.org](https://semver.org)
 
 Reference: [keepachangelog.com/en/1.1.0/](https://keepachangelog.com/en/1.1.0/)
 
-Custom changelog tag: `Dependencies`, `Documentation`, `Testing`
+Custom changelog tag
+
+- `breaking change`: breaking change regarding storage [ERC-7201](https://eips.ethereum.org/EIPS/eip-7201) namespace , as well as external engine
+- `Dependencies` (npm package, openzeppelin,...)
+- `Documentation`
+- `Testing`
 
 ## Checklist
 
@@ -47,6 +52,64 @@ forge lint
 
 
 
+## v3.0.0 - Unreleased (pending audit)
+
+Commit: to be added once the audit is done and the release is tagged.
+
+> **Note:** this section summarises the main changes between **v2.1.0** and **v3.0.0**. It will be finalised, with the audit report and its findings, once the audit is done. Per-item details, tests and documentation are in the release-candidate entries below (`v3.0.0-rc0` to `v3.0.0-rc7`).
+
+### Summary
+
+v3.0.0 turns the RuleEngine into a generic compliance controller for both CMTAT and ERC-3643 tokens. There is a single rule type, and the rules themselves move to a dedicated repository. There are three deployable access-control variants, and tokens must be explicitly bound to the engine. On-chain safeguards bound the rule set and separate rule accounts from privileged ones.
+
+### Breaking change
+
+- **Rules are no longer part of this repository.** Production rules are developed and audited separately in [CMTA/Rules](https://github.com/CMTA/Rules); `src/mocks/rules/` only holds reference mocks (suffixed `Mock` since rc5). (rc0)
+- **Single rule type.** The separate validation (read-only) and operation (read-write) rule lists are merged into one rule set, managed by `RulesManagementModule` (`addRule`, `removeRule`, `setRules`, `clearRules`, `rules`, `rule`, `rulesCount`, `containsRule`). `RuleEngineOperation` is renamed `RulesManagementModule` and `MetaTxModuleStandalone` `ERC2771ModuleStandalone`. (rc0)
+- **Rules must implement `IRule` and advertise it through ERC-165** (`0x2497d6cb`); `addRule` / `setRules` reject any other contract. A v2.x rule cannot be added as is. (rc1)
+- **Only bound tokens may call the engine.** `transferred`, `created` and `destroyed` revert with `TokenBinding_UnauthorizedCaller` unless the caller was bound, with `bindToken` or the constructor's `tokenContract` argument. A token's own `bindToken(this)` / `unbindToken(this)` (ERC-3643 `setCompliance`) requires a prior `setTokenSelfBindingApproval`. (rc0, rc3)
+- **Rule-set cap.** `addRule` / `setRules` revert with `RuleEngine_RulesManagementModule_MaxRulesExceeded` above `maxRules` (default 10, changed with `setMaxRules`). (rc3)
+- **Rule accounts cannot hold privileges.** `RuleEngine.grantRole` and the ownable variants' `transferOwnership` revert for an address in the rule set. (rc3)
+- **Interfaces split.** The base ERC-3643 surface is in `IERC3643Compliance`, and the helpers (batch binding, self-binding approval, `getTokenBounds`) are in `IERC3643ComplianceExtended`. Binding moved to the standard-agnostic `ITokenBinding` / `ITokenBindingExtended`. Selectors and ERC-165 IDs of the existing functions are unchanged. (rc3, rc6)
+- **Errors renamed.** `RuleEngine_ERC3643Compliance_*` became `TokenBinding_*`, which changes their selectors. (rc6)
+- **RBAC base.** `RuleEngine` uses `AccessControlEnumerable` (still with "default admin has all roles"). The deployable contracts moved to `src/deployment/`. (rc2)
+- **CMTAT v3.3.0 routing.** With CMTAT ≥ v3.3.0, mint, burn and the minter `batchTransfer` reach the engine on the 4-argument `transferred(spender, from, to, value)` with the operator as `spender`. Rules that check the spender must handle `from == address(0)` / `to == address(0)`. On CMTAT v3.0.0 – v3.2.0 those operations still use the 3-argument overload. (rc4, CMTAT side)
+- **Compiler floor.** The CMTAT engine interfaces require `pragma ^0.8.24`, so the engine compiles with Solidity ≥ 0.8.24 despite its own `^0.8.20` pragma.
+- **`version()`** returns the release string with its suffix while in release candidate (`"3.0.0-rc7"`). (rc7)
+- **No storage change to migrate.** The RuleEngine is not upgradeable: moving from v2.x means deploying a new engine, re-adding the rules and re-pointing each token (`setRuleEngine` / `setCompliance`).
+
+### Added
+
+- **ERC-3643 compliance.** The engine implements `IERC3643Compliance` (`canTransfer`, `transferred`, `created`, `destroyed`, `bindToken`, `unbindToken`, `isTokenBound`, `getTokenBound`), so it can be set as the compliance contract of an ERC-3643 (T-REX) token. (rc0)
+- **Two ownable variants:** `RuleEngineOwnable` (ERC-173 `Ownable`) and `RuleEngineOwnable2Step` (`Ownable2Step`), next to the RBAC `RuleEngine`. (rc1, rc2)
+- **Token binding registry**, reusable outside this project: `TokenBindingModule` / `TokenBindingExtendedModule`, with batch binding, `getTokenBounds()` and gated token self-binding (`setTokenSelfBindingApproval`, `setTokenSelfBindingApprovalBatch`, `isTokenSelfBindingApproved`). (rc3, rc6)
+- **Rule-set cap:** `maxRules()`, `setMaxRules(uint256)` and the `SetMaxRules` event, emitted at deployment too. (rc3, rc5)
+- **ERC-165 advertisement** of `IRuleEngine`, `IERC1404`, `IERC1404Extend`, `IERC3643Compliance` and its extension, `IERC7551Compliance` (subset), plus ERC-173 / `Ownable2Step` or `IAccessControl(Enumerable)` per variant. The IDs are computed from the interfaces and pinned by tests. (rc1–rc6)
+- **Spender-aware path** (`transferred(spender, …)`, `canTransferFrom`, `detectTransferRestrictionFrom`), first added in v2.1.0 (partial support), and forwarded to every rule as part of CMTAT's `IRuleEngine`.
+
+### Security
+
+- Fixes and mitigations for the Nethermind AuditAgent scan findings 1–7: multi-tenant binding warning, `IAccessControl` no longer advertised by `RuleEngineOwnable`, missing interface IDs, the rule-count cap, rule accounts excluded from privileges, the restriction-code uniqueness convention, and the empty `setRules` documented. (rc2, rc3)
+- Token self-binding requires explicit per-token approval, so an arbitrary contract cannot bind itself. (rc3)
+- Documented trust model: rules and every contract they call are trusted, `transferred*` hooks must not make state-changing external calls, and the ERC-2771 forwarder is trusted to the same degree as a bound token. (rc7)
+
+### Dependencies
+
+- CMTAT: supports **≥ v3.0.0**, target **v3.3.0-rc4** (tested also against v3.0.0 via `lib/CMTATv3.0.0`). v2.1.0 targeted CMTAT v3.0.0-rc5.
+- OpenZeppelin Contracts / Contracts Upgradeable **v5.7.0**.
+- Solidity **0.8.36**, EVM **Prague**.
+- ERC-3643 reference implementation (tests only): T-REX **4.2.0-beta1**.
+
+### Testing
+
+- Test suites for all three deployable variants, CMTAT integration (current and v3.0.0), an ERC-3643 mock-token integration, and a real T-REX 4.2.0-beta1 suite in the `erc3643` Foundry profile. Also a Hardhat smoke test and tests pinning the deployment scripts and every ERC-165 interface ID.
+
+### Documentation
+
+- Full reference in `doc/README.md`, and integration guides `doc/technical/RuleEngine-with-CMTAT.md`, `RuleEngine-with-ERC3643.md` and `TokenBinding-module.md`.
+- Static-analysis (Slither, Aderyn) and automated-review reports per release candidate, indexed in `doc/security/audits/AUDIT_OVERVIEW.md`.
+- PlantUML flow and access-control diagrams, sol2uml and Surya diagrams.
+
 ### v3.0.0-rc7 - 2026-10-14
 
 Commit: not yet committed (changes since rc6, `ca75429`, up to `32ed59c` plus pending working-tree changes)
@@ -54,6 +117,12 @@ Commit: not yet committed (changes since rc6, `ca75429`, up to `32ed59c` plus pe
 ### Summary
 
 Maintenance release with no change to the engine logic or to its external API. The CMTAT submodule moves to v3.3.0-rc4 and the ERC-3643 submodule to T-REX 4.2.0-beta1, which is now tested end-to-end in a dedicated Foundry profile. The CMTAT / Rules documentation is corrected and completed. `version()` now carries the release-candidate suffix.
+
+### Breaking change
+
+- **`version()` return value format.** It now returns `"3.0.0-rc7"` instead of `"3.0.0"`. An integration that compares the string literally (deployment checks, indexers, upgrade scripts) must be updated, and must expect the suffix to change at each release candidate. This is the only change under `src/` since rc6.
+- **No storage change.** The RuleEngine is not upgradeable and uses no ERC-7201 namespace.
+- **No external engine interface change.** Function signatures, selectors, events, errors and advertised ERC-165 interface IDs are identical to rc6. The CMTAT v3.3.0-rc4 update changes only NatSpec in `IRuleEngine`. Its engine-facing breaking changes (mint, burn and the minter `batchTransfer` routed to the 4-argument `transferred`, the reentrancy guard around `transferred`, the `^0.8.24` pragma of the engine interfaces) were already present in the v3.3.0-rc1 / rc3 targets of rc4–rc6.
 
 ### Changed
 
