@@ -146,7 +146,6 @@ _Diagram source: [doc/schema/plantuml/ruleengine-flow-erc3643.puml](./schema/pla
 | **v3.0.0-rc6**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc4](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc4) |
 | **v3.0.0-rc5**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc3](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3) |
 | **v3.0.0-rc4**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc1](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc1) |
-| **v3.0.0-rc3**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0) |
 | **v3.0.0-rc2**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
 | **[v1.0.2.1](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2.1)** | CMTAT v2.3.0 (audited)                                       |
 
