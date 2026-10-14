@@ -280,11 +280,12 @@ function destroyed(address from, uint256 value) external;
 
 ### CMTAT
 
-The `RuleEngine` base interface is defined in the CMTAT repository.
+The `RuleEngine` base interface is defined in the CMTAT repository ([`IRuleEngine.sol`](https://github.com/CMTA/CMTAT/blob/v3.3.0-rc4/contracts/interfaces/engine/IRuleEngine.sol)).
 
-![cmtat_surya_inheritance_IRuleEngine.sol](./schema/cmtat_surya_inheritance_IRuleEngine.sol.png)
+- `IRuleEngine` extends `IERC7551Compliance` (which extends `IERC3643ComplianceRead`), `IERC3643IComplianceContract` and `IERC165`.
+- `IRuleEngineERC1404` extends `IERC1404Extend` (which extends `IERC1404`) and `IRuleEngine`. The engine implements this one, since the token exposes ERC-1404.
 
-It inherits from several others interfaces: `IERC1404`, `IERC1404Extend`, `IERC7551Compliance`, `IERC3643ComplianceContract`
+Since CMTAT v3.2.0, `IRuleEngine` no longer extends `IERC1404Extend`. See the [IRuleEngine](#iruleengine) section for its sol2uml diagram.
 
 ```solidity
 // IRuleEngine
