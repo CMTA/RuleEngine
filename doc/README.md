@@ -141,6 +141,8 @@ _Diagram source: [doc/schema/plantuml/ruleengine-flow-erc3643.puml](./schema/pla
 
 | RuleEngine version                                           | Compatible Versions                                          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **v3.0.0-rc6**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc4](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc4) |
+| **v3.0.0-rc5**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc3](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3) |
 | **v3.0.0-rc4**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc1](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc1) |
 | **v3.0.0-rc3**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0) |
 | **v3.0.0-rc2**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
@@ -210,27 +212,29 @@ If you need non-standard helper functions (batch bind/unbind, self-binding appro
 
 ### Like CMTAT
 
-Before each ERC-20 transfer, mint, or burn, CMTAT calls the RuleEngine through the internal function `_checkTransferred`, which dispatches to one of two `transferred` overloads depending on whether a non-zero spender is present.
+Before each ERC-20 transfer, mint, or burn, CMTAT calls the RuleEngine from `ValidationModuleRuleEngine._transferred` (reached through `_checkTransferred`). The external call is isolated in `_callRuleEngineTransferred`, which dispatches to one of two `transferred` overloads depending on whether a non-zero spender is present.
 
 ```solidity
-// Called when spender == address(0)
+// Called when spender == address(0): direct `transfer` only
 function transferred(address from, address to, uint256 value)
 
-// Called when spender != address(0)
+// Called when spender != address(0): every other operation
 function transferred(address spender, address from, address to, uint256 value)
 ```
 
 #### CMTAT v3.3.0 — mint and burn use the spender path
 
-Since CMTAT v3.3.0, **mint and burn operations also go through the 4-argument overload**, with the operator (minter or burner) passed as `spender`:
+Since CMTAT v3.3.0, **every operation initiated by an operator goes through the 4-argument overload**, with the operator passed as `spender`. The routing is documented in the `IRuleEngine.transferred` NatSpec since CMTAT v3.3.0-rc4:
 
-| Operation | `spender` | `from` | `to` |
-|-----------|-----------|--------|------|
-| `transfer` / `transferFrom` | caller / approved spender | token holder | recipient |
-| `mint` | minter (`_msgSender()`) | `address(0)` | recipient |
-| `burn` | burner (`_msgSender()`) | token holder | `address(0)` |
+| Operation | Overload | `spender` | `from` | `to` |
+|-----------|----------|-----------|--------|------|
+| `transfer` | 3-argument | — | token holder | recipient |
+| `transferFrom` | 4-argument | approved spender | token holder | recipient |
+| `mint` / `batchMint` / `crosschainMint` | 4-argument | minter / bridge (`_msgSender()`) | `address(0)` | recipient |
+| `burn` / `batchBurn` / `burnFrom` / self-burn / `crosschainBurn` | 4-argument | burner / bridge (`_msgSender()`) | token holder | `address(0)` |
+| minter `batchTransfer` | 4-argument | minter (`_msgSender()`) | minter | recipient |
 
-The 3-argument overload is only called when `spender == address(0)`, which does not occur in normal CMTAT v3.3.0 flows.
+The 3-argument overload is therefore only called for a direct `transfer`. Up to CMTAT v3.2.0, mint, burn and the minter `batchTransfer` used the 3-argument overload.
 
 > **Rule authoring note:** Rules that check the `spender` argument in `transferred(spender, from, to, value)` must explicitly handle the mint (`from == address(0)`) and burn (`to == address(0)`) cases. A spender check that is intended only for `transferFrom` will also fire for mints and burns unless the rule skips it when `from` or `to` is the zero address. See `RuleWhitelist` and `RuleSpenderWhitelist` in the Rules repository for reference implementations.
 
@@ -347,8 +351,8 @@ The toolchain includes the following components, where the versions are the late
 
 - Foundry (forge-std) [v1.14.0](https://github.com/foundry-rs/forge-std/releases/tag/v1.14.0)
 - Solidity [0.8.36](https://docs.soliditylang.org/en/v0.8.36/)
-- OpenZeppelin Contracts (submodule) [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1)
-- CMTAT [v3.3.0](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0)
+- OpenZeppelin Contracts (submodule) [v5.7.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.7.0)
+- CMTAT [v3.3.0-rc4](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc4)
 
 ### Access Control
 

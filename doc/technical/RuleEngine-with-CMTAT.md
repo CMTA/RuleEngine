@@ -36,12 +36,13 @@ The `spender` value comes from `CMTATBaseCommon`:
 | `transferFrom(from, to, value)` | `_msgSender()` | 4-argument `transferred(spender, from, to, value)` |
 | `mint(to, value)` | `_msgSender()` | 4-argument, with `from == address(0)` |
 | `burn(from, value)` | `_msgSender()` | 4-argument, with `to == address(0)` |
+| minter `batchTransfer(tos, values)` | `_msgSender()` | 4-argument, with the minter as `from` |
 
 Two consequences follow:
 
 - A **plain transfer never carries a spender**. The zero address is a branch condition inside CMTAT and is
   never forwarded, so the engine is never called with a zero spender.
-- Since CMTAT v3.3.0, **mint and burn go through the 4-argument overload** with the operator as `spender`.
+- Since CMTAT v3.3.0, **mint, burn and the minter `batchTransfer` go through the 4-argument overload** with the operator as `spender` (documented in the `IRuleEngine.transferred` NatSpec since CMTAT v3.3.0-rc4).
   A rule that rejects unknown spenders must skip or adapt that check when `from == address(0)` (mint) or `to == address(0)` (burn), or it will block issuance and redemption.
 
 **CMTAT never calls `created()` or `destroyed()`.** Those belong to `IERC3643Compliance` and are used only by ERC-3643 tokens. 
@@ -183,7 +184,7 @@ to an address currently configured as a rule, but the check is one-directional a
 
 **31 CMTAT-specific tests.** Coverage includes: a real `CMTATStandardStandalone` bound to the engine, transfers accepted and rejected through the whitelist, restriction-code propagation back to the token, and a rule that reverts mid-transfer.
 
-**Backward compatibility is tested against two CMTAT versions.** The `…V3` suites deploy a real CMTAT **v3.0.0** token (submodule `lib/CMTATv3.0.0`, remapped `CMTATv3.0.0/`) alongside the current **v3.3.0-rc3** token (`lib/CMTAT`). 
+**Backward compatibility is tested against two CMTAT versions.** The `…V3` suites deploy a real CMTAT **v3.0.0** token (submodule `lib/CMTATv3.0.0`, remapped `CMTATv3.0.0/`) alongside the current **v3.3.0-rc4** token (`lib/CMTAT`). 
 
 Both are bound to the same engine implementation.
 
@@ -191,6 +192,7 @@ Both are bound to the same engine implementation.
 
 | RuleEngine | CMTAT |
 |---|---|
+| v3.0.0-rc6 | ≥ v3.0.0, target v3.3.0-rc4 |
 | v3.0.0-rc5 | ≥ v3.0.0, target v3.3.0-rc3 |
 | v3.0.0-rc4 | ≥ v3.0.0, target v3.3.0-rc1 |
 | v1.0.2.1 | v2.3.0 (audited) |
