@@ -243,17 +243,44 @@ The 3-argument overload is therefore only called for a direct `transfer`. `force
 
 > **Rule authoring note:** Rules that check the `spender` argument in `transferred(spender, from, to, value)` must explicitly handle the mint (`from == address(0)`) and burn (`to == address(0)`) cases. A spender check that is intended only for `transferFrom` will also fire for mints and burns unless the rule skips it when `from` or `to` is the zero address. See `RuleWhitelist` and `RuleSpenderWhitelist` in the Rules repository for reference implementations.
 
-For example, CMTAT defines the interaction with the RuleEngine inside a specific module, [ValidationModuleRuleEngine](https://github.com/CMTA/CMTAT/blob/master/contracts/modules/wrapper/extensions/ValidationModule/ValidationModuleRuleEngine.sol) and [CMTATBaseRuleEngine](https://github.com/CMTA/CMTAT/blob/master/contracts/modules/1_CMTATBaseRuleEngine.sol).
+For example, CMTAT defines the interaction with the RuleEngine inside a specific module, [ValidationModuleRuleEngine](https://github.com/CMTA/CMTAT/blob/v3.3.0-rc4/contracts/modules/wrapper/extensions/ValidationModule/ValidationModuleRuleEngine.sol), and calls it from [CMTATBaseRuleEngine](https://github.com/CMTA/CMTAT/blob/v3.3.0-rc4/contracts/modules/3_CMTATBaseRuleEngine.sol) (code below from CMTAT v3.3.0-rc4).
 
-- ValidationModuleRuleEngine
+- `CMTATBaseRuleEngine`: the token's common checks run first, then the RuleEngine hook.
 
-![transferred](./other/CMTAT/transferred.png)
+```solidity
+function _checkTransferred(address spender, address from, address to, uint256 value) internal virtual override(CMTATBaseCommon) {
+    CMTATBaseCommon._checkTransferred(spender, from, to, value);
+    ValidationModuleRuleEngine._transferred(spender, from, to, value);
+}
+```
 
-- CMTATBaseRuleEngine
+- `ValidationModuleRuleEngine`: the generic module checks (pause, freeze, …) revert on failure, then the engine is called if one is set. The overload is chosen in `_callRuleEngineTransferred`. That function is `virtual`, so the Standard, Snapshot and ERC-7551 variants wrap it in a `nonReentrant` guard.
 
-![checkTransferred](./other/CMTAT/checkTransferred.png)
+```solidity
+function _transferred(address spender, address from, address to, uint256 value) internal virtual {
+    _canTransferGenericByModuleAndRevert(spender, from, to);
+    IRuleEngine ruleEngine_ = ruleEngine();
+    if (address(ruleEngine_) != address(0)) {
+        _callRuleEngineTransferred(ruleEngine_, spender, from, to, value);
+    }
+}
 
-This function `_transferred` is called before each transfer/burn/mint through the internal function `_checkTransferred`.
+function _callRuleEngineTransferred(
+    IRuleEngine ruleEngine_,
+    address spender,
+    address from,
+    address to,
+    uint256 value
+) internal virtual {
+    if (spender != address(0)) {
+        ruleEngine_.transferred(spender, from, to, value);
+    } else {
+        ruleEngine_.transferred(from, to, value);
+    }
+}
+```
+
+`_checkTransferred` is called before each transfer, mint and burn. Since CMTAT v3.2.0, `_transferred` no longer returns a `bool` (it did up to v3.1.0): a rejected operation reverts in the module checks or in the engine itself.
 
 ### Like ERC-3643
 
