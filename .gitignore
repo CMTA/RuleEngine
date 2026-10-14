@@ -19,8 +19,7 @@ cache_hardhat/
 *.dtmp
 #claude
 history
-INSTRUCTION.md
-PLAN.md
-SUMMARY.md
-FEEDBACK.md
+draft
 .codex
+out-erc3643/
+

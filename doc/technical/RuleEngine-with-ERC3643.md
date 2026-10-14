@@ -14,7 +14,7 @@ _Diagram source: [doc/schema/plantuml/ruleengine-flow-erc3643.puml](../schema/pl
 
 ## 2. Which entry points an ERC-3643 token uses
 
-In ERC-3643 the RuleEngine plays the role of the **compliance contract**. Taken from `Token.sol` in the reference implementation (submodule `lib/ERC-3643`, tag 4.1.3):
+In ERC-3643 the RuleEngine plays the role of the **compliance contract**. Taken from `Token.sol` in the reference implementation (submodule `lib/ERC-3643`, tag 4.2.0-beta1; unchanged from 4.1.3 for these calls), and pinned against the real token by `test/ERC3643Real/` (section 5):
 
 | Token operation | Pre-check | State-changing callback |
 |---|---|---|
@@ -183,22 +183,29 @@ As with CMTAT: the engine returns the first non-zero code, so overlapping codes 
 `IERC7551Compliance` comes from `draft-IERC7551` and is not final. This project implements a subset focused on
 `canTransferFrom`. Do not assume full ERC-7551 conformance.
 
-### 4.8 The reference T-REX token cannot be compiled into this test suite
+### 4.8 The real T-REX token is tested in a separate Foundry profile
 
-Relevant if you intend to add tests against the vendored implementation in `lib/ERC-3643`. Three independent blockers:
+The vendored token (`lib/ERC-3643`, T-REX **4.2.0-beta1**) pins `pragma solidity 0.8.30` exactly, while this
+project compiles with **0.8.36**, and it imports the `@onchain-id/solidity` npm package, which is not a
+submodule. The suite that deploys it therefore runs in its own profile:
 
-- it pins `pragma solidity 0.8.17` (exact), while this project compiles with **0.8.36**;
-- it requires **OpenZeppelin 4.8.x**, while this project uses **5.7.0**;
-- it imports the `onchain-id/solidity` package, which is not installed here.
-
-Attempting it fails at resolution:
-
-```
-Error: Encountered invalid solc version in lib/ERC-3643/contracts/token/Token.sol:
-No solc version exists that matches the version requirement: =0.8.17
+```bash
+FOUNDRY_PROFILE=erc3643 forge test
 ```
 
-The integration tests therefore use `ERC3643TokenMock`, whose compliance interaction is copied from the reference `Token.sol` (the table in section 2 is taken from it directly). Compiling the real token would require unpinning the project compiler and vendoring a second OpenZeppelin major alongside the current one.
+- `[profile.erc3643]` in `foundry.toml` builds the whole project at solc 0.8.30 (the engine is `^0.8.20`,
+  CMTAT and OpenZeppelin `^0.8.24` at most) into `out-erc3643/`, and runs only `test/ERC3643Real/`.
+- The default profile lists `test/ERC3643Real/**` in `skip`, so a plain `forge test` is unaffected.
+- `test/utils/onchainid/` holds minimal `IIdentity` / `IClaimIssuer` stubs, wired in by a **context-scoped**
+  remapping (`lib/ERC-3643/:@onchain-id/solidity/contracts/=...`) that applies to the ERC-3643 sources only.
+  It is declared in the profile, not in `remappings.txt`: `hardhat-foundry` reads `forge remappings` and
+  rejects context-scoped lines.
+- T-REX 4.2.0-beta1 uses OpenZeppelin 5, so no second OpenZeppelin major is needed (4.1.3 required 4.8.x).
+- The identity registry is `IdentityRegistryStub`, which answers `isVerified` from a test flag, so every
+  rejection observed comes from the engine.
+
+`test/RuleEngine/ERC3643TokenIntegration.t.sol` keeps driving `ERC3643TokenMock` in the default profile, so the
+compliance surface is also covered by the ordinary `forge test` and by coverage.
 
 ### 4.9 Compliance is notified after the state change
 
@@ -211,7 +218,8 @@ amount twice on an ERC-3643 token and rejects operations that should pass.
 Use the ERC-3643 variants of such rules where the Rules repository provides them
 (`RuleMaxTotalSupplyERC3643`, `RuleChainlinkPoRERC3643`), and check each rule's documentation for ERC-3643
 support before binding an engine to a T-REX token. The pre-check `canTransfer` runs before the update, so it
-does not show the problem.
+does not show the problem. Pinned against the real token by `testComplianceIsNotifiedAfterTheMint`: a
+CMTAT-style cap of 100 accepts the pre-check of a 100-token mint, then rejects it in `created`.
 
 ## 5. What is tested
 
@@ -220,8 +228,9 @@ does not show the problem.
 | Compliance module, RBAC variant | `RuleEngine/ERC3643Compliance.t.sol` | 30 |
 | Compliance module, ownable variant | `RuleEngineOwnable/ERC3643Compliance.t.sol` | 29 |
 | End-to-end with an ERC-3643 style token | `RuleEngine/ERC3643TokenIntegration.t.sol` | 11 |
+| End-to-end with the real T-REX 4.2.0-beta1 token (`FOUNDRY_PROFILE=erc3643`) | `ERC3643Real/ERC3643RealTokenRuleEngine.t.sol` | 13 |
 
-**70 ERC-3643-specific tests.** The `RuleEngineOwnable2Step` suite exercises the same compliance surface again
+**83 ERC-3643-specific tests** (70 in the default profile, 13 in the `erc3643` profile). The `RuleEngineOwnable2Step` suite exercises the same compliance surface again
 through its own variant.
 
 The end-to-end suite covers, using a token that drives the engine exactly as `Token.sol` does:
@@ -233,6 +242,17 @@ The end-to-end suite covers, using a token that drives the engine exactly as `To
 - `transferred` / `created` / `destroyed` rejecting unbound callers
 - the two documented limitations above (`H-1` fail-open, `F-2` zero-address whitelist), pinned so a change in
   behaviour is noticed
+
+The real-token suite (`test/ERC3643Real/`) checks the same surface against the genuine `Token`, plus what the
+mock cannot show:
+
+- `init` self-binding the token through `setCompliance`, and reverting without self-binding approval
+- mint pre-checked with `canTransfer(address(0), ...)` then notified through `created`, forwarded to the rules
+  as the 3-argument `transferred(address(0), to, value)`; burn through `destroyed`
+- `transfer` and `transferFrom` both reaching the 3-argument `transferred` — the spender is never forwarded
+- `forcedTransfer` notifying compliance, so a rule can block it (unlike CMTAT, whose `forcedTransfer` bypasses
+  the engine)
+- the post-update notification order of section 4.9
 
 ## 6. Related documents
 

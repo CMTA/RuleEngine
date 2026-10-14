@@ -23,7 +23,13 @@ forge test --match-contract <Name> --match-test <fn>  # Run specific test
 forge coverage           # Code coverage
 forge coverage --no-match-coverage "(mocks|test)" --report lcov  # Production coverage (src/ + script/)
 forge fmt                # Format code
+FOUNDRY_PROFILE=erc3643 forge test  # Real ERC-3643 token suite (test/ERC3643Real/, solc 0.8.30)
 ```
+
+`test/ERC3643Real/` deploys the vendored T-REX 4.2.0-beta1 `Token`, which pins `pragma solidity 0.8.30`. It is
+skipped by the default profile and built by `[profile.erc3643]` (solc 0.8.30, `out-erc3643/`, context-scoped
+`@onchain-id` remapping to the stubs in `test/utils/onchainid/`). Files there must pin `pragma solidity 0.8.30`.
+Never move the context-scoped remapping into `remappings.txt`: `hardhat-foundry` rejects it.
 
 Dependencies are git submodules. Initialize with `git submodule update --init` (non-recursive is enough), update with `forge update`.
 `remappings.txt` resolves `@openzeppelin/...` to this repo's own submodules for every file, including the CMTAT sources,
@@ -273,6 +279,7 @@ test/
 ├── RuleEngine/                    # Tests for RuleEngine (RBAC)
 ├── RuleEngineOwnable/             # Tests for RuleEngineOwnable
 ├── RuleEngineOwnable2Step/        # Tests for RuleEngineOwnable2Step
+├── ERC3643Real/                   # Real T-REX token tests (FOUNDRY_PROFILE=erc3643 only)
 └── RuleWhitelist/                 # Tests for the whitelist mock rule
 
 script/                            # Foundry example/deployment scripts

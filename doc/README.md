@@ -1738,6 +1738,14 @@ Generate gas report
 forge test --gas-report
 ```
 
+The tests that deploy the real ERC-3643 token (T-REX 4.2.0-beta1, `pragma solidity 0.8.30`) run in a dedicated profile and are skipped by the default one:
+
+```bash
+FOUNDRY_PROFILE=erc3643 forge test
+```
+
+See [RuleEngine-with-ERC3643.md §4.8](./technical/RuleEngine-with-ERC3643.md#48-the-real-t-rex-token-is-tested-in-a-separate-foundry-profile).
+
 See also the test framework's [official documentation](https://book.getfoundry.sh/forge/tests), and that of the [test commands](https://book.getfoundry.sh/reference/forge/test-commands).
 
 There is also a small Hardhat smoke test to confirm the main `RuleEngine` contract can be compiled and deployed through Hardhat:

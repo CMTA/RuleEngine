@@ -68,6 +68,7 @@ The external API and the advertised ERC-165 interface IDs are unchanged; the onl
 
 ### Added
 
+- Add `test/ERC3643Real/ERC3643RealTokenRuleEngine.t.sol` (13 tests) against the **real** vendored ERC-3643 token (T-REX 4.2.0-beta1): self-binding through `init` / `setCompliance`, mint through `created`, burn through `destroyed`, `transfer` / `transferFrom` on the 3-argument `transferred` with no spender forwarded, `forcedTransfer` notifying compliance, unbound callers rejected, and the post-update notification order (a CMTAT-style supply cap counts a mint twice). Run with `FOUNDRY_PROFILE=erc3643 forge test`: a new `[profile.erc3643]` builds at solc 0.8.30 (the token pins `pragma solidity 0.8.30`) into `out-erc3643/`, with a context-scoped `@onchain-id` remapping to the stubs in `test/utils/onchainid/`; the default profile skips the directory. Test helpers: `IdentityRegistryStub`, `SupplyCapProbeRule`.
 - Add `TokenBindingStandaloneMock`: a minimal engine embedding `TokenBindingModule` alone with `Ownable` access control, showing what another project has to provide to reuse the registry, and pinning that it works with no compliance code around it.
 - Add `test/TokenBinding/TokenBindingStandalone.t.sol` (10 tests) covering the standalone registry: bind, unbind, events, manager-only administration, zero address, already-bound / not-bound, the `onlyBoundToken` guard, and that self-binding is rejected without `TokenBindingExtendedModule`.
 
@@ -89,6 +90,7 @@ The external API and the advertised ERC-165 interface IDs are unchanged; the onl
 
 ### Dependencies
 
+- Update the ERC-3643 submodule (`lib/ERC-3643`) from 4.1.3 to [4.2.0-beta1](https://github.com/ERC-3643/ERC-3643/releases/tag/4.2.0-beta1) (`a708758`, the commit used by the Rules repository). Only the `erc3643` test profile compiles it.
 - Update CMTAT submodule to [v3.3.0-rc4](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc4). No change to the interfaces used by the RuleEngine: rc4 only documents the `transferred` overload routing in the `IRuleEngine` NatSpec, replaces `EnumerableSet.at` by `EnumerableSet.pos` in `HolderListModule` (OpenZeppelin 5.7.0 deprecation, already the version of our submodule) and adds upgrade test mocks. Build and full test suite pass unchanged.
 
 ### v3.0.0-rc5-2026-08-13

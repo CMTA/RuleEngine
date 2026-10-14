@@ -112,6 +112,7 @@ git submodule update --init   # non-recursive is enough: remappings.txt resolves
 
 forge build       # compile
 forge test        # run the test suite
+FOUNDRY_PROFILE=erc3643 forge test   # tests against the real ERC-3643 token (T-REX 4.2.0-beta1, solc 0.8.30)
 forge coverage    # code coverage
 forge fmt         # format
 ```
