@@ -112,7 +112,7 @@ v3.0.0 turns the RuleEngine into a generic compliance controller for both CMTAT 
 
 ### v3.0.0-rc7 - 2026-10-14
 
-Commit: not yet committed (changes since rc6, `ca75429`, up to `32ed59c` plus pending working-tree changes)
+Commit: 
 
 ### Summary
 
