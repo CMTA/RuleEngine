@@ -13,7 +13,7 @@ describe("RuleEngine Hardhat smoke test", function () {
     );
     await ruleEngine.waitForDeployment();
 
-    expect(await ruleEngine.version()).to.equal("3.0.0-rc6");
+    expect(await ruleEngine.version()).to.equal("3.0.0-rc7");
     expect(await ruleEngine.rulesCount()).to.equal(0n);
     expect(await ruleEngine.getTokenBound()).to.equal(ethers.ZeroAddress);
 

@@ -44,7 +44,7 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
     }
 
     function testHasRightVersion() public view {
-        assertEq(ruleEngineMock.version(), "3.0.0-rc6");
+        assertEq(ruleEngineMock.version(), "3.0.0-rc7");
     }
 
     function testCannotDeployContractIfOwnerAddressIsZero() public {

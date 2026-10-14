@@ -53,7 +53,7 @@ contract RuleEngineOwnableDeploymentTest is Test, HelperContractOwnable {
         ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, address(0x0), ZERO_ADDRESS);
 
         // Assert
-        assertEq(ruleEngineMock.version(), "3.0.0-rc6");
+        assertEq(ruleEngineMock.version(), "3.0.0-rc7");
     }
 
     function testCannotDeployContractIfOwnerAddressIsZero() public {

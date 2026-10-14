@@ -234,7 +234,8 @@ Both are bound to the same engine implementation.
 
 | RuleEngine | CMTAT |
 |---|---|
-| v3.0.0-rc6 | ≥ v3.0.0, target v3.3.0-rc4 |
+| v3.0.0-rc7 | ≥ v3.0.0, target v3.3.0-rc4 |
+| v3.0.0-rc6 | ≥ v3.0.0, target v3.3.0-rc3 |
 | v3.0.0-rc5 | ≥ v3.0.0, target v3.3.0-rc3 |
 | v3.0.0-rc4 | ≥ v3.0.0, target v3.3.0-rc1 |
 | v1.0.2.1 | v2.3.0 (audited) |

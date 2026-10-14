@@ -47,7 +47,37 @@ forge lint
 
 
 
+### v3.0.0-rc7 - 2026-10-14
+
+Commit: not yet committed (changes since rc6, `ca75429`, up to `32ed59c` plus pending working-tree changes)
+
+### Summary
+
+Maintenance release with no change to the engine logic or to its external API. The CMTAT submodule moves to v3.3.0-rc4 and the ERC-3643 submodule to T-REX 4.2.0-beta1, which is now tested end-to-end in a dedicated Foundry profile. The CMTAT / Rules documentation is corrected and completed. `version()` now carries the release-candidate suffix.
+
+### Changed
+
+- `version()` now returns `"3.0.0-rc7"` instead of `"3.0.0"`, so the on-chain string matches the release tag (`VersionModule.VERSION`). The `version()` assertions of the RBAC and Ownable suites and of the Hardhat smoke test are updated, and `RuleEngineOwnable2Step` gains its own `testHasRightVersion` (348 -> 349 tests).
+
+### Added
+
+- Add `test/ERC3643Real/ERC3643RealTokenRuleEngine.t.sol` (13 tests) against the **real** vendored ERC-3643 token (T-REX 4.2.0-beta1): self-binding through `init` / `setCompliance`, mint through `created`, burn through `destroyed`, `transfer` / `transferFrom` on the 3-argument `transferred` with no spender forwarded, `forcedTransfer` notifying compliance, unbound callers rejected, and the post-update notification order (a CMTAT-style supply cap counts a mint twice). Run with `FOUNDRY_PROFILE=erc3643 forge test`: a new `[profile.erc3643]` builds at solc 0.8.30 (the token pins `pragma solidity 0.8.30`) into `out-erc3643/`, with a context-scoped `@onchain-id` remapping to the stubs in `test/utils/onchainid/`; the default profile skips the directory. Test helpers: `IdentityRegistryStub`, `SupplyCapProbeRule`.
+
+### Documentation
+
+- `doc/README.md` "Like CMTAT": corrected the overload routing. The section said the 3-argument `transferred` is never called in CMTAT v3.3.0 flows and listed `transfer` with a spender; a direct `transfer` is in fact the one operation that uses the 3-argument overload. The table now gives the overload per operation, including `batchMint`, `batchBurn`, `burnFrom`, self-burn, cross-chain mint/burn and the minter `batchTransfer`, as documented in the CMTAT v3.3.0-rc4 `IRuleEngine` NatSpec; `doc/technical/RuleEngine-with-CMTAT.md` gains the minter `batchTransfer` row. Compatibility tables and the tested toolchain (OpenZeppelin v5.7.0, CMTAT v3.3.0-rc4) updated.
+- CMTAT / Rules related documentation: complete CMTAT entry-point table (`batchMint`, `batchBurn`, `burnFrom`, cross-chain, minter `batchTransfer` with `spender == from`, `forcedTransfer` bypass); CMTAT v3.0.0–v3.2.0 3-argument mint/burn note; ERC-2771 forwarder trust stated for the bound-token gate (`doc/README.md` §Gasless, `RuleEngine-with-CMTAT.md` §4.7, `RuleEngine-with-ERC3643.md` §4.5, `TokenBinding-module.md` §4); rule-side `transferred*` reentrancy obligation (`RuleEngine-with-CMTAT.md` §4.6, `CLAUDE.md`); token-level ERC-1404 mint/burn pre-flight caveat; ERC-3643 post-update notification order (`RuleEngine-with-ERC3643.md` §4.9); rule lists synced with the Rules repository (`RuleSanctionsList` spelling, seven missing rules, `RuleConditionalTransferLightMultiToken` must not sit behind an engine); single-rule setup caveats; `ERC2771Context` / `forwarderIrrevocable` naming; `IRuleEngine.sol` link moved to CMTAT v3.3.0-rc4; two ERC-165 conventions explained; deployment checklist wiring steps; quick start uses non-recursive `git submodule update --init` without `npm install`; "CMTAT ≥ v3.0.0" headings and `setRuleEngine(IRuleEngine)` signature.
+- `doc/README.md` §Compatibility: removed the RuleEngine v3.0.0-rc3 row, which linked to a CMTAT `v3.3.0` tag that does not exist yet and was out of order with the rc4 row.
+- Add the v3.0.0-rc6 specification PDFs under `doc/specification/previous_specification/rc6/` and the cover sources; add `doc/script/convert_links_for_pdf_root.sh`, which applies the PDF link conversion of `convert_links_for_pdf.sh` to the root `README.md`.
+
+### Dependencies
+
+- Update the ERC-3643 submodule (`lib/ERC-3643`) from 4.1.3 to [4.2.0-beta1](https://github.com/ERC-3643/ERC-3643/releases/tag/4.2.0-beta1) (`a708758`, the commit used by the Rules repository). Only the `erc3643` test profile compiles it.
+- Update CMTAT submodule to [v3.3.0-rc4](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc4). No change to the interfaces used by the RuleEngine: rc4 only documents the `transferred` overload routing in the `IRuleEngine` NatSpec, replaces `EnumerableSet.at` by `EnumerableSet.pos` in `HolderListModule` (OpenZeppelin 5.7.0 deprecation, already the version of our submodule) and adds upgrade test mocks. Build and full test suite pass unchanged.
+
 ### v3.0.0-rc6
+
+Commit: `ca75429c581a2eb9043e4719561e941d0b2e1206`
 
 ### Summary
 
@@ -57,8 +87,6 @@ Token binding is separated from the ERC-3643 compliance code: `TokenBindingModul
 The external API and the advertised ERC-165 interface IDs are unchanged; the only breaking change is the rename of the binding errors `RuleEngine_ERC3643Compliance_*` to `TokenBinding_*`, which changes their selectors.
 
 ### Changed
-
-- `version()` now returns `"3.0.0-rc6"` instead of `"3.0.0"`, so the on-chain string matches the release tag (`VersionModule.VERSION`). The `version()` assertions of the RBAC and Ownable suites and of the Hardhat smoke test are updated, and `RuleEngineOwnable2Step` gains its own `testHasRightVersion` (348 -> 349 tests).
 
 - **Token binding is now separated from the ERC-3643 compliance code**, so the registry can be reused in another project as-is. `TokenBindingModule` (+ `TokenBindingExtendedModule`) holds the whole binding logic — bound token set, `bindToken` / `unbindToken` / `isTokenBound`, the `onlyBoundToken` guard, batch binding, token self-binding and `getTokenBounds()` — and depends only on OpenZeppelin's `Context` and `EnumerableSet`. `ERC3643ComplianceModule` / `ERC3643ComplianceExtendedModule` become thin ERC-3643 adapters, keeping only `getTokenBound()` and the compliance-manager vocabulary (`_onlyTokenBindingManager()` is wired to `_onlyComplianceManager()`).
 - The binding functions and events moved to the standard-agnostic `ITokenBinding` / `ITokenBindingExtended`, which `IERC3643Compliance` / `IERC3643ComplianceExtended` now extend. **The external API and the advertised ERC-165 interface IDs are unchanged**: same functions, same selectors, same events, same access control.
@@ -70,7 +98,6 @@ The external API and the advertised ERC-165 interface IDs are unchanged; the onl
 
 ### Added
 
-- Add `test/ERC3643Real/ERC3643RealTokenRuleEngine.t.sol` (13 tests) against the **real** vendored ERC-3643 token (T-REX 4.2.0-beta1): self-binding through `init` / `setCompliance`, mint through `created`, burn through `destroyed`, `transfer` / `transferFrom` on the 3-argument `transferred` with no spender forwarded, `forcedTransfer` notifying compliance, unbound callers rejected, and the post-update notification order (a CMTAT-style supply cap counts a mint twice). Run with `FOUNDRY_PROFILE=erc3643 forge test`: a new `[profile.erc3643]` builds at solc 0.8.30 (the token pins `pragma solidity 0.8.30`) into `out-erc3643/`, with a context-scoped `@onchain-id` remapping to the stubs in `test/utils/onchainid/`; the default profile skips the directory. Test helpers: `IdentityRegistryStub`, `SupplyCapProbeRule`.
 - Add `TokenBindingStandaloneMock`: a minimal engine embedding `TokenBindingModule` alone with `Ownable` access control, showing what another project has to provide to reuse the registry, and pinning that it works with no compliance code around it.
 - Add `test/TokenBinding/TokenBindingStandalone.t.sol` (10 tests) covering the standalone registry: bind, unbind, events, manager-only administration, zero address, already-bound / not-bound, the `onlyBoundToken` guard, and that self-binding is rejected without `TokenBindingExtendedModule`.
 
@@ -86,14 +113,6 @@ The external API and the advertised ERC-165 interface IDs are unchanged; the onl
 - Regenerate the contract UML diagrams with [sol2uml](https://github.com/naddison36/sol2uml) into `doc/schema/sol2uml/`, replacing the `doc/schema/vscode-uml/` images removed in `d6621e2` — the 14 references left in `doc/README.md` pointed at deleted files. Added [doc/script/script_sol2uml.sh](./doc/script/script_sol2uml.sh), which regenerates the whole set from relative source paths, so the diagrams are reproducible like the Surya ones. New diagrams for `TokenBindingModule`, `TokenBindingExtendedModule` and `ERC3643ComplianceExtendedModule` were added to their sections.
 - `doc/README.md`: the eight `[...](../src/...)` links now use absolute GitHub URLs. `doc/script/convert_links_for_pdf.sh` only rewrites the `./` form and its base URL points at the `doc/` directory, so a `../` link cannot be rewritten and stayed dead in the generated specification PDF.
 - `doc/README.md`: the "Role by modules" table now lists `bindToken` / `unbindToken` under `TokenBindingModule` and the batch and self-binding functions under `TokenBindingExtendedModule`, adds the missing `setMaxRules` row, and points `COMPLIANCE_MANAGER_ROLE` to `ERC3643ComplianceRolesStorage`, where it is actually declared.
-- `doc/README.md` "Like CMTAT": corrected the overload routing. The section said the 3-argument `transferred` is never called in CMTAT v3.3.0 flows and listed `transfer` with a spender; a direct `transfer` is in fact the one operation that uses the 3-argument overload. The table now gives the overload per operation, including `batchMint`, `batchBurn`, `burnFrom`, self-burn, cross-chain mint/burn and the minter `batchTransfer`, as documented in the CMTAT v3.3.0-rc4 `IRuleEngine` NatSpec; `doc/technical/RuleEngine-with-CMTAT.md` gains the minter `batchTransfer` row. Compatibility tables and the tested toolchain (OpenZeppelin v5.7.0, CMTAT v3.3.0-rc4) updated.
-- Documentation review of the CMTAT / Rules content, following an internal documentation review: complete CMTAT entry-point table (`batchMint`, `batchBurn`, `burnFrom`, cross-chain, minter `batchTransfer` with `spender == from`, `forcedTransfer` bypass); CMTAT v3.0.0–v3.2.0 3-argument mint/burn note; ERC-2771 forwarder trust stated for the bound-token gate (`doc/README.md` §Gasless, `RuleEngine-with-CMTAT.md` §4.7, `RuleEngine-with-ERC3643.md` §4.5, `TokenBinding-module.md` §4); rule-side `transferred*` reentrancy obligation (`RuleEngine-with-CMTAT.md` §4.6, `CLAUDE.md`); token-level ERC-1404 mint/burn pre-flight caveat; ERC-3643 post-update notification order (`RuleEngine-with-ERC3643.md` §4.9); rule lists synced with the Rules repository (`RuleSanctionsList` spelling, seven missing rules, `RuleConditionalTransferLightMultiToken` must not sit behind an engine); single-rule setup caveats; `ERC2771Context` / `forwarderIrrevocable` naming; `IRuleEngine.sol` link moved to CMTAT v3.3.0-rc4; two ERC-165 conventions explained; deployment checklist wiring steps; quick start uses non-recursive `git submodule update --init` without `npm install`; "CMTAT ≥ v3.0.0" headings and `setRuleEngine(IRuleEngine)` signature.
-- `doc/README.md` §Compatibility: removed the RuleEngine v3.0.0-rc3 row, which linked to a CMTAT `v3.3.0` tag that does not exist yet and was out of order with the rc4 row (documentation review item E-2).
-
-### Dependencies
-
-- Update the ERC-3643 submodule (`lib/ERC-3643`) from 4.1.3 to [4.2.0-beta1](https://github.com/ERC-3643/ERC-3643/releases/tag/4.2.0-beta1) (`a708758`, the commit used by the Rules repository). Only the `erc3643` test profile compiles it.
-- Update CMTAT submodule to [v3.3.0-rc4](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc4). No change to the interfaces used by the RuleEngine: rc4 only documents the `transferred` overload routing in the `IRuleEngine` NatSpec, replaces `EnumerableSet.at` by `EnumerableSet.pos` in `HolderListModule` (OpenZeppelin 5.7.0 deprecation, already the version of our submodule) and adds upgrade test mocks. Build and full test suite pass unchanged.
 
 ### v3.0.0-rc5-2026-08-13
 

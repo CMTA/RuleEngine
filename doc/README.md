@@ -143,7 +143,8 @@ _Diagram source: [doc/schema/plantuml/ruleengine-flow-erc3643.puml](./schema/pla
 
 | RuleEngine version                                           | Compatible Versions                                          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **v3.0.0-rc6**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc4](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc4) |
+| **v3.0.0-rc7**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc4](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc4) |
+| **v3.0.0-rc6**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc3](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3) |
 | **v3.0.0-rc5**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc3](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3) |
 | **v3.0.0-rc4**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.3.0-rc1](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc1) |
 | **v3.0.0-rc2**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
@@ -1037,14 +1038,14 @@ returns (string memory version_)
 
  **Description**
 
-Returns the current version of the RuleEngine contract (currently `"3.0.0-rc6"`).
+Returns the current version of the RuleEngine contract (currently `"3.0.0-rc7"`).
 Useful for identifying which version of the smart contract is deployed and in use. Release candidates carry their `-rcN` suffix, so the string matches the release tag. 
 
 **Return**
 
 | Name       | Type   | Description                                                  |
 | ---------- | ------ | ------------------------------------------------------------ |
-| `version_` | string | The version string of the RuleEngine implementation (e.g., "3.0.0-rc6"). |
+| `version_` | string | The version string of the RuleEngine implementation (e.g., "3.0.0-rc7"). |
 
 
 
