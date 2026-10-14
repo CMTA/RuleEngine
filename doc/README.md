@@ -1617,7 +1617,7 @@ Latest run (v3.0.0-rc6): 28 Solidity files, 683 nSLOC, mocks excluded.
 |----|---------|-----------|------------|
 | L-1 | Centralization Risk | 14 | Accepted by design — privileged compliance tool |
 | L-2 | Unspecific Solidity Pragma | 23 | Accepted by design — intentional for library reusability |
-| L-3 | PUSH0 Opcode | 28 | Not applicable — project targets Prague EVM |
+| L-3 | PUSH0 Opcode | 28 | Not applicable — project targets a post-Shanghai EVM (Prague at the time of the run, Osaka since rc7) |
 | L-4 | Modifier Invoked Only Once | 1 | Accepted by design — keeps hook-style access-control abstraction |
 | L-5 | Empty Block | 9 | Accepted by design — access-control hook pattern |
 | L-6 | Loop Contains `require`/`revert` | 4 | Accepted by design — `setRules` and `bindTokens`/`unbindTokens` are atomic batch operations |
@@ -1657,12 +1657,12 @@ Here are the settings for [Hardhat](https://hardhat.org) and [Foundry](https://g
 
 - `hardhat.config.js`
   - Solidity [v0.8.37](https://docs.soliditylang.org/en/v0.8.37/)
-  - EVM version: Prague (Pectra upgrade)
+  - EVM version: Osaka (Fusaka upgrade)
   - Optimizer: true, 200 runs
 
 - `foundry.toml`
   - Solidity [v0.8.37](https://docs.soliditylang.org/en/v0.8.37/)
-  - EVM version: Prague (Pectra upgrade)
+  - EVM version: Osaka (Fusaka upgrade)
   - Optimizer: true, 200 runs
 
 

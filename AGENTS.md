@@ -10,7 +10,7 @@ AGENTS.md and CLAUDE.md files must always be identical — always update both to
 
 - **Version:** 3.0.0-rc7 (defined in `src/modules/VersionModule.sol`; the string carries the release-candidate suffix and must be bumped with each tag — update the `version()` assertions in `test/RuleEngine/RuleEngineDeployment.t.sol`, `test/RuleEngineOwnable/RuleEngineOwnableDeployment.t.sol`, `test/RuleEngineOwnable2Step/RuleEngineOwnable2Step.t.sol` and `test/hardhat/RuleEngine.smoke.js` with it)
 - **Solidity:** ^0.8.20 (compiled with 0.8.37)
-- **EVM target:** Prague
+- **EVM target:** Osaka (Fusaka upgrade)
 - **License:** MPL-2.0
 
 ## Build & Test Commands

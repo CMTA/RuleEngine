@@ -5,13 +5,14 @@ out = 'out'
 libs = ['lib']
 optimizer = true
 optimizer_runs = 200
-evm_version = 'prague'
+evm_version = 'osaka'
 # The vendored ERC-3643 `Token.sol` (T-REX 4.2.0-beta1) pins `pragma solidity 0.8.30` exactly, which cannot
 # share a compilation unit with solc 0.8.37. The tests that deploy the real token therefore live in their own
 # directory and are built by the `erc3643` profile below. Run them with:
 #   FOUNDRY_PROFILE=erc3643 forge test
 skip = ['test/ERC3643Real/**']
 
+# Stays on evm_version 'prague': `osaka` is experimental in solc 0.8.30. The default profile targets osaka.
 # Builds the project at solc 0.8.30 so the vendored ERC-3643 `Token.sol` compiles alongside our own contracts
 # (`^0.8.20`; CMTAT and OpenZeppelin are `^0.8.24` at most, so 0.8.30 satisfies them).
 [profile.erc3643]

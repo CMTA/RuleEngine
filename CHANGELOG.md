@@ -97,7 +97,7 @@ v3.0.0 turns the RuleEngine into a generic compliance controller for both CMTAT 
 
 - CMTAT: supports **≥ v3.0.0**, target **v3.3.0-rc4** (tested also against v3.0.0 via `lib/CMTATv3.0.0`). v2.1.0 targeted CMTAT v3.0.0-rc5.
 - OpenZeppelin Contracts / Contracts Upgradeable **v5.7.0**.
-- Solidity **0.8.37**, EVM **Prague**.
+- Solidity **0.8.37**, EVM **Osaka** (Fusaka upgrade).
 - ERC-3643 reference implementation (tests only): T-REX **4.2.0-beta1**.
 
 ### Testing
@@ -142,6 +142,7 @@ Maintenance release with no change to the engine logic or to its external API. T
 ### Dependencies
 
 - Set the Solidity compiler to [0.8.37](https://www.soliditylang.org/blog/2026/09/10/solidity-0.8.37-release-announcement/) in `foundry.toml` (default profile) and `hardhat.config.js`. Checked against the release announcement: none of its bug fixes applies to this codebase or its dependencies. They concern a memory `bytes` element `delete` (only storage-mapping `delete` is used), `--via-ir` spill slots, named-argument custom errors in `require` and constants on the IR pipeline (the project uses the legacy pipeline), and internal function pointers in packed storage (none are used). There is no `pragma experimental`, and Prague is not among the newly deprecated EVM versions. Compiler warnings are the same as with 0.8.36, and the deployed bytecode size of the three deployables is unchanged. The `erc3643` test profile stays on 0.8.30, which the vendored T-REX `Token.sol` pins exactly.
+- Set the EVM version from Prague to **Osaka** (Fusaka upgrade, the default of solc 0.8.37) in `foundry.toml` (default profile) and `hardhat.config.js`. The deployed code of the three deployables is identical to the Prague build once the metadata, which records the EVM version, is stripped. It contains no `CLZ`, the only new opcode Osaka gives the compiler, so the contracts also run on chains that have not activated Fusaka. The `erc3643` test profile stays on Prague, because `osaka` is still experimental in solc 0.8.30.
 - Update the ERC-3643 submodule (`lib/ERC-3643`) from 4.1.3 to [4.2.0-beta1](https://github.com/ERC-3643/ERC-3643/releases/tag/4.2.0-beta1) (`a708758`, the commit used by the Rules repository). Only the `erc3643` test profile compiles it.
 - Update CMTAT submodule to [v3.3.0-rc4](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc4). No change to the interfaces used by the RuleEngine: rc4 only documents the `transferred` overload routing in the `IRuleEngine` NatSpec, replaces `EnumerableSet.at` by `EnumerableSet.pos` in `HolderListModule` (OpenZeppelin 5.7.0 deprecation, already the version of our submodule) and adds upgrade test mocks. Build and full test suite pass unchanged.
 

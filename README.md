@@ -6,7 +6,7 @@ It is an *external controller*: the token calls the engine on every transfer, mi
 
 - **Version:** 3.0.0-rc7 (`version()` returns `"3.0.0-rc7"`)
 - **Solidity:** ^0.8.20 (compiled with 0.8.37)
-- **EVM target:** Prague
+- **EVM target:** Osaka (Fusaka upgrade)
 - **License:** MPL-2.0
 
 **Full documentation: [doc/README.md](./doc/README.md)** — interfaces, Ethereum API, deployment, UML and call graphs, audits, and toolchain usage.
