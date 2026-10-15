@@ -120,8 +120,48 @@ already (it can leave the engine through `setCompliance` at any time), and re-bi
 the engine's rules. What remains is that the manager's unbind does not stand on its own, which the documentation
 does not say.
 
-**Recommendation.** Clear the approval when the manager, rather than the token itself, unbinds a token; or state in
-the `unbindToken` NatSpec and the ERC-3643 guide that revocation must come first.
+**Recommendation.** Three options, from the most to the least intrusive. Option 1 is the recommended one.
+
+*Option 1 — the manager's unbind also revokes the approval (code).* Clear the approval inside `_unbindToken` when
+the caller is not the token itself. `_unbindToken` is the point both `unbindToken` and the batch `unbindTokens`
+reach, so one change covers both entry points; checking the raw `msg.sender`, as the rest of the token-identity
+logic does since rc7, keeps the token's own unbind (ERC-3643 `setCompliance` migrating away) untouched.
+
+```solidity
+// TokenBindingExtendedModule
+function _unbindToken(address token) internal virtual override {
+    TokenBindingModule._unbindToken(token);
+    if (msg.sender != token && _tokenSelfBindingApproval[token]) {
+        _setTokenSelfBindingApproval(token, false); // writes the flag and emits TokenSelfBindingApprovalSet
+    }
+}
+```
+
+What it involves:
+
+- **A diamond override.** `_unbindToken` is defined in `TokenBindingModule` and would now be overridden in
+  `TokenBindingExtendedModule`; `ERC3643ComplianceExtendedModule` inherits both paths, so it needs the same
+  disambiguating `override(TokenBindingModule, TokenBindingExtendedModule)` it already has for
+  `_authorizeTokenBindingChange`.
+- **One write path for the approval.** Factor the existing setter body into `_setTokenSelfBindingApproval`, used by
+  `setTokenSelfBindingApproval` and by the code above, so every change of the flag emits
+  `TokenSelfBindingApprovalSet` and indexers reconstructing approvals stay correct.
+- **Behaviour change.** A token unbound by the manager must be approved again before it can bind itself. Clearing the
+  flag on a manager *bind* instead is not equivalent: it would take away the approval an ERC-3643 token needs to
+  unbind itself later when migrating to another compliance contract.
+- **Tests.** Invert `testApprovedTokenRebindsItselfAfterManagerUnbinds` into a regression test, add the same case for
+  `unbindTokens`, assert the `TokenSelfBindingApprovalSet(token, false)` event, and keep a test that a token
+  unbinding itself keeps its approval. Gas: one extra storage read on unbind, plus a write and an event only when an
+  approval was set.
+
+*Option 2 — make the approval single-use (code).* Clear the flag when the token binds itself. It closes the re-bind
+as well, but also removes the token's ability to unbind itself later, which ERC-3643 `setCompliance` needs to move to
+another compliance contract; the manager would have to approve again before every migration. Not recommended.
+
+*Option 3 — documentation only.* Keep the behaviour and state, in the `unbindToken` NatSpec, in
+`TokenBinding-module.md` §4 and in `RuleEngine-with-ERC3643.md` §3.2, that an approved token can bind itself again
+until its approval is revoked, so revocation must come before the unbind when the intent is to remove the token.
+The current mitigation test, `testRevokingApprovalPreventsRebind`, already shows the correct order.
 
 ### F-3 — Any address can be bound, including a rule or an EOA (Info)
 
@@ -130,8 +170,36 @@ time, and a bound externally owned account can drive a stateful rule with no tok
 minter's allowance. Binding is therefore a full trust decision of the manager. A code-size check would not be a
 defence (it is bypassed during construction).
 
-**Recommendation.** Extend the "rule accounts cannot hold privileges" note to binding, and say in `bindToken`'s
-NatSpec that a bound address is trusted to report token operations.
+**Recommendation.** Two parts: a small code change for rule addresses, and documentation for everything else.
+
+*Part 1 — keep rules and bound tokens disjoint (code, recommended).* Both sets live in the engine, so unlike roles
+the check can run in both directions and cheaply:
+
+- **Binding a rule is rejected.** Add a virtual hook to the generic registry, for example
+  `_checkBindingTarget(address token) internal view virtual {}` called from `_bindToken`. `TokenBindingModule` must
+  stay free of rule logic (it is reused outside this project), so the hook is empty there and `RuleEngineBase`
+  overrides it with `require(!containsRule(IRule(token)), RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges())`.
+  The override needs the usual disambiguation, because `RuleEngineBase` inherits the registry through both
+  `TokenBindingExtendedModule` and `ERC3643ComplianceModule`.
+- **Adding a bound token as a rule is rejected.** In `RuleEngineBase._checkRule`, add
+  `require(!isTokenBound(rule_), ...)`, reusing the same error.
+- **What it prevents.** An address cannot both drive the rules and be one, which removes a reentrancy path where a
+  rule's `transferred` calls the engine's `transferred` again as a bound token. It covers the batch `bindTokens` and
+  the self-binding path too, since all of them reach `_bindToken`.
+- **Cost.** One `EnumerableSet.contains` read per bind and per rule addition, no new error, no ABI change.
+- **Tests.** Invert `testRuleAddressCanBeBoundAsToken` into two regression tests (bind a rule; add a bound token as a
+  rule), on all six deployables.
+
+*Part 2 — document binding as a trust decision (docs).* An EOA, or any contract, can still be bound, and that cannot
+be fixed in code:
+
+- **A code-size check is not a defence.** `token.code.length > 0` is false for a contract during its own
+  construction, and it would block binding a token before it is deployed at a counterfactual (CREATE2) address, which
+  a deployment script may want to do. It is not recommended.
+- **What to write.** In the `bindToken` / `bindTokens` NatSpec and `TokenBinding-module.md` §4: a bound address is
+  trusted to report token operations; it can drive every stateful rule (consume approvals, allowances, counters)
+  without moving any token; bind only the token contracts the engine is meant to serve.
+- `testBoundEoaConsumesStatefulRuleState` stays as the illustration of why.
 
 ### F-4 — Views revert when a rule's view reverts (dismissed)
 
@@ -223,9 +291,10 @@ These are hardening items, not vulnerabilities.
 
 | # | Improvement | Addresses | Effort | Breaking? | Priority |
 |---|---|---|---|---|---|
-| 1 | Clear the self-binding approval when the manager unbinds a token, or document that revocation must precede the unbind | F-2 | Small | Behaviour change for approved tokens | Medium |
-| 2 | Document binding as a full trust decision: rules and EOAs are accepted and can drive stateful rules | F-3 | Docs | No | Low |
-| 3 | Decide `H-3`: reject `address(0)` as forwarder in the three `*2771` constructors (not in `ERC2771ModuleStandalone`, which the mock rules use with zero) | F-5 | Small | Constructor rejects a value it accepts today | Low |
+| 1 | Clear the self-binding approval when the manager unbinds a token, in `_unbindToken` (F-2 option 1), or document that revocation must precede the unbind (option 3) | F-2 | Small | Behaviour change for approved tokens | Medium |
+| 2 | Keep rules and bound tokens disjoint: a binding hook overridden in `RuleEngineBase`, and a bound-token check in `_checkRule` (F-3 part 1) | F-3 | Small | Rejects two configurations accepted today | Low |
+| 3 | Document binding as a full trust decision: EOAs and arbitrary contracts are accepted and can drive stateful rules (F-3 part 2) | F-3 | Docs | No | Low |
+| 4 | Decide `H-3`: reject `address(0)` as forwarder in the three `*2771` constructors (not in `ERC2771ModuleStandalone`, which the mock rules use with zero) | F-5 | Small | Constructor rejects a value it accepts today | Low |
 
 Item 1 is a design decision for the maintainers: clearing the approval makes the manager's unbind final, while
 keeping it preserves a token's ability to migrate back without a new approval.
