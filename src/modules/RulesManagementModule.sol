@@ -50,12 +50,8 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * but should not also be granted {RULES_MANAGEMENT_ROLE}.
      */
     function setRules(IRule[] calldata rules_) public virtual override(IRulesManagementModule) onlyRulesManager {
-        if (rules_.length == 0) {
-            revert RuleEngine_RulesManagementModule_ArrayIsEmpty();
-        }
-        if (rules_.length > _maxRules) {
-            revert RuleEngine_RulesManagementModule_MaxRulesExceeded(_maxRules);
-        }
+        require(rules_.length != 0, RuleEngine_RulesManagementModule_ArrayIsEmpty());
+        require(rules_.length <= _maxRules, RuleEngine_RulesManagementModule_MaxRulesExceeded(_maxRules));
         if (_rules.length() > 0) {
             _clearRules();
         }
@@ -77,9 +73,9 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * Security convention: do not grant {RULES_MANAGEMENT_ROLE} to rule contracts.
      */
     function addRule(IRule rule_) public virtual override(IRulesManagementModule) onlyRulesManager {
-        if (_rules.length() >= _maxRules) {
-            revert RuleEngine_RulesManagementModule_MaxRulesExceeded(_maxRules);
-        }
+        // `require` evaluates the error arguments even when the check passes: cache the cap to read it once
+        uint256 maxRules_ = _maxRules;
+        require(_rules.length() < maxRules_, RuleEngine_RulesManagementModule_MaxRulesExceeded(maxRules_));
         _addRule(rule_);
     }
 
@@ -160,9 +156,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * @param maxRules_ New maximum number of rules; must not be zero.
      */
     function _setMaxRules(uint256 maxRules_) internal virtual {
-        if (maxRules_ == 0) {
-            revert RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed();
-        }
+        require(maxRules_ != 0, RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed());
         _maxRules = maxRules_;
         emit SetMaxRules(maxRules_);
     }
@@ -247,8 +241,6 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * @param rule_ The candidate rule address to validate.
      */
     function _checkRule(address rule_) internal view virtual {
-        if (rule_ == address(0x0)) {
-            revert RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed();
-        }
+        require(rule_ != address(0), RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed());
     }
 }

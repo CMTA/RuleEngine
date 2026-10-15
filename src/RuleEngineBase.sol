@@ -231,9 +231,10 @@ abstract contract RuleEngineBase is
      */
     function _checkRule(address rule_) internal view virtual override {
         RulesManagementModule._checkRule(rule_);
-        if (!ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)) {
-            revert RuleEngine_RuleInvalidInterface();
-        }
+        require(
+            ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID),
+            RuleEngine_RuleInvalidInterface()
+        );
     }
 
     /**

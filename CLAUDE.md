@@ -158,7 +158,7 @@ Rule validation uses a two-layer override:
 ```solidity
 // RulesManagementModule (generic checks):
 function _checkRule(address rule_) internal view virtual {
-    if (rule_ == address(0x0)) revert ...ZeroNotAllowed();
+    require(rule_ != address(0), RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed());
 }
 
 // RulesManagementModule._addRule (duplicate check):
@@ -167,8 +167,9 @@ require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_RuleAlready
 // RuleEngineBase (adds ERC-165 check):
 function _checkRule(address rule_) internal view virtual override {
     RulesManagementModule._checkRule(rule_);
-    if (!ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID))
-        revert RuleEngine_RuleInvalidInterface();
+    require(
+        ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID), RuleEngine_RuleInvalidInterface()
+    );
 }
 ```
 
@@ -351,7 +352,7 @@ Key points:
 - Function ordering: constructor, receive, fallback, external, public, internal, private (view/pure last within each group)
 - Function declaration order: visibility, mutability, virtual, override, custom modifiers
 - All `internal` functions must be marked `virtual`, so inheriting contracts can override them.
-- Use `require(condition, CustomError(...))` for custom errors; avoid direct `revert CustomError(...)`.
+- Use `require(condition, CustomError(...))` for custom errors; avoid direct `revert CustomError(...)`. `src/` has no conditional `revert` left (the only two are the unconditional ones of `RuleOperationRevertMock`). Note that `require` evaluates the error's arguments even when the check passes: an argument read from storage costs an extra read, so cache it in a local first (see `RulesManagementModule.addRule`).
 - In `src/`, avoid `super` calls and prefer explicit parent-contract calls (e.g., `AccessControl.grantRole(...)`) for readability and deterministic inheritance behavior.
 - Section headers: `/* ============ SECTION ============ */`
 - **No emoji in code comments or NatSpec.** Use a plain word marker instead: `WARNING:`, `NOTE:`, `IMPORTANT:`. Emoji render inconsistently across editors, terminals, `forge doc` output and diffs; they are not searchable (`grep WARNING` finds the marker, `grep ⚠️` depends on the shell); and they encode as multi-byte sequences that can be silently mangled by tooling. This applies to `src/`, `test/` and `script/`. Markdown documentation may use emoji freely — the restriction is Solidity comments only.

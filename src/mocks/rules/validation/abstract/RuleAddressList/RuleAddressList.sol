@@ -30,9 +30,7 @@ abstract contract RuleAddressList is
      * @param forwarderIrrevocable Address of the forwarder, required for the gasless support
      */
     constructor(address admin, address forwarderIrrevocable) ERC2771ModuleStandalone(forwarderIrrevocable) {
-        if (admin == address(0)) {
-            revert RuleAddressList_AdminWithAddressZeroNotAllowed();
-        }
+        require(admin != address(0), RuleAddressList_AdminWithAddressZeroNotAllowed());
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 

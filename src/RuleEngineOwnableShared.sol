@@ -45,8 +45,6 @@ abstract contract RuleEngineOwnableShared is RuleEngineBase, ERC165 {
      * @param newOwner The candidate new owner; must not be a configured rule.
      */
     function _checkOwnershipTransferTarget(address newOwner) internal view virtual {
-        if (containsRule(IRule(newOwner))) {
-            revert RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges();
-        }
+        require(!containsRule(IRule(newOwner)), RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges());
     }
 }

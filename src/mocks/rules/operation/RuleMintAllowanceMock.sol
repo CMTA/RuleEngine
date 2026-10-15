@@ -99,9 +99,7 @@ contract RuleMintAllowanceMock is AccessControl, RuleMintAllowanceInvariantStora
     {
         if (from == address(0)) {
             uint256 allowance = mintAllowance[spender];
-            if (allowance < value) {
-                revert RuleMintAllowance_InsufficientAllowance(spender, allowance, value);
-            }
+            require(allowance >= value, RuleMintAllowance_InsufficientAllowance(spender, allowance, value));
             mintAllowance[spender] = allowance - value;
             emit MintAllowanceConsumed(spender, value, mintAllowance[spender]);
         }

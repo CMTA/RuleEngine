@@ -56,7 +56,7 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | D-1 | ERC-2771 `Context` overrides repeated per deployable | ⬜ no finding — 3 copies, one per `*2771` contract (4 before the split), compiler-mandated |
 | D-2 | The RBAC and ownable families implement the ERC-2771 split two different ways | ✅ fixed after the second pass — `RuleEngineAccessControlShared` folded into `RuleEngine`; deployables grouped in `accessControl/` and `ownable/` |
 | E-1 | `virtual` on every internal function | ⬜ no finding — 0 missing, including the new contracts |
-| E-2 | `if (...) revert X()` sites against the project's `require(cond, X())` convention | ⚠️ decide — 9 left (11 at the first pass) |
+| E-2 | `if (...) revert X()` sites against the project's `require(cond, X())` convention | ✅ fixed after the second pass — 8 production + 4 mock sites converted, 0 conditional `revert` left |
 | F-1 | `pragma solidity ^0.8.20` was false: the code does not compile below 0.8.27 | ✅ fixed — `^0.8.27` everywhere (`3b94564`) |
 | F-2 | Advertised ERC-165 ids unchanged by rc7, and identical between each pair | ⬜ verified — pinned by `IRuleInterfaceId.t.sol` and `ERC2771VariantTestBase` |
 | G-1 | NatSpec length and documentation pointers | ⬜ no finding — median 5 lines, max 19, zero `.md` pointers |
@@ -79,14 +79,13 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | K-5 | No fuzz and no invariant test | ✅ partly — 2 fuzz properties on all six deployables; invariant test proposed |
 | K-6 | `TokenSelfBindingApprovalSet` was never asserted | ✅ fixed — asserted in the three access-control models |
 
-**Counted: 33 rows — 15 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
-no-finding / verified / left as is (⬜), 6 open decisions or carried items (⚠️, `G-2` counted here).**
+**Counted: 33 rows — 16 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
+no-finding / verified / left as is (⬜), 5 open decisions or carried items (⚠️, `G-2` counted here).**
 
 ## Outstanding
 
 | ID | Item | Why it is still open |
 |----|------|----------------------|
-| E-2 | Convert the 9 remaining `if/revert` sites | Style only; the `^0.8.27` floor allows either form |
 | G-2 / G-3 | 9 comment fixes in `src/`, and the `ERC3643TokenMock` header | Comment-only, left for one `src/` commit |
 | H-3 | Reject a zero forwarder in the `*2771` constructors | Changes the tests that use a zero forwarder; needs a new error |
 | K-5 | Handler-based invariant test over the rule set and the binding set | Needs a design for the handler |
@@ -427,7 +426,7 @@ and the Surya schema is regenerated. The coverage table in `K-2` predates the fo
 Zero `internal` functions in `src/` (mocks excluded) lack `virtual`, including the four contracts added by the
 split.
 
-### E-2. Error style split 9 / 10 against the project's own rule — decide
+### E-2. Error style split 9 / 10 against the project's own rule — fixed
 
 `CLAUDE.md`: "Use `require(condition, CustomError(...))`." `src/` now has **10** `require` and **9**
 `if (...) { revert ... }`:
@@ -441,6 +440,31 @@ The two `RuleEngine.sol` sites of the first pass became `require` when they move
 `RuleEngineAccessControlShared`. Convention only, no runtime difference measured or claimed. With the pragma at
 `^0.8.27` (`F-1`), `require` with a custom error is available to every supported compiler, so the conversion has
 no remaining obstacle. **Verdict: decide.**
+
+**Implemented after the second pass.** `B-2` had already removed one site (the duplicate check in `_checkRule`),
+leaving 8 in production code, all converted: `RulesManagementModule` `setRules` (x2), `addRule`, `_setMaxRules`,
+`_checkRule`; `RuleEngineBase._checkRule`; `RuleEngineOwnableShared._checkOwnershipTransferTarget`;
+`TokenBindingModule._checkBoundToken`. The 4 conditional sites in the mocks were converted too
+(`RuleMintAllowanceMock.transferred`, the `RuleAddressList` constructor, `_addAddressToThelist`,
+`_removeAddressFromThelist`). The only `revert` statements left in `src/` are the two unconditional ones of
+`RuleOperationRevertMock`, which has no condition to express.
+
+**Correction: "no runtime difference" was not true for one site.** `require(cond, Error(args))` evaluates the
+error's arguments **before** the check, even when it passes. `addRule` reports the cap
+(`MaxRulesExceeded(_maxRules)`), so the straight conversion read `_maxRules` from storage twice: measured
+**68,056 -> 68,164 (+108)**. Caching the cap in a local (`uint256 maxRules_ = _maxRules;`) brings it to
+**68,069 (+13)**. Per-function probe, before -> after:
+
+| Call | Before | After |
+|---|---|---|
+| `addRule` | 68,056 | 68,069 (+13, with the cached cap; +108 without) |
+| `setRules` (2 rules) | 50,734 | 50,739 (+5; caching made it +10, so not cached) |
+| `setMaxRules` | 5,257 | 5,257 |
+| `transferred` (bound-token gate, hot path) | 10,553 | 10,553 |
+| `transferOwnership` (ownable rule guard) | 14,753 | 14,753 |
+
+Full suite 447/447; production coverage 100% lines / statements / functions / branches (48/48). The convention
+note in `CLAUDE.md` / `AGENTS.md` now records the eager-argument cost.
 
 ## F. Specification and compiler conformance
 

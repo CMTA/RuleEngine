@@ -146,8 +146,6 @@ abstract contract TokenBindingModule is Context, ITokenBinding, TokenBindingModu
      * token movement. Administrative functions keep `_msgSender()`, so they remain relayable.
      */
     function _checkBoundToken() internal view virtual {
-        if (!_boundTokens.contains(msg.sender)) {
-            revert TokenBinding_UnauthorizedCaller();
-        }
+        require(_boundTokens.contains(msg.sender), TokenBinding_UnauthorizedCaller());
     }
 }
