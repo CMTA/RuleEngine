@@ -95,15 +95,28 @@ abstract contract TokenBindingModule is Context, ITokenBinding, TokenBindingModu
 
     /**
      * @dev Adds a token to the bound set.
-     * @param token The token to bind; reverts on the zero address or when already bound.
+     * A bound address is trusted to report token operations: it can drive every stateful downstream check
+     * without moving any token, and the registry cannot tell a token contract from any other address. Bind only
+     * the token contracts the host is meant to serve.
+     * @param token The token to bind; reverts on the zero address, when already bound, or when
+     * {_checkBindingTarget} rejects it.
      */
     function _bindToken(address token) internal virtual {
         require(token != address(0), TokenBinding_InvalidTokenAddress());
+        _checkBindingTarget(token);
         // add() returns false when the token is already bound, so a separate
         // contains() lookup is unnecessary.
         require(_boundTokens.add(token), TokenBinding_TokenAlreadyBound());
         emit TokenBound(token);
     }
+
+    /**
+     * @dev Hook for host-specific restrictions on which addresses may be bound; reverts to reject `token`.
+     * Empty here, so the registry stays standalone. Every binding path ({bindToken}, the batch and the token
+     * self-binding paths) reaches it through {_bindToken}.
+     * @param token The address about to be bound.
+     */
+    function _checkBindingTarget(address token) internal view virtual {}
 
     /**
      * @dev Removes a token from the bound set.

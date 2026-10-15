@@ -40,6 +40,9 @@ interface ITokenBinding {
      *      when all bound tokens are equally trusted and governed together, since the
      *      bound-token entry points do not necessarily carry the calling token address to the
      *      downstream logic.
+     *      Trust note: a bound address can drive every stateful downstream check without moving any
+     *      token, and the registry cannot tell a token contract from an EOA or another contract. Bind only
+     *      the token contracts the host is meant to serve.
      *      Complexity: O(1).
      * @param token The address of the token to bind.
      */

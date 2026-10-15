@@ -853,6 +853,7 @@ constructor(
 | └ | _detectTransferRestrictionFrom | Internal 🔒 |   | |
 | └ | _messageForTransferRestriction | Internal 🔒 |   | |
 | └ | _checkRule | Internal 🔒 |   | |
+| └ | _checkBindingTarget | Internal 🔒 |   | |
 | └ | _supportsRuleInterface | Internal 🔒 |   | |
 | └ | _supportsRuleEngineBaseInterface | Internal 🔒 |   | |
 
@@ -1231,6 +1232,7 @@ under `ERC3643ComplianceExtendedModule`, since that is the form in which the Rul
 | └ | unbindToken | Public ❗️ | 🛑  |NO❗️ |
 | └ | isTokenBound | Public ❗️ |   |NO❗️ |
 | └ | _bindToken | Internal 🔒 | 🛑  | |
+| └ | _checkBindingTarget | Internal 🔒 |   | |
 | └ | _unbindToken | Internal 🔒 | 🛑  | |
 | └ | _authorizeTokenBindingChange | Internal 🔒 | 🛑  | |
 | └ | _onlyTokenBindingManager | Internal 🔒 | 🛑  | |

@@ -67,7 +67,11 @@ contract RuleEngineHandler is Test {
         return rulePool[seed % rulePool.length];
     }
 
+    /// @dev One draw in three is a rule-pool address, so the fuzzer also tries to bind rules (F-3).
     function _token(uint256 seed) internal view returns (address) {
+        if (seed % 3 == 0) {
+            return rulePool[(seed / 3) % rulePool.length];
+        }
         return tokenPool[seed % tokenPool.length];
     }
 
@@ -256,6 +260,14 @@ abstract contract RuleEngineInvariantTestBase is Test {
 
     /* ============ Token binding ============ */
 
+    /// @notice F-3. No address is both a rule and a bound token.
+    function invariant_RulesAndBoundTokensAreDisjoint() public view {
+        address[] memory rs = engine.rules();
+        for (uint256 i = 0; i < rs.length; ++i) {
+            assertFalse(engine.isTokenBound(rs[i]), "a rule is also a bound token");
+        }
+    }
+
     /// @notice A token is bound exactly when the successful calls imply it; `getTokenBounds()` agrees.
     function invariant_BoundTokensMatchModel() public view {
         address[] memory ts = engine.getTokenBounds();
@@ -263,6 +275,10 @@ abstract contract RuleEngineInvariantTestBase is Test {
         for (uint256 i = 0; i < handler.tokenPoolLength(); ++i) {
             address t = handler.tokenPool(i);
             assertEq(engine.isTokenBound(t), handler.modelIsBound(t), "isTokenBound");
+        }
+        for (uint256 i = 0; i < handler.rulePoolLength(); ++i) {
+            address t = handler.rulePool(i);
+            assertEq(engine.isTokenBound(t), handler.modelIsBound(t), "isTokenBound (rule pool)");
         }
         for (uint256 i = 0; i < ts.length; ++i) {
             assertTrue(ts[i] != address(0), "zero token bound");

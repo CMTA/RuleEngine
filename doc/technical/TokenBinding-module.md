@@ -61,6 +61,7 @@ Two hooks are left to the embedding contract:
 |---|---|---|
 | `_onlyTokenBindingManager()` | access control for binding administration | abstract, must be implemented |
 | `_authorizeTokenBindingChange(address token)` | authorizes one bind/unbind | manager check |
+| `_checkBindingTarget(address token)` | host-specific restriction on which addresses may be bound; reverts to reject | empty (`RuleEngineBase` rejects current rules) |
 
 A minimal deployment therefore only has to wire its access control model:
 
@@ -119,6 +120,13 @@ These are properties of the registry itself, not of any standard built on it.
 - **Binding and unbinding are not idempotent.** Re-binding a bound token reverts with
   `TokenBinding_TokenAlreadyBound`, and unbinding an unbound one with `TokenBinding_TokenNotBound`, so a
   redundant administrative call is reported rather than silently accepted.
+- **Binding is a trust decision.** A bound address can drive every stateful downstream check (consume
+  approvals, allowances, counters) without moving any token. The registry cannot tell a token contract from an
+  EOA or any other contract, and a code-size check would not help: it is false for a contract under
+  construction, and it would block binding a token before it is deployed at a counterfactual (CREATE2) address.
+  Bind only the token contracts the host is meant to serve. The RuleEngine adds one restriction through
+  `_checkBindingTarget`: an address that is currently a rule cannot be bound, and `_checkRule` rejects a bound
+  token as a rule, so the two sets stay disjoint.
 - **An administrative unbind revokes the self-binding approval.** When the binding manager unbinds a token
   (`unbindToken` or `unbindTokens`), `TokenBindingExtendedModule._unbindToken` also clears the token's
   self-binding approval and emits `TokenSelfBindingApprovalSet(token, false)`, so the token cannot undo the

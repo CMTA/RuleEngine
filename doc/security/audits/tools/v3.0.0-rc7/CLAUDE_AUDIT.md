@@ -37,7 +37,7 @@ them, and the codes and messages the views report.
 2. Privileged surface from the Slither printers: every state-changing external function of the six deployables
    and its guard.
 3. Review of each threat against the code and the documentation.
-4. Tests: 86 new tests integrated in the suite, following its convention (a shared base in `test/utils/`, a short
+4. Tests: 105 new tests integrated in the suite, following its convention (a shared base in `test/utils/`, a short
    file per deployable), run in a Docker container (Foundry 1.5.1).
 5. Mutation check: three deliberately broken versions of the code, each caught by a new test.
 6. Adversarial pass, then correction of the findings.
@@ -45,7 +45,7 @@ them, and the codes and messages the views report.
 ## 2. Executive Summary
 
 **0 Critical, 0 High, 0 Medium, 0 Low, 3 Informational** (F-1, F-2, F-3), plus one item already open in the
-code-quality review (F-5). F-1 and F-2 have since been fixed (section 6); F-3 and F-5 remain open. The first pass rated F-1 and F-2 Low; the adversarial pass downgraded them, and
+code-quality review (F-5). F-1, F-2 and F-3 have since been fixed (section 6); F-5 remains open. The first pass rated F-1 and F-2 Low; the adversarial pass downgraded them, and
 dismissed three other items as documented behaviour (F-4, F-6, F-7).
 
 **Cleared hypotheses.** These would have been High or Medium had they held; each was probed and does not:
@@ -68,7 +68,7 @@ dismissed three other items as documented behaviour (F-4, F-6, F-7).
 |----|-------|----------|--------|-----------|-----|
 | F-1 | Pending owner turned rule can accept ownership | Info (was Low) | Fixed | `RuleEngineOwnable2Step.sol:29-32`, inherited `acceptOwnership` | `testNomineeAddedAsRuleBeforeAcceptingBecomesOwner` |
 | F-2 | Self-binding approval survives an administrative unbind | Info (was Low) | Fixed (option 1) | `TokenBindingModule.sol:81`, `TokenBindingExtendedModule.sol:52, 98` | `testApprovedTokenRebindsItselfAfterManagerUnbinds` |
-| F-3 | Any address can be bound, including a rule or an EOA | Info | Open | `TokenBindingModule.sol:100` | `testRuleAddressCanBeBoundAsToken`, `testBoundEoaConsumesStatefulRuleState` |
+| F-3 | Any address can be bound, including a rule or an EOA | Info | Fixed (rules) / documented (EOAs) | `TokenBindingModule.sol:100` | `testCannotBindACurrentRule`, `testCannotAddABoundTokenAsRule`, `testBoundEoaConsumesStatefulRuleState` |
 | F-4 | Views revert when a rule's view reverts | — | Dismissed: documented | `RuleEngineBase.sol:172, 214` | `testViewsRevertWhenARuleViewReverts` |
 | F-5 | `*2771` deployables accept `address(0)` as forwarder | Info | Duplicate of code-quality review `H-3` (open) | constructors of the three `*2771` | `testZeroForwarderIsAccepted` |
 | F-6 | Renouncing administration freezes the configuration | — | Dismissed: OpenZeppelin default, documented | inherited `renounceOwnership` / `renounceRole` | `testRenouncingAdministrationFreezesConfiguration` |
@@ -175,7 +175,7 @@ the token's own unbind fails one.
 ### F-3 — Any address can be bound, including a rule or an EOA (Info)
 
 `_bindToken` checks only for `address(0)` and duplicates. An address can be a rule and a bound token at the same
-time, and a bound externally owned account can drive a stateful rule with no token involved: the PoC consumes a
+time, and a bound **exterwnally** owned account can drive a stateful rule with no token involved: the PoC consumes a
 minter's allowance. Binding is therefore a full trust decision of the manager. A code-size check would not be a
 defence (it is bypassed during construction).
 
@@ -209,6 +209,22 @@ be fixed in code:
   trusted to report token operations; it can drive every stateful rule (consume approvals, allowances, counters)
   without moving any token; bind only the token contracts the engine is meant to serve.
 - `testBoundEoaConsumesStatefulRuleState` stays as the illustration of why.
+
+**Fixed: both parts.**
+
+- **Part 1, code.** `TokenBindingModule._bindToken` calls a new empty hook, `_checkBindingTarget`, which
+  `RuleEngineBase` overrides to reject a current rule; `RuleEngineBase._checkRule` rejects a bound token. Both revert
+  with `RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges`, so the ABI is unchanged and the
+  reusable registry stays free of rule logic.
+- **Coverage of the paths.** Every binding path (`bindToken`, `bindTokens`, a rule binding itself with an
+  approval) and every rule path (`addRule`, `setRules`) goes through one of the two checks.
+- **Part 2, documentation.** The `bindToken` NatSpec, the registry's `_bindToken` NatSpec and
+  `TokenBinding-module.md` §4 state that binding is a trust decision.
+- **Tests, on all six deployables.** The proof of concept became `testCannotBindACurrentRule` and
+  `testCannotAddABoundTokenAsRule`; `testRuleAndTokenRolesCanBeSwappedSequentially` covers the legitimate
+  sequences; the invariant handler now also tries to bind rule addresses, with a new
+  `invariant_RulesAndBoundTokensAreDisjoint`. Removing either check fails its regression test and the invariant.
+  `testBoundEoaConsumesStatefulRuleState` stays as the documented illustration.
 
 ### F-4 — Views revert when a rule's view reverts (dismissed)
 
@@ -245,7 +261,7 @@ interface and is documented in `RuleEngine-with-ERC3643.md`.
 | INV-5 | Token identity is `msg.sender`, never the forwarder's appended sender | Yes | ERC-2771 token-gate suites, 3 deployables |
 | INV-6 | Every admin entry point rejects every other caller | Yes | `testFuzz_NonAuthorizedCallerCannotAdminister`, 11 functions, 6 × 256 runs; mutation-checked |
 | INV-7 | `canTransfer == (detectTransferRestriction == 0)`, and the 4-argument equivalent | Yes | rule-aggregation fuzz, 6 deployables |
-| INV-8 | An address in the rule set cannot be granted a role or become owner | Yes for roles and ownership; not applied to binding (F-3) | checked at grant, at nomination and, since the F-1 fix, at `Ownable2Step` acceptance (`RuleGuard.t.sol`, mutation-checked) |
+| INV-8 | An address in the rule set cannot be granted a role, become owner, or be bound as a token, and a bound token cannot become a rule | Yes | checked at grant, at nomination, at `Ownable2Step` acceptance (F-1) and at binding / rule addition (F-3); `RuleGuard.t.sol`, `invariant_RulesAndBoundTokensAreDisjoint` (6 deployables), mutation-checked |
 | INV-9 | `getTokenBounds()` holds no duplicate and no `address(0)` | Yes | `invariant_BoundTokensMatchModel`, 6 deployables |
 
 The handler-based invariants run in the default suite at 64 sequences of 50 calls; they also passed once at
@@ -257,7 +273,7 @@ Foundry's defaults (256 × 500, 128 000 calls each).
 |---|---|---|---|
 | `addRule`, `removeRule`, `setRules`, `clearRules` | `RULES_MANAGEMENT_ROLE` | owner | fuzz × 6 |
 | `setMaxRules` | `DEFAULT_ADMIN_ROLE` | owner | fuzz × 6, mutation-checked |
-| `bindToken`, `unbindToken` | `COMPLIANCE_MANAGER_ROLE`, or an approved token for itself | owner, or an approved token for itself | fuzz × 6, existing self-binding tests |
+| `bindToken`, `unbindToken` | `COMPLIANCE_MANAGER_ROLE`, or an approved token for itself; a current rule cannot be bound | owner, or an approved token for itself; a current rule cannot be bound | fuzz × 6, existing self-binding tests |
 | `bindTokens`, `unbindTokens`, `setTokenSelfBindingApproval(Batch)` | `COMPLIANCE_MANAGER_ROLE` | owner | fuzz × 6 |
 | `transferred` (3/4), `created`, `destroyed` | bound token (`msg.sender`) | same | fuzz × 6, mutation-checked |
 | `grantRole` | role admin; the target must not be a rule | — | existing tests |
@@ -273,25 +289,26 @@ call any administrative function, even from inside its callback.
 
 ## 6. Remediation — What Was Implemented
 
-Two findings were fixed after the review; the others are open.
+Three findings were fixed after the review; F-5 (H-3) is open.
 
 | Item | Status | What changed | Verified by |
 |---|---|---|---|
 | F-1 | Fixed | `RuleEngineOwnable2Step.acceptOwnership` re-checks that the caller is not a rule (inherited by `RuleEngineOwnable2Step2771`). Behaviour change: a nominee that became a rule can no longer accept until it is removed from the rule set | PoC inverted into a regression test, plus a recovery test, on both deployables; removing the check makes both fail |
 | F-2 | Fixed | A manager's `unbindToken` / `unbindTokens` revokes the token's self-binding approval (`_unbindToken` override, single approval write path). Behaviour change: an ERC-3643 token unbound by the manager needs a new approval before it can bind itself; a token unbinding itself keeps its approval | PoC inverted into a regression test, plus batch, self-unbind and event tests on six deployables; mutation-checked |
-| F-3 | Open | Behaviour unchanged; pinned on six deployables | `SecurityReview.t.sol` |
+| F-3 | Fixed (rules) / documented (EOAs) | `_checkBindingTarget` hook in `TokenBindingModule`, overridden in `RuleEngineBase` to reject a current rule; `_checkRule` rejects a bound token; NatSpec and `TokenBinding-module.md` document binding as a trust decision. Behaviour change: an address can no longer be both a rule and a bound token | PoC inverted into two regression tests, plus a sequencing test and a new handler invariant on six deployables; mutation-checked |
 | F-5 / H-3 | Open | Behaviour unchanged; pinned on three deployables | `ERC2771VariantTestBase` |
 | Access control, unbound callers | Verified | New fuzz tests on six deployables | mutation-checked |
 
-**Tests added.** 86 tests: `test/utils/SecurityReviewTestBase.sol` (13 tests, run by `test/<Variant>/SecurityReview.t.sol`
-for the six deployables), `test/utils/Ownable2StepRuleGuardTestBase.sol` (3 tests, run by `RuleGuard.t.sol` for the
+**Tests added.** 105 tests: `test/utils/SecurityReviewTestBase.sol` (15 tests, run by `test/<Variant>/SecurityReview.t.sol`
+for the six deployables), `invariant_RulesAndBoundTokensAreDisjoint` in `test/utils/RuleEngineInvariantTestBase.sol`
+(six deployables), `test/utils/Ownable2StepRuleGuardTestBase.sol` (3 tests, run by `RuleGuard.t.sol` for the
 two `Ownable2Step` deployables), `testZeroForwarderIsAccepted` in `test/utils/ERC2771VariantTestBase.sol` (three
-`*2771` deployables), and two test-only rules, `RevertingViewRule` and `ReentrantAdminRule`. Suite: 592 tests, all
+`*2771` deployables), and two test-only rules, `RevertingViewRule` and `ReentrantAdminRule`. Suite: 610 tests, all
 passing; the real T-REX suite: 13, all passing; coverage of `src/` at 100% of lines, statements,
-branches (50/50) and functions.
+branches (54/54) and functions.
 
 Several new tests pin today's behaviour of an open item. When an item is fixed, its PoC is expected to fail and must
-be inverted into a regression test, as was done for F-1 and F-2: applying each fix made its PoC fail, and the PoC
+be inverted into a regression test, as was done for F-1, F-2 and F-3: applying each fix made its PoC fail, and the PoC
 was then rewritten to assert the fixed behaviour.
 
 ## 7. Potential Improvements (open backlog)
@@ -300,12 +317,7 @@ These are hardening items, not vulnerabilities.
 
 | # | Improvement | Addresses | Effort | Breaking? | Priority |
 |---|---|---|---|---|---|
-| 1 | Keep rules and bound tokens disjoint: a binding hook overridden in `RuleEngineBase`, and a bound-token check in `_checkRule` (F-3 part 1) | F-3 | Small | Rejects two configurations accepted today | Low |
-| 2 | Document binding as a full trust decision: EOAs and arbitrary contracts are accepted and can drive stateful rules (F-3 part 2) | F-3 | Docs | No | Low |
-| 3 | Decide `H-3`: reject `address(0)` as forwarder in the three `*2771` constructors (not in `ERC2771ModuleStandalone`, which the mock rules use with zero) | F-5 | Small | Constructor rejects a value it accepts today | Low |
-
-Item 1 changes which configurations the engine accepts (an address can no longer be both a rule and a bound
-token), so it is a decision for the maintainers rather than a defect fix.
+| 1 | Decide `H-3`: reject `address(0)` as forwarder in the three `*2771` constructors (not in `ERC2771ModuleStandalone`, which the mock rules use with zero) | F-5 | Small | Constructor rejects a value it accepts today | Low |
 
 ## 8. Scope & Duplicate Check
 

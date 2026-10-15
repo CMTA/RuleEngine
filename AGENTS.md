@@ -349,7 +349,8 @@ Key points:
 5. **Admin has all roles** in `RuleEngine` and `RuleEngine2771` (the `hasRole` override in `RuleEngine`, inherited by `RuleEngine2771`)
 6. **Forwarder is immutable** — set at construction, cannot be changed (the three `*2771` contracts; the others have none)
 7. **Token identity uses `msg.sender`, never `_msgSender()`** — `_checkBoundToken` (`onlyBoundToken`) and the token self-binding check in `_authorizeTokenBindingChange` compare the raw caller so the ERC-2771 forwarder cannot pass as a token; administrative checks keep `_msgSender()` (gasless admin). Pinned by `test/utils/ERC2771TokenGateTestBase.sol`
-8. **Rule contracts in `src/mocks/` are reference implementations** — they are useful for testing and examples, not as production rule contracts. Production rules live in a [separate repository](https://github.com/CMTA/Rules).
+8. **Rules and bound tokens are disjoint** — `RuleEngineBase._checkBindingTarget` rejects binding a current rule and `_checkRule` rejects adding a bound token as a rule, both with `RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges`. Pinned by `invariant_RulesAndBoundTokensAreDisjoint`
+9. **Rule contracts in `src/mocks/` are reference implementations** — they are useful for testing and examples, not as production rule contracts. Production rules live in a [separate repository](https://github.com/CMTA/Rules).
 
 ## Solidity Style
 

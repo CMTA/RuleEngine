@@ -226,12 +226,24 @@ abstract contract RuleEngineBase is
     }
 
     /**
-     * @dev Override to add the ERC-165 interface check, see {_supportsRuleInterface}.
+     * @dev Override to add the ERC-165 interface check, see {_supportsRuleInterface}, and to reject a bound
+     * token: an address may be a rule or a bound token, never both (see {_checkBindingTarget}).
      * @param rule_ The candidate rule address to validate.
      */
     function _checkRule(address rule_) internal view virtual override {
         RulesManagementModule._checkRule(rule_);
+        require(!_boundTokens.contains(rule_), RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges());
         require(_supportsRuleInterface(rule_), RuleEngine_RuleInvalidInterface());
+    }
+
+    /**
+     * @dev Rejects binding an address that is currently a rule. Binding lets an address drive every rule, so a
+     * rule that was also a bound token could call the engine's callbacks from inside its own `transferred` hook.
+     * Together with the bound-token check in {_checkRule}, the rule set and the bound tokens stay disjoint.
+     * @param token The address about to be bound.
+     */
+    function _checkBindingTarget(address token) internal view virtual override {
+        require(!_rules.contains(token), RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges());
     }
 
     /**

@@ -8,6 +8,7 @@ import {IRulesManagementModule} from "src/interfaces/IRulesManagementModule.sol"
 import {RuleEngineBase} from "src/RuleEngineBase.sol";
 import {RuleMintAllowanceMock} from "src/mocks/rules/operation/RuleMintAllowanceMock.sol";
 import {TokenBindingModuleInvariantStorage} from "src/modules/library/TokenBindingModuleInvariantStorage.sol";
+import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 import {RuleCodeProbe} from "./RuleCodeProbe.sol";
 import {RevertingViewRule} from "./RevertingViewRule.sol";
 import {ReentrantAdminRule} from "./ReentrantAdminRule.sol";
@@ -182,19 +183,62 @@ abstract contract SecurityReviewTestBase is Test {
 
     /* ============ TB-3: any address can be bound ============ */
 
-    /// @notice TB-3 (proof of concept). Binding does not check the rule set: an address can be a rule and a
-    /// bound token at the same time.
-    function testRuleAddressCanBeBoundAsToken() public {
+    /// @notice F-3 regression (was the TB-3 proof of concept). A current rule cannot be bound, through any binding
+    /// path: `bindToken`, `bindTokens`, or the rule binding itself with a self-binding approval.
+    function testCannotBindACurrentRule() public {
+        address[] memory ts = new address[](1);
+        ts[0] = address(probe);
+        bytes4 err =
+            RulesManagementModuleInvariantStorage.RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges
+            .selector;
         vm.startPrank(ADMIN);
         engine.addRule(probe);
+        engine.setTokenSelfBindingApproval(address(probe), true);
+        vm.expectRevert(err);
         engine.bindToken(address(probe));
+        vm.expectRevert(err);
+        engine.bindTokens(ts);
         vm.stopPrank();
-        assertTrue(engine.containsRule(probe));
-        assertTrue(engine.isTokenBound(address(probe)));
+
+        vm.prank(address(probe));
+        vm.expectRevert(err);
+        engine.bindToken(address(probe));
+        assertFalse(engine.isTokenBound(address(probe)));
     }
 
-    /// @notice TB-3 (proof of concept). A bound externally owned account drives a stateful rule with no token
-    /// movement: here it consumes a minter's allowance. Binding is a trust decision of the manager.
+    /// @notice F-3 regression. A bound token cannot be added as a rule, through `addRule` or `setRules`.
+    function testCannotAddABoundTokenAsRule() public {
+        IRule[] memory rs = new IRule[](1);
+        rs[0] = probe;
+        bytes4 err =
+            RulesManagementModuleInvariantStorage.RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges
+            .selector;
+        vm.startPrank(ADMIN);
+        engine.bindToken(address(probe));
+        vm.expectRevert(err);
+        engine.addRule(probe);
+        vm.expectRevert(err);
+        engine.setRules(rs);
+        vm.stopPrank();
+        assertFalse(engine.containsRule(probe));
+    }
+
+    /// @notice F-3. Once removed from the rule set, the address can be bound, and the other way round.
+    function testRuleAndTokenRolesCanBeSwappedSequentially() public {
+        vm.startPrank(ADMIN);
+        engine.addRule(probe);
+        engine.removeRule(probe);
+        engine.bindToken(address(probe));
+        assertTrue(engine.isTokenBound(address(probe)));
+        engine.unbindToken(address(probe));
+        engine.addRule(probe);
+        vm.stopPrank();
+        assertTrue(engine.containsRule(probe));
+    }
+
+    /// @notice TB-3 / F-3 (documented behaviour). A bound externally owned account drives a stateful rule with no
+    /// token movement: here it consumes a minter's allowance. Binding is a trust decision of the manager; the
+    /// registry cannot tell a token contract from an EOA, so this stays a documentation item.
     function testBoundEoaConsumesStatefulRuleState() public {
         address eoa = address(0xE0A);
         RuleMintAllowanceMock allowance = new RuleMintAllowanceMock(ADMIN);
