@@ -336,10 +336,12 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         ruleEngineMock.bindTokens(tokens);
     }
 
+    /// @notice Batch binding is atomic on purpose (rc7 code-quality review `C-3`): one token already bound
+    /// reverts the whole batch, including the tokens bound before it in the same call.
     function testCannotBindTokensBatchWithAlreadyBoundToken() public {
         address[] memory tokens = new address[](2);
-        tokens[0] = TOKEN_1;
-        tokens[1] = TOKEN_2;
+        tokens[0] = TOKEN_2;
+        tokens[1] = TOKEN_1;
 
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindToken(TOKEN_1);
@@ -347,6 +349,8 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenAlreadyBound.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindTokens(tokens);
+
+        assertFalse(ruleEngineMock.isTokenBound(TOKEN_2), "the token before the failing one is rolled back");
     }
 
     function testCannotUnbindTokensBatchWithTokenNotBound() public {
@@ -360,6 +364,23 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenNotBound.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.unbindTokens(tokens);
+
+        assertTrue(ruleEngineMock.isTokenBound(TOKEN_1), "the token before the failing one stays bound");
+    }
+
+    /// @notice An empty batch is a no-op: no revert, no event, no state change (rc7 code-quality review `C-3`).
+    function testEmptyBindAndUnbindBatchesAreNoOps() public {
+        address[] memory empty = new address[](0);
+        uint256 before = ruleEngineMock.getTokenBounds().length;
+
+        vm.recordLogs();
+        vm.startPrank(OWNER_ADDRESS);
+        ruleEngineMock.bindTokens(empty);
+        ruleEngineMock.unbindTokens(empty);
+        vm.stopPrank();
+
+        assertEq(vm.getRecordedLogs().length, 0);
+        assertEq(ruleEngineMock.getTokenBounds().length, before);
     }
 
     function testMessageForTransferRestrictionWithTransferOKCode() public {

@@ -51,8 +51,8 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | B-1 | `messageForTransferRestriction` resolves `rule(i)` twice, across an external call | ✅ fixed after the second pass — −375 gas per call on top of `A-3` |
 | B-2 | `contains()` before `add()` / `remove()` leaves two unreachable branches | ✅ fixed after the second pass — −271 / −268 gas, branch coverage 40/40; the old form added no security (assessed) |
 | C-1 | Every event has exactly one emit site | ⬜ verified — 8/8, unchanged by the split |
-| C-2 | Batch self-binding approval emits the input, not the effect | ⚠️ still open — carried from rc5 |
-| C-3 | Empty batches succeed silently, while `setRules([])` reverts | ⚠️ revised — empty batches and `setRules([])` both follow a convention; the open point is `bindTokens` / `unbindTokens` reverting on an already-applied element |
+| C-2 | Batch self-binding approval emits the input, not the effect | ⚠️ still open — carried from rc5; restated with 3 options measured, `TokenBound` / `TokenUnbound` not indexed noted |
+| C-3 | Empty batches succeed silently, while `setRules([])` reverts | ✅ decided after the second pass — binding batches stay atomic, documented in NatSpec and `TokenBinding-module.md`; rollback and empty-batch no-op pinned |
 | D-1 | ERC-2771 `Context` overrides repeated per deployable | ⬜ no finding — 3 copies, one per `*2771` contract (4 before the split), compiler-mandated |
 | D-2 | The RBAC and ownable families implement the ERC-2771 split two different ways | ✅ fixed after the second pass — `RuleEngineAccessControlShared` folded into `RuleEngine`; deployables grouped in `accessControl/` and `ownable/` |
 | E-1 | `virtual` on every internal function | ⬜ no finding — 0 missing, including the new contracts |
@@ -79,8 +79,8 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | K-5 | No fuzz and no invariant test | ✅ partly — 2 fuzz properties on all six deployables; invariant test proposed |
 | K-6 | `TokenSelfBindingApprovalSet` was never asserted | ✅ fixed — asserted in the three access-control models |
 
-**Counted: 33 rows — 17 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
-no-finding / verified / left as is (⬜), 4 open decisions or carried items (⚠️, `G-2` counted here).**
+**Counted: 33 rows — 18 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
+no-finding / verified / left as is (⬜), 3 open decisions or carried items (⚠️, `G-2` counted here).**
 
 ## Outstanding
 
@@ -89,7 +89,7 @@ no-finding / verified / left as is (⬜), 4 open decisions or carried items (⚠
 | G-2 / G-3 | 9 comment fixes in `src/`, and the `ERC3643TokenMock` header | Comment-only, left for one `src/` commit |
 | H-3 | Reject a zero forwarder in the `*2771` constructors | Changes the tests that use a zero forwarder; needs a new error |
 | K-5 | Handler-based invariant test over the rule set and the binding set | Needs a design for the handler |
-| C-2 / C-3 | Batch approval event shape; whether `bindTokens` / `unbindTokens` stay atomic or skip already-applied tokens | Event shape is API-visible to indexers; the binding batches deviate from the project's single-versus-batch revert convention, which is a product call |
+| C-2 | Batch approval event shape | Event shape is API-visible to indexers (options measured in `C-2`) |
 | H-1 | View/enforcement divergence | Inherent to the ERC-1404 3-argument signature |
 
 ---
@@ -275,9 +275,93 @@ Unchanged by the split: the constructors of `RuleEngineAccessControlShared` and 
 
 ### C-2. The batch approval event reports the input — still open
 
-Carried verbatim from rc6 `C-2`.
+Carried from rc5 `C-2` / rc6 `C-2`, unchanged by rc7. Restated in full and re-verified on the final rc7 code, with
+the options measured.
 
-### C-3. Empty batches are accepted, inconsistently with `setRules` — revised
+**The code.** The single and batch setters write the same mapping but emit different events
+(`TokenBindingExtendedModule.sol:50-71`, events in `ITokenBindingExtended.sol:21` and `:28`):
+
+```solidity
+function setTokenSelfBindingApproval(address token, bool approved) ... {
+    require(token != address(0), TokenBinding_InvalidTokenAddress());
+    _tokenSelfBindingApproval[token] = approved;
+    emit TokenSelfBindingApprovalSet(token, approved);          // event TokenSelfBindingApprovalSet(address indexed token, bool approved)
+}
+
+function setTokenSelfBindingApprovalBatch(address[] calldata tokens, bool approved) ... {
+    for (uint256 i = 0; i < tokens.length; ++i) {
+        require(tokens[i] != address(0), TokenBinding_InvalidTokenAddress());
+        _tokenSelfBindingApproval[tokens[i]] = approved;
+    }
+    emit TokenSelfBindingApprovalBatchSet(tokens, approved);   // event TokenSelfBindingApprovalBatchSet(address[] tokens, bool approved)
+}
+```
+
+**What goes wrong for a consumer:**
+
+- **Two shapes for one state change.** Approving token `T` emits `TokenSelfBindingApprovalSet(T, true)` through
+  the single setter and `TokenSelfBindingApprovalBatchSet([.., T, ..], true)` through the batch. An indexer that
+  rebuilds the approval map must subscribe to both and decode both.
+- **A filter on the token misses every batch update.** `token` is `indexed` in the single event, so the natural
+  query is `eth_getLogs` with `topics[1] = T`. The batch event has no indexed field (an `address[]` cannot be
+  usefully indexed; it would be stored as a hash), so that query never returns a batch approval of `T`. A
+  monitoring rule "alert when token T gains self-binding rights", the security-relevant one, since self-binding
+  lets a token unbind itself, is silently blind to the batch path.
+- **The event reports the input, not the effect.** The array is echoed as given: tokens already at the
+  requested value, and duplicates (`[T, T]` is accepted and listed twice), appear as if they changed. The
+  NatSpec of the event says "The token addresses whose self-binding permission changed", which is therefore
+  inaccurate. An empty batch emits `TokenSelfBindingApprovalBatchSet([], b)`, an event that records nothing
+  (`C-3`).
+- **Inconsistent with the sibling batch functions.** `bindTokens` / `unbindTokens` go through
+  `_bindToken` / `_unbindToken` and emit one `TokenBound` / `TokenUnbound` per token, so binding has a single
+  event shape whichever entry point is used. Only the approval batch has a separate event.
+
+What it is **not**: a state or security defect. The mapping is written correctly, the reads
+(`isTokenSelfBindingApproved`) are authoritative, and the batch is guarded by the same
+`onlyTokenBindingManager` as the single setter. The issue is only what the event log says.
+
+**Pinned today** by `testSetTokenSelfBindingApprovalBatchEmitsSingleBatchEvent` in the three access-control
+models (`test/RuleEngine/ERC3643Compliance.t.sol:313`, `test/RuleEngineOwnable/ERC3643Compliance.t.sol:262`,
+`test/RuleEngineOwnable2Step/RuleEngineOwnable2Step.t.sol:260`), which assert exactly one log with the batch
+topic. Any option below changes those tests.
+
+**Options, measured** (throwaway probe on `RuleEngine`, each variant patched into
+`TokenBindingExtendedModule` and reverted; "unchanged" re-sends the same 10 tokens with the same value):
+
+| Option | Batch of 1 | Batch of 10 (new) | Batch of 10 (unchanged) | Event stream |
+|---|---|---|---|---|
+| **Current**: one batch event with the input | 33,080 | 233,956 | 14,938 | two shapes; input, not effect |
+| **A.** Per-token `TokenSelfBindingApprovalSet`, drop the batch event | 32,384 (−696) | 242,440 (+8,484) | 23,422 (+8,484) | one shape, indexed; still reports no-ops |
+| **B.** Per-token events **and** the batch event | 34,529 (+1,449) | 248,446 (+14,490) | 29,428 (+14,490) | both shapes; old consumers keep working |
+| **C.** Per-token event **only when the value changes** | 32,611 (−469) | 244,710 (+10,754) | 8,086 (−6,852) | one shape, indexed, reports the effect |
+
+The per-token cost is about 850 gas per event (A) and about 1,075 per token for the change check plus the event
+(C). This is an administrative function, called rarely and by an operator, so the absolute cost is minor;
+the difference in what consumers can rely on is not.
+
+**Trade-offs:**
+
+- **A** is the minimal fix for consistency and filtering, and the closest to `bindTokens`. It removes an event
+  from the ABI.
+- **B** is the only option that breaks no existing consumer, at the highest gas cost, and it keeps the two
+  shapes alive: it postpones the cleanup rather than doing it.
+- **C** makes the log match the effect and is the cheapest when nothing changes, but it also changes the single
+  setter's contract if applied there (today `setTokenSelfBindingApproval(T, true)` emits even when `T` is already
+  approved). To stay consistent, both setters would get the change check. It is the convention `RuleAddressList`
+  already uses for its batches: skip elements already in the target state (`C-3`).
+- In every option, the NatSpec of the batch function and of the remaining event must say what is emitted.
+
+**Related, noticed while re-verifying:** `TokenBound(address token)` and `TokenUnbound(address token)`
+(`ITokenBinding.sol:20`, `:26`) do **not** index `token`, unlike `TokenSelfBindingApprovalSet`. A consumer filtering
+binding changes by token has the same problem as above, on every binding path. Indexing them changes the event
+topics (`topics[1]` becomes the token, the data becomes empty), so it is also an ABI-visible change for indexers;
+it would be cheapest to decide together with C-2.
+
+**Verdict: decide** — a product call on the event API, not a correctness fix. Recommended: **C**, applied to both
+setters, plus `indexed` on `TokenBound` / `TokenUnbound`, while the project is still in release candidates and
+the event API is not yet frozen. If existing indexers must keep working unchanged, **B** for one release, then A or C.
+
+### C-3. Empty batches are accepted, inconsistently with `setRules` — decided
 
 `setRules([])` reverts (`RuleEngine_RulesManagementModule_ArrayIsEmpty`). `bindTokens([])`, `unbindTokens([])`
 and `setTokenSelfBindingApprovalBatch([], b)` succeed as no-ops, and the last one emits
@@ -328,6 +412,26 @@ reason. The open decision moves to the binding batches:
 
 Either way, a test for the empty batches can now be written, since the expected value (no-op, no revert) is no
 longer the question. Not written in this pass.
+
+**Decided after the second pass: keep them atomic.** The maintainer chose the first option. Implemented as
+documentation and tests, with no behaviour change:
+
+- **NatSpec** of `bindTokens` / `unbindTokens` (`ITokenBindingExtended.sol`) states that the call is atomic,
+  that this deliberately departs from the skip-if-already-done batch convention, why (a binding change is
+  security-relevant, and an already-bound token in the list is most likely an operator mistake that should stop
+  the operation), and that an empty array is a no-op.
+- **`doc/technical/TokenBinding-module.md` §4** has a new warning, "The batch functions are atomic, on purpose",
+  with the same reasoning and the contrast with `RuleAddressList`.
+- **Tests**, in the three access-control families (`test/RuleEngine/ERC3643Compliance.t.sol`,
+  `test/RuleEngineOwnable/ERC3643Compliance.t.sol`, `test/RuleEngineOwnable2Step/RuleEngineOwnable2Step.t.sol`):
+  `testCannotBindTokensBatchWithAlreadyBoundToken` now lists the new token **before** the already-bound one and
+  asserts it is rolled back (before, the failing token came first, so nothing was bound before the revert and
+  atomicity was not observed); `testCannotUnbindTokensBatchWithTokenNotBound` asserts the token unbound before
+  the failure stays bound; new `testEmptyBindAndUnbindBatchesAreNoOps` asserts no revert, no event and no state
+  change. Full suite 463/463.
+
+`setRules([])` keeps reverting (safety guard, not a batch rule), and the empty approval batch still emits an
+empty `TokenSelfBindingApprovalBatchSet`, which belongs to `C-2`.
 
 ## D. Duplication
 

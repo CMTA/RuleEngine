@@ -31,7 +31,10 @@ interface ITokenBindingExtended is ITokenBinding {
     /**
      * @notice Binds several token contracts in a single call.
      * @dev Must be restricted by implementation-specific access control.
-     * Reverts if any token is invalid or already bound.
+     * Atomic: reverts if any token is invalid or already bound (or listed twice), and then binds none of them.
+     * This deliberately departs from the usual batch convention of skipping elements already in the target
+     * state: a binding change is security-relevant, and a token that is already bound in the list is most
+     * likely an operator mistake that should stop the whole operation. An empty array is a no-op.
      * @param tokens The token addresses to bind.
      */
     function bindTokens(address[] calldata tokens) external;
@@ -39,7 +42,8 @@ interface ITokenBindingExtended is ITokenBinding {
     /**
      * @notice Unbinds several token contracts in a single call.
      * @dev Must be restricted by implementation-specific access control.
-     * Reverts if any token is not currently bound.
+     * Atomic: reverts if any token is not currently bound, and then unbinds none of them. Deliberately not
+     * the skip-if-already-done batch convention, for the same reason as {bindTokens}. An empty array is a no-op.
      * @param tokens The token addresses to unbind.
      */
     function unbindTokens(address[] calldata tokens) external;

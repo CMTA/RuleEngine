@@ -401,10 +401,12 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngine.bindTokens(tokens);
     }
 
+    /// @notice Batch binding is atomic on purpose (rc7 code-quality review `C-3`): one token already bound
+    /// reverts the whole batch, including the tokens bound before it in the same call.
     function testCannotBindTokensBatchWithAlreadyBoundToken() public {
         address[] memory tokens = new address[](2);
-        tokens[0] = address(token1);
-        tokens[1] = address(token2);
+        tokens[0] = address(token2);
+        tokens[1] = address(token1);
 
         vm.prank(operator);
         ruleEngine.bindToken(address(token1));
@@ -412,6 +414,8 @@ contract RuleEngineTest is Test, HelperContract {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenAlreadyBound.selector);
         vm.prank(operator);
         ruleEngine.bindTokens(tokens);
+
+        assertFalse(ruleEngine.isTokenBound(address(token2)), "the token before the failing one is rolled back");
     }
 
     /// @notice A token listed twice in one batch reverts on its second occurrence, and the whole batch rolls back.
@@ -440,6 +444,23 @@ contract RuleEngineTest is Test, HelperContract {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenNotBound.selector);
         vm.prank(operator);
         ruleEngine.unbindTokens(tokens);
+
+        assertTrue(ruleEngine.isTokenBound(address(token1)), "the token before the failing one stays bound");
+    }
+
+    /// @notice An empty batch is a no-op: no revert, no event, no state change (rc7 code-quality review `C-3`).
+    function testEmptyBindAndUnbindBatchesAreNoOps() public {
+        address[] memory empty = new address[](0);
+        uint256 before = ruleEngine.getTokenBounds().length;
+
+        vm.recordLogs();
+        vm.startPrank(operator);
+        ruleEngine.bindTokens(empty);
+        ruleEngine.unbindTokens(empty);
+        vm.stopPrank();
+
+        assertEq(vm.getRecordedLogs().length, 0);
+        assertEq(ruleEngine.getTokenBounds().length, before);
     }
 
     function testCannotCreatedIfNotBound() public {

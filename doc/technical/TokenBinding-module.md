@@ -119,14 +119,23 @@ These are properties of the registry itself, not of any standard built on it.
 - **Binding and unbinding are not idempotent.** Re-binding a bound token reverts with
   `TokenBinding_TokenAlreadyBound`, and unbinding an unbound one with `TokenBinding_TokenNotBound`, so a
   redundant administrative call is reported rather than silently accepted.
+- **The batch functions are atomic, on purpose.** `bindTokens` / `unbindTokens` apply the single-call rule to
+  every element: one token already bound (or listed twice) in `bindTokens`, or not bound in `unbindTokens`,
+  reverts the whole call, and the tokens processed before it in the same call are rolled back. This departs
+  from the batch convention used elsewhere in the project (the reference `RuleAddressList` rule skips elements
+  already in the target state so that one stale entry does not waste the whole batch). Binding is treated
+  differently because a binding change is security-relevant: a token that is already bound in the list is most
+  likely an operator mistake (wrong list, wrong environment), and it should stop the operation rather than be
+  silently skipped. The cost is that the operator re-submits a corrected list. An empty array is accepted as a
+  no-op, consistent with the batch rule (nothing to change, nothing reverts).
 
 ## 5. What is tested
 
 | Area | File | Tests |
 |---|---|---|
 | Standalone reuse, outside any compliance context | `test/TokenBinding/TokenBindingStandalone.t.sol` | 10 |
-| Registry through the ERC-3643 surface, RBAC variant | `test/RuleEngine/ERC3643Compliance.t.sol` | 30 |
-| Registry through the ERC-3643 surface, ownable variant | `test/RuleEngineOwnable/ERC3643Compliance.t.sol` | 29 |
+| Registry through the ERC-3643 surface, RBAC variant | `test/RuleEngine/ERC3643Compliance.t.sol` | 31 |
+| Registry through the ERC-3643 surface, ownable variant | `test/RuleEngineOwnable/ERC3643Compliance.t.sol` | 30 |
 
 ## 6. Related documents
 
