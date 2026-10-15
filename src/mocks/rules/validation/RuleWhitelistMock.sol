@@ -4,6 +4,8 @@ pragma solidity ^0.8.27;
 
 import {RuleAddressList} from "./abstract/RuleAddressList/RuleAddressList.sol";
 import {RuleWhitelistCommon} from "./abstract/RuleWhitelistCommon.sol";
+import {IRuleEngine, IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
+import {IRule} from "../../../interfaces/IRule.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
@@ -14,7 +16,7 @@ import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.s
 /**
  * @title a whitelist manager
  */
-contract RuleWhitelistMock is RuleAddressList, RuleWhitelistCommon {
+contract RuleWhitelistMock is RuleAddressList, RuleWhitelistCommon, IRuleEngineERC1404 {
     error RuleWhitelist_InvalidTransfer(address from, address to, uint256 value, uint8 code);
 
     /**
@@ -42,7 +44,7 @@ contract RuleWhitelistMock is RuleAddressList, RuleWhitelistCommon {
      * @param to the destination address
      * @param value the amount to transfer
      */
-    function transferred(address spender, address from, address to, uint256 value) public {
+    function transferred(address spender, address from, address to, uint256 value) public override(IRule, IRuleEngine) {
         uint8 code = detectTransferRestrictionFrom(spender, from, to, value);
         require(code == uint8(REJECTED_CODE_BASE.TRANSFER_OK), RuleWhitelist_InvalidTransfer(from, to, value, code));
     }

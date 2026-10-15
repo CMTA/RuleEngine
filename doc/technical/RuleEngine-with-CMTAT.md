@@ -139,7 +139,7 @@ engine.addRule(IRule(address(rule)));                  // RULES_MANAGEMENT_ROLE,
 engine.setRules(rulesArray);                           // replaces the whole set atomically
 ```
 
-A rule must implement `IRule` and advertise `RuleInterfaceId.IRULE_INTERFACE_ID` (`0x2497d6cb`) through ERC-165; the engine validates this on `addRule` and rejects anything else. Rules run **in declaration order** and the first one to revert aborts the whole transaction.
+A rule must implement `IRule` and advertise `RuleInterfaceId.IRULE_INTERFACE_ID` (`0xb1a69752`) through ERC-165; the engine validates this on `addRule` and rejects anything else. Rules run **in declaration order** and the first one to revert aborts the whole transaction.
 
 ### 3.5 Roles reference (`RuleEngine` variant)
 
@@ -226,8 +226,9 @@ is not needed. Details:
 
 ### 4.8 A single rule can be the token's rule engine
 
-A rule implements the whole engine-facing interface (`IRule is IRuleEngineERC1404`), and the reference rules
-advertise `RULE_ENGINE_INTERFACE_ID`. An issuer who needs exactly one rule can therefore skip the RuleEngine and
+Since v3.0.0-rc7, `IRule` requires only what the engine calls, so it no longer includes `canTransfer` /
+`canTransferFrom`. A rule that also wants this role implements CMTAT's `IRuleEngineERC1404` on top of `IRule`
+and advertises `RULE_ENGINE_INTERFACE_ID`, as the four reference rules do. An issuer who needs exactly one rule can therefore skip the RuleEngine and
 call `token.setRuleEngine(rule)`. CMTAT's `setRuleEngine` performs no ERC-165 check, so the token accepts any
 contract with the right functions. The token then calls the rule directly: `transferred` (3- or 4-argument,
 see §2), `canTransfer` / `canTransferFrom`, and the ERC-1404 views `detectTransferRestriction(From)` and

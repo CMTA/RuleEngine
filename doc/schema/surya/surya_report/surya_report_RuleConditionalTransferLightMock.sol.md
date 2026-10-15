@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/operation/RuleConditionalTransferLightMock.sol | 87279cf6059885bf42df95e2a381805e93f20bde |
+| ./mocks/rules/operation/RuleConditionalTransferLightMock.sol | 89607e259489744ca2824d83515be3694d2ffd25 |
 
 
 ### Contracts Description Table
@@ -15,7 +15,7 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleConditionalTransferLightMock** | Implementation | AccessControl, RuleConditionalTransferLightInvariantStorage, IRule |||
+| **RuleConditionalTransferLightMock** | Implementation | AccessControl, RuleConditionalTransferLightInvariantStorage, IRule, IRuleEngineERC1404 |||
 | └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
 | └ | canReturnTransferRestrictionCode | External ❗️ |   |NO❗️ |
 | └ | messageForTransferRestriction | External ❗️ |   |NO❗️ |

@@ -11,6 +11,8 @@ import {RuleInterfaceId} from "src/modules/library/RuleInterfaceId.sol";
  * it claims and the message for it. Used to pin how the engine aggregates several rules.
  * @dev The 3-argument and 4-argument paths have separate codes so a test can tell which path the engine used.
  * Each `transferred` overload reverts with the code of its own path when that code is non-zero.
+ * Implements only `IRule`, with no `canTransfer` / `canTransferFrom`: an engine-only rule, which the narrowed
+ * interface accepts (rc7 code-quality review `I-1`).
  */
 contract RuleCodeProbe is IRule, ERC165 {
     error RuleCodeProbe_Rejected(uint8 code);
@@ -44,14 +46,6 @@ contract RuleCodeProbe is IRule, ERC165 {
 
     function detectTransferRestrictionFrom(address, address, address, uint256) external view override returns (uint8) {
         return codeFrom;
-    }
-
-    function canTransfer(address, address, uint256) external view override returns (bool) {
-        return code == 0;
-    }
-
-    function canTransferFrom(address, address, address, uint256) external view override returns (bool) {
-        return codeFrom == 0;
     }
 
     function canReturnTransferRestrictionCode(uint8 restrictionCode) external view override returns (bool) {

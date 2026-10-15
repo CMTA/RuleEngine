@@ -3,6 +3,7 @@ pragma solidity ^0.8.27;
 
 import {RuleCommonInvariantStorage} from "../validation/abstract/RuleCommonInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
+import {IRuleEngine, IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
@@ -14,7 +15,7 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  * @dev Requires operator approval for each ERC20 transfer.
  *      Same transfer (from, to, value) can be approved multiple times.
  */
-contract RuleOperationRevertMock is AccessControl, IRule, RuleCommonInvariantStorage {
+contract RuleOperationRevertMock is AccessControl, IRule, IRuleEngineERC1404, RuleCommonInvariantStorage {
     error RuleConditionalTransferLight_InvalidTransfer();
     // It is very important that each rule uses an unique code
     /**
@@ -90,6 +91,7 @@ contract RuleOperationRevertMock is AccessControl, IRule, RuleCommonInvariantSto
     )
         public
         pure
+        override(IRule, IRuleEngine)
     {
         revert RuleConditionalTransferLight_InvalidTransfer();
     }

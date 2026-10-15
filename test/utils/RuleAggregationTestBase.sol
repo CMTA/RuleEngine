@@ -8,6 +8,9 @@ import {IRulesManagementModule} from "src/interfaces/IRulesManagementModule.sol"
 import {IRule} from "src/interfaces/IRule.sol";
 import {RuleEngineBase} from "src/RuleEngineBase.sol";
 import {RuleCodeProbe} from "./RuleCodeProbe.sol";
+import {LegacyIRuleIdProbe} from "./LegacyIRuleIdProbe.sol";
+import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
+import {RuleInterfaceId} from "src/modules/library/RuleInterfaceId.sol";
 
 /**
  * @title RuleAggregationTestBase
@@ -48,6 +51,25 @@ abstract contract RuleAggregationTestBase is Test {
         vm.stopPrank();
         assertEq(engine.rule(0), address(first));
         assertEq(engine.rule(1), address(second));
+    }
+
+    /* ============ IRule interface gate ============ */
+
+    /// @notice An engine-only rule is accepted: the probes implement `IRule` without `canTransfer` /
+    /// `canTransferFrom` (both added in `setUp`), and the engine never needs them.
+    function testEngineOnlyRuleWithoutComplianceReadsIsAccepted() public {
+        assertTrue(first.supportsInterface(RuleInterfaceId.IRULE_INTERFACE_ID));
+        (bool ok,) = address(first).call(abi.encodeWithSignature("canTransfer(address,address,uint256)", FROM, TO, 1));
+        assertFalse(ok, "the probe has no canTransfer");
+        assertTrue(IRulesManagementModule(address(engine)).containsRule(IRule(address(first))));
+    }
+
+    /// @notice A rule advertising only the pre-narrowing ID `0x2497d6cb` is rejected: the gate is strict.
+    function testRuleAdvertisingOnlyTheLegacyIdIsRejected() public {
+        LegacyIRuleIdProbe legacy = new LegacyIRuleIdProbe();
+        vm.prank(ADMIN);
+        vm.expectRevert(RuleEngineInvariantStorage.RuleEngine_RuleInvalidInterface.selector);
+        IRulesManagementModule(address(engine)).addRule(IRule(address(legacy)));
     }
 
     /* ============ detectTransferRestriction / canTransfer ============ */

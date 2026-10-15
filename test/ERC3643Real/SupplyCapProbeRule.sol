@@ -55,16 +55,6 @@ contract SupplyCapProbeRule is IRule {
     }
 
     /// @dev See {IRule}.
-    function canTransfer(address from, address to, uint256 value) external view override returns (bool) {
-        return detectTransferRestriction(from, to, value) == 0;
-    }
-
-    /// @dev See {IRule}.
-    function canTransferFrom(address, address from, address to, uint256 value) external view override returns (bool) {
-        return detectTransferRestriction(from, to, value) == 0;
-    }
-
-    /// @dev See {IRule}.
     function detectTransferRestrictionFrom(address, address from, address to, uint256 value)
         external
         view

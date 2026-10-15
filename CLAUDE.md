@@ -238,7 +238,7 @@ This gives O(1) add/remove/contains and iterable storage.
 
 | Interface | Purpose | Where Defined |
 |-----------|---------|---------------|
-| `IRule` | What every rule must implement (extends `IRuleEngineERC1404`) | `src/interfaces/IRule.sol` |
+| `IRule` | What every rule must implement: the six functions the engine calls + ERC-165 (extends `IERC1404Extend`, `IERC3643IComplianceContract`, `IERC165`; no `canTransfer*`) | `src/interfaces/IRule.sol` |
 | `IRulesManagementModule` | Rule CRUD operations | `src/interfaces/IRulesManagementModule.sol` |
 | `ITokenBinding` | Token binding registry, standard-agnostic | `src/interfaces/ITokenBinding.sol` |
 | `ITokenBindingExtended` | Batch binding, token self-binding, `getTokenBounds` | `src/interfaces/ITokenBindingExtended.sol` |
@@ -246,7 +246,7 @@ This gives O(1) add/remove/contains and iterable storage.
 | `IRuleEngine` | Full CMTAT integration interface | `lib/CMTAT/contracts/interfaces/engine/IRuleEngine.sol` |
 
 **ERC-165 interface IDs:**
-- `IRule`: `0x2497d6cb` (`src/modules/library/RuleInterfaceId.sol`)
+- `IRule`: `0xb1a69752` (`src/modules/library/RuleInterfaceId.sol`). Narrowed in rc7 (was `0x2497d6cb`, which also covered `canTransfer` / `canTransferFrom`); the engine accepts only the new ID
 - `IERC3643Compliance`: `0x3144991c`, extended: `0x646ba2be`, `IERC7551Compliance`: `0x7157797f` (`ComplianceInterfaceId.sol`)
 - `IERC1404`: `0xab84a5c8` (`ERC1404InterfaceId.sol`)
 - `IRuleEngine`: from `CMTAT/library/RuleEngineInterfaceId.sol`
@@ -370,7 +370,7 @@ Key points:
 
 ### Adding a new rule (mock)
 1. Create the rule in `src/mocks/rules/`
-2. Implement `IRule` (which extends `IRuleEngineERC1404`)
+2. Implement `IRule`; to also support the standalone role (set directly as a CMTAT token's rule engine), implement CMTAT's `IRuleEngineERC1404` too and advertise `RULE_ENGINE_INTERFACE_ID`. The 4-argument `transferred` then needs `override(IRule, IRuleEngine)`
 3. Implement ERC-165 with `IRULE_INTERFACE_ID`
 4. `transferred*` hooks may update the rule's own storage but must not make a state-changing external call; external reads must be `view` (`STATICCALL`). Six CMTAT variants have no reentrancy guard around `transferred` (see `doc/technical/RuleEngine-with-CMTAT.md` §4.6). A rule can also be set directly as a CMTAT token's rule engine (§4.8): keep `canTransfer*` consistent with `detectTransferRestriction*`, and a production stateful rule must restrict who calls `transferred`
 5. Add tests using the existing `HelperContract` base

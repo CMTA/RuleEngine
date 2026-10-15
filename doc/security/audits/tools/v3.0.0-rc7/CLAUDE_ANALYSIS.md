@@ -67,7 +67,7 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | H-1 | View approves a mint that enforcement rejects | ⬜ documented — carried, unchanged |
 | H-2 | Sender resolution after the ERC-2771 fix and the split | ⬜ verified — two identity sites, both `msg.sender`; no-forwarder variants ignore any suffix |
 | H-3 | A `*2771` deployable accepts `address(0)` as its forwarder | ⚠️ decide — new in the second pass |
-| I-1 | `IRule` demands two functions the engine never calls | ⚠️ still open — carried from rc6, re-verified and restated in full; narrowed id `0xb1a69752` recomputed |
+| I-1 | `IRule` demands two functions the engine never calls | ✅ fixed after the second pass — `IRule` narrowed, ID `0xb1a69752`, strict gate (old ID rejected) |
 | I-2 | Standalone-rule configuration advertised but untested | ✅ fixed after the second pass (option 1) — 9 integration tests, CMTAT guide §4.8, mocks import CMTAT's ids; mock `transferred` left unguarded, documented |
 | I-3 | Engine should call `canTransfer` on rules? | ⬜ no — carried from rc6 |
 | J-1 | Binding registry embeddable in a foreign host | Can ⬜ carried — inheritance of the registry unchanged |
@@ -79,8 +79,8 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | K-5 | No fuzz and no invariant test | ✅ partly — 2 fuzz properties on all six deployables; invariant test proposed |
 | K-6 | `TokenSelfBindingApprovalSet` was never asserted | ✅ fixed — asserted in the three access-control models |
 
-**Counted: 33 rows — 16 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
-no-finding / verified / left as is (⬜), 5 open decisions or carried items (⚠️, `G-2` counted here).**
+**Counted: 33 rows — 17 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
+no-finding / verified / left as is (⬜), 4 open decisions or carried items (⚠️, `G-2` counted here).**
 
 ## Outstanding
 
@@ -90,7 +90,6 @@ no-finding / verified / left as is (⬜), 5 open decisions or carried items (⚠
 | H-3 | Reject a zero forwarder in the `*2771` constructors | Changes the tests that use a zero forwarder; needs a new error |
 | K-5 | Handler-based invariant test over the rule set and the binding set | Needs a design for the handler |
 | C-2 / C-3 | Batch approval event shape; whether `bindTokens` / `unbindTokens` stay atomic or skip already-applied tokens | Event shape is API-visible to indexers; the binding batches deviate from the project's single-versus-batch revert convention, which is a product call |
-| I-1 | Narrow `IRule` | Coordinated with CMTA/Rules. With `I-2` resolved as "rules are also minimal engines", rules that support the role keep `canTransfer*` anyway, so narrowing has documentation value for engine-only rules |
 | H-1 | View/enforcement divergence | Inherent to the ERC-1404 3-argument signature |
 
 ---
@@ -576,7 +575,7 @@ stand; `I-1` and `I-2` are restated below in full and re-verified against the fi
 `canTransfer` instead of `detectTransferRestriction`) is unchanged: the restriction code is the stronger primitive,
 the engine owes the token a code, and calling both would let a rule contradict itself.
 
-### I-1. `IRule` demands two functions the engine never calls — still open
+### I-1. `IRule` demands two functions the engine never calls — fixed
 
 **What the gate requires.** `RuleEngineBase._checkRule` accepts a rule only if
 `ERC165Checker.supportsInterface(rule, IRULE_INTERFACE_ID)` is true. `IRule` declares a single function of its
@@ -646,6 +645,34 @@ deny-list. That stays configuration discipline, and the change must not be prese
 only broader than the engine needs. Not worth doing alone if the answer to `I-2` is "rules are meant to be
 usable standalone", since every rule would then implement the two functions anyway; it is then documentation
 value only.
+
+**Implemented after the second pass**, after `I-2` was resolved by supporting the standalone role. Narrowing still
+pays off with that answer: the role is opt-in, so an engine-only rule no longer has to implement two views
+nothing calls.
+
+- **Interface.** `IRule is IERC1404Extend, IERC3643IComplianceContract, IERC165` and declares the 4-argument
+  `transferred` and `canReturnTransferRestrictionCode` itself. The 4-argument `transferred` is declared rather
+  than inherited because its CMTAT home, `IRuleEngine`, also brings `IERC7551Compliance` (`canTransferFrom`).
+  `IERC1404Extend` keeps the `REJECTED_CODE_BASE` enum available to rules.
+- **ID.** `IRULE_INTERFACE_ID = type(IRule).interfaceId ^ IERC3643IComplianceContract ^ IERC1404 ^
+  IERC1404Extend ^ IERC165 = 0xb1a69752`, the value specified above. Pinned by
+  `testInterfaceIdConstantsMatchTheirWireValues`; `testIRuleIdExcludesTheComplianceReads` checks that the old
+  value is exactly the new one XOR `canTransfer` (`0xe46638e6`) and `canTransferFrom` (`0x7157797f`).
+- **Migration: strict, by decision of the maintainer.** The engine accepts only `0xb1a69752`. A fallback
+  accepting `0x2497d6cb` as well was considered (the old interface is a superset, so it would be safe) and
+  declined. Consequence: **every rule from CMTA/Rules must advertise the new ID before an rc7 engine accepts
+  it**; a rule advertising both works with old and new engines. Pinned on all six deployables by
+  `testRuleAdvertisingOnlyTheLegacyIdIsRejected` (`test/utils/LegacyIRuleIdProbe.sol`); checked that the test
+  can fail: an engine that also accepts the old ID fails it six times.
+- **Reference rules** implement `IRuleEngineERC1404` on top of `IRule` to keep the standalone role of `I-2`;
+  the 4-argument `transferred` then appears in both `IRule` and `IRuleEngine` and needs
+  `override(IRule, IRuleEngine)`. **Test probes** `RuleCodeProbe` and `SupplyCapProbeRule` implement only
+  `IRule`, without `canTransfer*`, and are accepted on all six deployables
+  (`testEngineOnlyRuleWithoutComplianceReadsIsAccepted`, and every rule-aggregation and real-T-REX test).
+- **Verified:** full suite 460/460, `FOUNDRY_PROFILE=erc3643 forge test` 13/13, production coverage 100% (lines,
+  statements, branches 48/48, functions).
+
+The limit stated above still holds: the narrowed ID describes shape, not semantics.
 
 ### I-2. Rules advertise the standalone engine role, but nothing tests or documents it — fixed
 

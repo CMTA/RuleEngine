@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.27;
 
-import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
+import {IRuleEngine, IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {
     RuleConditionalTransferLightInvariantStorage
 } from "./abstract/RuleConditionalTransferLightInvariantStorage.sol";
@@ -17,7 +17,12 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  * @dev Requires operator approval for each ERC20 transfer.
  *      Same transfer (from, to, value) can be approved multiple times.
  */
-contract RuleConditionalTransferLightMock is AccessControl, RuleConditionalTransferLightInvariantStorage, IRule {
+contract RuleConditionalTransferLightMock is
+    AccessControl,
+    RuleConditionalTransferLightInvariantStorage,
+    IRule,
+    IRuleEngineERC1404
+{
     // Mapping from transfer hash to approval count
     /**
      * @notice Number of outstanding approvals per transfer hash.
@@ -111,6 +116,7 @@ contract RuleConditionalTransferLightMock is AccessControl, RuleConditionalTrans
         uint256 value
     )
         public
+        override(IRule, IRuleEngine)
     {
         transferred(from, to, value);
     }

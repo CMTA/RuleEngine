@@ -4,6 +4,7 @@ pragma solidity ^0.8.27;
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
+import {IRuleEngine, IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
@@ -16,7 +17,7 @@ import {RuleMintAllowanceInvariantStorage} from "./abstract/RuleMintAllowanceInv
  *         Each mint deducts from the minter's remaining allowance.
  *         Burns and regular transfers are unrestricted by this rule.
  */
-contract RuleMintAllowanceMock is AccessControl, RuleMintAllowanceInvariantStorage, IRule {
+contract RuleMintAllowanceMock is AccessControl, RuleMintAllowanceInvariantStorage, IRule, IRuleEngineERC1404 {
     /**
      * @notice Remaining mint allowance per minter.
      */
@@ -96,6 +97,7 @@ contract RuleMintAllowanceMock is AccessControl, RuleMintAllowanceInvariantStora
         uint256 value
     )
         public
+        override(IRule, IRuleEngine)
     {
         if (from == address(0)) {
             uint256 allowance = mintAllowance[spender];
