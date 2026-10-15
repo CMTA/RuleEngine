@@ -202,15 +202,19 @@ operation and the token's views, so it is trusted for availability too. See CMTA
 Do not grant `RULES_MANAGEMENT_ROLE` to a rule contract — the engine blocks granting any role
 to an address currently configured as a rule, but the check is one-directional and does not stop an already privileged address from later being added as a rule.
 
-### 4.7 The trusted forwarder can call the token callbacks
+### 4.7 The trusted forwarder cannot act as a token
 
-The bound-token gate (`onlyBoundToken`) compares `_msgSender()`, and every deployable inherits
-`ERC2771Context`. When a forwarder is configured, a call relayed by that forwarder with a bound token appended
-as the ERC-2771 sender passes the gate, so the forwarder can reach `transferred` on a bound token's behalf and
-drive stateful rules without any token movement. The forwarder is therefore trusted to the same degree as a bound
-token: deploy with `address(0)` as forwarder unless gasless administration is needed, and otherwise use only a
-signature-verifying ERC-2771 forwarder. CMTAT's integration guide recommends comparing the raw `msg.sender`
-instead; the engine keeps `_msgSender()` for now.
+Every deployable inherits `ERC2771Context`, but the bound-token gate (`onlyBoundToken`, on `transferred`,
+`created` and `destroyed`) compares the raw **`msg.sender`**, not `_msgSender()`. CMTAT calls the engine directly
+from its own transfer, mint and burn, never through a forwarder, so nothing changes for a real token. A forwarder
+that appends a bound token's address, however, is rejected with `TokenBinding_UnauthorizedCaller`.
+
+This has been the case since v3.0.0-rc7. Before that, the gate used `_msgSender()`, and a trusted forwarder could
+reach `transferred` "as" a bound token and drive stateful rules with no token movement: for example, consuming a
+per-minter mint quota with no mint. This follows CMTAT's integration guide, which recommends `msg.sender` for this
+check. Administrative calls still resolve through `_msgSender()`, so gasless administration keeps working. Use a
+signature-verifying ERC-2771 forwarder, or `address(0)` if gasless administration is not needed. Details:
+[doc/README.md §Gasless support](../README.md#gasless-support-erc-2771).
 
 ## 5. What is tested
 

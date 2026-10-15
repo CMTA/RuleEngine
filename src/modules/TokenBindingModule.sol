@@ -139,9 +139,14 @@ abstract contract TokenBindingModule is Context, ITokenBinding, TokenBindingModu
 
     /**
      * @dev Reverts when the caller is not a bound token.
+     * IMPORTANT: compares the raw `msg.sender`, not the ERC-2771 `_msgSender()`. A token always
+     * calls the engine directly from its own transfer, mint or burn, never through a forwarder, so
+     * the two are equal for every legitimate call. Resolving the caller through `_msgSender()` would
+     * let the trusted forwarder append a bound token's address and drive the rule callbacks with no
+     * token movement. Administrative functions keep `_msgSender()`, so they remain relayable.
      */
     function _checkBoundToken() internal view virtual {
-        if (!_boundTokens.contains(_msgSender())) {
+        if (!_boundTokens.contains(msg.sender)) {
             revert TokenBinding_UnauthorizedCaller();
         }
     }

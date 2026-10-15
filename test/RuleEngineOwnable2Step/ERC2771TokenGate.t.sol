@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: MPL-2.0
+pragma solidity ^0.8.20;
+
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {RuleEngineOwnable2Step} from "src/deployment/RuleEngineOwnable2Step.sol";
+import {ERC2771TokenGateTestBase} from "../utils/ERC2771TokenGateTestBase.sol";
+
+/**
+ * @title ERC2771TokenGateOwnable2StepTest
+ * @notice ERC-2771 token-identity gate tests for `RuleEngineOwnable2Step`.
+ */
+contract ERC2771TokenGateOwnable2StepTest is ERC2771TokenGateTestBase {
+    function _deployEngine(address admin, address forwarder, address token) internal override returns (address) {
+        return address(new RuleEngineOwnable2Step(admin, forwarder, token));
+    }
+
+    function _managerRevertData(address caller) internal pure override returns (bytes memory) {
+        return abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, caller);
+    }
+}

@@ -170,9 +170,11 @@ A gas-heavy rule affects every operation on every bound token.
 `TokenBinding_UnauthorizedCaller` for any caller that is not a bound token. Verified by
 `testUnboundCallerCannotCallTransferred` and `testUnboundCallerCannotCallCreatedOrDestroyed`.
 
-The gate resolves the caller through `_msgSender()` (ERC-2771). If a trusted forwarder is configured, it can
-relay a call with a bound token as the appended sender and pass the gate: the forwarder is trusted to the same
-degree as a bound token. See [RuleEngine-with-CMTAT.md §4.7](./RuleEngine-with-CMTAT.md#47-the-trusted-forwarder-can-call-the-token-callbacks).
+The gate compares the raw `msg.sender`, not the ERC-2771 `_msgSender()`, and so does the token self-binding
+check that `setCompliance` relies on. A trusted forwarder therefore cannot pass as a bound token, and it cannot
+unbind a token approved for self-binding by claiming to be it. Both were possible up to v3.0.0-rc6. A T-REX token
+calls `transferred` / `created` / `destroyed` and `bindToken` / `unbindToken(this)` directly, so it is unaffected.
+See [RuleEngine-with-CMTAT.md §4.7](./RuleEngine-with-CMTAT.md#47-the-trusted-forwarder-cannot-act-as-a-token).
 
 ### 4.6 Restriction codes must be unique across the rule set
 

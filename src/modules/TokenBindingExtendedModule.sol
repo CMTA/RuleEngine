@@ -88,10 +88,15 @@ abstract contract TokenBindingExtendedModule is TokenBindingModule, ITokenBindin
     /**
      * @dev Authorizes bind/unbind operations.
      * Allows the binding manager, or approved token self-calls (used by ERC-3643 `setCompliance`).
+     * IMPORTANT: the token self-call is identified by the raw `msg.sender`, not the ERC-2771
+     * `_msgSender()`: a token calls `bindToken` / `unbindToken` on itself directly from
+     * `setCompliance`, never through a forwarder. Otherwise the trusted forwarder could append an
+     * approved token's address and unbind it. The manager path (`_onlyTokenBindingManager`) keeps
+     * `_msgSender()`, so binding administration remains relayable.
      * @param token The token being bound or unbound.
      */
     function _authorizeTokenBindingChange(address token) internal virtual override {
-        if (_msgSender() == token && _tokenSelfBindingApproval[token]) {
+        if (msg.sender == token && _tokenSelfBindingApproval[token]) {
             return;
         }
         _onlyTokenBindingManager();

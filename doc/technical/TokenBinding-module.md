@@ -111,10 +111,11 @@ These are properties of the registry itself, not of any standard built on it.
   while the token was bound.
 - **`address(0)` cannot be bound.** It could never call the engine, and binding it would only emit a
   `TokenBound` event that indexers would have to filter out.
-- **The gate trusts the ERC-2771 forwarder.** `onlyBoundToken` compares `_msgSender()`, not `msg.sender`.
-  In a host that inherits `ERC2771Context` with a forwarder configured, the forwarder can relay a call with a
-  bound token as the appended sender and pass the gate. A reusing project must either treat its forwarder as
-  trusted as a bound token, or override the check to use `msg.sender` (a token never calls through a forwarder).
+- **Token identity uses `msg.sender`, administration uses `_msgSender()`.** `onlyBoundToken` and the token
+  self-binding check compare the raw `msg.sender`. A token never calls through a forwarder, so in a host that
+  inherits `ERC2771Context` the forwarder cannot pass as a bound or self-binding token. The manager path
+  (`_onlyTokenBindingManager`) is left to the host and normally resolves through `_msgSender()`, so binding
+  administration can stay gasless. Do not override `_checkBoundToken` back to `_msgSender()`.
 - **Binding and unbinding are not idempotent.** Re-binding a bound token reverts with
   `TokenBinding_TokenAlreadyBound`, and unbinding an unbound one with `TokenBinding_TokenNotBound`, so a
   redundant administrative call is reported rather than silently accepted.

@@ -655,9 +655,28 @@ The contract uses the OpenZeppelin contract `ERC2771Context` (through `ERC2771Mo
 
 At deployment, the constructor parameter `forwarderIrrevocable` has to be set with the address of the forwarder, or `address(0)` to disable ERC-2771.
 
-> **Warning:** the forwarder is trusted to the same degree as a bound token. The bound-token gate of `transferred`, `created` and `destroyed` also resolves the caller through `_msgSender()`, so the forwarder can relay a call with a bound token appended as the sender and reach these callbacks on its behalf. Use `address(0)` unless gasless administration is needed, and otherwise only a signature-verifying ERC-2771 forwarder. See [RuleEngine-with-CMTAT.md §4.7](./technical/RuleEngine-with-CMTAT.md#47-the-trusted-forwarder-can-call-the-token-callbacks).
-
 After deployment, the forwarder is immutable and can not be changed.
+
+#### Token calls are never resolved through the forwarder
+
+ERC-2771 lets the trusted forwarder name the sender of a call: when `msg.sender` is the forwarder, `_msgSender()` returns the address appended to the calldata. This is what makes gasless administration possible, and the engine's administrative checks rely on it.
+
+Two checks, however, identify a **token** rather than a person, and they compare the raw `msg.sender` instead:
+
+| Check | Where | Identifies | Resolved with |
+|---|---|---|---|
+| `onlyBoundToken` (`_checkBoundToken`) on `transferred`, `created`, `destroyed` | `TokenBindingModule` | the bound token calling the engine | **`msg.sender`** |
+| Token self-binding in `bindToken` / `unbindToken` (ERC-3643 `setCompliance`) | `TokenBindingExtendedModule._authorizeTokenBindingChange` | the approved token binding itself | **`msg.sender`** |
+| Rule management, binding manager, `setMaxRules`, self-binding approval, roles / ownership | the access-control hooks of each deployable | an operator | `_msgSender()` (relayable) |
+
+**Purpose of the fix (v3.0.0-rc7).** Up to rc6, both token checks used `_msgSender()`. A trusted forwarder could therefore append a bound token's address to a call and pass as that token:
+
+- **Forged callbacks.** By calling `transferred` / `created` / `destroyed` "as" a bound token, the forwarder drove every rule with no token movement. Read-only rules are unaffected, but stateful rules were not: a per-minter mint quota could be consumed with no mint, and a one-time transfer approval could be used up so that the real transfer then fails.
+- **Forged self-unbinding.** By calling `unbindToken(token)` "as" a token approved for self-binding, the forwarder could unbind it. Every transfer, mint and burn of that token then reverted until an operator re-bound it.
+
+A signature-verifying forwarder never produces such a call, because a token contract cannot sign a request. The exposure was a buggy, malicious or permissive forwarder, which is fixed at deployment. The fix removes that dependency: a token always calls the engine directly from its own `transfer`, `mint`, `burn` or `setCompliance`, never through a forwarder, so for every legitimate token call `msg.sender == _msgSender()`, and comparing `msg.sender` rejects only the impersonation. Operators can still bind and unbind tokens, and manage rules, through signed meta-transactions. CMTAT makes the same choice for its bridge gate (`ERC20CrossChainModule.onlyTokenBridge`).
+
+The behaviour is pinned for the three deployables by `test/RuleEngine*/ERC2771TokenGate.t.sol` (shared suite `test/utils/ERC2771TokenGateTestBase.sol`). See also [RuleEngine-with-CMTAT.md §4.7](./technical/RuleEngine-with-CMTAT.md#47-the-trusted-forwarder-cannot-act-as-a-token).
 
 References:
 
@@ -1871,7 +1890,7 @@ forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=127.0.0.1:
 #### Production Deployment Checklist
 
 - Choose the deployable variant: `RuleEngine`, `RuleEngineOwnable`, or `RuleEngineOwnable2Step`.
-- Choose the trusted forwarder address, or use `address(0)` if ERC-2771 support is not needed. A forwarder must be a signature-verifying ERC-2771 forwarder: it can reach the bound-token callbacks (see [Gasless support](#gasless-support-erc-2771)).
+- Choose the trusted forwarder address, or use `address(0)` if ERC-2771 support is not needed. A forwarder must be a signature-verifying ERC-2771 forwarder: it can relay administrative calls (rule management, binding) on behalf of any operator who signs them. It cannot act as a token (see [Gasless support](#gasless-support-erc-2771)).
 - Decide whether the token should be bound in the constructor or later via `bindToken`.
 - **CMTAT:** bind the token on the engine (`engine.bindToken(cmtat)`, or the constructor's `tokenContract` argument) — CMTAT never self-binds, and an engine with no bound token rejects every transfer with `TokenBinding_UnauthorizedCaller`. Then point the token at the engine with `cmtat.setRuleEngine(engine)` (token `DEFAULT_ADMIN_ROLE`), or pass it at token construction.
 - **ERC-3643:** grant `setTokenSelfBindingApproval(token, true)` on the engine **before** calling `token.setCompliance(engine)`, which self-binds the token.

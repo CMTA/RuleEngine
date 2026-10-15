@@ -91,7 +91,8 @@ v3.0.0 turns the RuleEngine into a generic compliance controller for both CMTAT 
 
 - Fixes and mitigations for the Nethermind AuditAgent scan findings 1–7: multi-tenant binding warning, `IAccessControl` no longer advertised by `RuleEngineOwnable`, missing interface IDs, the rule-count cap, rule accounts excluded from privileges, the restriction-code uniqueness convention, and the empty `setRules` documented. (rc2, rc3)
 - Token self-binding requires explicit per-token approval, so an arbitrary contract cannot bind itself. (rc3)
-- Documented trust model: rules and every contract they call are trusted, `transferred*` hooks must not make state-changing external calls, and the ERC-2771 forwarder is trusted to the same degree as a bound token. (rc7)
+- The trusted ERC-2771 forwarder can no longer act as a token: the bound-token gate and the token self-binding check compare `msg.sender`, while administration stays gasless. (rc7)
+- Documented trust model: rules and every contract they call are trusted, and `transferred*` hooks must not make state-changing external calls. (rc7)
 
 ### Dependencies
 
@@ -116,13 +117,18 @@ Commit:
 
 ### Summary
 
-Maintenance release with no change to the engine logic or to its external API. The CMTAT submodule moves to v3.3.0-rc4 and the ERC-3643 submodule to T-REX 4.2.0-beta1, which is now tested end-to-end in a dedicated Foundry profile. The CMTAT / Rules documentation is corrected and completed. `version()` now carries the release-candidate suffix.
+Security hardening of the ERC-2771 token-identity checks, otherwise a maintenance release with no change to the external API. The trusted forwarder can no longer pass as a token: the bound-token gate and the token self-binding check now compare `msg.sender`. The CMTAT submodule moves to v3.3.0-rc4 and the ERC-3643 submodule to T-REX 4.2.0-beta1, which is now tested end-to-end in a dedicated Foundry profile. The CMTAT / Rules documentation is corrected and completed. `version()` now carries the release-candidate suffix.
 
 ### Breaking change
 
+- **Token callbacks and token self-binding are no longer relayable through the ERC-2771 forwarder.** `transferred`, `created` and `destroyed` (`onlyBoundToken`), and a token's own `bindToken` / `unbindToken(this)`, now identify the token by `msg.sender` instead of `_msgSender()`. A call that the trusted forwarder relays with a token address appended is rejected (`TokenBinding_UnauthorizedCaller`, or the binding-manager check for the self-binding path). Real tokens are unaffected, because they always call the engine directly. Only a setup that relayed token callbacks through the forwarder breaks, and no legitimate setup does. Administrative functions are unchanged and remain relayable.
 - **`version()` return value format.** It now returns `"3.0.0-rc7"` instead of `"3.0.0"`. An integration that compares the string literally (deployment checks, indexers, upgrade scripts) must be updated, and must expect the suffix to change at each release candidate. This is the only change under `src/` since rc6.
 - **No storage change.** The RuleEngine is not upgradeable and uses no ERC-7201 namespace.
-- **No external engine interface change.** Function signatures, selectors, events, errors and advertised ERC-165 interface IDs are identical to rc6. The CMTAT v3.3.0-rc4 update changes only NatSpec in `IRuleEngine`. Its engine-facing breaking changes (mint, burn and the minter `batchTransfer` routed to the 4-argument `transferred`, the reentrancy guard around `transferred`, the `^0.8.24` pragma of the engine interfaces) were already present in the v3.3.0-rc1 / rc3 targets of rc4–rc6.
+- **No external engine interface change.** Function signatures, selectors, events, errors and advertised ERC-165 interface IDs are identical to rc6. Only who may call the token callbacks changes (see above). The CMTAT v3.3.0-rc4 update changes only NatSpec in `IRuleEngine`. Its engine-facing breaking changes (mint, burn and the minter `batchTransfer` routed to the 4-argument `transferred`, the reentrancy guard around `transferred`, the `^0.8.24` pragma of the engine interfaces) were already present in the v3.3.0-rc1 / rc3 targets of rc4–rc6.
+
+### Security
+
+- **The trusted ERC-2771 forwarder can no longer act as a token.** `TokenBindingModule._checkBoundToken` (the `onlyBoundToken` gate) and the token self-binding check in `TokenBindingExtendedModule._authorizeTokenBindingChange` compared `_msgSender()`, so a trusted forwarder could append a token's address and pass as that token. It could (a) call `transferred` / `created` / `destroyed` with no token movement, driving stateful rules, for example consuming a per-minter mint quota or a one-time transfer approval; and (b) call `unbindToken(token)` for a token approved for self-binding, after which every operation of that token reverted until it was re-bound. Both checks now compare the raw `msg.sender`; a token never calls through a forwarder. A signature-verifying forwarder could not produce these calls, because a token cannot sign, so the exposure was limited to a buggy, malicious or permissive forwarder. This aligns with CMTAT's `onlyTokenBridge` and with CMTAT's RuleEngine integration guide. The administrative checks keep `_msgSender()`, so gasless administration is unchanged.
 
 ### Changed
 
@@ -130,6 +136,7 @@ Maintenance release with no change to the engine logic or to its external API. T
 
 ### Added
 
+- Add `test/utils/ERC2771TokenGateTestBase.sol` and `test/RuleEngine*/ERC2771TokenGate.t.sol`: 7 tests × 3 deployable variants (349 -> 370 tests). Each simulates a forwarder relay (`vm.prank(forwarder)` with the claimed sender appended to the calldata) and checks four things: the forwarder cannot pass as a bound token on any of the four callbacks; a forged mint callback does not consume a `RuleMintAllowanceMock` quota, while a real one does; the forwarder cannot unbind a token approved for self-binding; and the bound token, an approved self-binding token and a relayed binding manager still work. Against the rc6 code, the three impersonation tests fail.
 - Add `test/ERC3643Real/ERC3643RealTokenRuleEngine.t.sol` (13 tests) against the **real** vendored ERC-3643 token (T-REX 4.2.0-beta1): self-binding through `init` / `setCompliance`, mint through `created`, burn through `destroyed`, `transfer` / `transferFrom` on the 3-argument `transferred` with no spender forwarded, `forcedTransfer` notifying compliance, unbound callers rejected, and the post-update notification order (a CMTAT-style supply cap counts a mint twice). Run with `FOUNDRY_PROFILE=erc3643 forge test`: a new `[profile.erc3643]` builds at solc 0.8.30 (the token pins `pragma solidity 0.8.30`) into `out-erc3643/`, with a context-scoped `@onchain-id` remapping to the stubs in `test/utils/onchainid/`; the default profile skips the directory. Test helpers: `IdentityRegistryStub`, `SupplyCapProbeRule`.
 
 ### Documentation
