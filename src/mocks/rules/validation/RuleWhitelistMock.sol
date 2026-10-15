@@ -94,7 +94,7 @@ contract RuleWhitelistMock is RuleAddressList, RuleWhitelistCommon, IRuleEngineE
      * @notice Check if an addres is in the whitelist or not
      * @param from the origin address
      * @param to the destination address
-     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     * @return The restriction code or REJECTED_CODE_BASE.TRANSFER_OK
      *
      */
     function detectTransferRestriction(

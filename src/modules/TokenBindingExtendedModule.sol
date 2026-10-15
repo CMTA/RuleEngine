@@ -25,7 +25,7 @@ abstract contract TokenBindingExtendedModule is TokenBindingModule, ITokenBindin
     mapping(address token => bool approved) private _tokenSelfBindingApproval;
 
     /*//////////////////////////////////////////////////////////////
-                            PUBLIC/public FUNCTIONS
+                            PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
     /* ============ State functions ============ */

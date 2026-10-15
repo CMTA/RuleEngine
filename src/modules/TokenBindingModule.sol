@@ -54,7 +54,7 @@ abstract contract TokenBindingModule is Context, ITokenBinding, TokenBindingModu
     }
 
     /*//////////////////////////////////////////////////////////////
-                            PUBLIC/public FUNCTIONS
+                            PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
     /* ============ State functions ============ */

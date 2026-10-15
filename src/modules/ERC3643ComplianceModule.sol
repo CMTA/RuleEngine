@@ -33,7 +33,7 @@ abstract contract ERC3643ComplianceModule is TokenBindingModule, IERC3643Complia
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /*//////////////////////////////////////////////////////////////
-                            PUBLIC/public FUNCTIONS
+                            PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
     /* ============ View functions ============ */

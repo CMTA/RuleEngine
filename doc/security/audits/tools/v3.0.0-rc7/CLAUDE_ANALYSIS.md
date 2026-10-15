@@ -60,7 +60,7 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | F-1 | `pragma solidity ^0.8.20` was false: the code does not compile below 0.8.27 | ✅ fixed — `^0.8.27` everywhere (`3b94564`) |
 | F-2 | Advertised ERC-165 ids unchanged by rc7, and identical between each pair | ⬜ verified — pinned by `IRuleInterfaceId.t.sol` and `ERC2771VariantTestBase` |
 | G-1 | NatSpec length and documentation pointers | ⬜ no finding — median 5 lines, max 19, zero `.md` pointers |
-| G-2 | Stale or wrong NatSpec in production contracts | ⚠️ partly fixed — the 12 "MetaTxModule" sites are gone, `_removeRule` fixed with `B-2`; 9 sites remain |
+| G-2 | Stale or wrong NatSpec in production contracts | ✅ fixed after the second pass — all 10 sites corrected (1 with `B-2`, 9 after), plus 5 typos in the mocks |
 | G-3 | `ERC3643TokenMock` header and a test header describe the pre-rc7 ERC-3643 setup | ✅ test header fixed / ⚠️ mock header still open |
 | G-4 | CHANGELOG rc7 said the `version()` string was "the only change under `src/`" | ✅ fixed |
 | G-5 | `RuleEngine-with-CMTAT.md` §4.7 said every deployable inherits `ERC2771Context` | ✅ fixed — new in the second pass |
@@ -79,14 +79,14 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | K-5 | No fuzz and no invariant test | ✅ partly — 2 fuzz properties on all six deployables; invariant test proposed |
 | K-6 | `TokenSelfBindingApprovalSet` was never asserted | ✅ fixed — asserted in the three access-control models |
 
-**Counted: 33 rows — 19 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
-no-finding / verified / left as is (⬜), 2 open decisions or carried items (⚠️, `G-2` counted here).**
+**Counted: 33 rows — 20 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
+no-finding / verified / left as is (⬜), 1 open decision or carried item (⚠️).**
 
 ## Outstanding
 
 | ID | Item | Why it is still open |
 |----|------|----------------------|
-| G-2 / G-3 | 9 comment fixes in `src/`, and the `ERC3643TokenMock` header | Comment-only, left for one `src/` commit |
+| G-3 | The `ERC3643TokenMock` header | Comment-only, in a test mock |
 | H-3 | Reject a zero forwarder in the `*2771` constructors | Changes the tests that use a zero forwarder; needs a new error |
 | K-5 | Handler-based invariant test over the rule set and the binding set | Needs a design for the handler |
 | H-1 | View/enforcement divergence | Inherent to the ERC-1404 3-argument signature |
@@ -625,7 +625,7 @@ forwarder (ERC-2771 has no ERC-165 id).
 158 NatSpec blocks in `src/` (mocks excluded): median **5** lines, 90th percentile **9**, maximum **19**
 (`ERC3643ComplianceModule` header). Zero `.md` / `doc/` pointers in production comments.
 
-### G-2. Stale or wrong NatSpec in production contracts — partly fixed
+### G-2. Stale or wrong NatSpec in production contracts — fixed
 
 **Fixed by the split:** the 12 "This surcharge is not necessary if you do not use the MetaTxModule" comments
 (there is no `MetaTxModule`, and the overrides are not optional) and the misplaced `ERC-2771` section header of
@@ -644,6 +644,21 @@ forwarder (ERC-2771 has no ERC-165 id).
 | `VersionModule.sol:20` | `/* ============ Events ============ */` | Empty section |
 
 **Verdict: implement** (comment-only).
+
+**Implemented after the second pass.** The 9 remaining sites, rewritten to say what the code does:
+
+| Site | Now reads |
+|---|---|
+| `RulesManagementModule` title | `@title RulesManagementModule`, with a one-line `@notice` on what the module holds |
+| `RulesManagementModule._transferred` (x2) | "Applies every rule, in order, to an operation without / with a spender; reverts as soon as one rule rejects it" (enforcement, not detection) |
+| `RuleEngineBase.transferred` (4-arg) | `// Every rule is applied; the first one that rejects the operation reverts it` |
+| `RuleEngineBase.detectTransferRestriction` | "Queries every rule, in order, and returns the first restriction code that is not zero"; "restricion" -> "restriction" |
+| `TokenBindingModule`, `TokenBindingExtendedModule`, `ERC3643ComplianceModule` | section header `PUBLIC/EXTERNAL FUNCTIONS`, like the other modules |
+| `VersionModule` | empty `Events` section header removed |
+
+The same "restricion" typo was also fixed at 5 places in the mock rules (`RuleConditionalTransferLightMock` x2,
+`RuleOperationRevertMock` x2, `RuleWhitelistMock`). Comment-only: no bytecode-relevant change; full suite
+481/481, `forge fmt --check` clean. A final grep for the stale phrases in `src/` returns nothing.
 
 ### G-3. The ERC-3643 mock still describes the pre-rc7 setup — mock header open
 

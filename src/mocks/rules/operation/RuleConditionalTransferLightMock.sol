@@ -150,7 +150,7 @@ contract RuleConditionalTransferLightMock is
      * @param from the origin address
      * @param to the destination address
      * @param value the amount to transfer
-     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     * @return The restriction code or REJECTED_CODE_BASE.TRANSFER_OK
      *
      */
     function detectTransferRestriction(address from, address to, uint256 value) public view override returns (uint8) {
@@ -168,7 +168,7 @@ contract RuleConditionalTransferLightMock is
      * @param from the origin address
      * @param to the destination address
      * @param value the amount to transfer
-     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     * @return The restriction code or REJECTED_CODE_BASE.TRANSFER_OK
      *
      */
     function detectTransferRestrictionFrom(

@@ -10,7 +10,9 @@ import {IRule} from "../interfaces/IRule.sol";
 import {RulesManagementModuleInvariantStorage} from "./library/RulesManagementModuleInvariantStorage.sol";
 
 /**
- * @title RuleEngine -  part
+ * @title RulesManagementModule
+ * @notice Rule set of the RuleEngine: add, remove, replace and clear rules under a configurable cap, and
+ * apply every rule to a token operation.
  */
 abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage, IRulesManagementModule {
     modifier onlyRulesManager() {
@@ -189,7 +191,8 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     /* ============ Transferred functions ============ */
 
     /**
-     * @notice Go through all the rule to know if a restriction exists on the transfer
+     * @notice Applies every rule, in order, to an operation without a spender; reverts as soon as one rule
+     * rejects it (each rule's `transferred` reverts on a disallowed operation).
      * @dev Complexity is O(number of configured rules). Large rule sets can make
      * transfers too expensive on chains with lower block gas limits.
      * Security convention: rule contracts are expected to be trusted and must not
@@ -207,7 +210,8 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     }
 
     /**
-     * @notice Go through all the rule to know if a restriction exists on the transfer
+     * @notice Applies every rule, in order, to an operation with a spender; reverts as soon as one rule
+     * rejects it (each rule's `transferred` reverts on a disallowed operation).
      * @dev Complexity is O(number of configured rules). Large rule sets can make
      * transfers too expensive on chains with lower block gas limits.
      * Security convention: rule contracts are expected to be trusted and must not

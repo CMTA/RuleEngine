@@ -59,7 +59,7 @@ abstract contract RuleEngineBase is
         override(IRuleEngine)
         onlyBoundToken
     {
-        // Apply  on RuleEngine
+        // Every rule is applied; the first one that rejects the operation reverts it
         RulesManagementModule._transferred(spender, from, to, value);
     }
 
@@ -87,11 +87,11 @@ abstract contract RuleEngineBase is
 
     /* ============ View functions ============ */
     /**
-     * @notice Go through all the rule to know if a restriction exists on the transfer
+     * @notice Queries every rule, in order, and returns the first restriction code that is not zero
      * @param from the origin address
      * @param to the destination address
      * @param value to transfer
-     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK (0) if the transfer is valid
+     * @return The restriction code or REJECTED_CODE_BASE.TRANSFER_OK (0) if the transfer is valid
      *
      */
     function detectTransferRestriction(address from, address to, uint256 value)

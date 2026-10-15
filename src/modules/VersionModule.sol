@@ -17,7 +17,6 @@ abstract contract VersionModule is IERC3643Version {
      */
     string internal constant VERSION = "3.0.0-rc7";
 
-    /* ============ Events ============ */
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
