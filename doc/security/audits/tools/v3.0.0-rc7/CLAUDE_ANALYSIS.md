@@ -61,7 +61,7 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | F-2 | Advertised ERC-165 ids unchanged by rc7, and identical between each pair | ⬜ verified — pinned by `IRuleInterfaceId.t.sol` and `ERC2771VariantTestBase` |
 | G-1 | NatSpec length and documentation pointers | ⬜ no finding — median 5 lines, max 19, zero `.md` pointers |
 | G-2 | Stale or wrong NatSpec in production contracts | ✅ fixed after the second pass — all 10 sites corrected (1 with `B-2`, 9 after), plus 5 typos in the mocks |
-| G-3 | `ERC3643TokenMock` header and a test header describe the pre-rc7 ERC-3643 setup | ✅ test header fixed / ⚠️ mock header still open |
+| G-3 | `ERC3643TokenMock` header and a test header describe the pre-rc7 ERC-3643 setup | ✅ fixed — test header at the first pass, mock header after the second pass |
 | G-4 | CHANGELOG rc7 said the `version()` string was "the only change under `src/`" | ✅ fixed |
 | G-5 | `RuleEngine-with-CMTAT.md` §4.7 said every deployable inherits `ERC2771Context` | ✅ fixed — new in the second pass |
 | H-1 | View approves a mint that enforcement rejects | ⬜ documented — carried, unchanged |
@@ -73,22 +73,19 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | J-1 | Binding registry embeddable in a foreign host | ⬜ re-verified by example — two hosts compile (no `5005`); size depends on the host's CMTAT deployment version |
 | J-2 | ERC-2771 in the shared ownable layer blocked a host with its own forwarder | ✅ fixed by the split — verified by compile probe |
 | K-1 | Two tests used a bare `vm.expectRevert()` | ✅ fixed — both name their error; 0 left |
-| K-2 | Coverage | ⬜ 100% lines / statements / functions; branches 41/43 at the second pass (2 dead, `B-2`), **40/40** after `B-2` |
+| K-2 | Coverage | ⬜ 100% lines / statements / functions; branches 41/43 at the second pass (2 dead, `B-2`), **49/49** on the final code |
 | K-3 | Mutation testing | ✅ first pass: 4 of 32 survived, all 33 killed after new tests; second pass: see `K-3` |
 | K-4 | CI never runs the `erc3643` profile | ✅ fixed after the second pass — new CI step |
-| K-5 | No fuzz and no invariant test | ✅ partly — 2 fuzz properties on all six deployables; invariant test proposed |
+| K-5 | No fuzz and no invariant test | ✅ fixed — 2 fuzz properties and 4 handler-based invariants, on all six deployables |
 | K-6 | `TokenSelfBindingApprovalSet` was never asserted | ✅ fixed — asserted in the three access-control models |
 
-**Counted: 33 rows — 20 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
-no-finding / verified / left as is (⬜), 1 open decision or carried item (⚠️).**
+**Counted: 33 rows — 20 fixed (✅), 12 no-finding / verified / left as is (⬜), 1 open decision (⚠️, `H-3`).**
 
 ## Outstanding
 
 | ID | Item | Why it is still open |
 |----|------|----------------------|
-| G-3 | The `ERC3643TokenMock` header | Comment-only, in a test mock |
 | H-3 | Reject a zero forwarder in the `*2771` constructors | Changes the tests that use a zero forwarder; needs a new error |
-| K-5 | Handler-based invariant test over the rule set and the binding set | Needs a design for the handler |
 | H-1 | View/enforcement divergence | Inherent to the ERC-1404 3-argument signature |
 
 ---
@@ -543,8 +540,8 @@ Verified: `forge build` without conflict (the "not compiled" assumption above is
 for each pair, by `ERC2771VariantTestBase`. The ABIs were **not** diffed against the previous commit (the
 temporary worktree was not permitted); since the moved code is unchanged, no difference is expected. Import paths
 in the scripts, tests, mocks, `package.json`, `doc/TOOLCHAIN.md` and `doc/script/script_sol2uml.sh` are updated,
-and the Surya schema is regenerated. The coverage table in `K-2` predates the fold and still lists
-`RuleEngineAccessControlShared.sol`.
+and the Surya schema is regenerated. The second-pass coverage table in `K-2` predates the fold and still lists
+`RuleEngineAccessControlShared.sol`; `K-2` now also has a table measured on the final code.
 
 ## E. `virtual` and style conventions
 
@@ -660,12 +657,22 @@ The same "restricion" typo was also fixed at 5 places in the mock rules (`RuleCo
 `RuleOperationRevertMock` x2, `RuleWhitelistMock`). Comment-only: no bytecode-relevant change; full suite
 481/481, `forge fmt --check` clean. A final grep for the stale phrases in `src/` returns nothing.
 
-### G-3. The ERC-3643 mock still describes the pre-rc7 setup — mock header open
+### G-3. The ERC-3643 mock still describes the pre-rc7 setup — fixed
 
 The test header was fixed at the first pass. `src/mocks/ERC3643TokenMock.sol:13-22` still says the reference is
 "tag 4.1.3", that the real token "cannot be compiled into this test suite", that it pins 0.8.17 while "this
 project compiles with 0.8.36", and that it depends on OpenZeppelin 4.8.x. All four claims are false since rc7:
 T-REX 4.2.0-beta1 uses OpenZeppelin 5, pins 0.8.30, and **is** compiled by the `erc3643` profile.
+
+**Fixed after the second pass.** The header now names T-REX 4.2.0-beta1, says the real token is tested in
+`test/ERC3643Real/` under the `erc3643` profile (solc 0.8.30, `onchain-id` stubs), and why the mock stays: it
+runs in the default profile with no identity registry. The call sequence it describes (`setCompliance` unbind
+then bind, `transfer` and `mint` checking `canTransfer` before `transferred` / `created`, `burn` calling
+`destroyed`) was re-checked against `lib/ERC-3643/contracts/token/Token.sol` and still holds. Correction made
+while writing it: a first draft said the mock did not reproduce T-REX's order of balance update and
+notification; it does (balances first, then `created` / `destroyed`), and the header says so. A second slip,
+caught by the compiler: writing the package name with its leading `@` in NatSpec is parsed as a tag
+(`Error (6546)`), so the header names it `onchain-id/solidity`, as the original did.
 
 ### G-4. CHANGELOG rc7 claimed the version string was the only `src/` change — fixed
 
@@ -1074,6 +1081,31 @@ the false sides of `require(_rules.add(...), OperationNotSuccessful())` (`RulesM
 **After `B-2`:** both `require`s now carry the reachable error (`RuleAlreadyExists`, `RuleDoNotMatch`) and the
 dead `contains()` checks are gone. Re-run: lines 232/232, statements 222/222, **branches 40/40**, functions 81/81.
 
+**Final rc7 code** (after `D-2`, `E-2`, `I-1`, `G-2` and the `K-5` invariants; the second-pass table above is kept
+as measured, with `RuleEngineAccessControlShared.sol`, since folded into `RuleEngine.sol`):
+
+| Contract | Lines | Statements | Branches | Funcs |
+|---|---|---|---|---|
+| `RuleEngineBase.sol` | 100% (56/56) | 100% (69/69) | 100% (7/7) | 100% (15/15) |
+| `RuleEngineOwnableShared.sol` | 100% (9/9) | 100% (10/10) | 100% (3/3) | 100% (3/3) |
+| `accessControl/RuleEngine.sol` | 100% (18/18) | 100% (15/15) | 100% (7/7) | 100% (7/7) |
+| `accessControl/RuleEngine2771.sol` | 100% (6/6) | 100% (6/6) | — | 100% (3/3) |
+| `ownable/RuleEngineOwnable.sol` | 100% (6/6) | 100% (2/2) | — | 100% (4/4) |
+| `ownable/RuleEngineOwnable2771.sol` | 100% (6/6) | 100% (6/6) | — | 100% (3/3) |
+| `ownable/RuleEngineOwnable2Step.sol` | 100% (9/9) | 100% (6/6) | — | 100% (5/5) |
+| `ownable/RuleEngineOwnable2Step2771.sol` | 100% (6/6) | 100% (6/6) | — | 100% (3/3) |
+| `ERC3643ComplianceExtendedModule.sol` | 100% (2/2) | 100% (1/1) | — | 100% (1/1) |
+| `ERC3643ComplianceModule.sol` | 100% (6/6) | 100% (6/6) | 100% (2/2) | 100% (2/2) |
+| `RulesManagementModule.sol` | 100% (57/57) | 100% (52/52) | 100% (17/17) | 100% (19/19) |
+| `TokenBindingExtendedModule.sol` | 100% (24/24) | 100% (25/25) | 100% (5/5) | 100% (7/7) |
+| `TokenBindingModule.sol` | 100% (23/23) | 100% (15/15) | 100% (8/8) | 100% (9/9) |
+| `VersionModule.sol` | 100% (2/2) | 100% (1/1) | — | 100% (1/1) |
+| **Total** | **100% (230/230)** | **100% (220/220)** | **100% (49/49)** | **100% (82/82)** |
+
+`RuleEngine.sol` now has a row of its own: it holds the RBAC logic since `D-2`. The branch count rose 40 -> 49 with
+`E-2` (each `require` is a branch) and `I-1` (the ERC-165 pre-check and the legacy-ID fallback); every one is
+covered. 505 tests.
+
 ### K-3. Mutation testing
 
 **First pass (`4946c87`, 33 mutants).** 4 of 32 survived the suite as it stood: a rule returning code 1 ignored
@@ -1122,7 +1154,7 @@ token comes from the `lib/ERC-3643` submodule, which the existing `forge install
 `@onchain-id` imports resolve to the stubs in `test/utils/onchainid/`, so no extra install is needed. Checked
 locally: the workflow parses, and the command passes 13/13. **Not checked:** a run on GitHub Actions itself.
 
-### K-5. Fuzz and invariant tests — fuzz written, invariant proposed
+### K-5. Fuzz and invariant tests — written
 
 | Property | Kind | Where |
 |---|---|---|
@@ -1130,11 +1162,34 @@ locally: the workflow parses, and the command passes 13/13. **Not checked:** a r
 | The 4-argument view uses the rules' 4-argument answers | **fuzz** × 6 | `testFuzz_DetectFromReturnsFirstNonZeroCode` |
 | Codes 1 and 255 are reported | spot-checked | `testBoundaryCodesAreReported` |
 | Each `*2771` contract advertises the same ERC-165 ids as its counterpart | spot-checked over 13 ids × 3 pairs | `ERC2771VariantTestBase` |
-| The rule set never holds a duplicate or `address(0)`, and every member advertises `IRULE_INTERFACE_ID` | **proposed invariant** | not written |
-| A token is bound iff `isTokenBound`, and `getTokenBounds()` has no duplicate | **proposed invariant** | not written |
+| The rule set never holds a duplicate or `address(0)`, and every member advertises a rule ID | **invariant** × 6 | `invariant_RuleSetIsWellFormed` |
+| The rule set and `rulesCount()` match what the successful calls imply | **invariant** × 6 | `invariant_RuleSetMatchesModel` |
+| `maxRules()` is the last value set and never 0 | **invariant** × 6 | `invariant_MaxRulesMatchesModelAndIsNotZero` |
+| A token is bound iff the successful calls imply it; `getTokenBounds()` agrees, no duplicate, no `address(0)` | **invariant** × 6 | `invariant_BoundTokensMatchModel` |
 
 `rulesCount() <= maxRules()` is deliberately **not** an invariant: lowering the cap below the current count is
 allowed and tested.
+
+**Invariants implemented after the second pass.** `test/utils/RuleEngineInvariantTestBase.sol` holds a handler,
+`RuleEngineHandler`, and the four invariants; a short `RuleEngineInvariant.t.sol` in each of the six
+`test/RuleEngine*/` directories deploys the variant.
+
+- **Handler.** It is the only fuzz target. It calls, as the admin/owner, `addRule`, `removeRule`, `setRules` (0 to 2
+  rules), `clearRules`, `setMaxRules` (0 to 6), `bindToken`, `unbindToken`, `bindTokens`, `unbindTokens`, with
+  inputs drawn from small pools so that collisions are frequent: four valid rules, one rule advertising only the
+  legacy ID, one ERC-165 contract with no rule ID, `address(0)`; four tokens and `address(0)`. Each call is in
+  `try/catch`; on success the handler updates its own model from the call's semantics (for example `setRules`
+  clears the model, then adds), never by reading the engine. A reverted call must leave both unchanged.
+- **Invariants** (checked after every call): the four rows above. The model comparison is what makes them more
+  than restatements: `containsRule`, `rulesCount`, `isTokenBound` and `getTokenBounds` read storage, while the
+  model is derived from which calls succeeded.
+- **Shown to fail.** Three mutants, each caught by the expected invariant on `RuleEngine`: `_setMaxRules` without
+  its zero check (`maxRules is zero`), `_unbindToken` that does not remove the token (`getTokenBounds().length:
+  1 != 0`), `_removeRule` that does not remove the rule (`rulesCount: 3 != 2`). Source restored after each.
+- **Budget.** At Foundry's defaults (256 sequences of 500 calls) the six suites took 4 min 43 s, against 0.1 s for
+  the rest of the suite. `foundry.toml` sets `invariant = { runs = 64, depth = 50 }` (about 3 s for the six); the
+  file comment gives the environment variables for a deeper run. All four invariants also passed once at the
+  defaults (128,000 calls each, six deployables).
 
 ### K-6. Tests written
 

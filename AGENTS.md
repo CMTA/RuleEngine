@@ -24,6 +24,7 @@ forge coverage           # Code coverage
 forge coverage --no-match-coverage "(mocks|test)" --report lcov  # Production coverage (src/ + script/)
 forge fmt                # Format code
 FOUNDRY_PROFILE=erc3643 forge test  # Real ERC-3643 token suite (test/ERC3643Real/, solc 0.8.30)
+FOUNDRY_INVARIANT_RUNS=256 FOUNDRY_INVARIANT_DEPTH=500 forge test --match-contract InvariantTest  # deeper invariant run (foundry.toml caps it at 64 x 50)
 ```
 
 `test/ERC3643Real/` deploys the vendored T-REX 4.2.0-beta1 `Token`, which pins `pragma solidity 0.8.30`. It is
@@ -328,7 +329,7 @@ Key points:
 - Use `HelperContractOwnable2Step` for `RuleEngineOwnable2Step` tests
 - Always use specific error selectors in `vm.expectRevert()`
 - When adding a feature to `RuleEngineBase`, add tests for **all deployable variants**
-- Behaviour shared by the variants is tested once in an abstract base under `test/utils/` (`ERC2771TokenGateTestBase`, `ERC2771VariantTestBase`, `NoForwarderTestBase`, `RuleAggregationTestBase`), with a short per-variant file in each `test/RuleEngine*/` directory that only deploys the variant
+- Behaviour shared by the variants is tested once in an abstract base under `test/utils/` (`ERC2771TokenGateTestBase`, `ERC2771VariantTestBase`, `NoForwarderTestBase`, `RuleAggregationTestBase`, `RuleEngineInvariantTestBase`), with a short per-variant file in each `test/RuleEngine*/` directory that only deploys the variant
 - Before trusting a new test, check it can fail: break the line it guards and run the suite (the rc7 code-quality review mutation-tests the suite this way)
 
 ## RBAC Roles (RuleEngine and RuleEngine2771)

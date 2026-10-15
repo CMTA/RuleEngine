@@ -6,6 +6,10 @@ libs = ['lib']
 optimizer = true
 optimizer_runs = 200
 evm_version = 'osaka'
+# Handler-based invariant tests (test/utils/RuleEngineInvariantTestBase.sol, six deployables): 64 sequences of
+# 50 calls each keep `forge test` fast; the defaults (256 x 500) take about 5 minutes. For a deeper run:
+#   FOUNDRY_INVARIANT_RUNS=256 FOUNDRY_INVARIANT_DEPTH=500 forge test --match-contract InvariantTest
+invariant = { runs = 64, depth = 50 }
 # The vendored ERC-3643 `Token.sol` (T-REX 4.2.0-beta1) pins `pragma solidity 0.8.30` exactly, which cannot
 # share a compilation unit with solc 0.8.37. The tests that deploy the real token therefore live in their own
 # directory and are built by the `erc3643` profile below. Run them with:
