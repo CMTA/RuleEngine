@@ -8,7 +8,7 @@ import {CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.
 import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 // RuleEngineOwnable
-import {RuleEngineOwnable} from "src/deployment/RuleEngineOwnable.sol";
+import {RuleEngineOwnable} from "src/deployment/ownable/RuleEngineOwnable.sol";
 // forge-lint: disable-next-line(unused-import)
 import {RulesManagementModule} from "src/RuleEngineBase.sol";
 // forge-lint: disable-next-line(unused-import)

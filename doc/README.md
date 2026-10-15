@@ -73,7 +73,7 @@ ERC-3643 compliance specification indicates the use of ERC-173.
 
 > The standard relies on ERC-173 to define contract ownership, with the owner having the responsibility of setting the Compliance parameters and binding the Compliance to a Token contract.
 
-All deployable contracts share the same core functionality (`RuleEngineBase`, through `RuleEngineAccessControlShared` or `RuleEngineOwnableShared`) and support:
+All deployable contracts share the same core functionality (`RuleEngineBase`, extended directly by `RuleEngine` or through `RuleEngineOwnableShared`) and support:
 
 - ERC-1404 transfer restrictions
 - ERC-3643 compliance interface
@@ -397,10 +397,10 @@ Two access control mechanisms are available depending on which contract you depl
 
 #### RuleEngine and RuleEngine2771 (RBAC - AccessControlEnumerable)
 
-The `RuleEngine` and `RuleEngine2771` contracts use Role-Based Access Control (RBAC) via OpenZeppelin's `AccessControlEnumerable`, wired once in `RuleEngineAccessControlShared`. They differ only in ERC-2771 support.
+The `RuleEngine` and `RuleEngine2771` contracts use Role-Based Access Control (RBAC) via OpenZeppelin's `AccessControlEnumerable`, wired once in `RuleEngine`; `RuleEngine2771` extends it. They differ only in ERC-2771 support.
 
 Each module defines the roles useful to restrict its functions. The contract overrides the OpenZeppelin function `hasRole` to give by default all the roles to the `admin`.
-`RulesManagementModule` itself is access-control agnostic; RBAC is wired in `RuleEngineAccessControlShared`.
+`RulesManagementModule` itself is access-control agnostic; RBAC is wired in `RuleEngine`.
 Note: this `hasRole` override does not add the admin address to each role's enumerable member set. As a result, `getRoleMember` / `getRoleMemberCount` for a specific role do not include the admin unless that role is explicitly granted.
 
 See also [docs.openzeppelin.com - AccessControlEnumerable](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControlEnumerable)
@@ -447,7 +447,7 @@ contract advertises exactly the same set as its counterpart without a forwarder 
 `test/utils/ERC2771VariantTestBase.sol`).
 
 Notes:
-- `RuleEngine` / `RuleEngine2771` advertise OpenZeppelin RBAC interfaces because they inherit `AccessControlEnumerable` (through `RuleEngineAccessControlShared`).
+- `RuleEngine` / `RuleEngine2771` advertise OpenZeppelin RBAC interfaces because `RuleEngine` inherits `AccessControlEnumerable` and `RuleEngine2771` extends `RuleEngine`.
 - `RuleEngineOwnable` / `RuleEngineOwnable2Step` intentionally do not advertise `IAccessControl`.
 - `Ownable2Step` specific interface ID is defined in `Ownable2StepInterfaceId` and includes only `pendingOwner()` and `acceptOwnership()`.
 - **Two ERC-165 conventions coexist, both on purpose.** `IRuleEngine` (`0x20c49ce7`) is CMTAT's constant and is computed **without** `IERC165.supportsInterface`; `IRule` (`0x2497d6cb`) is computed **with** it (`RuleInterfaceId` XORs in `IERC165`). Both values are the ones deployed tokens and rules already check, and both are pinned by `test/RuleEngine/IRuleInterfaceId.t.sol`: do not "fix" one to match the other.
@@ -536,22 +536,20 @@ contract's surface.
 
 ![surya_inheritance_RuleEngine](./schema/surya/surya_inheritance/surya_inheritance_RuleEngine.sol.png)
 ![surya_inheritance_RuleEngine2771](./schema/surya/surya_inheritance/surya_inheritance_RuleEngine2771.sol.png)
-![surya_inheritance_RuleEngineAccessControlShared](./schema/surya/surya_inheritance/surya_inheritance_RuleEngineAccessControlShared.sol.png)
 
 ```
 RuleEngine
-└── RuleEngineAccessControlShared (shared RBAC deployment logic)
-    ├── RuleEngineBase (core functionality)
-    ├── AccessControlEnumerable (RBAC)
-    ├── ERC3643ComplianceRolesStorage
-    └── RulesManagementModuleRolesStorage
+├── RuleEngineBase (core functionality)
+├── AccessControlEnumerable (RBAC)
+├── ERC3643ComplianceRolesStorage
+└── RulesManagementModuleRolesStorage
 
 RuleEngine2771
 ├── ERC2771ModuleStandalone (gasless support)
-└── RuleEngineAccessControlShared
+└── RuleEngine
 ```
 
-`RuleEngine` and `RuleEngine2771` differ only by ERC-2771: same constructor checks, roles, `grantRole` / `hasRole` overrides and ERC-165 answers, all held by `RuleEngineAccessControlShared`. `RuleEngine2771` adds the immutable trusted forwarder and the `_msgSender` / `_msgData` / `_contextSuffixLength` overrides.
+`RuleEngine` and `RuleEngine2771` differ only by ERC-2771: same constructor checks, roles, `grantRole` / `hasRole` overrides and ERC-165 answers, all held by `RuleEngine`. `RuleEngine2771` extends `RuleEngine` (the same pattern as `RuleEngineOwnable2771` / `RuleEngineOwnable2Step2771`) and adds the immutable trusted forwarder and the `_msgSender` / `_msgData` / `_contextSuffixLength` overrides.
 
 #### RuleEngineOwnable
 
@@ -1839,9 +1837,9 @@ The official documentation is available in the Foundry [website](https://book.ge
 forge build
 
 # Build specific contract
-forge build --contracts src/deployment/RuleEngine.sol
-forge build --contracts src/deployment/RuleEngineOwnable.sol
-forge build --contracts src/deployment/RuleEngineOwnable2Step.sol
+forge build --contracts src/deployment/accessControl/RuleEngine.sol
+forge build --contracts src/deployment/ownable/RuleEngineOwnable.sol
+forge build --contracts src/deployment/ownable/RuleEngineOwnable2Step.sol
 ```
 ### Contract size
 

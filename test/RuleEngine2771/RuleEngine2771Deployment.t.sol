@@ -8,7 +8,7 @@ import {IAccessControlEnumerable} from "@openzeppelin/contracts/access/extension
 import {MinimalForwarderMock} from "CMTAT/mocks/MinimalForwarderMock.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
-import {RuleEngine2771} from "src/deployment/RuleEngine2771.sol";
+import {RuleEngine2771} from "src/deployment/accessControl/RuleEngine2771.sol";
 import {ComplianceInterfaceId} from "src/modules/library/ComplianceInterfaceId.sol";
 import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
 import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";

@@ -8,7 +8,7 @@ import {Script, console} from "forge-std/Script.sol";
 import {ICMTATConstructor, CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.sol";
 import {IERC1643CMTAT} from "CMTAT/interfaces/tokenization/draft-IERC1643CMTAT.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
-import {RuleEngine} from "../src/deployment/RuleEngine.sol";
+import {RuleEngine} from "../src/deployment/accessControl/RuleEngine.sol";
 import {RuleWhitelistMock} from "../src/mocks/rules/validation/RuleWhitelistMock.sol";
 
 /**

@@ -61,8 +61,8 @@ RuleEngineBase (abstract)              — core logic, shared by all variants
 │   └── TokenBindingExtendedModule     — batch binding, token self-binding
 └── IRuleEngineERC1404                 — CMTAT interface
 
-RuleEngine               = RuleEngineAccessControlShared (RuleEngineBase + AccessControlEnumerable)
-RuleEngine2771           = RuleEngineAccessControlShared + ERC2771ModuleStandalone
+RuleEngine                 = RuleEngineBase          + AccessControlEnumerable
+RuleEngine2771             = RuleEngine              + ERC2771ModuleStandalone
 RuleEngineOwnable          = RuleEngineOwnableShared + Ownable
 RuleEngineOwnable2771      = RuleEngineOwnable       + ERC2771ModuleStandalone
 RuleEngineOwnable2Step     = RuleEngineOwnableShared + Ownable2Step
@@ -78,15 +78,16 @@ Modules declare access control as **virtual internal hooks** (`_onlyRulesManager
 ```
 src/
 ├── RuleEngineBase.sol              # abstract core logic (not deployable)
-├── RuleEngineAccessControlShared.sol # shared logic for the two RBAC variants
 ├── RuleEngineOwnableShared.sol     # shared logic for the two ownable variants
-├── deployment/                     # the six deployable contracts
-│   ├── RuleEngine.sol
-│   ├── RuleEngine2771.sol
-│   ├── RuleEngineOwnable.sol
-│   ├── RuleEngineOwnable2771.sol
-│   ├── RuleEngineOwnable2Step.sol
-│   └── RuleEngineOwnable2Step2771.sol
+├── deployment/                     # the six deployable contracts, one directory per access-control model
+│   ├── accessControl/              # RBAC (AccessControlEnumerable)
+│   │   ├── RuleEngine.sol
+│   │   └── RuleEngine2771.sol
+│   └── ownable/                    # ERC-173 (Ownable / Ownable2Step)
+│       ├── RuleEngineOwnable.sol
+│       ├── RuleEngineOwnable2771.sol
+│       ├── RuleEngineOwnable2Step.sol
+│       └── RuleEngineOwnable2Step2771.sol
 ├── interfaces/                     # IRule, IRulesManagementModule, ITokenBinding(Extended),
 │                                   # IERC3643Compliance(Extended)
 ├── modules/                        # VersionModule, RulesManagementModule, TokenBinding(Extended)Module,

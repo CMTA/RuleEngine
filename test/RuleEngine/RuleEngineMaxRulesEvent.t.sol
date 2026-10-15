@@ -2,12 +2,12 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {RuleEngine} from "src/deployment/RuleEngine.sol";
-import {RuleEngine2771} from "src/deployment/RuleEngine2771.sol";
-import {RuleEngineOwnable} from "src/deployment/RuleEngineOwnable.sol";
-import {RuleEngineOwnable2771} from "src/deployment/RuleEngineOwnable2771.sol";
-import {RuleEngineOwnable2Step} from "src/deployment/RuleEngineOwnable2Step.sol";
-import {RuleEngineOwnable2Step2771} from "src/deployment/RuleEngineOwnable2Step2771.sol";
+import {RuleEngine} from "src/deployment/accessControl/RuleEngine.sol";
+import {RuleEngine2771} from "src/deployment/accessControl/RuleEngine2771.sol";
+import {RuleEngineOwnable} from "src/deployment/ownable/RuleEngineOwnable.sol";
+import {RuleEngineOwnable2771} from "src/deployment/ownable/RuleEngineOwnable2771.sol";
+import {RuleEngineOwnable2Step} from "src/deployment/ownable/RuleEngineOwnable2Step.sol";
+import {RuleEngineOwnable2Step2771} from "src/deployment/ownable/RuleEngineOwnable2Step2771.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 
 /**

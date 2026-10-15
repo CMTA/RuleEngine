@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./deployment/RuleEngine2771.sol | 0881ac33e13728ec8c5bc36bf76415d343c26d80 |
+| ./deployment/accessControl/RuleEngine2771.sol | 4aecab6173fb0c2ba8bcdcf380433d39fed59124 |
 
 
 ### Contracts Description Table
@@ -15,8 +15,8 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleEngine2771** | Implementation | ERC2771ModuleStandalone, RuleEngineAccessControlShared |||
-| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771ModuleStandalone RuleEngineAccessControlShared |
+| **RuleEngine2771** | Implementation | ERC2771ModuleStandalone, RuleEngine |||
+| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771ModuleStandalone RuleEngine |
 | └ | _msgSender | Internal 🔒 |   | |
 | └ | _msgData | Internal 🔒 |   | |
 | └ | _contextSuffixLength | Internal 🔒 |   | |

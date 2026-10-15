@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {RuleEngine} from "src/deployment/RuleEngine.sol";
+import {RuleEngine} from "src/deployment/accessControl/RuleEngine.sol";
 import {ERC3643TokenMock} from "src/mocks/ERC3643TokenMock.sol";
 import {RuleWhitelistMock} from "src/mocks/rules/validation/RuleWhitelistMock.sol";
 import {RuleMintAllowanceMock} from "src/mocks/rules/operation/RuleMintAllowanceMock.sol";

@@ -5,7 +5,7 @@
 pragma solidity ^0.8.27;
 
 import {Script, console} from "forge-std/Script.sol";
-import {RuleEngine} from "../src/deployment/RuleEngine.sol";
+import {RuleEngine} from "../src/deployment/accessControl/RuleEngine.sol";
 import {RuleWhitelistMock} from "../src/mocks/rules/validation/RuleWhitelistMock.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {

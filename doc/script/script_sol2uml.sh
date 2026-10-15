@@ -14,9 +14,9 @@ mkdir -p "$DIR_OUT"
 
 # "<image name>|<source file>|<contract name>"
 DIAGRAMS=(
-    "RuleEngineUML|src/deployment/RuleEngine.sol|RuleEngine"
-    "RuleEngineOwnableUML|src/deployment/RuleEngineOwnable.sol|RuleEngineOwnable"
-    "RuleEngineOwnable2StepUML|src/deployment/RuleEngineOwnable2Step.sol|RuleEngineOwnable2Step"
+    "RuleEngineUML|src/deployment/accessControl/RuleEngine.sol|RuleEngine"
+    "RuleEngineOwnableUML|src/deployment/ownable/RuleEngineOwnable.sol|RuleEngineOwnable"
+    "RuleEngineOwnable2StepUML|src/deployment/ownable/RuleEngineOwnable2Step.sol|RuleEngineOwnable2Step"
     "RuleEngineBaseUML|src/RuleEngineBase.sol|RuleEngineBase"
     "VersionModuleUML|src/modules/VersionModule.sol|VersionModule"
     "RuleManagementModuleUML|src/modules/RulesManagementModule.sol|RulesManagementModule"

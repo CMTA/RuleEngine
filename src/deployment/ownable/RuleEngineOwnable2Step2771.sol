@@ -5,26 +5,26 @@ pragma solidity ^0.8.27;
 /* ==== OpenZeppelin === */
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 /* ==== Modules === */
-import {ERC2771ModuleStandalone, ERC2771Context} from "../modules/ERC2771ModuleStandalone.sol";
+import {ERC2771ModuleStandalone, ERC2771Context} from "../../modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */
-import {RuleEngineAccessControlShared} from "../RuleEngineAccessControlShared.sol";
+import {RuleEngineOwnable2Step} from "./RuleEngineOwnable2Step.sol";
 
 /**
- * @title Implementation of a ruleEngine as defined by the CMTAT, with RBAC access control and ERC-2771
- * @dev Administrative calls may be relayed by the immutable trusted forwarder (gasless transactions).
- * Token identity is never resolved through the forwarder: the bound-token gate and token self-binding
- * compare the raw `msg.sender`.
+ * @title Implementation of a ruleEngine with ERC-173 Ownable2Step access control and ERC-2771
+ * @dev {RuleEngineOwnable2Step} plus an immutable trusted forwarder: administrative calls (owner-only functions) may be
+ * relayed by the forwarder (gasless transactions). Token identity is never resolved through the
+ * forwarder: the bound-token gate and token self-binding compare the raw `msg.sender`.
  */
-contract RuleEngine2771 is ERC2771ModuleStandalone, RuleEngineAccessControlShared {
+contract RuleEngineOwnable2Step2771 is ERC2771ModuleStandalone, RuleEngineOwnable2Step {
     /**
-     * @notice Deploys the RBAC RuleEngine with a trusted forwarder.
-     * @param admin Address receiving `DEFAULT_ADMIN_ROLE`; must not be the zero address.
+     * @notice Deploys a RuleEngine with ERC-173 Ownable2Step access control and a trusted forwarder.
+     * @param owner_ Address of the initial contract owner (ERC-173).
      * @param forwarderIrrevocable Address of the trusted ERC-2771 forwarder, immutable after construction.
      * @param tokenContract Token to bind at deployment, or the zero address to bind none.
      */
-    constructor(address admin, address forwarderIrrevocable, address tokenContract)
+    constructor(address owner_, address forwarderIrrevocable, address tokenContract)
         ERC2771ModuleStandalone(forwarderIrrevocable)
-        RuleEngineAccessControlShared(admin, tokenContract)
+        RuleEngineOwnable2Step(owner_, tokenContract)
     {}
 
     /*//////////////////////////////////////////////////////////////

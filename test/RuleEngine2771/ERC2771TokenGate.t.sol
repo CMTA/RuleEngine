@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {RuleEngine2771} from "src/deployment/RuleEngine2771.sol";
+import {RuleEngine2771} from "src/deployment/accessControl/RuleEngine2771.sol";
 import {ERC2771TokenGateTestBase} from "../utils/ERC2771TokenGateTestBase.sol";
 
 /**

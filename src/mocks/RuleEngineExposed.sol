@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.27;
 
-import {RuleEngine2771} from "../deployment/RuleEngine2771.sol";
-import {RuleEngineOwnable2771} from "../deployment/RuleEngineOwnable2771.sol";
-import {RuleEngineOwnable2Step2771} from "../deployment/RuleEngineOwnable2Step2771.sol";
+import {RuleEngine2771} from "../deployment/accessControl/RuleEngine2771.sol";
+import {RuleEngineOwnable2771} from "../deployment/ownable/RuleEngineOwnable2771.sol";
+import {RuleEngineOwnable2Step2771} from "../deployment/ownable/RuleEngineOwnable2Step2771.sol";
 
 /**
  * @title RuleEngine2771Exposed

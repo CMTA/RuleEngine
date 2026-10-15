@@ -5,8 +5,8 @@ pragma solidity ^0.8.27;
 /* ==== OpenZeppelin === */
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {RuleEngineOwnableShared} from "../RuleEngineOwnableShared.sol";
-import {Ownable2StepInterfaceId} from "../modules/library/Ownable2StepInterfaceId.sol";
+import {RuleEngineOwnableShared} from "../../RuleEngineOwnableShared.sol";
+import {Ownable2StepInterfaceId} from "../../modules/library/Ownable2StepInterfaceId.sol";
 
 /**
  * @title Implementation of a ruleEngine with ERC-173 Ownable2Step access control

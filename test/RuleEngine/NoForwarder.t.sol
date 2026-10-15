@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {RuleEngine} from "src/deployment/RuleEngine.sol";
+import {RuleEngine} from "src/deployment/accessControl/RuleEngine.sol";
 import {NoForwarderTestBase} from "../utils/NoForwarderTestBase.sol";
 
 /**

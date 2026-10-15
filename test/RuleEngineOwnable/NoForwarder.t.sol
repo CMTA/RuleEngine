@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {RuleEngineOwnable} from "src/deployment/RuleEngineOwnable.sol";
+import {RuleEngineOwnable} from "src/deployment/ownable/RuleEngineOwnable.sol";
 import {NoForwarderTestBase} from "../utils/NoForwarderTestBase.sol";
 
 /**

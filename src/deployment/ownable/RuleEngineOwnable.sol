@@ -3,7 +3,7 @@
 pragma solidity ^0.8.27;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {RuleEngineOwnableShared} from "../RuleEngineOwnableShared.sol";
+import {RuleEngineOwnableShared} from "../../RuleEngineOwnableShared.sol";
 
 /**
  * @title Implementation of a ruleEngine with ERC-173 Ownable access control

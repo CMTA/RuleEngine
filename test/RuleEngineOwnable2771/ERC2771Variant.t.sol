@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {RuleEngineOwnable} from "src/deployment/RuleEngineOwnable.sol";
-import {RuleEngineOwnable2771} from "src/deployment/RuleEngineOwnable2771.sol";
+import {RuleEngineOwnable} from "src/deployment/ownable/RuleEngineOwnable.sol";
+import {RuleEngineOwnable2771} from "src/deployment/ownable/RuleEngineOwnable2771.sol";
 import {RuleEngineOwnable2771Exposed} from "src/mocks/RuleEngineExposed.sol";
 import {ERC2771VariantTestBase} from "../utils/ERC2771VariantTestBase.sol";
 

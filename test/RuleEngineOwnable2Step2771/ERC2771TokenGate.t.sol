@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {RuleEngineOwnable2Step2771} from "src/deployment/RuleEngineOwnable2Step2771.sol";
+import {RuleEngineOwnable2Step2771} from "src/deployment/ownable/RuleEngineOwnable2Step2771.sol";
 import {ERC2771TokenGateTestBase} from "../utils/ERC2771TokenGateTestBase.sol";
 
 /**

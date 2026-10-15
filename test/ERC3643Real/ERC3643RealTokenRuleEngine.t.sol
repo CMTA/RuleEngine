@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ComplianceNotFollowed, Token, TransferNotPossible} from "ERC3643/token/Token.sol";
-import {RuleEngine} from "src/deployment/RuleEngine.sol";
+import {RuleEngine} from "src/deployment/accessControl/RuleEngine.sol";
 import {IRule} from "src/interfaces/IRule.sol";
 import {RuleWhitelistMock} from "src/mocks/rules/validation/RuleWhitelistMock.sol";
 import {TokenBindingModuleInvariantStorage} from "src/modules/library/TokenBindingModuleInvariantStorage.sol";

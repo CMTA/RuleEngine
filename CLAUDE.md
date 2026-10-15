@@ -72,7 +72,7 @@ RuleEngineOwnable2Step      — ERC-173 Ownable2Step (single-owner, two-step han
 RuleEngineOwnable2Step2771  — ERC-173 Ownable2Step + ERC-2771
 ```
 
-All six share their core logic through `RuleEngineBase`, via `RuleEngineAccessControlShared` (the two RBAC variants) or `RuleEngineOwnableShared` (the four ownable variants). Each access-control model has a version without ERC-2771 (constructor `(admin|owner_, tokenContract)`) and a `*2771` version with an immutable trusted forwarder (constructor `(admin|owner_, forwarderIrrevocable, tokenContract)`). `RuleEngineOwnable2771` / `RuleEngineOwnable2Step2771` extend `RuleEngineOwnable` / `RuleEngineOwnable2Step` and add only `ERC2771ModuleStandalone` plus the three `Context` overrides.
+All six share their core logic through `RuleEngineBase`: `RuleEngine` extends it directly with RBAC, and the four ownable variants go through `RuleEngineOwnableShared`. Each access-control model has a version without ERC-2771 (constructor `(admin|owner_, tokenContract)`) and a `*2771` version with an immutable trusted forwarder (constructor `(admin|owner_, forwarderIrrevocable, tokenContract)`). Every `X2771` extends its counterpart `X` (`RuleEngine2771 is ERC2771ModuleStandalone, RuleEngine`, and likewise for the ownable pair) and adds only `ERC2771ModuleStandalone` plus the three `Context` overrides. The deployables live in `src/deployment/accessControl/` (RBAC) and `src/deployment/ownable/` (ERC-173).
 
 ### Inheritance Hierarchy
 
@@ -93,17 +93,14 @@ RuleEngineBase (abstract)
 ├── RuleEngineInvariantStorage            → errors
 └── IRuleEngineERC1404                    → CMTAT interface
 
-RuleEngineAccessControlShared (abstract)
+RuleEngine                              → no gasless support
 ├── RuleEngineBase
 ├── AccessControlEnumerable (OZ)
 └── ERC3643ComplianceRolesStorage, RulesManagementModuleRolesStorage → roles
 
-RuleEngine
-└── RuleEngineAccessControlShared       → no gasless support
-
 RuleEngine2771
 ├── ERC2771ModuleStandalone → gasless support
-└── RuleEngineAccessControlShared
+└── RuleEngine
 
 RuleEngineOwnable
 ├── RuleEngineOwnableShared             → no gasless support
@@ -138,7 +135,7 @@ function _onlyTokenBindingManager() internal virtual;
 // wired by ERC3643ComplianceModule to its own abstract hook:
 function _onlyComplianceManager() internal virtual;
 
-// RuleEngineAccessControlShared (RuleEngine, RuleEngine2771) overrides with RBAC:
+// RuleEngine (and RuleEngine2771, which extends it) overrides with RBAC:
 function _onlyRulesManager() internal virtual override onlyRole(RULES_MANAGEMENT_ROLE) {}
 function _onlyRulesLimitManager() internal virtual override onlyRole(DEFAULT_ADMIN_ROLE) {}
 function _onlyComplianceManager() internal virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {}
@@ -149,7 +146,7 @@ function _onlyRulesLimitManager() internal virtual override onlyOwner {}
 function _onlyComplianceManager() internal virtual override onlyOwner {}
 ```
 
-**When adding a new protected function**, follow this pattern: define a virtual hook in the module, then override it in `RuleEngineAccessControlShared`, `RuleEngineOwnable`, and `RuleEngineOwnable2Step`.
+**When adding a new protected function**, follow this pattern: define a virtual hook in the module, then override it in `RuleEngine`, `RuleEngineOwnable`, and `RuleEngineOwnable2Step`.
 
 ### `_checkRule` Override Chain
 
@@ -279,14 +276,15 @@ Errors, events, and role constants are centralized in "invariant storage" abstra
 ```
 src/
 ├── deployment/
-│   ├── RuleEngine.sol             # RBAC variant, no ERC-2771 (deploy this)
-│   ├── RuleEngine2771.sol         # RBAC variant with ERC-2771 (deploy this)
-│   ├── RuleEngineOwnable.sol      # Ownable variant, no ERC-2771 (deploy this)
-│   ├── RuleEngineOwnable2771.sol  # Ownable variant with ERC-2771 (deploy this)
-│   ├── RuleEngineOwnable2Step.sol # Ownable2Step variant, no ERC-2771 (deploy this)
-│   └── RuleEngineOwnable2Step2771.sol # Ownable2Step variant with ERC-2771 (deploy this)
+│   ├── accessControl/
+│   │   ├── RuleEngine.sol         # RBAC variant, no ERC-2771 (deploy this)
+│   │   └── RuleEngine2771.sol     # RBAC variant with ERC-2771 (deploy this)
+│   └── ownable/
+│       ├── RuleEngineOwnable.sol      # Ownable variant, no ERC-2771 (deploy this)
+│       ├── RuleEngineOwnable2771.sol  # Ownable variant with ERC-2771 (deploy this)
+│       ├── RuleEngineOwnable2Step.sol # Ownable2Step variant, no ERC-2771 (deploy this)
+│       └── RuleEngineOwnable2Step2771.sol # Ownable2Step variant with ERC-2771 (deploy this)
 ├── RuleEngineBase.sol             # Abstract core logic (do not deploy)
-├── RuleEngineAccessControlShared.sol # Shared logic for the RBAC variants
 ├── RuleEngineOwnableShared.sol    # Shared logic for ownable variants
 ├── interfaces/                    # IRule, IRulesManagementModule, ITokenBinding(Extended), IERC3643Compliance(Extended)
 ├── modules/                       # VersionModule, RulesManagementModule, TokenBinding(Extended)Module,
@@ -340,7 +338,7 @@ Key points:
 2. **Rules are validated via ERC-165** before being added — they must support `IRULE_INTERFACE_ID`
 3. **No duplicate rules** — `EnumerableSet` prevents this
 4. **No zero-address rules** — checked in `_checkRule`
-5. **Admin has all roles** in `RuleEngine` and `RuleEngine2771` (the `hasRole` override in `RuleEngineAccessControlShared`)
+5. **Admin has all roles** in `RuleEngine` and `RuleEngine2771` (the `hasRole` override in `RuleEngine`, inherited by `RuleEngine2771`)
 6. **Forwarder is immutable** — set at construction, cannot be changed (the three `*2771` contracts; the others have none)
 7. **Token identity uses `msg.sender`, never `_msgSender()`** — `_checkBoundToken` (`onlyBoundToken`) and the token self-binding check in `_authorizeTokenBindingChange` compare the raw caller so the ERC-2771 forwarder cannot pass as a token; administrative checks keep `_msgSender()` (gasless admin). Pinned by `test/utils/ERC2771TokenGateTestBase.sol`
 8. **Rule contracts in `src/mocks/` are reference implementations** — they are useful for testing and examples, not as production rule contracts. Production rules live in a [separate repository](https://github.com/CMTA/Rules).
@@ -365,7 +363,7 @@ Key points:
 2. Create an invariant storage contract in `src/modules/library/` for errors/events
 3. Add a virtual access control hook (e.g., `_onlyNewManager()`)
 4. Have `RuleEngineBase` inherit the module
-5. Override the hook in `RuleEngineAccessControlShared`, `RuleEngineOwnable` and `RuleEngineOwnable2Step`
+5. Override the hook in `RuleEngine`, `RuleEngineOwnable` and `RuleEngineOwnable2Step`
 6. Add tests for all six deployables (one directory each under `test/`), preferably through a shared `test/utils/*TestBase.sol`
 
 ### Adding a new rule (mock)
@@ -377,5 +375,5 @@ Key points:
 
 ### Modifying access control
 1. Update the virtual hook in the relevant module
-2. Update overrides in `RuleEngineAccessControlShared.sol`, `RuleEngineOwnable.sol` and `RuleEngineOwnable2Step.sol`
+2. Update overrides in `RuleEngine.sol`, `RuleEngineOwnable.sol` and `RuleEngineOwnable2Step.sol`
 3. Update tests in all affected test directories

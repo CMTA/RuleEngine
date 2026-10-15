@@ -54,7 +54,7 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | C-2 | Batch self-binding approval emits the input, not the effect | ⚠️ still open — carried from rc5 |
 | C-3 | Empty batches succeed silently, while `setRules([])` reverts | ⚠️ revised — empty batches and `setRules([])` both follow a convention; the open point is `bindTokens` / `unbindTokens` reverting on an already-applied element |
 | D-1 | ERC-2771 `Context` overrides repeated per deployable | ⬜ no finding — 3 copies, one per `*2771` contract (4 before the split), compiler-mandated |
-| D-2 | The RBAC and ownable families implement the ERC-2771 split two different ways | ⚠️ decide — new in the second pass |
+| D-2 | The RBAC and ownable families implement the ERC-2771 split two different ways | ✅ fixed after the second pass — `RuleEngineAccessControlShared` folded into `RuleEngine`; deployables grouped in `accessControl/` and `ownable/` |
 | E-1 | `virtual` on every internal function | ⬜ no finding — 0 missing, including the new contracts |
 | E-2 | `if (...) revert X()` sites against the project's `require(cond, X())` convention | ⚠️ decide — 9 left (11 at the first pass) |
 | F-1 | `pragma solidity ^0.8.20` was false: the code does not compile below 0.8.27 | ✅ fixed — `^0.8.27` everywhere (`3b94564`) |
@@ -79,8 +79,8 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | K-5 | No fuzz and no invariant test | ✅ partly — 2 fuzz properties on all six deployables; invariant test proposed |
 | K-6 | `TokenSelfBindingApprovalSet` was never asserted | ✅ fixed — asserted in the three access-control models |
 
-**Counted: 33 rows — 12 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
-no-finding / verified / left as is (⬜), 9 open decisions or carried items (⚠️, `G-2` counted here).**
+**Counted: 33 rows — 13 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
+no-finding / verified / left as is (⬜), 8 open decisions or carried items (⚠️, `G-2` counted here).**
 
 ## Outstanding
 
@@ -88,7 +88,6 @@ no-finding / verified / left as is (⬜), 9 open decisions or carried items (⚠
 |----|------|----------------------|
 | E-2 | Convert the 9 remaining `if/revert` sites | Style only; the `^0.8.27` floor allows either form |
 | G-2 / G-3 | 9 comment fixes in `src/`, and the `ERC3643TokenMock` header | Comment-only, left for one `src/` commit |
-| D-2 | One pattern for the ERC-2771 split in both families | Structural; no behaviour change, product of taste |
 | H-3 | Reject a zero forwarder in the `*2771` constructors | Changes the tests that use a zero forwarder; needs a new error |
 | K-4 | Run `FOUNDRY_PROFILE=erc3643 forge test` in CI | Workflow change |
 | K-5 | Handler-based invariant test over the rule set and the binding set | Needs a design for the handler |
@@ -341,7 +340,7 @@ The `_msgSender` / `_msgData` / `_contextSuffixLength` trio now appears once in 
 down from 4 at the first pass (when `RuleEngine`, `RuleEngineOwnableShared` and both ownable deployables carried
 it). It is compiler-mandated: each contract must name its bases in `override(...)`.
 
-### D-2. The two families implement the same split two ways — decide
+### D-2. The two families implement the same split two ways — fixed
 
 | Family | Without forwarder | With forwarder |
 |---|---|---|
@@ -355,6 +354,72 @@ RuleEngine`) would let `RuleEngineAccessControlShared` be folded into `RuleEngin
 the ownable family, where the deployables hold the `Ownable` / `Ownable2Step` choice. **Verdict: decide** — a
 consistency improvement with no runtime effect; leaving it is defensible because `RuleEngineAccessControlShared`
 mirrors `RuleEngineOwnableShared` by name.
+
+**Which option is better, for duplication and readability.** Analysed after the second pass, on request.
+
+*Duplication: almost no difference.*
+
+- The three ERC-2771 overrides (`_msgSender`, `_msgData`, `_contextSuffixLength`) stay in each of the three
+  `*2771` contracts whichever way the RBAC family is built, because the compiler requires them in every contract
+  that combines `ERC2771Context` with `Context` (`D-1`).
+- The fold deletes `RuleEngineAccessControlShared.sol` (116 lines including NatSpec), but its code moves into
+  `RuleEngine`. The net saving is about 20 lines: the current 20-line `RuleEngine` wrapper and one duplicated
+  constructor parameter list. The argument for the change is readability, not duplication.
+
+*Readability: the fold is clearly better.*
+
+1. **One rule for all six deployables.** Each `X2771` would be `X` plus `ERC2771ModuleStandalone` plus the three
+   overrides. Today a reader has to learn two layouts: `RuleEngine2771` does not extend `RuleEngine`, while
+   `RuleEngineOwnable2771` extends `RuleEngineOwnable`.
+2. **The ownable shared base earns its place; the RBAC one does not.** `RuleEngineOwnableShared` holds code used
+   by two different deployables, `RuleEngineOwnable` and `RuleEngineOwnable2Step`.
+   `RuleEngineAccessControlShared` exists only so that `RuleEngine2771` can avoid inheriting `RuleEngine`. After
+   the fold it would have a single child: a layer of indirection with nothing to share.
+3. **`RuleEngine` becomes readable on its own.** Today the deployable people open first is a 20-line wrapper, and
+   the roles, the `hasRole` override and `supportsInterface` live one file away.
+4. **The inheritance chain gets one level shorter** for both RBAC contracts.
+
+*What argues for leaving it as is:*
+
+- **Naming symmetry.** `RuleEngineAccessControlShared` mirrors `RuleEngineOwnableShared`. That is the only real
+  argument, and it is cosmetic: the two names would look parallel while doing different jobs.
+- **Abstract bases versus deployables.** Some teams prefer that a deployable never inherits another deployable.
+  The ownable family already does it, so that rule does not hold in this project anyway.
+
+*Cost of the fold:*
+
+- **Code:** `src/deployment/RuleEngine.sol`, `src/deployment/RuleEngine2771.sol`, and deleting
+  `src/RuleEngineAccessControlShared.sol`. No test or script references the shared base, so
+  `RuleEngine2771Exposed` and the test suites stay as they are.
+- **Docs:** `README.md`, `doc/README.md`, `CLAUDE.md` / `AGENTS.md` (inheritance tree and the "override the hooks
+  in ..." instructions), `CHANGELOG.md`, the Surya schema, and this entry.
+- **Behaviour:** none. Constructors, ABI, ERC-165 answers and roles are unchanged; only the bytecode layout
+  changes, and the contracts are not upgradeable. The ownable family already compiles with this exact pattern,
+  so no linearization conflict is expected. **Assumed, not checked: the RBAC version has not been compiled.**
+
+**Recommendation:** fold `RuleEngineAccessControlShared` into `RuleEngine` and declare
+`RuleEngine2771 is ERC2771ModuleStandalone, RuleEngine`. Not implemented.
+
+**Implemented after the analysis.** `src/RuleEngineAccessControlShared.sol` is deleted and its content (constructor
+checks, initial `SetMaxRules`, `grantRole` rule guard, `hasRole`, `supportsInterface`, the three access-control
+hooks) now lives in `RuleEngine`, which extends `RuleEngineBase`, `AccessControlEnumerable` and the two role
+storages directly. `RuleEngine2771 is ERC2771ModuleStandalone, RuleEngine`, so all six deployables follow the same
+rule. On request, the deployables are also grouped by access-control model:
+
+```
+src/deployment/
+├── accessControl/   RuleEngine, RuleEngine2771
+└── ownable/         RuleEngineOwnable, RuleEngineOwnable2771, RuleEngineOwnable2Step, RuleEngineOwnable2Step2771
+```
+
+The abstract bases (`RuleEngineBase`, `RuleEngineOwnableShared`) stay in `src/`, since they are not deployable.
+Verified: `forge build` without conflict (the "not compiled" assumption above is now checked), full suite
+438/438, `FOUNDRY_PROFILE=erc3643 forge test` 13/13. The ERC-165 answers are pinned by `testSupportsInterfaces` and,
+for each pair, by `ERC2771VariantTestBase`. The ABIs were **not** diffed against the previous commit (the
+temporary worktree was not permitted); since the moved code is unchanged, no difference is expected. Import paths
+in the scripts, tests, mocks, `package.json`, `doc/TOOLCHAIN.md` and `doc/script/script_sol2uml.sh` are updated,
+and the Surya schema is regenerated. The coverage table in `K-2` predates the fold and still lists
+`RuleEngineAccessControlShared.sol`.
 
 ## E. `virtual` and style conventions
 

@@ -9,18 +9,17 @@ import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 /* ==== Modules === */
-import {ERC3643ComplianceRolesStorage} from "./modules/library/ERC3643ComplianceRolesStorage.sol";
-import {RulesManagementModuleRolesStorage} from "./modules/library/RulesManagementModuleRolesStorage.sol";
+import {ERC3643ComplianceRolesStorage} from "../../modules/library/ERC3643ComplianceRolesStorage.sol";
+import {RulesManagementModuleRolesStorage} from "../../modules/library/RulesManagementModuleRolesStorage.sol";
 /* ==== Base contract === */
-import {RuleEngineBase} from "./RuleEngineBase.sol";
+import {RuleEngineBase} from "../../RuleEngineBase.sol";
 
 /**
- * @title Shared RBAC deployment logic for RuleEngine variants
- * @dev Kept abstract and free of ERC-2771 so the RBAC engine can be deployed with a trusted
- * forwarder (`RuleEngine2771`) or without one (`RuleEngine`), sharing the constructor, the roles,
- * the access-control hooks and ERC-165.
+ * @title Implementation of a ruleEngine as defined by the CMTAT, with RBAC access control
+ * @dev No ERC-2771 support: every caller is the raw `msg.sender`. Deploy {RuleEngine2771}, which
+ * extends this contract, to administer the engine through a trusted forwarder (gasless transactions).
  */
-abstract contract RuleEngineAccessControlShared is
+contract RuleEngine is
     RuleEngineBase,
     AccessControlEnumerable,
     ERC3643ComplianceRolesStorage,
@@ -29,7 +28,7 @@ abstract contract RuleEngineAccessControlShared is
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /**
-     * @notice Grants the admin role and optionally binds an initial token.
+     * @notice Deploys the RBAC RuleEngine, grants the admin role and optionally binds an initial token.
      * @param admin Address receiving `DEFAULT_ADMIN_ROLE`; must not be the zero address.
      * @param tokenContract Token to bind at deployment, or the zero address to bind none.
      */
