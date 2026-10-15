@@ -2,8 +2,8 @@
 
 **Tool:** [Aderyn](https://github.com/Cyfrin/aderyn) 0.6.5
 **Report file:** `doc/security/audits/tools/v3.0.0-rc7/aderyn-report.md`
-**Assessment date:** 2026-10-15 (commit `4946c87`; re-run of the 2026-10-14 analysis at `a91ca9a`, output identical)
-**Scope:** `src/`, **mocks excluded** (`-x mocks`), 28 files analysed, 700 nSLOC, solc 0.8.37 / EVM Osaka
+**Assessment date:** 2026-10-15 (commit `850976f` + the `^0.8.27` pragma change: the final rc7 code; earlier runs at `a91ca9a` and `4946c87`)
+**Scope:** `src/`, **mocks excluded** (`-x mocks`), 32 files analysed, 707 nSLOC, solc 0.8.37 / EVM Osaka, `pragma ^0.8.27`
 
 ```bash
 aderyn -x mocks --output doc/security/audits/tools/v3.0.0-rc7/aderyn-report.md
@@ -14,15 +14,15 @@ aderyn -x mocks --output doc/security/audits/tools/v3.0.0-rc7/aderyn-report.md
 | ID | Finding | Tool Impact | Instances | Assessment | Decision |
 |----|---------|-------------|-----------|------------|----------|
 | L-1 | Centralization Risk | Low | 14 | The engine is by definition an admin-operated compliance controller | Accepted by design |
-| L-2 | Unspecific Solidity Pragma | Low | 23 | `^0.8.20` is the supported range for integrators; the build pins 0.8.37 | Accepted by design |
-| L-3 | PUSH0 Opcode | Low | 28 | EVM target is Osaka, which includes PUSH0 (since Shanghai) | Accepted by design |
+| L-2 | Unspecific Solidity Pragma | Low | 27 | The floating range is kept for integrators, but it was wrong: raised from `^0.8.20` to the real floor `^0.8.27`; the build pins 0.8.37 | **Fixed (pragma corrected)**, floating kept by design |
+| L-3 | PUSH0 Opcode | Low | 32 | EVM target is Osaka, which includes PUSH0 (since Shanghai) | Accepted by design |
 | L-4 | Modifier Invoked Only Once | Low | 1 | `onlyRulesLimitManager`, kept for symmetry with the hook pattern | Cosmetic, kept |
-| L-5 | Empty Block | Low | 9 | The three access-control hooks × three variants; the modifier does the work | Accepted by design |
+| L-5 | Empty Block | Low | 9 | The three access-control hooks × three access-control models; the modifier does the work | Accepted by design |
 | L-6 | Loop Contains `require`/`revert` | Low | 4 | Admin batch operations where fail-fast is the wanted behaviour | Accepted by design |
 | L-7 | Costly operations inside loop | Low | 4 | Admin-gated batch writes; inherent to a batch operation | Accepted by design |
 | L-8 | Unchecked Return | Low | 1 | `_grantRole` cannot return `false` in a constructor | False positive |
 
-**0 High · 8 Low (84 instances). Nothing to fix.**
+**0 High · 8 Low (92 instances). Nothing exploitable; one change made (`L-2`: pragma corrected to `^0.8.27`).**
 
 ## Scope verification
 
@@ -40,31 +40,33 @@ produced 84 such links, so it was re-run with the output inside the repository t
 
 ## Changes since v3.0.0-rc6
 
-**Same 8 findings, same 84 instances, and every `file:line` citation identical to rc6.**
+**Same 8 findings, 84 -> 92 instances.**
 
-| ID | rc6 | rc7 |
-|----|-----|-----|
-| L-1 … L-8 | 14/23/28/1/9/4/4/1 | **unchanged** |
+| ID | rc6 | rc7 | Why |
+|----|-----|-----|-----|
+| L-1 | 14 | 14 | RBAC instances moved from `RuleEngine.sol` to `RuleEngineAccessControlShared.sol` |
+| L-2 | 23 | **27** | +4 files (per-file detector) |
+| L-3 | 28 | **32** | +4 files (per-file detector) |
+| L-4 | 1 | 1 | — |
+| L-5 | 9 | 9 | RBAC hooks moved to `RuleEngineAccessControlShared.sol` |
+| L-6 / L-7 | 4 / 4 | 4 / 4 | — |
+| L-8 | 1 | 1 | Moved to `RuleEngineAccessControlShared.sol:41` |
 
-The only number that moved is nSLOC, 683 -> 700, all of it in the three interface-ID libraries:
+**Where the change comes from.** rc7 made ERC-2771 opt-in: each access-control model now has a deployable
+without a forwarder (`RuleEngine`, `RuleEngineOwnable`, `RuleEngineOwnable2Step`) and a `*2771` deployable with one,
+and the RBAC logic moved to the abstract `RuleEngineAccessControlShared`. That adds four files. The three `*2771`
+contracts contain only a constructor and the three `Context` overrides, so they appear in the two per-file
+detectors and nowhere else: no centralization, empty-block or unchecked-return instance is duplicated, because the
+hooks and the constructor are inherited, not re-declared.
 
-| File | rc6 nSLOC | rc7 nSLOC |
-|---|---|---|
-| `ComplianceInterfaceId.sol` | 6 | 13 |
-| `RuleInterfaceId.sol` | 4 | 13 |
-| `ERC1404InterfaceId.sol` | 4 | 5 |
+**nSLOC 683 -> 707.** +17 in the three interface-ID libraries: the rc6 report was generated (`dc7a4d3`, 2026-08-20
+16:09) about an hour before the rc6 commit that replaced those hardcoded constants with computed
+`type(I).interfaceId` XOR expressions (`bdd59fd`, 17:22), so rc7 is the first run on their final form. +7 from the
+deployable split.
 
-This is not an rc7 code change. The rc6 report was generated (`dc7a4d3`, 2026-08-20 16:09) about an hour before
-the rc6 commit that replaced those hardcoded constants with computed `type(I).interfaceId` XOR expressions
-(`bdd59fd`, 17:22). So rc7 is the first Aderyn run on their final form, which multiplies their line count but
-adds no finding. Under `src/`, rc7 itself changes the `VERSION` string, a `forge fmt` re-wrap of two of
-those expressions, and the ERC-2771 token-identity fix (`4946c87`).
-
-**Re-run after the ERC-2771 fix:** the report was first generated at `a91ca9a` (2026-10-14), then re-run at
-`4946c87` (2026-10-15) with the same command; the tool output is identical. The fix replaces `_msgSender()` with
-`msg.sender` in place (`TokenBindingModule.sol:149`, `TokenBindingExtendedModule.sol:99`) and adds NatSpec, which
-does not count toward nSLOC. Every line it shifts lies below the existing citations (the last one in those files
-is `TokenBindingExtendedModule.sol:65`), so nSLOC stays 700 and every `file:line` is unchanged.
+**Runs:** `a91ca9a` (2026-10-14) and `4946c87` (2026-10-15) gave 84 instances on the pre-split code; this final run
+is on the six-deployable code with the corrected pragma. The ERC-2771 token-identity fix (`4946c87`) replaced
+`_msgSender()` with `msg.sender` in place and produced no finding.
 
 The build changes (solc 0.8.37, EVM Osaka, CMTAT v3.3.0-rc4, forge-std v1.17.0) produced nothing either.
 
@@ -72,7 +74,8 @@ The build changes (solc 0.8.37, EVM Osaka, CMTAT v3.3.0-rc4, forge-std v1.17.0) 
 
 ### L-1: Centralization Risk (14 instances)
 
-Flags the `onlyRole` / `onlyOwner` privileged functions across the three deployable variants.
+Flags the `onlyRole` / `onlyOwner` privileged functions: the RBAC ones in `RuleEngineAccessControlShared` and the
+ownable ones in `RuleEngineOwnable` / `RuleEngineOwnable2Step`. The `*2771` deployables inherit them and add none.
 
 The RuleEngine is a compliance controller: an operator must be able to add and remove rules and bind tokens, or
 the contract has no purpose. The project deliberately ships three access-control shapes — RBAC (`RuleEngine`),
@@ -82,20 +85,35 @@ compliance contract.
 
 **Decision: accepted by design.**
 
-### L-2: Unspecific Solidity Pragma (23 instances)
+### L-2: Unspecific Solidity Pragma (27 instances) — pragma corrected
 
-Every `src/` file declares `pragma solidity ^0.8.20;`.
+Every `src/` file declared `pragma solidity ^0.8.20;`, now **`^0.8.27`**.
 
 The caret is intentional: these contracts are consumed as a library by integrators compiling against their own
 toolchain, and pinning an exact version would force their whole project onto it. The *build* is deterministic
 regardless — `foundry.toml` pins `solc = "0.8.37"`.
 
-This matters slightly more now that `TokenBindingModule` is explicitly offered for reuse in other projects: the
-permissive pragma is what lets it compile inside a consumer's build.
+**But the range was wrong.** Up to this run, this triage accepted the caret because "`^0.8.20` is the supported
+range". The rc7 code-quality review (`CLAUDE_ANALYSIS.md`, `F-1`) built the production contracts with older
+compilers and showed it is not:
 
-**Decision: accepted by design.**
+| solc | Result with `^0.8.20` |
+|---|---|
+| 0.8.20 | fails: CMTAT's interface-ID libraries require `^0.8.24` |
+| 0.8.24 | fails: `Error (9322)`, no `require(bool, error)` overload |
+| 0.8.26 | fails: "Require with a custom error is only available using the via-ir pipeline" |
+| 0.8.27 | compiles |
 
-### L-3: PUSH0 Opcode (28 instances)
+The code uses `require(cond, CustomError())`, available on the legacy pipeline from 0.8.27 only, and so does
+`TokenBindingModule`, which is offered for reuse in other projects. **Fix applied:** every file under `src/` and
+`script/` now declares `^0.8.27`, the real floor. A consumer on 0.8.26 now gets a clear "no matching version" error
+from the pragma instead of a compile error deep in a `require`. Checked: `forge build --use 0.8.27` succeeds, 0.8.26
+is rejected by the pragma, and the full suite (default profile on 0.8.37, `erc3643` profile on 0.8.30, Hardhat)
+passes. The count rose 23 -> 27 with the four new files, unrelated to the fix.
+
+**Decision: floating pragma accepted by design; its range corrected to `^0.8.27`.**
+
+### L-3: PUSH0 Opcode (32 instances)
 
 `foundry.toml` sets `evm_version = 'osaka'` (Prague up to rc6). PUSH0 has been available since Shanghai, so its presence is
 expected for the declared target. A chain that has not adopted Shanghai must recompile with a lower
@@ -113,7 +131,8 @@ wrapped in an `onlyX` modifier, so each deployable variant can override the auth
 
 ### L-5: Empty Block (9 instances)
 
-All nine are the same three hooks across the three deployable contracts:
+All nine are the same three hooks, declared once per access-control model (`RuleEngineAccessControlShared`,
+`RuleEngineOwnable`, `RuleEngineOwnable2Step`; the `*2771` deployables inherit them):
 
 ```solidity
 function _onlyComplianceManager() internal virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {}
@@ -149,7 +168,7 @@ Recorded as `A-3` in the rc5 `CLAUDE_ANALYSIS.md`, where the same conclusion was
 
 ### L-8: Unchecked Return (1 instance) — false positive
 
-`RuleEngine.sol:46`:
+`RuleEngineAccessControlShared.sol:41` (moved from `RuleEngine.sol` by the rc7 RBAC split):
 
 ```solidity
 _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -163,7 +182,8 @@ value is invariably `true`. Checking it would add a branch that can never be tak
 
 ## Conclusion
 
-**No actionable security fixes are required from this Aderyn run.** Seven findings are by-design consequences of
-what the RuleEngine is — an admin-operated, rule-iterating compliance controller distributed as a library — one
-is a deliberately kept cosmetic, and one (`L-8`) is a verified false positive. No finding is exploitable, and
-rc7 introduced none.
+**No security fix is required from this Aderyn run.** Six findings are by-design consequences of what the
+RuleEngine is — an admin-operated, rule-iterating compliance controller distributed as a library — one (`L-4`) is a
+deliberately kept cosmetic, and one (`L-8`) is a verified false positive. No finding is exploitable, and rc7
+introduced none. One improvement was made: `L-2`'s accepted range was false, so the pragma now states the real
+floor, `^0.8.27`.

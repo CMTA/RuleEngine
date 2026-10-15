@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/ICompliance.sol | d60ed00e5ca3214d76ec4a3611920400a135368e |
+| ./mocks/ICompliance.sol | 9a38bb55b45e91f8b7ac9018491a1d6d6a5214a2 |
 
 
 ### Contracts Description Table

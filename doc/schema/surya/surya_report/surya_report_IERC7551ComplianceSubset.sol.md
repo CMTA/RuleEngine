@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/IERC7551ComplianceSubset.sol | 25d02e6850beac18aa40340a7e9617ff39bbe64a |
+| ./mocks/IERC7551ComplianceSubset.sol | 675cf7bf59b680c52775104404d2a9618f16ddd7 |
 
 
 ### Contracts Description Table

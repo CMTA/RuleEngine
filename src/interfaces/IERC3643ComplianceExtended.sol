@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 import {IERC3643Compliance} from "./IERC3643Compliance.sol";
 import {ITokenBindingExtended} from "./ITokenBindingExtended.sol";

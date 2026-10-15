@@ -2,8 +2,8 @@
 
 **Tool:** [Slither](https://github.com/crytic/slither) 0.11.5 (run with `uvx --python 3.12 --from slither-analyzer==0.11.5`)
 **Report file:** `doc/security/audits/tools/v3.0.0-rc7/slither-report.md`
-**Assessment date:** 2026-10-15 (commit `4946c87`; re-run of the 2026-10-14 analysis at `a91ca9a`, output identical)
-**Scope:** `src/`, **mocks excluded**, 108 contracts analysed, solc 0.8.37 / EVM Osaka
+**Assessment date:** 2026-10-15 (commit `850976f` + the `^0.8.27` pragma change: the final rc7 code; earlier runs at `a91ca9a` and `4946c87` gave the same findings)
+**Scope:** `src/`, **mocks excluded**, 112 contracts analysed, solc 0.8.37 / EVM Osaka, `pragma ^0.8.27`
 
 ```bash
 slither . --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" \
@@ -37,19 +37,25 @@ compiler never pulls it in — confirmed by the zero `lib/` count above. Worth r
 
 ## Changes since v3.0.0-rc6
 
-**None.** Same two detectors, same 10 + 2 instances, and a line-by-line comparison of the two reports finds every
-citation (contract, function, `file:line`) identical.
+**None in findings.** Same two detectors, same 10 + 2 instances, in the same functions: the two
+`RulesManagementModule._transferred` overloads, the three `RuleEngineBase` view loops, and the two `ITokenBinding`
+events.
 
-That is the expected outcome, and it is worth recording why. Under `src/`, rc7 changes only:
+That holds although rc7 changed `src/` substantially, and it is worth recording why:
 
-- `VersionModule.VERSION` (`"3.0.0"` -> `"3.0.0-rc7"`), a string constant no detector looks at;
-- a `forge fmt` re-wrap of the `RuleInterfaceId` and `ComplianceInterfaceId` constants (line breaks only);
-- the ERC-2771 token-identity fix (`4946c87`): `TokenBindingModule._checkBoundToken` and the token self-binding
-  check in `TokenBindingExtendedModule._authorizeTokenBindingChange` compare `msg.sender` instead of
-  `_msgSender()`, plus NatSpec. Neither function contains a loop or an event, so no detector is concerned.
+- **ERC-2771 token-identity fix** (`4946c87`): `_checkBoundToken` and the token self-binding check compare
+  `msg.sender`. Neither function contains a loop or an event.
+- **ERC-2771 made opt-in, six deployables** (`a183425`, `850976f`): `RuleEngine`, `RuleEngineOwnable` and
+  `RuleEngineOwnable2Step` lost the forwarder; `RuleEngine2771`, `RuleEngineOwnable2771` and
+  `RuleEngineOwnable2Step2771` carry it; the RBAC logic moved to the abstract `RuleEngineAccessControlShared`. These
+  are constructors, access-control hooks and `Context` overrides: no external call in a loop, no new event. The
+  contract count rose 108 -> 112 (three deployables and the shared base) with no new result.
+- **Pragma `^0.8.20` -> `^0.8.27`**, following the Aderyn `L-2` triage (see its feedback). No Slither detector
+  depends on it; the output is identical before and after.
+- `VERSION` string, `forge fmt` re-wrap of two interface-ID constants.
 
-**Re-run:** the report was first generated at `a91ca9a` (2026-10-14), before the fix, then re-run at `4946c87`
-(2026-10-15) with the same command. The two outputs are byte-identical.
+**Runs:** `a91ca9a` (2026-10-14), `4946c87` and this final run (2026-10-15). Same 12 findings each time; only
+`file:line` positions moved with the edited files.
 
 The rest of rc7 is build and dependency changes: solc 0.8.36 -> **0.8.37**, EVM Prague -> **Osaka**, CMTAT
 v3.3.0-rc4 (NatSpec-only change to `IRuleEngine`), forge-std v1.17.0, and T-REX 4.2.0-beta1 in `lib/ERC-3643`.

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/IOwnable2StepSubset.sol | 2c0b4a4eccfda2aa49f81039a5f5ae8f826dbe50 |
+| ./mocks/IOwnable2StepSubset.sol | cc0b916aba040644eba928510e510d206acc2d9c |
 
 
 ### Contracts Description Table

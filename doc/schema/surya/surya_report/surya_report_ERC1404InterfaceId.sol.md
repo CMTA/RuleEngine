@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/library/ERC1404InterfaceId.sol | a33a85519a39a7dc75bd9ed7bcb88a51ec6dd4b5 |
+| ./modules/library/ERC1404InterfaceId.sol | fcdd6b316e5a554c19350fd56f9b2641b4cace64 |
 
 
 ### Contracts Description Table

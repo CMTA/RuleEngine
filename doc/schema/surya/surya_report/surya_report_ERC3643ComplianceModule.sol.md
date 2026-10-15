@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/ERC3643ComplianceModule.sol | 85c740155a17502a2f306f82eaa7335e186dc40a |
+| ./modules/ERC3643ComplianceModule.sol | 3a9fc24fec26903c3b51a85045bdceee25795d62 |
 
 
 ### Contracts Description Table

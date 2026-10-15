@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/library/RuleInterfaceId.sol | 65c302818900904547afb065eb4fb5fb6a13d5af |
+| ./modules/library/RuleInterfaceId.sol | 5c530212c908dcfea10249fada44f4e52627ae2a |
 
 
 ### Contracts Description Table

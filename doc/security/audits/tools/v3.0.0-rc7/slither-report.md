@@ -4,10 +4,10 @@
 |---|---|
 | **Tool** | Slither 0.11.5 (run with `uvx --python 3.12 --from slither-analyzer==0.11.5`) |
 | **Scope** | `src/`, **mocks excluded** |
-| **Compiler** | solc 0.8.37, EVM Osaka |
-| **Contracts analysed** | 108 |
-| **Date** | 2026-10-15 (re-run; first run 2026-10-14 at `a91ca9a`) |
-| **Commit** | `4946c87` |
+| **Compiler** | solc 0.8.37, EVM Osaka, `pragma solidity ^0.8.27` |
+| **Contracts analysed** | 112 |
+| **Date** | 2026-10-15 |
+| **Commit** | `850976f` + the `^0.8.27` pragma change (final rc7 code: six deployables) |
 
 ```bash
 slither . --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" \
@@ -24,19 +24,17 @@ slither . --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-st
 **Scope verified:** `grep -c 'lib/\|node_modules/'` = **0** and `grep -c 'src/mocks/'` = **0** in this report, so
 no vendored dependency or mock contract entered the analysis.
 
-**Delta from v3.0.0-rc6: none.** Same two detectors, same 10 + 2 instances, and every citation (contract,
-function, `file:line`) is identical to rc6. The `src/` changes since rc6 are the `VERSION` string, a
-`forge fmt` re-wrap of two interface-ID constants and the ERC-2771 token-identity fix (`msg.sender` in
-`_checkBoundToken` and the self-binding check). The build changes (solc 0.8.36 -> 0.8.37, EVM Prague -> Osaka,
-CMTAT v3.3.0-rc4, forge-std v1.17.0) produced no finding.
-
-**Re-run after the ERC-2771 fix (`4946c87`): output byte-identical** to the first rc7 run at `a91ca9a`.
+**Delta from v3.0.0-rc6: none in findings.** Same two detectors, same 10 + 2 instances, in the same functions
+(`RulesManagementModule._transferred`, `RuleEngineBase` view loops, `ITokenBinding` events). rc7 changed `src/`
+substantially (the ERC-2771 token-identity fix, ERC-2771 made opt-in with six deployables, the shared
+`RuleEngineAccessControlShared` base, the `^0.8.27` pragma), but none of it touches a looped external call or an
+event: the contract count rose 108 -> 112 (the three `*2771` deployables and the shared base) with no new result.
+The report was run three times during rc7 (`a91ca9a`, `4946c87`, this final run) with the same 12 findings.
 
 Triage and per-finding reasoning: [slither-report-feedback.md](./slither-report-feedback.md).
 Overview of all analyses: [AUDIT_OVERVIEW.md](../../AUDIT_OVERVIEW.md).
 
 ---
-
 **THIS CHECKLIST IS NOT COMPLETE**. Use `--show-ignored-findings` to show all the results.
 Summary
  - [calls-loop](#calls-loop) (10 results) (Low)

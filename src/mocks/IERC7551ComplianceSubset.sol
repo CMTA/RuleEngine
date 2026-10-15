@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 /**
  * @dev Test-only subset interface used to validate the advertised ERC-165 ID.

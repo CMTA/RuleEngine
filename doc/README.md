@@ -532,7 +532,11 @@ contract's surface.
 #### RuleEngine
 ![RuleEngineUML](./schema/sol2uml/RuleEngineUML.png)
 
-> The UML above predates the v3.0.0-rc7 split: it shows the RBAC engine with ERC-2771, which is now `RuleEngine2771`.
+> The UML above predates the v3.0.0-rc7 split: it shows the RBAC engine with ERC-2771, which is now `RuleEngine2771`. The Surya inheritance graphs below are current.
+
+![surya_inheritance_RuleEngine](./schema/surya/surya_inheritance/surya_inheritance_RuleEngine.sol.png)
+![surya_inheritance_RuleEngine2771](./schema/surya/surya_inheritance/surya_inheritance_RuleEngine2771.sol.png)
+![surya_inheritance_RuleEngineAccessControlShared](./schema/surya/surya_inheritance/surya_inheritance_RuleEngineAccessControlShared.sol.png)
 
 ```
 RuleEngine
@@ -555,7 +559,11 @@ RuleEngine2771
 
 `RuleEngineOwnable` shares the same base functionality as `RuleEngine` but uses ERC-173 ownership instead of RBAC.
 
-> The UML above predates the v3.0.0-rc7 split: it shows the ownable engine with ERC-2771, which is now `RuleEngineOwnable2771`.
+> The UML above predates the v3.0.0-rc7 split: it shows the ownable engine with ERC-2771, which is now `RuleEngineOwnable2771`. The Surya inheritance graphs below are current.
+
+![surya_inheritance_RuleEngineOwnable](./schema/surya/surya_inheritance/surya_inheritance_RuleEngineOwnable.sol.png)
+![surya_inheritance_RuleEngineOwnable2771](./schema/surya/surya_inheritance/surya_inheritance_RuleEngineOwnable2771.sol.png)
+![surya_inheritance_RuleEngineOwnableShared](./schema/surya/surya_inheritance/surya_inheritance_RuleEngineOwnableShared.sol.png)
 
 ```
 RuleEngineOwnable
@@ -585,7 +593,10 @@ RuleEngineOwnable2771
 
 `RuleEngineOwnable2Step` shares the same base functionality as `RuleEngineOwnable` but uses OpenZeppelin's `Ownable2Step` for safer ownership handover.
 
-> The UML above predates the v3.0.0-rc7 split: it shows the two-step engine with ERC-2771, which is now `RuleEngineOwnable2Step2771`.
+> The UML above predates the v3.0.0-rc7 split: it shows the two-step engine with ERC-2771, which is now `RuleEngineOwnable2Step2771`. The Surya inheritance graphs below are current.
+
+![surya_inheritance_RuleEngineOwnable2Step](./schema/surya/surya_inheritance/surya_inheritance_RuleEngineOwnable2Step.sol.png)
+![surya_inheritance_RuleEngineOwnable2Step2771](./schema/surya/surya_inheritance/surya_inheritance_RuleEngineOwnable2Step2771.sol.png)
 
 ```
 RuleEngineOwnable2Step
@@ -618,9 +629,11 @@ Each ownable `*2771` contract is its counterpart plus the immutable trusted forw
 
 ### Graph
 
-Here is the surya graph of the main contract:
+Here is the surya graph of `RuleEngineBase`, which holds the logic shared by the six deployables (each deployable
+only adds its constructor, access-control hooks and, for the `*2771` contracts, the ERC-2771 overrides; their own
+graphs are in [doc/schema/surya/surya_graph](./schema/surya/surya_graph/)):
 
-![surya_graph_RuleEngine](./schema/surya/surya_graph/surya_graph_RuleEngine.sol.png)
+![surya_graph_RuleEngineBase](./schema/surya/surya_graph/surya_graph_RuleEngineBase.sol.png)
 
 ## Functionality
 
@@ -817,21 +830,25 @@ constructor(
 #### Contracts Description Table
 
 
-|      Contract      |             Type              |                            Bases                             |                |                |
-| :----------------: | :---------------------------: | :----------------------------------------------------------: | :------------: | :------------: |
-|         └          |       **Function Name**       |                        **Visibility**                        | **Mutability** | **Modifiers**  |
-|                    |                               |                                                              |                |                |
-| **RuleEngineBase** |        Implementation         | VersionModule, RulesManagementModule, ERC3643ComplianceExtendedModule, RuleEngineInvariantStorage, IRuleEngine |                |                |
-|         └          |          transferred          |                           Public ❗️                           |       🛑        | onlyBoundToken |
-|         └          |          transferred          |                           Public ❗️                           |       🛑        | onlyBoundToken |
-|         └          |            created            |                           Public ❗️                           |       🛑        | onlyBoundToken |
-|         └          |           destroyed           |                           Public ❗️                           |       🛑        | onlyBoundToken |
-|         └          |   detectTransferRestriction   |                           Public ❗️                           |                |      NO❗️       |
-|         └          | detectTransferRestrictionFrom |                           Public ❗️                           |                |      NO❗️       |
-|         └          |          canTransfer          |                           Public ❗️                           |                |      NO❗️       |
-|         └          |        canTransferFrom        |                           Public ❗️                           |                |      NO❗️       |
-|         └          | messageForTransferRestriction |                           Public ❗️                           |                |      NO❗️       |
-|         └          |            hasRole            |                           Public ❗️                           |                |      NO❗️       |
+|  Contract  |         Type        |       Bases      |                  |                 |
+|:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
+|     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
+||||||
+| **RuleEngineBase** | Implementation | VersionModule, RulesManagementModule, ERC3643ComplianceExtendedModule, RuleEngineInvariantStorage, IRuleEngineERC1404 |||
+| └ | transferred | Public ❗️ | 🛑  | onlyBoundToken |
+| └ | transferred | Public ❗️ | 🛑  | onlyBoundToken |
+| └ | created | Public ❗️ | 🛑  | onlyBoundToken |
+| └ | destroyed | Public ❗️ | 🛑  | onlyBoundToken |
+| └ | detectTransferRestriction | Public ❗️ |   |NO❗️ |
+| └ | detectTransferRestrictionFrom | Public ❗️ |   |NO❗️ |
+| └ | messageForTransferRestriction | Public ❗️ |   |NO❗️ |
+| └ | canTransfer | Public ❗️ |   |NO❗️ |
+| └ | canTransferFrom | Public ❗️ |   |NO❗️ |
+| └ | _detectTransferRestriction | Internal 🔒 |   | |
+| └ | _detectTransferRestrictionFrom | Internal 🔒 |   | |
+| └ | _messageForTransferRestriction | Internal 🔒 |   | |
+| └ | _checkRule | Internal 🔒 |   | |
+| └ | _supportsRuleEngineBaseInterface | Internal 🔒 |   | |
 
 
 ##### Legend
@@ -1132,12 +1149,12 @@ This is an extension of {ERC-1404} with an additional `spender` parameter to enf
 #### Contracts Description Table
 
 
-|     Contract      |       Type        |     Bases      |                |               |
-| :---------------: | :---------------: | :------------: | :------------: | :-----------: |
-|         └         | **Function Name** | **Visibility** | **Mutability** | **Modifiers** |
-|                   |                   |                |                |               |
-| **VersionModule** |  Implementation   |  IERC3643Base  |                |               |
-|         └         |      version      |    Public ❗️    |                |      NO❗️      |
+|  Contract  |         Type        |       Bases      |                  |                 |
+|:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
+|     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
+||||||
+| **VersionModule** | Implementation | IERC3643Version |||
+| └ | version | Public ❗️ |   |NO❗️ |
 
 #### version()
 
@@ -1189,23 +1206,27 @@ under `ERC3643ComplianceExtendedModule`, since that is the form in which the Rul
 #### Contracts Description Table
 
 
-|            Contract            |       Type        |                     Bases                     |                |                          |
-| :----------------------------: | :---------------: | :-------------------------------------------: | :------------: | :----------------------: |
-|               └                | **Function Name** |                **Visibility**                 | **Mutability** |      **Modifiers**       |
-|                                |                   |                                               |                |                          |
-|     **TokenBindingModule**     |  Implementation   |    Context, ITokenBinding                     |                |                          |
-|               └                |     bindToken     |                   Public ❗️                    |       🛑        |          NO❗️           |
-|               └                |    unbindToken    |                   Public ❗️                    |       🛑        |          NO❗️           |
-|               └                |   isTokenBound    |                   Public ❗️                    |                |          NO❗️           |
-|               └                |    _bindToken     |                  Internal 🔒                   |       🛑        |                          |
-|               └                |   _unbindToken    |                  Internal 🔒                   |       🛑        |                          |
-| **TokenBindingExtendedModule** |  Implementation   | TokenBindingModule, ITokenBindingExtended      |                |                          |
-|               └                |    bindTokens     |                   Public ❗️                    |       🛑        | onlyTokenBindingManager  |
-|               └                |   unbindTokens    |                   Public ❗️                    |       🛑        | onlyTokenBindingManager  |
-|               └                | setTokenSelfBindingApproval |         Public ❗️                    |       🛑        | onlyTokenBindingManager  |
-|               └                | setTokenSelfBindingApprovalBatch |    Public ❗️                    |       🛑        | onlyTokenBindingManager  |
-|               └                | isTokenSelfBindingApproved |          Public ❗️                    |                |          NO❗️           |
-|               └                |  getTokenBounds   |                   Public ❗️                    |                |          NO❗️           |
+|  Contract  |         Type        |       Bases      |                  |                 |
+|:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
+|     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
+||||||
+| **TokenBindingModule** | Implementation | Context, ITokenBinding, TokenBindingModuleInvariantStorage |||
+| └ | bindToken | Public ❗️ | 🛑  |NO❗️ |
+| └ | unbindToken | Public ❗️ | 🛑  |NO❗️ |
+| └ | isTokenBound | Public ❗️ |   |NO❗️ |
+| └ | _bindToken | Internal 🔒 | 🛑  | |
+| └ | _unbindToken | Internal 🔒 | 🛑  | |
+| └ | _authorizeTokenBindingChange | Internal 🔒 | 🛑  | |
+| └ | _onlyTokenBindingManager | Internal 🔒 | 🛑  | |
+| └ | _checkBoundToken | Internal 🔒 |   | |
+| **TokenBindingExtendedModule** | Implementation | TokenBindingModule, ITokenBindingExtended |||
+| └ | bindTokens | Public ❗️ | 🛑  | onlyTokenBindingManager |
+| └ | unbindTokens | Public ❗️ | 🛑  | onlyTokenBindingManager |
+| └ | setTokenSelfBindingApproval | Public ❗️ | 🛑  | onlyTokenBindingManager |
+| └ | setTokenSelfBindingApprovalBatch | Public ❗️ | 🛑  | onlyTokenBindingManager |
+| └ | isTokenSelfBindingApproved | Public ❗️ |   |NO❗️ |
+| └ | getTokenBounds | Public ❗️ |   |NO❗️ |
+| └ | _authorizeTokenBindingChange | Internal 🔒 | 🛑  | |
 
 ### ERC3643ComplianceModule
 
@@ -1221,13 +1242,14 @@ variants). The compliance callbacks `transferred`, `created` and `destroyed` are
 #### Contracts Description Table
 
 
-|          Contract           |       Type        |               Bases               |                |               |
-| :-------------------------: | :---------------: | :-------------------------------: | :------------: | :-----------: |
-|              └              | **Function Name** |          **Visibility**           | **Mutability** | **Modifiers** |
-|                             |                   |                                   |                |               |
-| **ERC3643ComplianceModule** |  Implementation   | TokenBindingModule, IERC3643Compliance |           |               |
-|              └              |   getTokenBound   |             Public ❗️              |                |      NO❗️      |
-|              └              | _onlyTokenBindingManager |      Internal 🔒            |       🛑        |               |
+|  Contract  |         Type        |       Bases      |                  |                 |
+|:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
+|     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
+||||||
+| **ERC3643ComplianceModule** | Implementation | TokenBindingModule, IERC3643Compliance |||
+| └ | getTokenBound | Public ❗️ |   |NO❗️ |
+| └ | _onlyTokenBindingManager | Internal 🔒 | 🛑  | |
+| └ | _onlyComplianceManager | Internal 🔒 | 🛑  | |
 
 ### ERC3643ComplianceExtendedModule
 

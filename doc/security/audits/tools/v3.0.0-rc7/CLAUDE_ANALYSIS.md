@@ -470,6 +470,9 @@ contracts extend their counterpart. Effect on the findings above:
   (3 copies, down from 4), still compiler-mandated.
 - **`E-2`:** the two `if/revert` sites of `RuleEngine.sol` (`:41`, `:64`) moved to `RuleEngineAccessControlShared`
   as `require(cond, Error())`, so 9 `if/revert` sites remain.
+- **`F-1`: fixed.** After the final Slither / Aderyn run, every `src/` and `script/` file declares
+  `pragma solidity ^0.8.27` (the Aderyn `L-2` feedback records it). 0.8.26 is now rejected by the pragma and 0.8.27
+  builds. `E-2` stays open: the remaining `if/revert` sites are a style choice the new floor allows either way.
 - **`H-2`:** unchanged. The contracts without the suffix resolve every caller as `msg.sender` (OpenZeppelin
   `Context`); the two token-identity sites were already `msg.sender`.
 - **`J-1`:** strengthened. ERC-2771 is no longer forced on a deployment that does not use it.
