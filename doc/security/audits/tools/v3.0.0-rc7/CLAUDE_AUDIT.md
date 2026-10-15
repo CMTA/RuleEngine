@@ -37,7 +37,7 @@ them, and the codes and messages the views report.
 2. Privileged surface from the Slither printers: every state-changing external function of the six deployables
    and its guard.
 3. Review of each threat against the code and the documentation.
-4. Tests: 67 new tests integrated in the suite, following its convention (a shared base in `test/utils/`, a short
+4. Tests: 68 new tests integrated in the suite, following its convention (a shared base in `test/utils/`, a short
    file per deployable), run in a Docker container (Foundry 1.5.1).
 5. Mutation check: three deliberately broken versions of the code, each caught by a new test.
 6. Adversarial pass, then correction of the findings.
@@ -45,7 +45,7 @@ them, and the codes and messages the views report.
 ## 2. Executive Summary
 
 **0 Critical, 0 High, 0 Medium, 0 Low, 3 Informational** (F-1, F-2, F-3), plus one item already open in the
-code-quality review (F-5). The first pass rated F-1 and F-2 Low; the adversarial pass downgraded them, and
+code-quality review (F-5). F-1 has since been fixed (section 6); F-2, F-3 and F-5 remain open. The first pass rated F-1 and F-2 Low; the adversarial pass downgraded them, and
 dismissed three other items as documented behaviour (F-4, F-6, F-7).
 
 **Cleared hypotheses.** These would have been High or Medium had they held; each was probed and does not:
@@ -66,7 +66,7 @@ dismissed three other items as documented behaviour (F-4, F-6, F-7).
 
 | ID | Title | Severity | Status | Component | PoC |
 |----|-------|----------|--------|-----------|-----|
-| F-1 | Pending owner turned rule can accept ownership | Info (was Low) | Open | `RuleEngineOwnable2Step.sol:29-32`, inherited `acceptOwnership` | `testNomineeAddedAsRuleBeforeAcceptingBecomesOwner` |
+| F-1 | Pending owner turned rule can accept ownership | Info (was Low) | Fixed | `RuleEngineOwnable2Step.sol:29-32`, inherited `acceptOwnership` | `testNomineeAddedAsRuleBeforeAcceptingBecomesOwner` |
 | F-2 | Self-binding approval survives an administrative unbind | Info (was Low) | Open | `TokenBindingModule.sol:81`, `TokenBindingExtendedModule.sol:52, 98` | `testApprovedTokenRebindsItselfAfterManagerUnbinds` |
 | F-3 | Any address can be bound, including a rule or an EOA | Info | Open | `TokenBindingModule.sol:100` | `testRuleAddressCanBeBoundAsToken`, `testBoundEoaConsumesStatefulRuleState` |
 | F-4 | Views revert when a rule's view reverts | — | Dismissed: documented | `RuleEngineBase.sol:172, 214` | `testViewsRevertWhenARuleViewReverts` |
@@ -97,6 +97,13 @@ a rule"). F-1 adds a path, not a new end state.
 
 **Recommendation.** Override `acceptOwnership` to call `_checkOwnershipTransferTarget(msg.sender)` first. It is a
 three-line change that closes the path.
+
+**Fixed.** `RuleEngineOwnable2Step` now overrides `acceptOwnership` and runs the check on `_msgSender()` (the same
+sender OpenZeppelin's implementation uses, so the `*2771` variant resolves it through the forwarder consistently)
+before delegating to `Ownable2Step.acceptOwnership`. A pending owner that is a rule reverts with
+`RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges`; once removed from the rule set it can accept.
+The proof of concept was inverted into `testNomineeAddedAsRuleBeforeAcceptingCannotAccept`, and
+`testNomineeCanAcceptOnceRemovedFromRules` covers the recovery path, on both `Ownable2Step` deployables.
 
 ### F-2 — Self-binding approval survives an administrative unbind (Info, was Low)
 
@@ -161,7 +168,7 @@ interface and is documented in `RuleEngine-with-ERC3643.md`.
 | INV-5 | Token identity is `msg.sender`, never the forwarder's appended sender | Yes | ERC-2771 token-gate suites, 3 deployables |
 | INV-6 | Every admin entry point rejects every other caller | Yes | `testFuzz_NonAuthorizedCallerCannotAdminister`, 11 functions, 6 × 256 runs; mutation-checked |
 | INV-7 | `canTransfer == (detectTransferRestriction == 0)`, and the 4-argument equivalent | Yes | rule-aggregation fuzz, 6 deployables |
-| INV-8 | An address in the rule set cannot be granted a role or become owner | Partly | holds at grant and at nomination; not at `Ownable2Step` acceptance (F-1), and not applied to binding (F-3) |
+| INV-8 | An address in the rule set cannot be granted a role or become owner | Yes for roles and ownership; not applied to binding (F-3) | checked at grant, at nomination and, since the F-1 fix, at `Ownable2Step` acceptance (`RuleGuard.t.sol`, mutation-checked) |
 | INV-9 | `getTokenBounds()` holds no duplicate and no `address(0)` | Yes | `invariant_BoundTokensMatchModel`, 6 deployables |
 
 The handler-based invariants run in the default suite at 64 sequences of 50 calls; they also passed once at
@@ -177,7 +184,7 @@ Foundry's defaults (256 × 500, 128 000 calls each).
 | `bindTokens`, `unbindTokens`, `setTokenSelfBindingApproval(Batch)` | `COMPLIANCE_MANAGER_ROLE` | owner | fuzz × 6 |
 | `transferred` (3/4), `created`, `destroyed` | bound token (`msg.sender`) | same | fuzz × 6, mutation-checked |
 | `grantRole` | role admin; the target must not be a rule | — | existing tests |
-| `transferOwnership`, `acceptOwnership` | — | owner; the target must not be a rule at nomination | existing tests, F-1 |
+| `transferOwnership`, `acceptOwnership` | — | owner; the target must not be a rule, at nomination and at acceptance | existing tests, `RuleGuard.t.sol` (F-1) |
 
 **Centralization premise.** In the RBAC deployables the default admin holds every role through the `hasRole`
 override, and in the ownable deployables the owner holds all powers. This is the model, not a finding: the admin
@@ -189,26 +196,26 @@ call any administrative function, even from inside its callback.
 
 ## 6. Remediation — What Was Implemented
 
-No code change was made in this review. The work added tests only:
+One finding was fixed after the review; the others are open.
 
 | Item | Status | What changed | Verified by |
 |---|---|---|---|
-| F-1 | Open | Behaviour unchanged; pinned by two tests on the two `Ownable2Step` deployables | `RuleGuard.t.sol` |
+| F-1 | Fixed | `RuleEngineOwnable2Step.acceptOwnership` re-checks that the caller is not a rule (inherited by `RuleEngineOwnable2Step2771`). Behaviour change: a nominee that became a rule can no longer accept until it is removed from the rule set | PoC inverted into a regression test, plus a recovery test, on both deployables; removing the check makes both fail |
 | F-2 | Open | Behaviour unchanged; the PoC and the working mitigation (revoke first) pinned on six deployables | `SecurityReview.t.sol` |
 | F-3 | Open | Behaviour unchanged; pinned on six deployables | `SecurityReview.t.sol` |
 | F-5 / H-3 | Open | Behaviour unchanged; pinned on three deployables | `ERC2771VariantTestBase` |
 | Access control, unbound callers | Verified | New fuzz tests on six deployables | mutation-checked |
 
-**Tests added.** 67 tests: `test/utils/SecurityReviewTestBase.sol` (10 tests, run by `test/<Variant>/SecurityReview.t.sol`
-for the six deployables), `test/utils/Ownable2StepRuleGuardTestBase.sol` (2 tests, run by `RuleGuard.t.sol` for the
+**Tests added.** 68 tests: `test/utils/SecurityReviewTestBase.sol` (10 tests, run by `test/<Variant>/SecurityReview.t.sol`
+for the six deployables), `test/utils/Ownable2StepRuleGuardTestBase.sol` (3 tests, run by `RuleGuard.t.sol` for the
 two `Ownable2Step` deployables), `testZeroForwarderIsAccepted` in `test/utils/ERC2771VariantTestBase.sol` (three
-`*2771` deployables), and two test-only rules, `RevertingViewRule` and `ReentrantAdminRule`. Suite: 572 tests, all
+`*2771` deployables), and two test-only rules, `RevertingViewRule` and `ReentrantAdminRule`. Suite: 574 tests, all
 passing; the real T-REX suite: 13, all passing; coverage of `src/` unchanged at 100% of lines, statements,
 branches and functions.
 
 Several new tests pin today's behaviour of an open item. When an item is fixed, its PoC is expected to fail and must
-be inverted into a regression test. One of them was checked this way: applying the F-2 fix makes
-`testApprovedTokenRebindsItselfAfterManagerUnbinds` fail.
+be inverted into a regression test, as was done for F-1. The F-2 PoC was checked the same way: applying the F-2 fix
+makes `testApprovedTokenRebindsItselfAfterManagerUnbinds` fail.
 
 ## 7. Potential Improvements (open backlog)
 
@@ -216,12 +223,11 @@ These are hardening items, not vulnerabilities.
 
 | # | Improvement | Addresses | Effort | Breaking? | Priority |
 |---|---|---|---|---|---|
-| 1 | Re-check the rule-account guard in `acceptOwnership` of the two `Ownable2Step` deployables | F-1 | Small | No | Medium |
-| 2 | Clear the self-binding approval when the manager unbinds a token, or document that revocation must precede the unbind | F-2 | Small | Behaviour change for approved tokens | Medium |
-| 3 | Document binding as a full trust decision: rules and EOAs are accepted and can drive stateful rules | F-3 | Docs | No | Low |
-| 4 | Decide `H-3`: reject `address(0)` as forwarder in the three `*2771` constructors (not in `ERC2771ModuleStandalone`, which the mock rules use with zero) | F-5 | Small | Constructor rejects a value it accepts today | Low |
+| 1 | Clear the self-binding approval when the manager unbinds a token, or document that revocation must precede the unbind | F-2 | Small | Behaviour change for approved tokens | Medium |
+| 2 | Document binding as a full trust decision: rules and EOAs are accepted and can drive stateful rules | F-3 | Docs | No | Low |
+| 3 | Decide `H-3`: reject `address(0)` as forwarder in the three `*2771` constructors (not in `ERC2771ModuleStandalone`, which the mock rules use with zero) | F-5 | Small | Constructor rejects a value it accepts today | Low |
 
-Item 2 is a design decision for the maintainers: clearing the approval makes the manager's unbind final, while
+Item 1 is a design decision for the maintainers: clearing the approval makes the manager's unbind final, while
 keeping it preserves a token's ability to migrate back without a new approval.
 
 ## 8. Scope & Duplicate Check

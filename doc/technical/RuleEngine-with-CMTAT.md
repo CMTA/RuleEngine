@@ -207,7 +207,7 @@ operation and the token's views, so it is trusted for availability too. See CMTA
 [`ruleengine-integration.md`](https://github.com/CMTA/CMTAT/blob/v3.3.0-rc4/doc/technical/ruleengine-integration.md) §"Deployment Coverage".
 
 Do not grant `RULES_MANAGEMENT_ROLE` to a rule contract — the engine blocks granting any role
-to an address currently configured as a rule, but the check is one-directional and does not stop an already privileged address from later being added as a rule.
+to an address currently configured as a rule, but the check is one-directional and does not stop an already privileged address from later being added as a rule. The ownable variants apply the same check to a new owner, and `RuleEngineOwnable2Step` applies it both when the owner is nominated and when it accepts.
 
 ### 4.7 The trusted forwarder cannot act as a token
 

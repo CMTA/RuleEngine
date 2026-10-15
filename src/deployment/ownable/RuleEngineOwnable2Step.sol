@@ -31,6 +31,16 @@ contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
         Ownable2Step.transferOwnership(newOwner);
     }
 
+    /**
+     * @notice Completes the ownership transfer; callable by the pending owner only.
+     * @dev Repeats the rule-account check of {transferOwnership}: an address nominated while it was not a rule,
+     * then added as a rule, cannot accept until it is removed from the rule set.
+     */
+    function acceptOwnership() public virtual override {
+        RuleEngineOwnableShared._checkOwnershipTransferTarget(_msgSender());
+        Ownable2Step.acceptOwnership();
+    }
+
     /* ============ ERC-165 ============ */
     /**
      * @notice ERC-165 interface detection.

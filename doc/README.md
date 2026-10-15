@@ -623,6 +623,7 @@ Each ownable `*2771` contract is its counterpart plus the immutable trusted forw
 **Key differences from RuleEngineOwnable:**
 - Uses a two-step ownership transfer flow: `transferOwnership()` then `acceptOwnership()`
 - The current owner retains privileges until the pending owner accepts ownership
+- The rule-account guard runs at nomination and again at acceptance: a pending owner that has been added as a rule cannot call `acceptOwnership()` until it is removed from the rule set
 - Reuses `RuleEngineOwnableShared` for the constructor and ERC-165 (via OpenZeppelin `ERC165`)
 - Implements ERC-173 interface (`supportsInterface(0x7f5828d0)` returns `true`)
 - Implements Ownable2Step-specific ERC-165 interface (`supportsInterface(0x9ab669ef)` returns `true`), covering `pendingOwner()` and `acceptOwnership()`

@@ -9,10 +9,9 @@ import {RuleCodeProbe} from "./RuleCodeProbe.sol";
 
 /**
  * @title Ownable2StepRuleGuardTestBase
- * @notice Security review, threat AC-3, for the two `Ownable2Step` deployables. The guard that keeps rule
- * accounts away from ownership runs in `transferOwnership`, at nomination. `acceptOwnership` is inherited from
- * OpenZeppelin and does not repeat it, so an address that becomes a rule while it is the pending owner can
- * still accept. These tests pin the current behaviour.
+ * @notice Security review, threat AC-3 / finding F-1, for the two `Ownable2Step` deployables. The guard that
+ * keeps rule accounts away from ownership runs at nomination (`transferOwnership`) and again at acceptance
+ * (`acceptOwnership`), so an address that becomes a rule while it is the pending owner cannot accept.
  */
 abstract contract Ownable2StepRuleGuardTestBase is Test {
     address internal constant OWNER = address(0xA11CE);
@@ -40,18 +39,35 @@ abstract contract Ownable2StepRuleGuardTestBase is Test {
         vm.stopPrank();
     }
 
-    /// @notice AC-3 (proof of concept). A nominee added as a rule before it accepts still becomes the owner, so
-    /// the engine ends up owned by one of its own rules.
-    function testNomineeAddedAsRuleBeforeAcceptingBecomesOwner() public {
+    /// @notice F-1 regression (was the AC-3 proof of concept). A nominee added as a rule before it accepts
+    /// cannot accept: the engine can no longer end up owned by one of its own rules.
+    function testNomineeAddedAsRuleBeforeAcceptingCannotAccept() public {
         vm.startPrank(OWNER);
         Ownable2Step(address(engine)).transferOwnership(address(nominee));
         engine.addRule(nominee);
         vm.stopPrank();
 
+        vm.expectRevert(
+            RulesManagementModuleInvariantStorage.RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges
+                .selector
+        );
         vm.prank(address(nominee));
         Ownable2Step(address(engine)).acceptOwnership();
 
+        assertEq(Ownable2Step(address(engine)).owner(), OWNER);
+        assertEq(Ownable2Step(address(engine)).pendingOwner(), address(nominee));
+    }
+
+    /// @notice F-1. Once the owner removes the nominee from the rule set, the pending transfer completes.
+    function testNomineeCanAcceptOnceRemovedFromRules() public {
+        vm.startPrank(OWNER);
+        Ownable2Step(address(engine)).transferOwnership(address(nominee));
+        engine.addRule(nominee);
+        engine.removeRule(nominee);
+        vm.stopPrank();
+
+        vm.prank(address(nominee));
+        Ownable2Step(address(engine)).acceptOwnership();
         assertEq(Ownable2Step(address(engine)).owner(), address(nominee));
-        assertTrue(engine.containsRule(nominee), "the owner is a rule of the engine it owns");
     }
 }
