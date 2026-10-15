@@ -48,8 +48,8 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | A-1 | Loop increment form and `unchecked` | ⬜ no finding — `++i` on 0.8.37, `unchecked` would buy nothing |
 | A-2 | Unbounded iteration over caller-supplied arrays | ⬜ left as is — admin-gated, carried from rc5/rc6 |
 | A-3 | View loops call the public `rule(i)`, re-checking the bound on every iteration | ✅ fixed after the second pass — −682 gas per detect call with 3 rules; paid on-chain by ERC-3643 tokens |
-| B-1 | `messageForTransferRestriction` resolves `rule(i)` twice, across an external call | ⚠️ decide — part of a measured −1,229 gas (3 rules) |
-| B-2 | `contains()` before `add()` / `remove()` leaves two unreachable branches | ⚠️ decide — −271 / −268 gas, and removes the only uncovered branches |
+| B-1 | `messageForTransferRestriction` resolves `rule(i)` twice, across an external call | ✅ fixed after the second pass — −375 gas per call on top of `A-3` |
+| B-2 | `contains()` before `add()` / `remove()` leaves two unreachable branches | ⚠️ decide — −271 / −268 gas, removes the only uncovered branches; the current form adds no security (assessed) |
 | C-1 | Every event has exactly one emit site | ⬜ verified — 8/8, unchanged by the split |
 | C-2 | Batch self-binding approval emits the input, not the effect | ⚠️ still open — carried from rc5 |
 | C-3 | Empty batches succeed silently, while `setRules([])` reverts | ⚠️ decide |
@@ -79,14 +79,14 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | K-5 | No fuzz and no invariant test | ✅ partly — 2 fuzz properties on all six deployables; invariant test proposed |
 | K-6 | `TokenSelfBindingApprovalSet` was never asserted | ✅ fixed — asserted in the three access-control models |
 
-**Counted: 33 rows — 10 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
-no-finding / verified / left as is (⬜), 11 open decisions or carried items (⚠️, `G-2` counted here).**
+**Counted: 33 rows — 11 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
+no-finding / verified / left as is (⬜), 10 open decisions or carried items (⚠️, `G-2` counted here).**
 
 ## Outstanding
 
 | ID | Item | Why it is still open |
 |----|------|----------------------|
-| B-1 / B-2 | Cache the rule in the message loop, use the `add` / `remove` return value | Measured twice and suite-verified (438/438 with the change), but a `src/` change (`A-3`, the view loops, is implemented) |
+| B-2 | Use the `add` / `remove` return value instead of the preceding `contains()` | Measured twice and suite-verified (438/438 with the change); gas and coverage only, no security effect either way (see `B-2`). `A-3` and `B-1` are implemented |
 | E-2 | Convert the 9 remaining `if/revert` sites | Style only; the `^0.8.27` floor allows either form |
 | G-2 / G-3 | 10 comment fixes in `src/`, and the `ERC3643TokenMock` header | Comment-only, left for one `src/` commit |
 | D-2 | One pattern for the ERC-2771 split in both families | Structural; no behaviour change, product of taste |
@@ -157,12 +157,12 @@ absolute numbers include cold-access costs and are not comparable with the table
 | `detectTransferRestrictionFrom` | 9,915 | 9,233 | **−682** |
 | `messageForTransferRestriction` (code claimed by the first rule) | 5,262 | 4,794 | **−468** |
 
-Full suite 438/438. The message loop still resolves the rule twice when a rule claims the code; caching it is
-`B-1`, still open.
+Full suite 438/438. The message loop still resolved the rule twice when a rule claimed the code; that is `B-1`,
+implemented next.
 
 ## B. Storage reads
 
-### B-1. `messageForTransferRestriction` resolves the rule twice — decide
+### B-1. `messageForTransferRestriction` resolves the rule twice — fixed
 
 `RuleEngineBase.sol:217-218`:
 
@@ -177,8 +177,26 @@ forward across. Caching it (`IRule rule_ = IRule(_rules.pos(i));`) together with
 View-only, so it only matters for an on-chain caller. **Verdict: implement with `A-3`**; it is the same edit.
 
 **After `A-3`:** the two calls now read `IRule(_rules.pos(i))`, so what remains is one extra `pos(i)` storage read
-after the external call. The saving left for `B-1` is smaller than the combined figure above and has not been
-measured separately.
+after the external call.
+
+**Implemented after `A-3`.** The loop body now reads:
+
+```solidity
+IRule rule_ = IRule(_rules.pos(i));
+if (rule_.canReturnTransferRestrictionCode(restrictionCode)) {
+    return rule_.messageForTransferRestriction(restrictionCode);
+```
+
+Measured with a throwaway probe (3 `RuleCodeProbe` rules claiming codes 50, 51 and 52; `A-3` already applied on
+both sides):
+
+| Claiming rule | Before | After | Difference |
+|---|---|---|---|
+| First of three | 18,362 | 17,987 | **−375** |
+| Third of three | 18,992 | 18,631 | **−361** |
+
+The saving does not grow with the position of the claiming rule: only the claiming iteration made the second
+read. Full suite 438/438.
 
 ### B-2. A `contains()` check before the mutation leaves two branches no test can reach — decide
 
@@ -202,6 +220,31 @@ require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_RuleAlready
 the same savings as the first pass. Full suite 438/438 with the change. Adding a duplicate now performs the
 ERC-165 call before reverting with the same `RuleAlreadyExists`; only the revert path is affected.
 `OperationNotSuccessful` then becomes unused; removing it is an ABI change. **Verdict: implement**, with `A-3`.
+
+**Does the current form add a check, or any security?** No. Assessed point by point against the code:
+
+- **No-duplicate invariant.** It is held by the `EnumerableSet` itself together with the
+  `require(_rules.add(...))` in `_addRule` (`:181`), which is present in both the current and the proposed form.
+  The `_checkRule` duplicate test (`:255`) only runs first. If a subclass overrode `_checkRule` without calling
+  the parent, the current code would still reject the duplicate (with `OperationNotSuccessful`), and so would the
+  proposed code (with `RuleAlreadyExists`). The redundant test adds no layer.
+- **Removal.** `_rules.remove` returns `false` exactly when `contains` would, and the function has no external
+  call or other state change before it, so `require(_rules.remove(...), RuleDoNotMatch())` rejects the same calls
+  with the same error. Same for an override of `removeRule` that skipped the `contains()`: today it is caught by
+  `OperationNotSuccessful` in `_removeRule`, after the fix by `RuleDoNotMatch`.
+- **Order against the external call.** This is the only real difference: today a duplicate is rejected before
+  `ERC165Checker.supportsInterface`, after the fix it is rejected after it. That call is a `staticcall` limited
+  to 30,000 gas (OpenZeppelin `ERC165Checker.sol:135`), so the rule cannot change state or re-enter, and the rule
+  is already in the set, so it is already trusted. Checks-effects-interactions is not at stake: the call
+  is a read, and the revert discards everything.
+- **Access.** Both paths stay behind `onlyRulesManager`; nothing changes who can reach them.
+
+What the current form does buy, none of it security: a duplicate `addRule` fails before the ERC-165 call (cheaper
+revert path); and the error is always `RuleAlreadyExists` for a duplicate, even when a mutable rule that is
+already in the set has since stopped advertising `IRule` (after the fix that case reports
+`RuleInvalidInterface`, because `_checkRule` runs first). `_checkRule` also stays a complete, standalone
+validation hook for a subclass that calls it on its own; no contract in this repository does. The case for the
+change remains gas (−271 / −268 on the success paths) and coverage (the only two dead branches in `src/`).
 
 ## C. Events
 

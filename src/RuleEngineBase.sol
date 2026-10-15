@@ -217,8 +217,9 @@ abstract contract RuleEngineBase is
         }
         uint256 rulesLength = _rules.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            if (IRule(_rules.pos(i)).canReturnTransferRestrictionCode(restrictionCode)) {
-                return IRule(_rules.pos(i)).messageForTransferRestriction(restrictionCode);
+            IRule rule_ = IRule(_rules.pos(i));
+            if (rule_.canReturnTransferRestrictionCode(restrictionCode)) {
+                return rule_.messageForTransferRestriction(restrictionCode);
             }
         }
         return TEXT_CODE_NOT_FOUND;
