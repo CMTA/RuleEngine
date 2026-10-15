@@ -15,12 +15,17 @@ interface ITokenBinding {
     /* ============ Events ============ */
     /**
      * @notice Emitted when a token is successfully bound.
+     * @dev Same declaration as ERC-3643 `TokenBound(address _token)`, which does not index the token. Keep it
+     * non-indexed: `indexed` would move `token` from the data to a topic and break consumers decoding with
+     * the standard ERC-3643 ABI.
      * @param token The address of the token that was bound.
      */
     event TokenBound(address token);
 
     /**
      * @notice Emitted when a token is successfully unbound.
+     * @dev Same declaration as ERC-3643 `TokenUnbound(address _token)`; kept non-indexed for the same reason as
+     * {TokenBound}.
      * @param token The address of the token that was unbound.
      */
     event TokenUnbound(address token);

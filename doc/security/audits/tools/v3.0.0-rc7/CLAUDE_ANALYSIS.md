@@ -51,7 +51,7 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | B-1 | `messageForTransferRestriction` resolves `rule(i)` twice, across an external call | ✅ fixed after the second pass — −375 gas per call on top of `A-3` |
 | B-2 | `contains()` before `add()` / `remove()` leaves two unreachable branches | ✅ fixed after the second pass — −271 / −268 gas, branch coverage 40/40; the old form added no security (assessed) |
 | C-1 | Every event has exactly one emit site | ⬜ verified — 8/8, unchanged by the split |
-| C-2 | Batch self-binding approval emits the input, not the effect | ⚠️ still open — carried from rc5; restated with 3 options measured, `TokenBound` / `TokenUnbound` not indexed noted |
+| C-2 | Batch self-binding approval emits the input, not the effect | ⚠️ still open — carried from rc5; restated with 3 options measured; `TokenBound` / `TokenUnbound` stay non-indexed (ERC-3643 spec) |
 | C-3 | Empty batches succeed silently, while `setRules([])` reverts | ✅ decided after the second pass — binding batches stay atomic, documented in NatSpec and `TokenBinding-module.md`; rollback and empty-batch no-op pinned |
 | D-1 | ERC-2771 `Context` overrides repeated per deployable | ⬜ no finding — 3 copies, one per `*2771` contract (4 before the split), compiler-mandated |
 | D-2 | The RBAC and ownable families implement the ERC-2771 split two different ways | ✅ fixed after the second pass — `RuleEngineAccessControlShared` folded into `RuleEngine`; deployables grouped in `accessControl/` and `ownable/` |
@@ -70,7 +70,7 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | I-1 | `IRule` demands two functions the engine never calls | ✅ fixed after the second pass — `IRule` narrowed, ID `0xb1a69752`, strict gate (old ID rejected) |
 | I-2 | Standalone-rule configuration advertised but untested | ✅ fixed after the second pass (option 1) — 9 integration tests, CMTAT guide §4.8, mocks import CMTAT's ids; mock `transferred` left unguarded, documented |
 | I-3 | Engine should call `canTransfer` on rules? | ⬜ no — carried from rc6 |
-| J-1 | Binding registry embeddable in a foreign host | Can ⬜ carried — inheritance of the registry unchanged |
+| J-1 | Binding registry embeddable in a foreign host | ⬜ re-verified — both probes compile (no `5005`); a CMTAT token with the *extended* registry is 326 B over EIP-170 |
 | J-2 | ERC-2771 in the shared ownable layer blocked a host with its own forwarder | ✅ fixed by the split — verified by compile probe |
 | K-1 | Two tests used a bare `vm.expectRevert()` | ✅ fixed — both name their error; 0 left |
 | K-2 | Coverage | ⬜ 100% lines / statements / functions; branches 41/43 at the second pass (2 dead, `B-2`), **40/40** after `B-2` |
@@ -357,9 +357,18 @@ binding changes by token has the same problem as above, on every binding path. I
 topics (`topics[1]` becomes the token, the data becomes empty), so it is also an ABI-visible change for indexers;
 it would be cheapest to decide together with C-2.
 
+**Correction (maintainer):** these two events are **not** this project's to change. They are defined by
+ERC-3643 itself, without `indexed`: `event TokenBound(address _token); event TokenUnbound(address _token);`
+(`doc/ERCSpecification/erc-3643.md:295-296`, and T-REX `lib/ERC-3643/contracts/ERC-3643/IERC3643Compliance.sol:45`,
+`:49`). `indexed` does not change the event signature (`topic0` is the same), but it moves `token` from the data
+to `topics[1]`, so a consumer decoding with the standard ERC-3643 ABI would read an empty data field. The project
+would prefer an indexed token, but conformance to the standard wins: **keep them non-indexed**. The NatSpec of
+both events in `ITokenBinding.sol` now says so, so they are not "fixed" later. This does not affect the
+recommendation for `TokenSelfBindingApprovalSet` / the batch event, which are this project's own events.
+
 **Verdict: decide** — a product call on the event API, not a correctness fix. Recommended: **C**, applied to both
-setters, plus `indexed` on `TokenBound` / `TokenUnbound`, while the project is still in release candidates and
-the event API is not yet frozen. If existing indexers must keep working unchanged, **B** for one release, then A or C.
+setters, while the project is still in release candidates and the event API is not yet frozen. (`indexed` on
+`TokenBound` / `TokenUnbound` was also recommended here at first; withdrawn, see the correction above.) If existing indexers must keep working unchanged, **B** for one release, then A or C.
 
 ### C-3. Empty batches are accepted, inconsistently with `setRules` — decided
 
@@ -874,10 +883,81 @@ because a production rule (`RuleConditionalTransferLightMultiToken`) already dep
 
 ## J. Modularity
 
-### J-1. Binding registry — carried
+### J-1. The binding registry embeds in a foreign host — re-verified, with a size limit found
 
-The registry's inheritance is unchanged, so the rc6 compile probes remain valid. With `F-1`, a host embedding it
-needs solc 0.8.27 or later, which the pragma now says.
+**What is claimed.** rc6 split token binding out of the ERC-3643 code so it can be reused by any project that has
+to bind tokens: `TokenBindingModule` (bind, unbind, `isTokenBound`, the `onlyBoundToken` guard) and
+`TokenBindingExtendedModule` (batch binding, token self-binding, `getTokenBounds`) depend only on OpenZeppelin
+(`Context`, `EnumerableSet`), and leave one hook to the host, `_onlyTokenBindingManager()`. `README.md`,
+`CLAUDE.md` and `doc/technical/TokenBinding-module.md` §3 make that claim; `TokenBindingStandaloneMock` and
+`test/TokenBinding/` (10 tests) keep a minimal host compiling.
+
+**Why re-check in rc7.** The inheritance of the two modules is unchanged since rc6, but rc7 touched their code
+(`E-2` turned `_checkBoundToken` into a `require`, the ERC-2771 fix made the gate compare `msg.sender`) and raised
+the pragma to `^0.8.27` (`F-1`), so a host now needs solc 0.8.27 or later. The rc6 probes were re-run on the final
+rc7 code rather than carried on trust.
+
+**Method.** Two probe contracts written in `src/` (so they compile with the project's remappings), built alone
+with `forge build <file>`, then deleted. The errors are graded as in the modularity check: `Error (6480)`
+("derived contract must override") is an inconvenience the integrator fixes with an override; `Error (5005)`
+("linearization of inheritance graph impossible") is a blocker that no glue can fix.
+
+**Probe 1: an unrelated host with its own ERC-2771 forwarder and RBAC.**
+
+```solidity
+contract Probe1 is ERC2771Context, AccessControl, TokenBindingExtendedModule {
+    constructor(address fwd, address admin) ERC2771Context(fwd) { _grantRole(DEFAULT_ADMIN_ROLE, admin); }
+    function _onlyTokenBindingManager() internal virtual override onlyRole(DEFAULT_ADMIN_ROLE) {}
+    // + _msgSender / _msgData / _contextSuffixLength, override(ERC2771Context, Context)
+}
+```
+
+**Probe 2: the hardest case, a CMTAT token embedding the registry itself** (`CMTATStandardStandalone`, which
+already carries ERC-2771, AccessControl, ERC-7551 and its own `Context` overrides).
+
+```solidity
+contract Probe2 is CMTATStandardStandalone, TokenBindingModule {
+    constructor(...) CMTATStandardStandalone(fwd, admin, erc20, extra, engines) {}
+    function _onlyTokenBindingManager() internal virtual override onlyRole(DEFAULT_ADMIN_ROLE) {}
+    // + _msgSender / _msgData / _contextSuffixLength, override(CMTATBaseERC7551Enforcement, Context)
+}
+```
+
+**Results** (solc 0.8.37, optimizer on, 200 runs, `evm_version = osaka`, as in `foundry.toml`):
+
+| Probe | Without the three overrides | With them | Runtime size | Margin to 24,576 B (EIP-170) |
+|---|---|---|---|---|
+| 1. ERC-2771 + RBAC host + `TokenBindingExtendedModule` | 3 x `Error (6480)` (`_msgSender`, `_msgData`, `_contextSuffixLength`) | **compiles** | 3,655 B | 20,921 B |
+| 2. `CMTATStandardStandalone` + `TokenBindingModule` | 3 x `Error (6480)` (same three) | **compiles** | 23,864 B | **712 B** |
+| 2b. `CMTATStandardStandalone` + `TokenBindingExtendedModule` | (same) | **compiles** | 24,902 B | **−326 B: over the limit, not deployable** |
+| Reference: `CMTATStandardStandalone` alone | — | — | 23,111 B | 1,465 B |
+
+**Reading the results:**
+
+- **No `Error (5005)` in any probe.** The modules' bases (`Context`, the two interfaces, the invariant storage)
+  linearize with an unrelated host and with a full CMTAT token. That is the property the reuse claim rests on,
+  and it holds.
+- **The only work left to the integrator** is the hook and the three `Context` overrides. The overrides are not
+  caused by this module: any contract that combines ERC-2771 with another `Context` user must write them. The
+  module inherits OpenZeppelin's `Context` because every OpenZeppelin mixin does; replacing it with a
+  project-specific sender hook would only move the same wiring to the integrator.
+- **Which base to name in the overrides is not obvious for CMTAT.** The first attempt named
+  `CMTATStandardStandalone` and failed with `Error (4327)` / `(2353)`: the overrides must name
+  `CMTATBaseERC7551Enforcement`, the CMTAT contract that actually declares them. Worth a line in
+  `TokenBinding-module.md` §3 for anyone embedding the registry in a CMTAT variant.
+- **New in rc7, and the real limit: contract size.** The registry costs about 750 B of runtime code
+  (`TokenBindingModule`) and about 1,790 B with the extended module. A CMTAT Standard token has 1,465 B left, so
+  it can embed the base module (712 B to spare) but **not** the extended one (326 B over EIP-170). That is not a
+  linearization problem and not a defect of the module, but it means "a CMTAT token can embed the registry"
+  holds for `TokenBindingModule` only, at this CMTAT version and these optimizer settings. Raising
+  `optimizer_runs` makes code larger; lowering it, or `via_ir`, may recover the margin, at a gas cost per call.
+  Not measured here.
+
+**Verdict: reuse claim confirmed, with one qualification to document.** No code change. Recommended:
+`TokenBinding-module.md` §3 should (a) give the three overrides with the right CMTAT base, and (b) state that a
+CMTAT Standard token can embed `TokenBindingModule` but is over the size limit with `TokenBindingExtendedModule`
+at 200 optimizer runs. `TokenBindingStandaloneMock` and `test/TokenBinding/` remain the compiling fixture that
+stops the linearization property from regressing; contract size is not covered by any test.
 
 ### J-2. ERC-2771 in the shared layer blocked a host with its own forwarder — fixed by the split
 
