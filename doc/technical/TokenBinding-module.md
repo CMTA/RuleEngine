@@ -119,6 +119,14 @@ These are properties of the registry itself, not of any standard built on it.
 - **Binding and unbinding are not idempotent.** Re-binding a bound token reverts with
   `TokenBinding_TokenAlreadyBound`, and unbinding an unbound one with `TokenBinding_TokenNotBound`, so a
   redundant administrative call is reported rather than silently accepted.
+- **Self-binding approvals have two events; indexers must handle both.** `setTokenSelfBindingApproval` emits
+  `TokenSelfBindingApprovalSet(address indexed token, bool approved)`; `setTokenSelfBindingApprovalBatch` emits
+  a single `TokenSelfBindingApprovalBatchSet(address[] tokens, bool approved)` with the array as passed, and no
+  per-token event. A log filter on the indexed `token` therefore misses batch updates, and the batch array also
+  lists tokens that were already at the requested value, and duplicates. Monitoring that must catch every token
+  gaining self-binding rights (which lets it unbind itself) subscribes to both events, or reads
+  `isTokenSelfBindingApproved(token)`, which is authoritative. Kept as is by decision; the alternatives
+  (per-token events, with or without a change check) are measured in the rc7 code-quality review, `C-2`.
 - **The batch functions are atomic, on purpose.** `bindTokens` / `unbindTokens` apply the single-call rule to
   every element: one token already bound (or listed twice) in `bindTokens`, or not bound in `unbindTokens`,
   reverts the whole call, and the tokens processed before it in the same call are rolled back. This departs
