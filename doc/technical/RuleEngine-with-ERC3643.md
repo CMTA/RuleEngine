@@ -197,6 +197,8 @@ submodule. The suite that deploys it therefore runs in its own profile:
 FOUNDRY_PROFILE=erc3643 forge test
 ```
 
+The CI workflow (`.github/workflows/ci.yml`) runs this profile in its own step, after the default `forge test`.
+
 - `[profile.erc3643]` in `foundry.toml` builds the whole project at solc 0.8.30 (the engine is `^0.8.27`,
   CMTAT and OpenZeppelin `^0.8.24` at most) into `out-erc3643/`, and runs only `test/ERC3643Real/`.
 - The default profile lists `test/ERC3643Real/**` in `skip`, so a plain `forge test` is unaffected.

@@ -1882,7 +1882,7 @@ The tests that deploy the real ERC-3643 token (T-REX 4.2.0-beta1, `pragma solidi
 FOUNDRY_PROFILE=erc3643 forge test
 ```
 
-See [RuleEngine-with-ERC3643.md §4.8](./technical/RuleEngine-with-ERC3643.md#48-the-real-t-rex-token-is-tested-in-a-separate-foundry-profile).
+CI runs both profiles (`.github/workflows/ci.yml`). See [RuleEngine-with-ERC3643.md §4.8](./technical/RuleEngine-with-ERC3643.md#48-the-real-t-rex-token-is-tested-in-a-separate-foundry-profile).
 
 See also the test framework's [official documentation](https://book.getfoundry.sh/forge/tests), and that of the [test commands](https://book.getfoundry.sh/reference/forge/test-commands).
 

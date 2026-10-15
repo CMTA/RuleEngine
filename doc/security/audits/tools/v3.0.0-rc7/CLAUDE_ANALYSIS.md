@@ -75,12 +75,12 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | K-1 | Two tests used a bare `vm.expectRevert()` | ✅ fixed — both name their error; 0 left |
 | K-2 | Coverage | ⬜ 100% lines / statements / functions; branches 41/43 at the second pass (2 dead, `B-2`), **40/40** after `B-2` |
 | K-3 | Mutation testing | ✅ first pass: 4 of 32 survived, all 33 killed after new tests; second pass: see `K-3` |
-| K-4 | CI never runs the `erc3643` profile | ⚠️ decide — one workflow step |
+| K-4 | CI never runs the `erc3643` profile | ✅ fixed after the second pass — new CI step |
 | K-5 | No fuzz and no invariant test | ✅ partly — 2 fuzz properties on all six deployables; invariant test proposed |
 | K-6 | `TokenSelfBindingApprovalSet` was never asserted | ✅ fixed — asserted in the three access-control models |
 
-**Counted: 33 rows — 13 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
-no-finding / verified / left as is (⬜), 8 open decisions or carried items (⚠️, `G-2` counted here).**
+**Counted: 33 rows — 14 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
+no-finding / verified / left as is (⬜), 7 open decisions or carried items (⚠️, `G-2` counted here).**
 
 ## Outstanding
 
@@ -89,7 +89,6 @@ no-finding / verified / left as is (⬜), 8 open decisions or carried items (⚠
 | E-2 | Convert the 9 remaining `if/revert` sites | Style only; the `^0.8.27` floor allows either form |
 | G-2 / G-3 | 9 comment fixes in `src/`, and the `ERC3643TokenMock` header | Comment-only, left for one `src/` commit |
 | H-3 | Reject a zero forwarder in the `*2771` constructors | Changes the tests that use a zero forwarder; needs a new error |
-| K-4 | Run `FOUNDRY_PROFILE=erc3643 forge test` in CI | Workflow change |
 | K-5 | Handler-based invariant test over the rule set and the binding set | Needs a design for the handler |
 | C-2 / C-3 | Batch approval event shape; whether `bindTokens` / `unbindTokens` stay atomic or skip already-applied tokens | Event shape is API-visible to indexers; the binding batches deviate from the project's single-versus-batch revert convention, which is a product call |
 | I-1 / I-2 | Narrow `IRule`; test or drop the standalone-rule claim (one question: is a rule only a plug-in, or also a minimal engine?) | Coordinated with CMTA/Rules |
@@ -797,11 +796,17 @@ The thinnest margins are N10, N11 and N17, each caught by a single test (`testMs
 `*2771` pair, and the `Ownable2Step` interface test). They are still real assertions on the exact property, so no
 test was added. Across both passes, **50 mutants, 0 surviving** against the current suite.
 
-### K-4. CI never runs the real ERC-3643 suite — decide
+### K-4. CI never runs the real ERC-3643 suite — fixed
 
 `.github/workflows/ci.yml` runs `forge test -vvv` and `npx hardhat test`. `test/ERC3643Real/` is in the default
 profile's `skip` list, so its 13 tests are never run by CI, although they caught M05 / M06 at the first pass.
 **Fix:** a step running `FOUNDRY_PROFILE=erc3643 forge test`. **Verdict: implement.**
+
+**Implemented after the second pass.** `.github/workflows/ci.yml` has a step "Run Forge tests against the real
+ERC-3643 token" (`FOUNDRY_PROFILE=erc3643 forge test -vvv`) right after the default `forge test`. The vendored
+token comes from the `lib/ERC-3643` submodule, which the existing `forge install` step initialises, and its
+`@onchain-id` imports resolve to the stubs in `test/utils/onchainid/`, so no extra install is needed. Checked
+locally: the workflow parses, and the command passes 13/13. **Not checked:** a run on GitHub Actions itself.
 
 ### K-5. Fuzz and invariant tests — fuzz written, invariant proposed
 
