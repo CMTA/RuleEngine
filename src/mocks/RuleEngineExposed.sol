@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import {RuleEngine} from "../deployment/RuleEngine.sol";
+import {RuleEngine2771} from "../deployment/RuleEngine2771.sol";
 import {RuleEngineOwnable} from "../deployment/RuleEngineOwnable.sol";
 import {RuleEngineOwnable2Step} from "../deployment/RuleEngineOwnable2Step.sol";
 
 /**
- * @title RuleEngineExposed
+ * @title RuleEngine2771Exposed
  * @dev Exposes internal functions for testing coverage
  */
-contract RuleEngineExposed is RuleEngine {
+contract RuleEngine2771Exposed is RuleEngine2771 {
     /**
      * @notice Deploys the exposed engine.
      * @param admin Address receiving the initial privileges.
      * @param forwarder Address of the trusted ERC-2771 forwarder.
      * @param token Token to bind at deployment, or the zero address to bind none.
      */
-    constructor(address admin, address forwarder, address token) RuleEngine(admin, forwarder, token) {}
+    constructor(address admin, address forwarder, address token) RuleEngine2771(admin, forwarder, token) {}
 
     /**
      * @notice Exposes the internal {_msgData} for testing.

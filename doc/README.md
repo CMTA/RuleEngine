@@ -58,11 +58,12 @@ The RuleEngine is an external contract used to apply transfer restrictions to an
 
 ## Contract Variants
 
-Three deployable contracts are available:
+Four deployable contracts are available:
 
 | Contract | Access Control | Interface | Use Case |
 |----------|---------------|-----------|----------|
-| `RuleEngine` | Role-Based (AccessControlEnumerable) | RBAC roles | Multi-operator environments with granular permissions |
+| `RuleEngine` | Role-Based (AccessControlEnumerable) | RBAC roles | Multi-operator environments with granular permissions, no ERC-2771 |
+| `RuleEngine2771` | Role-Based (AccessControlEnumerable) | RBAC roles + ERC-2771 | Same as `RuleEngine`, administrable through an immutable trusted forwarder (gasless) |
 | `RuleEngineOwnable` | ERC-173 Ownership | `Ownable` | Single-owner setups, simpler administration |
 | `RuleEngineOwnable2Step` | ERC-173 Ownership (two-step transfer) | `Ownable2Step` | Single-owner setups with safer ownership handover |
 
@@ -70,12 +71,13 @@ ERC-3643 compliance specification indicates the use of ERC-173.
 
 > The standard relies on ERC-173 to define contract ownership, with the owner having the responsibility of setting the Compliance parameters and binding the Compliance to a Token contract.
 
-All deployable contracts share the same core functionality (`RuleEngineBase`, directly or through `RuleEngineOwnableShared`) and support:
+All deployable contracts share the same core functionality (`RuleEngineBase`, through `RuleEngineAccessControlShared` or `RuleEngineOwnableShared`) and support:
 
 - ERC-1404 transfer restrictions
 - ERC-3643 compliance interface
-- ERC-2771 meta-transactions (gasless)
 - Multiple token bindings
+
+ERC-2771 meta-transactions (gasless) are supported by `RuleEngine2771`, `RuleEngineOwnable` and `RuleEngineOwnable2Step`. The plain `RuleEngine` has no trusted forwarder: every caller is the raw `msg.sender`. Choose `RuleEngine` for RBAC without meta-transactions, and `RuleEngine2771` when operators should administer the engine through a forwarder.
 
 > **Warning (shared engine across multiple tokens):** A "multi-tenant" setup here means one RuleEngine instance is shared by several token contracts (all bound through `bindToken`). In this setup, tokens must be equally trusted and governed together. ERC-3643 callbacks (`transferred`, `created`, `destroyed`) do not pass the token address to rules, so stateful/accounting rules are not safe for mutually untrusted tokens sharing the same engine.
 
@@ -391,12 +393,12 @@ The toolchain includes the following components, where the versions are the late
 
 Two access control mechanisms are available depending on which contract you deploy:
 
-#### RuleEngine (RBAC - AccessControlEnumerable)
+#### RuleEngine and RuleEngine2771 (RBAC - AccessControlEnumerable)
 
-The `RuleEngine` contract uses Role-Based Access Control (RBAC) via OpenZeppelin's `AccessControlEnumerable`.
+The `RuleEngine` and `RuleEngine2771` contracts use Role-Based Access Control (RBAC) via OpenZeppelin's `AccessControlEnumerable`, wired once in `RuleEngineAccessControlShared`. They differ only in ERC-2771 support.
 
 Each module defines the roles useful to restrict its functions. The contract overrides the OpenZeppelin function `hasRole` to give by default all the roles to the `admin`.
-`RulesManagementModule` itself is access-control agnostic; RBAC is wired at the concrete `RuleEngine` level.
+`RulesManagementModule` itself is access-control agnostic; RBAC is wired in `RuleEngineAccessControlShared`.
 Note: this `hasRole` override does not add the admin address to each role's enumerable member set. As a result, `getRoleMember` / `getRoleMemberCount` for a specific role do not include the admin unless that role is explicitly granted.
 
 See also [docs.openzeppelin.com - AccessControlEnumerable](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControlEnumerable)
@@ -423,7 +425,7 @@ See also [docs.openzeppelin.com - Ownable2Step](https://docs.openzeppelin.com/co
 
 The table below summarizes which ERC-165 interfaces are advertised by each deployment version via `supportsInterface(bytes4)`.
 
-| Interface | Interface ID | RuleEngine (RBAC deployment) | RuleEngineOwnable deployment | RuleEngineOwnable2Step deployment |
+| Interface | Interface ID | RuleEngine / RuleEngine2771 (RBAC deployments) | RuleEngineOwnable deployment | RuleEngineOwnable2Step deployment |
 | --- | --- | --- | --- | --- |
 | `IERC165` | `0x01ffc9a7` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
 | `IRuleEngine` | `0x20c49ce7` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> |
@@ -437,11 +439,12 @@ The table below summarizes which ERC-165 interfaces are advertised by each deplo
 | `IAccessControl` | `0x7965db0b` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> |
 | `IAccessControlEnumerable` | `0x5a05180f` | <strong><span style="color: #1e7e34;">&#x2714;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> | <strong><span style="color: #b00020;">&#x2718;</span></strong> |
 
-The six interfaces common to all three variants come from `RuleEngineBase._supportsRuleEngineBaseInterface`;
-each deployable adds the IDs of its own access-control model on top.
+The six interfaces common to all variants come from `RuleEngineBase._supportsRuleEngineBaseInterface`;
+each deployable adds the IDs of its own access-control model on top. ERC-2771 has no ERC-165 id, so `RuleEngine`
+and `RuleEngine2771` advertise exactly the same set.
 
 Notes:
-- `RuleEngine` advertises OpenZeppelin RBAC interfaces because it inherits `AccessControlEnumerable`.
+- `RuleEngine` / `RuleEngine2771` advertise OpenZeppelin RBAC interfaces because they inherit `AccessControlEnumerable` (through `RuleEngineAccessControlShared`).
 - `RuleEngineOwnable` / `RuleEngineOwnable2Step` intentionally do not advertise `IAccessControl`.
 - `Ownable2Step` specific interface ID is defined in `Ownable2StepInterfaceId` and includes only `pendingOwner()` and `acceptOwnership()`.
 - **Two ERC-165 conventions coexist, both on purpose.** `IRuleEngine` (`0x20c49ce7`) is CMTAT's constant and is computed **without** `IERC165.supportsInterface`; `IRule` (`0x2497d6cb`) is computed **with** it (`RuleInterfaceId` XORs in `IERC165`). Both values are the ones deployed tokens and rules already check, and both are pinned by `test/RuleEngine/IRuleInterfaceId.t.sol`: do not "fix" one to match the other.
@@ -525,6 +528,23 @@ contract's surface.
 
 #### RuleEngine
 ![RuleEngineUML](./schema/sol2uml/RuleEngineUML.png)
+
+> The UML above predates the v3.0.0-rc7 split: it shows the RBAC engine with ERC-2771, which is now `RuleEngine2771`.
+
+```
+RuleEngine
+└── RuleEngineAccessControlShared (shared RBAC deployment logic)
+    ├── RuleEngineBase (core functionality)
+    ├── AccessControlEnumerable (RBAC)
+    ├── ERC3643ComplianceRolesStorage
+    └── RulesManagementModuleRolesStorage
+
+RuleEngine2771
+├── ERC2771ModuleStandalone (gasless support)
+└── RuleEngineAccessControlShared
+```
+
+`RuleEngine` and `RuleEngine2771` differ only by ERC-2771: same constructor checks, roles, `grantRole` / `hasRole` overrides and ERC-165 answers, all held by `RuleEngineAccessControlShared`. `RuleEngine2771` adds the immutable trusted forwarder and the `_msgSender` / `_msgData` / `_contextSuffixLength` overrides.
 
 #### RuleEngineOwnable
 
@@ -649,11 +669,11 @@ Here is a summary tab of available rules, see [github.com/CMTA/Rules](https://gi
 
 ![surya_inheritance_ERC2771ModuleStandalone.sol](./schema/surya/surya_inheritance/surya_inheritance_ERC2771ModuleStandalone.sol.png)
 
-The RuleEngine supports client-side gasless transactions using the standard [ERC-2771](https://eips.ethereum.org/EIPS/eip-2771).
+`RuleEngine2771`, `RuleEngineOwnable` and `RuleEngineOwnable2Step` support client-side gasless transactions using the standard [ERC-2771](https://eips.ethereum.org/EIPS/eip-2771). The plain `RuleEngine` does not: deploy `RuleEngine2771` for RBAC with a forwarder.
 
 The contract uses the OpenZeppelin contract `ERC2771Context` (through `ERC2771ModuleStandalone`), which allows a contract to get the original client with `_msgSender()` instead of the feepayer given by `msg.sender`.
 
-At deployment, the constructor parameter `forwarderIrrevocable` has to be set with the address of the forwarder, or `address(0)` to disable ERC-2771.
+At deployment, the constructor parameter `forwarderIrrevocable` has to be set with the address of the forwarder. For the ownable variants it can be `address(0)` to disable ERC-2771; for RBAC, deploy `RuleEngine` instead of `RuleEngine2771` with a zero forwarder.
 
 After deployment, the forwarder is immutable and can not be changed.
 
@@ -676,7 +696,7 @@ Two checks, however, identify a **token** rather than a person, and they compare
 
 A signature-verifying forwarder never produces such a call, because a token contract cannot sign a request. The exposure was a buggy, malicious or permissive forwarder, which is fixed at deployment. The fix removes that dependency: a token always calls the engine directly from its own `transfer`, `mint`, `burn` or `setCompliance`, never through a forwarder, so for every legitimate token call `msg.sender == _msgSender()`, and comparing `msg.sender` rejects only the impersonation. Operators can still bind and unbind tokens, and manage rules, through signed meta-transactions. CMTAT makes the same choice for its bridge gate (`ERC20CrossChainModule.onlyTokenBridge`).
 
-The behaviour is pinned for the three deployables by `test/RuleEngine*/ERC2771TokenGate.t.sol` (shared suite `test/utils/ERC2771TokenGateTestBase.sol`). See also [RuleEngine-with-CMTAT.md §4.7](./technical/RuleEngine-with-CMTAT.md#47-the-trusted-forwarder-cannot-act-as-a-token).
+The behaviour is pinned for the three ERC-2771 deployables by `test/RuleEngine2771/ERC2771TokenGate.t.sol`, `test/RuleEngineOwnable/ERC2771TokenGate.t.sol` and `test/RuleEngineOwnable2Step/ERC2771TokenGate.t.sol` (shared suite `test/utils/ERC2771TokenGateTestBase.sol`). See also [RuleEngine-with-CMTAT.md §4.7](./technical/RuleEngine-with-CMTAT.md#47-the-trusted-forwarder-cannot-act-as-a-token).
 
 References:
 
@@ -715,6 +735,20 @@ Similar to the pause functionality, the RuleEngine can be directly removed from 
 ```solidity
 constructor(
     address admin,
+    address tokenContract
+)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| admin | address | Address granted DEFAULT_ADMIN_ROLE (has all roles); must not be zero |
+| tokenContract | address | Token to bind at deployment (can be zero) |
+
+#### RuleEngine2771 Constructor
+
+```solidity
+constructor(
+    address admin,
     address forwarderIrrevocable,
     address tokenContract
 )
@@ -722,9 +756,11 @@ constructor(
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| admin | address | Address granted DEFAULT_ADMIN_ROLE (has all roles) |
-| forwarderIrrevocable | address | ERC-2771 trusted forwarder address (can be zero) |
+| admin | address | Address granted DEFAULT_ADMIN_ROLE (has all roles); must not be zero |
+| forwarderIrrevocable | address | ERC-2771 trusted forwarder address, immutable |
 | tokenContract | address | Token to bind at deployment (can be zero) |
+
+> Up to v3.0.0-rc6, `RuleEngine` took the three parameters of `RuleEngine2771`. A deployment script that passes a forwarder must switch to `RuleEngine2771`; one that passes `address(0)` drops the middle argument.
 
 #### RuleEngineOwnable Constructor
 
@@ -1836,6 +1872,7 @@ The official documentation is available in the Foundry [website](https://getfoun
 | Scenario | Recommended Contract |
 |----------|---------------------|
 | Multiple operators with different permissions | `RuleEngine` |
+| Multiple operators, administration through gasless meta-transactions | `RuleEngine2771` |
 | Single administrator | `RuleEngineOwnable` |
 | Single administrator with safer ownership handover | `RuleEngineOwnable2Step` |
 | Integration with existing RBAC systems | `RuleEngine` |
@@ -1889,13 +1926,13 @@ forge script script/RuleEngineScript.s.sol:RuleEngineScript --rpc-url=127.0.0.1:
 
 #### Production Deployment Checklist
 
-- Choose the deployable variant: `RuleEngine`, `RuleEngineOwnable`, or `RuleEngineOwnable2Step`.
-- Choose the trusted forwarder address, or use `address(0)` if ERC-2771 support is not needed. A forwarder must be a signature-verifying ERC-2771 forwarder: it can relay administrative calls (rule management, binding) on behalf of any operator who signs them. It cannot act as a token (see [Gasless support](#gasless-support-erc-2771)).
+- Choose the deployable variant: `RuleEngine`, `RuleEngine2771`, `RuleEngineOwnable`, or `RuleEngineOwnable2Step`.
+- If ERC-2771 support is needed, choose the trusted forwarder address (`RuleEngine2771` or an ownable variant); otherwise deploy `RuleEngine`, or pass `address(0)` to an ownable variant. A forwarder must be a signature-verifying ERC-2771 forwarder: it can relay administrative calls (rule management, binding) on behalf of any operator who signs them. It cannot act as a token (see [Gasless support](#gasless-support-erc-2771)).
 - Decide whether the token should be bound in the constructor or later via `bindToken`.
 - **CMTAT:** bind the token on the engine (`engine.bindToken(cmtat)`, or the constructor's `tokenContract` argument) — CMTAT never self-binds, and an engine with no bound token rejects every transfer with `TokenBinding_UnauthorizedCaller`. Then point the token at the engine with `cmtat.setRuleEngine(engine)` (token `DEFAULT_ADMIN_ROLE`), or pass it at token construction.
 - **ERC-3643:** grant `setTokenSelfBindingApproval(token, true)` on the engine **before** calling `token.setCompliance(engine)`, which self-binds the token.
 - Source production rule contracts from the [CMTA/Rules](https://github.com/CMTA/Rules) repository, not from `src/mocks/`.
-- Verify post-deployment permissions: owner for ownable variants, or admin plus role assignments for the RBAC variant.
+- Verify post-deployment permissions: owner for ownable variants, or admin plus role assignments for the RBAC variants.
 
 ### Solidity style guideline
 

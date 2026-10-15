@@ -15,15 +15,16 @@ It is an *external controller*: the token calls the engine on every transfer, mi
 
 ## Contract Variants
 
-Three deployable contracts share the same core logic and differ only in access control:
+Four deployable contracts share the same core logic and differ only in access control and ERC-2771 support:
 
-| Contract | Access Control | Use Case |
-|----------|---------------|----------|
-| `RuleEngine` | Role-based (`AccessControlEnumerable`) | Multi-operator environments with granular permissions |
-| `RuleEngineOwnable` | ERC-173 `Ownable` | Single-owner setups, simpler administration |
-| `RuleEngineOwnable2Step` | ERC-173 `Ownable2Step` | Single-owner setups with safer ownership handover |
+| Contract | Access Control | ERC-2771 (gasless) | Use Case |
+|----------|---------------|--------------------|----------|
+| `RuleEngine` | Role-based (`AccessControlEnumerable`) | No | Multi-operator environments with granular permissions |
+| `RuleEngine2771` | Role-based (`AccessControlEnumerable`) | Yes (immutable trusted forwarder) | Same, with administration through meta-transactions |
+| `RuleEngineOwnable` | ERC-173 `Ownable` | Yes (forwarder can be zero) | Single-owner setups, simpler administration |
+| `RuleEngineOwnable2Step` | ERC-173 `Ownable2Step` | Yes (forwarder can be zero) | Single-owner setups with safer ownership handover |
 
-All three support ERC-1404 transfer restrictions, the ERC-3643 compliance interface, ERC-2771 meta-transactions (gasless), and multiple token bindings.
+All of them support ERC-1404 transfer restrictions, the ERC-3643 compliance interface and multiple token bindings.
 
 > **Warning (shared engine across multiple tokens):** one RuleEngine instance can be bound to several tokens, but they must be equally trusted and governed together. ERC-3643 callbacks do not pass the token address to rules, so stateful rules are not safe for mutually untrusted tokens sharing an engine.
 
@@ -58,7 +59,8 @@ RuleEngineBase (abstract)              — core logic, shared by all variants
 │   └── TokenBindingExtendedModule     — batch binding, token self-binding
 └── IRuleEngineERC1404                 — CMTAT interface
 
-RuleEngine               = RuleEngineBase + AccessControl + ERC2771ModuleStandalone
+RuleEngine               = RuleEngineAccessControlShared (RuleEngineBase + AccessControlEnumerable)
+RuleEngine2771           = RuleEngineAccessControlShared + ERC2771ModuleStandalone
 RuleEngineOwnable        = RuleEngineOwnableShared + Ownable      + ERC2771ModuleStandalone
 RuleEngineOwnable2Step   = RuleEngineOwnableShared + Ownable2Step + ERC2771ModuleStandalone
 ```
@@ -72,9 +74,11 @@ Modules declare access control as **virtual internal hooks** (`_onlyRulesManager
 ```
 src/
 ├── RuleEngineBase.sol              # abstract core logic (not deployable)
+├── RuleEngineAccessControlShared.sol # shared logic for the two RBAC variants
 ├── RuleEngineOwnableShared.sol     # shared logic for the two ownable variants
-├── deployment/                     # the three deployable contracts
+├── deployment/                     # the four deployable contracts
 │   ├── RuleEngine.sol
+│   ├── RuleEngine2771.sol
 │   ├── RuleEngineOwnable.sol
 │   └── RuleEngineOwnable2Step.sol
 ├── interfaces/                     # IRule, IRulesManagementModule, ITokenBinding(Extended),

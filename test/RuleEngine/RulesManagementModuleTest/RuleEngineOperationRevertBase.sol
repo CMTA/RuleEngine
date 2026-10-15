@@ -19,7 +19,7 @@ abstract contract RuleEngineOperationRevertBase is Test, HelperContract {
         cmtatContract = _deployCmtat();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, address(cmtatContract));
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, address(cmtatContract));
         RuleOperationRevertMock ruleOperationRevert = new RuleOperationRevertMock();
 
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);

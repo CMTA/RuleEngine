@@ -10,6 +10,6 @@ import {RuleAggregationTestBase} from "../utils/RuleAggregationTestBase.sol";
  */
 contract RuleAggregationTest is RuleAggregationTestBase {
     function _deployEngine(address admin, address token) internal override returns (address) {
-        return address(new RuleEngine(admin, address(0), token));
+        return address(new RuleEngine(admin, token));
     }
 }

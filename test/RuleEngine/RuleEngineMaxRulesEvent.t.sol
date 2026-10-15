@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {RuleEngine} from "src/deployment/RuleEngine.sol";
+import {RuleEngine2771} from "src/deployment/RuleEngine2771.sol";
 import {RuleEngineOwnable} from "src/deployment/RuleEngineOwnable.sol";
 import {RuleEngineOwnable2Step} from "src/deployment/RuleEngineOwnable2Step.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
@@ -20,7 +21,13 @@ contract RuleEngineMaxRulesEventTest is Test, RulesManagementModuleInvariantStor
     function testRuleEngineEmitsInitialMaxRulesOnDeployment() public {
         vm.expectEmit(true, true, true, true);
         emit SetMaxRules(DEFAULT_MAX_RULES);
-        new RuleEngine(ADMIN, FORWARDER, address(0));
+        new RuleEngine(ADMIN, address(0));
+    }
+
+    function testRuleEngine2771EmitsInitialMaxRulesOnDeployment() public {
+        vm.expectEmit(true, true, true, true);
+        emit SetMaxRules(DEFAULT_MAX_RULES);
+        new RuleEngine2771(ADMIN, FORWARDER, address(0));
     }
 
     function testRuleEngineOwnableEmitsInitialMaxRulesOnDeployment() public {

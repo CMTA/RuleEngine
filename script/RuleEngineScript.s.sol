@@ -49,7 +49,7 @@ contract RuleEngineScript is Script {
         listed[1] = address(0);
         ruleWhitelist.addAddressesToTheList(listed);
         // ruleEngine, bound to the CMTAT token
-        RuleEngine ruleEngine = new RuleEngine(admin, address(0), cmtatAddress);
+        RuleEngine ruleEngine = new RuleEngine(admin, cmtatAddress);
         console.log("RuleEngine: ", address(ruleEngine));
         ruleEngine.addRule(ruleWhitelist);
         // Configure the new ruleEngine for CMTAT.

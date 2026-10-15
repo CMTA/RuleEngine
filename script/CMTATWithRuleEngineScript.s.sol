@@ -48,7 +48,7 @@ contract CMTATWithRuleEngineScript is Script {
         RuleWhitelistMock ruleWhitelist = new RuleWhitelistMock(admin, trustedForwarder);
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
-        RuleEngine ruleEngine = new RuleEngine(admin, trustedForwarder, address(cmtatContract));
+        RuleEngine ruleEngine = new RuleEngine(admin, address(cmtatContract));
         console.log("RuleEngine : ", address(ruleEngine));
         ruleEngine.addRule(ruleWhitelist);
         cmtatContract.setRuleEngine(ruleEngine);

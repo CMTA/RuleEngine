@@ -44,7 +44,7 @@ contract ERC3643RealTokenRuleEngineTest is Test, TokenBindingModuleInvariantStor
         registry.setVerified(CAROL, true);
 
         vm.startPrank(ADMIN);
-        engine = new RuleEngine(ADMIN, address(0), address(0));
+        engine = new RuleEngine(ADMIN, address(0));
         whitelist = new RuleWhitelistMock(ADMIN, address(0));
         address[] memory listed = new address[](3);
         listed[0] = ALICE;
@@ -80,7 +80,7 @@ contract ERC3643RealTokenRuleEngineTest is Test, TokenBindingModuleInvariantStor
     /// @notice Without self-binding approval, `init` reverts on the engine's binding manager check.
     function testInitRevertsWithoutSelfBindingApproval() public {
         vm.prank(ADMIN);
-        RuleEngine engine2 = new RuleEngine(ADMIN, address(0), address(0));
+        RuleEngine engine2 = new RuleEngine(ADMIN, address(0));
         Token token2 = new Token();
 
         vm.expectRevert(
@@ -96,7 +96,7 @@ contract ERC3643RealTokenRuleEngineTest is Test, TokenBindingModuleInvariantStor
     /// @notice Re-pointing the token at a second engine unbinds it from the first (`unbindToken(this)`).
     function testSetComplianceMovesTheBinding() public {
         vm.startPrank(ADMIN);
-        RuleEngine engine2 = new RuleEngine(ADMIN, address(0), address(0));
+        RuleEngine engine2 = new RuleEngine(ADMIN, address(0));
         engine2.setTokenSelfBindingApproval(address(token), true);
         vm.stopPrank();
 

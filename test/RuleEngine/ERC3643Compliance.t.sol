@@ -69,7 +69,7 @@ contract RuleEngineTest is Test, HelperContract {
 
     function setUp() public {
         // Deploy RuleEngine with admin
-        ruleEngine = new RuleEngine(admin, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngine = new RuleEngine(admin, ZERO_ADDRESS);
 
         // Deploy multiple mock tokens
         token1 = new ERC3643MockToken(address(ruleEngine));
@@ -458,7 +458,7 @@ contract RuleEngineTest is Test, HelperContract {
     }
 
     function testTokenSetComplianceCanMigrateBetweenRuleEngines() public {
-        RuleEngine ruleEngine2 = new RuleEngine(admin, ZERO_ADDRESS, ZERO_ADDRESS);
+        RuleEngine ruleEngine2 = new RuleEngine(admin, ZERO_ADDRESS);
         ERC3643MockTokenWithSetCompliance trexLikeToken = new ERC3643MockTokenWithSetCompliance(user1);
 
         vm.startPrank(admin);

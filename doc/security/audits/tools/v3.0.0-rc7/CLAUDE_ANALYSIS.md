@@ -454,3 +454,20 @@ and the Hardhat smoke test; `forge fmt --check` is clean.
 | Authorization | unauthorized caller per protected function, rule as role holder or owner, relayed forwarder (rc7): tested | — |
 | Reentrancy | not tested at engine level. The obligation is on the rule (`RuleEngine-with-CMTAT.md` §4.6); the engine keeps no state across the loop that a re-entering rule could corrupt without a privileged role | — |
 | Events | 7 of 8 asserted before; `TokenSelfBindingApprovalSet`: **written**. All 8 now asserted | — |
+
+## Changes after this review: the RBAC split
+
+After this review, rc7 split the RBAC engine into `RuleEngine` (no ERC-2771, constructor `(admin, tokenContract)`)
+and `RuleEngine2771` (immutable trusted forwarder, the rc6 `RuleEngine` behaviour), sharing the new abstract
+`RuleEngineAccessControlShared`. Effect on the findings above:
+
+- **`G-2`:** the three "surcharge … MetaTxModule" sites of `RuleEngine.sol` and its misplaced `ERC-2771` section
+  header are gone. `RuleEngine2771` has accurate NatSpec on its ERC-2771 overrides. The other 9 sites (the ownable
+  variants and `RuleEngineOwnableShared`) remain.
+- **`E-2`:** the two `if/revert` sites of `RuleEngine.sol` (`:41`, `:64`) moved to `RuleEngineAccessControlShared`
+  as `require(cond, Error())`, so 9 `if/revert` sites remain.
+- **`H-2`:** unchanged. `RuleEngine` resolves every caller as `msg.sender` (OpenZeppelin `Context`); the two
+  token-identity sites were already `msg.sender`.
+- **Line numbers** cited above for `RuleEngine.sol` refer to commit `4946c87`.
+- **Tests:** 395 -> 409 (see the rc7 CHANGELOG). Coverage stays at 100% of lines, statements and functions, with
+  41/43 branches: the 2 missing are still the dead `OperationNotSuccessful` branches of `B-2`.

@@ -33,7 +33,7 @@ contract ERC3643TokenIntegrationTest is Test, TokenBindingModuleInvariantStorage
 
     function setUp() public {
         vm.startPrank(ADMIN);
-        engine = new RuleEngine(ADMIN, address(0), address(0));
+        engine = new RuleEngine(ADMIN, address(0));
         token = new ERC3643TokenMock();
 
         whitelist = new RuleWhitelistMock(ADMIN, address(0));
@@ -65,7 +65,7 @@ contract ERC3643TokenIntegrationTest is Test, TokenBindingModuleInvariantStorage
     /// @notice Re-pointing the token at a second engine unbinds it from the first.
     function testSetComplianceUnbindsThePreviousEngine() public {
         vm.startPrank(ADMIN);
-        RuleEngine engine2 = new RuleEngine(ADMIN, address(0), address(0));
+        RuleEngine engine2 = new RuleEngine(ADMIN, address(0));
         engine2.setTokenSelfBindingApproval(address(token), true);
         vm.stopPrank();
 
@@ -78,7 +78,7 @@ contract ERC3643TokenIntegrationTest is Test, TokenBindingModuleInvariantStorage
     /// @notice Without self-binding approval the token cannot bind itself.
     function testSetComplianceRevertsWithoutSelfBindingApproval() public {
         vm.prank(ADMIN);
-        RuleEngine engine2 = new RuleEngine(ADMIN, address(0), address(0));
+        RuleEngine engine2 = new RuleEngine(ADMIN, address(0));
 
         ERC3643TokenMock token2 = new ERC3643TokenMock();
         vm.expectRevert(
@@ -155,7 +155,7 @@ contract ERC3643TokenIntegrationTest is Test, TokenBindingModuleInvariantStorage
      */
     function testMintIsBlockedWhenZeroAddressNotListed() public {
         vm.startPrank(ADMIN);
-        RuleEngine engine2 = new RuleEngine(ADMIN, address(0), address(0));
+        RuleEngine engine2 = new RuleEngine(ADMIN, address(0));
         RuleWhitelistMock whitelist2 = new RuleWhitelistMock(ADMIN, address(0));
         address[] memory listed = new address[](1);
         listed[0] = BOB; // real holder only, zero address deliberately omitted
