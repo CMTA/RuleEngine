@@ -5,9 +5,9 @@
 | **Tool** | Slither 0.11.5 (run with `uvx --python 3.12 --from slither-analyzer==0.11.5`) |
 | **Scope** | `src/`, **mocks excluded** |
 | **Compiler** | solc 0.8.37, EVM Osaka, `pragma solidity ^0.8.27` |
-| **Contracts analysed** | 112 |
+| **Contracts analysed** | 111 |
 | **Date** | 2026-10-15 |
-| **Commit** | `850976f` + the `^0.8.27` pragma change (final rc7 code: six deployables) |
+| **Commit** | `3055fe2` (final rc7 code, after the code-quality review fixes) |
 
 ```bash
 slither . --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" \
@@ -19,17 +19,17 @@ slither . --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-st
 | Detector | Severity | Instances | Assessment |
 |---|---|---|---|
 | `calls-loop` | Low | 10 | **By design** — the engine iterates its rule set; bounded by `maxRules` (default 10) |
-| `unindexed-event-address` | Informational | 2 | **By design (spec conformance)** — `TokenBound` / `TokenUnbound` keep the unindexed signature of the ERC-3643 reference |
+| `unindexed-event-address` | Informational | 2 | **By design (spec conformance)** — `TokenBound` / `TokenUnbound` keep the unindexed signature of ERC-3643 |
 
 **Scope verified:** `grep -c 'lib/\|node_modules/'` = **0** and `grep -c 'src/mocks/'` = **0** in this report, so
 no vendored dependency or mock contract entered the analysis.
 
-**Delta from v3.0.0-rc6: none in findings.** Same two detectors, same 10 + 2 instances, in the same functions
-(`RulesManagementModule._transferred`, `RuleEngineBase` view loops, `ITokenBinding` events). rc7 changed `src/`
-substantially (the ERC-2771 token-identity fix, ERC-2771 made opt-in with six deployables, the shared
-`RuleEngineAccessControlShared` base, the `^0.8.27` pragma), but none of it touches a looped external call or an
-event: the contract count rose 108 -> 112 (the three `*2771` deployables and the shared base) with no new result.
-The report was run three times during rc7 (`a91ca9a`, `4946c87`, this final run) with the same 12 findings.
+**Delta from the previous rc7 run (`850976f` + pragma): none in findings.** Same two detectors, same 10 + 2
+instances, in the same functions; only `file:line` positions moved. The contract count drops 112 -> 111 because
+`RuleEngineAccessControlShared` was folded into `RuleEngine` (code-quality review `D-2`). The other changes made
+since (`A-3`, `B-1`, `B-2`, `E-2`, `I-1`, `G-2`, deployables moved to `src/deployment/accessControl/` and
+`src/deployment/ownable/`) touch the loops' bodies, the error style and comments, not the looped external calls
+or the events. **Delta from v3.0.0-rc6: none in findings** (108 contracts then).
 
 Triage and per-finding reasoning: [slither-report-feedback.md](./slither-report-feedback.md).
 Overview of all analyses: [AUDIT_OVERVIEW.md](../../AUDIT_OVERVIEW.md).
@@ -43,99 +43,99 @@ Summary
 Impact: Low
 Confidence: Medium
  - [ ] ID-0
-[RulesManagementModule._transferred(address,address,uint256)](src/modules/RulesManagementModule.sol#L211-L216) has external calls inside a loop: [IRule(_rules.pos(i)).transferred(from,to,value)](src/modules/RulesManagementModule.sol#L214)
-	Calls stack containing the loop:
-		RuleEngineBase.transferred(address,address,uint256)
-
-src/modules/RulesManagementModule.sol#L211-L216
-
-
- - [ ] ID-1
-[RuleEngineBase._messageForTransferRestriction(uint8)](src/RuleEngineBase.sol#L211-L222) has external calls inside a loop: [IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)](src/RuleEngineBase.sol#L217)
-	Calls stack containing the loop:
-		RuleEngineBase.messageForTransferRestriction(uint8)
-
-src/RuleEngineBase.sol#L211-L222
-
-
- - [ ] ID-2
-[RuleEngineBase._detectTransferRestriction(address,address,uint256)](src/RuleEngineBase.sol#L166-L175) has external calls inside a loop: [restriction = IRule(rule(i)).detectTransferRestriction(from,to,value)](src/RuleEngineBase.sol#L169)
-	Calls stack containing the loop:
-		RuleEngineBase.canTransfer(address,address,uint256)
-		RuleEngineBase.detectTransferRestriction(address,address,uint256)
-
-src/RuleEngineBase.sol#L166-L175
-
-
- - [ ] ID-3
-[RulesManagementModule._transferred(address,address,uint256)](src/modules/RulesManagementModule.sol#L211-L216) has external calls inside a loop: [IRule(_rules.pos(i)).transferred(from,to,value)](src/modules/RulesManagementModule.sol#L214)
-	Calls stack containing the loop:
-		RuleEngineBase.destroyed(address,uint256)
-
-src/modules/RulesManagementModule.sol#L211-L216
-
-
- - [ ] ID-4
-[RulesManagementModule._transferred(address,address,address,uint256)](src/modules/RulesManagementModule.sol#L230-L235) has external calls inside a loop: [IRule(_rules.pos(i)).transferred(spender,from,to,value)](src/modules/RulesManagementModule.sol#L233)
-	Calls stack containing the loop:
-		RuleEngineBase.transferred(address,address,address,uint256)
-
-src/modules/RulesManagementModule.sol#L230-L235
-
-
- - [ ] ID-5
-[RuleEngineBase._messageForTransferRestriction(uint8)](src/RuleEngineBase.sol#L211-L222) has external calls inside a loop: [IRule(rule(i)).messageForTransferRestriction(restrictionCode)](src/RuleEngineBase.sol#L218)
-	Calls stack containing the loop:
-		RuleEngineBase.messageForTransferRestriction(uint8)
-
-src/RuleEngineBase.sol#L211-L222
-
-
- - [ ] ID-6
-[RulesManagementModule._transferred(address,address,uint256)](src/modules/RulesManagementModule.sol#L211-L216) has external calls inside a loop: [IRule(_rules.pos(i)).transferred(from,to,value)](src/modules/RulesManagementModule.sol#L214)
+[RulesManagementModule._transferred(address,address,uint256)](src/modules/RulesManagementModule.sol#L205-L210) has external calls inside a loop: [IRule(_rules.pos(i)).transferred(from,to,value)](src/modules/RulesManagementModule.sol#L208)
 	Calls stack containing the loop:
 		RuleEngineBase.created(address,uint256)
 
-src/modules/RulesManagementModule.sol#L211-L216
+src/modules/RulesManagementModule.sol#L205-L210
 
 
- - [ ] ID-7
-[RuleEngineBase._detectTransferRestrictionFrom(address,address,address,uint256)](src/RuleEngineBase.sol#L185-L199) has external calls inside a loop: [restriction = IRule(rule(i)).detectTransferRestrictionFrom(spender,from,to,value)](src/RuleEngineBase.sol#L193)
+ - [ ] ID-1
+[RuleEngineBase._detectTransferRestrictionFrom(address,address,address,uint256)](src/RuleEngineBase.sol#L188-L202) has external calls inside a loop: [restriction = IRule(_rules.pos(i)).detectTransferRestrictionFrom(spender,from,to,value)](src/RuleEngineBase.sol#L196)
 	Calls stack containing the loop:
 		RuleEngineBase.canTransferFrom(address,address,address,uint256)
 		RuleEngineBase.detectTransferRestrictionFrom(address,address,address,uint256)
 
-src/RuleEngineBase.sol#L185-L199
+src/RuleEngineBase.sol#L188-L202
 
 
- - [ ] ID-8
-[RuleEngineBase._detectTransferRestrictionFrom(address,address,address,uint256)](src/RuleEngineBase.sol#L185-L199) has external calls inside a loop: [restriction = IRule(rule(i)).detectTransferRestrictionFrom(spender,from,to,value)](src/RuleEngineBase.sol#L193)
+ - [ ] ID-2
+[RuleEngineBase._messageForTransferRestriction(uint8)](src/RuleEngineBase.sol#L214-L226) has external calls inside a loop: [rule_.messageForTransferRestriction(restrictionCode)](src/RuleEngineBase.sol#L222)
+	Calls stack containing the loop:
+		RuleEngineBase.messageForTransferRestriction(uint8)
+
+src/RuleEngineBase.sol#L214-L226
+
+
+ - [ ] ID-3
+[RuleEngineBase._detectTransferRestrictionFrom(address,address,address,uint256)](src/RuleEngineBase.sol#L188-L202) has external calls inside a loop: [restriction = IRule(_rules.pos(i)).detectTransferRestrictionFrom(spender,from,to,value)](src/RuleEngineBase.sol#L196)
 	Calls stack containing the loop:
 		RuleEngineBase.detectTransferRestrictionFrom(address,address,address,uint256)
 
-src/RuleEngineBase.sol#L185-L199
+src/RuleEngineBase.sol#L188-L202
 
 
- - [ ] ID-9
-[RuleEngineBase._detectTransferRestriction(address,address,uint256)](src/RuleEngineBase.sol#L166-L175) has external calls inside a loop: [restriction = IRule(rule(i)).detectTransferRestriction(from,to,value)](src/RuleEngineBase.sol#L169)
+ - [ ] ID-4
+[RulesManagementModule._transferred(address,address,address,uint256)](src/modules/RulesManagementModule.sol#L225-L230) has external calls inside a loop: [IRule(_rules.pos(i)).transferred(spender,from,to,value)](src/modules/RulesManagementModule.sol#L228)
+	Calls stack containing the loop:
+		RuleEngineBase.transferred(address,address,address,uint256)
+
+src/modules/RulesManagementModule.sol#L225-L230
+
+
+ - [ ] ID-5
+[RulesManagementModule._transferred(address,address,uint256)](src/modules/RulesManagementModule.sol#L205-L210) has external calls inside a loop: [IRule(_rules.pos(i)).transferred(from,to,value)](src/modules/RulesManagementModule.sol#L208)
+	Calls stack containing the loop:
+		RuleEngineBase.transferred(address,address,uint256)
+
+src/modules/RulesManagementModule.sol#L205-L210
+
+
+ - [ ] ID-6
+[RulesManagementModule._transferred(address,address,uint256)](src/modules/RulesManagementModule.sol#L205-L210) has external calls inside a loop: [IRule(_rules.pos(i)).transferred(from,to,value)](src/modules/RulesManagementModule.sol#L208)
+	Calls stack containing the loop:
+		RuleEngineBase.destroyed(address,uint256)
+
+src/modules/RulesManagementModule.sol#L205-L210
+
+
+ - [ ] ID-7
+[RuleEngineBase._detectTransferRestriction(address,address,uint256)](src/RuleEngineBase.sol#L169-L178) has external calls inside a loop: [restriction = IRule(_rules.pos(i)).detectTransferRestriction(from,to,value)](src/RuleEngineBase.sol#L172)
 	Calls stack containing the loop:
 		RuleEngineBase.detectTransferRestriction(address,address,uint256)
 
-src/RuleEngineBase.sol#L166-L175
+src/RuleEngineBase.sol#L169-L178
+
+
+ - [ ] ID-8
+[RuleEngineBase._messageForTransferRestriction(uint8)](src/RuleEngineBase.sol#L214-L226) has external calls inside a loop: [rule_.canReturnTransferRestrictionCode(restrictionCode)](src/RuleEngineBase.sol#L221)
+	Calls stack containing the loop:
+		RuleEngineBase.messageForTransferRestriction(uint8)
+
+src/RuleEngineBase.sol#L214-L226
+
+
+ - [ ] ID-9
+[RuleEngineBase._detectTransferRestriction(address,address,uint256)](src/RuleEngineBase.sol#L169-L178) has external calls inside a loop: [restriction = IRule(_rules.pos(i)).detectTransferRestriction(from,to,value)](src/RuleEngineBase.sol#L172)
+	Calls stack containing the loop:
+		RuleEngineBase.canTransfer(address,address,uint256)
+		RuleEngineBase.detectTransferRestriction(address,address,uint256)
+
+src/RuleEngineBase.sol#L169-L178
 
 
 ## unindexed-event-address
 Impact: Informational
 Confidence: High
  - [ ] ID-10
-Event [ITokenBinding.TokenBound(address)](src/interfaces/ITokenBinding.sol#L20) has address parameters but no indexed parameters
+Event [ITokenBinding.TokenBound(address)](src/interfaces/ITokenBinding.sol#L23) has address parameters but no indexed parameters
 
-src/interfaces/ITokenBinding.sol#L20
+src/interfaces/ITokenBinding.sol#L23
 
 
  - [ ] ID-11
-Event [ITokenBinding.TokenUnbound(address)](src/interfaces/ITokenBinding.sol#L26) has address parameters but no indexed parameters
+Event [ITokenBinding.TokenUnbound(address)](src/interfaces/ITokenBinding.sol#L31) has address parameters but no indexed parameters
 
-src/interfaces/ITokenBinding.sol#L26
+src/interfaces/ITokenBinding.sol#L31
 
 

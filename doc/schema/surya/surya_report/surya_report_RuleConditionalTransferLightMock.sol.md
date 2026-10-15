@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/operation/RuleConditionalTransferLightMock.sol | 89607e259489744ca2824d83515be3694d2ffd25 |
+| ./mocks/rules/operation/RuleConditionalTransferLightMock.sol | 24061f4b8c7a78e6ea457fa036d79ad4d130bfaf |
 
 
 ### Contracts Description Table

@@ -45,7 +45,7 @@ concern a mock are labelled as such and do not apply to production deployments.
 | Tool | High | Medium | Low | Info | Relevant to fix? |
 |---|---|---|---|---|---|
 | Slither 0.11.5 | 0 | 0 | 10 | 2 | **No** |
-| Aderyn 0.6.5 | 0 | — | 8 (92 instances) | — | **No** (one improvement made: `L-2`, pragma corrected to `^0.8.27`) |
+| Aderyn 0.6.5 | 0 | — | 8 (90 instances) | — | **No** (one improvement made: `L-2`, pragma corrected to `^0.8.27`) |
 
 Every finding is by design, cosmetic, or a verified false positive. Highlights:
 
@@ -55,15 +55,15 @@ Every finding is by design, cosmetic, or a verified false positive. Highlights:
   match the ERC-3643 reference interface, which declares them unindexed. Conformance, not an oversight.
 - **`L-8 Unchecked Return` (Aderyn, 1)** — `_grantRole` in a constructor cannot return `false`. False positive.
 
-- **`L-2 Unspecific Solidity Pragma` (Aderyn, 27)** — the floating pragma is kept for integrators, but the
+- **`L-2 Unspecific Solidity Pragma` (Aderyn, 26)** — the floating pragma is kept for integrators, but the
   range it stated was false: the code needs solc 0.8.27 (`require` with a custom error). Every `src/` and
   `script/` file now declares `^0.8.27`.
 
-**Same findings as v3.0.0-rc6** in both tools, on the final rc7 code (six deployables, `850976f` + the pragma
-change). Slither: same 12 results, 108 -> 112 contracts. Aderyn: same 8 findings, 84 -> 92 instances, all from the
-two per-file detectors (`L-2`, `L-3`) on the four new files (`RuleEngine2771`, `RuleEngineOwnable2771`,
-`RuleEngineOwnable2Step2771`, `RuleEngineAccessControlShared`); nSLOC 683 -> 707 (+17 from the interface-ID
-libraries, which the rc6 run predates, +7 from the split). Under `src/`, rc7 changes the `VERSION` string, the
+**Same findings as v3.0.0-rc6** in both tools, on the final rc7 code (`3055fe2`: six deployables, after the
+code-quality review fixes). Slither: same 12 results, 108 -> 111 contracts. Aderyn: same 8 findings, 84 -> 90
+instances, all from the two per-file detectors (`L-2`, `L-3`) on the three new `*2771` deployables; nSLOC
+683 -> 694. An intermediate rc7 run (`850976f` + pragma) counted 112 contracts / 92 instances / 707 nSLOC, with
+the abstract `RuleEngineAccessControlShared` since folded into `RuleEngine` (`D-2`). Under `src/`, rc7 changes the `VERSION` string, the
 ERC-2771 token-identity fix, ERC-2771 made opt-in (six deployables) and the pragma; build updates (solc 0.8.37,
 EVM Osaka, CMTAT v3.3.0-rc4, forge-std v1.17.0) produced no finding. Earlier rc7 runs (`a91ca9a`, `4946c87`) gave
 the same findings.

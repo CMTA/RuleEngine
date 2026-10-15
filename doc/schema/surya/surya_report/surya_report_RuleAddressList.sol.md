@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/validation/abstract/RuleAddressList/RuleAddressList.sol | b7592fbe098734a0b6ebb5524fbf4878bf7294db |
+| ./mocks/rules/validation/abstract/RuleAddressList/RuleAddressList.sol | d79f80292cef8935e4773093dd9915684bb201fb |
 
 
 ### Contracts Description Table

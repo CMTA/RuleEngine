@@ -2,8 +2,8 @@
 
 **Tool:** [Aderyn](https://github.com/Cyfrin/aderyn) 0.6.5
 **Report file:** `doc/security/audits/tools/v3.0.0-rc7/aderyn-report.md`
-**Assessment date:** 2026-10-15 (commit `850976f` + the `^0.8.27` pragma change: the final rc7 code; earlier runs at `a91ca9a` and `4946c87`)
-**Scope:** `src/`, **mocks excluded** (`-x mocks`), 32 files analysed, 707 nSLOC, solc 0.8.37 / EVM Osaka, `pragma ^0.8.27`
+**Assessment date:** 2026-10-15 (commit `3055fe2`: the final rc7 code, after the code-quality review fixes; earlier runs at `a91ca9a`, `4946c87` and `850976f` + pragma)
+**Scope:** `src/`, **mocks excluded** (`-x mocks`), 31 files analysed, 694 nSLOC, solc 0.8.37 / EVM Osaka, `pragma ^0.8.27`
 
 ```bash
 aderyn -x mocks --output doc/security/audits/tools/v3.0.0-rc7/aderyn-report.md
@@ -14,15 +14,15 @@ aderyn -x mocks --output doc/security/audits/tools/v3.0.0-rc7/aderyn-report.md
 | ID | Finding | Tool Impact | Instances | Assessment | Decision |
 |----|---------|-------------|-----------|------------|----------|
 | L-1 | Centralization Risk | Low | 14 | The engine is by definition an admin-operated compliance controller | Accepted by design |
-| L-2 | Unspecific Solidity Pragma | Low | 27 | The floating range is kept for integrators, but it was wrong: raised from `^0.8.20` to the real floor `^0.8.27`; the build pins 0.8.37 | **Fixed (pragma corrected)**, floating kept by design |
-| L-3 | PUSH0 Opcode | Low | 32 | EVM target is Osaka, which includes PUSH0 (since Shanghai) | Accepted by design |
+| L-2 | Unspecific Solidity Pragma | Low | 26 | The floating range is kept for integrators, but it was wrong: raised from `^0.8.20` to the real floor `^0.8.27`; the build pins 0.8.37 | **Fixed (pragma corrected)**, floating kept by design |
+| L-3 | PUSH0 Opcode | Low | 31 | EVM target is Osaka, which includes PUSH0 (since Shanghai) | Accepted by design |
 | L-4 | Modifier Invoked Only Once | Low | 1 | `onlyRulesLimitManager`, kept for symmetry with the hook pattern | Cosmetic, kept |
 | L-5 | Empty Block | Low | 9 | The three access-control hooks × three access-control models; the modifier does the work | Accepted by design |
-| L-6 | Loop Contains `require`/`revert` | Low | 4 | Admin batch operations where fail-fast is the wanted behaviour | Accepted by design |
+| L-6 | Loop Contains `require`/`revert` | Low | 4 | Admin batch operations, atomic on purpose (code-quality review `C-3`) | Accepted by design |
 | L-7 | Costly operations inside loop | Low | 4 | Admin-gated batch writes; inherent to a batch operation | Accepted by design |
 | L-8 | Unchecked Return | Low | 1 | `_grantRole` cannot return `false` in a constructor | False positive |
 
-**0 High · 8 Low (92 instances). Nothing exploitable; one change made (`L-2`: pragma corrected to `^0.8.27`).**
+**0 High · 8 Low (90 instances). Nothing exploitable; one change made (`L-2`: pragma corrected to `^0.8.27`).**
 
 ## Scope verification
 
@@ -40,21 +40,33 @@ produced 84 such links, so it was re-run with the output inside the repository t
 
 ## Changes since v3.0.0-rc6
 
-**Same 8 findings, 84 -> 92 instances.**
+**Same 8 findings, 84 -> 90 instances** (92 at the intermediate rc7 run, before `D-2`).
 
-| ID | rc6 | rc7 | Why |
-|----|-----|-----|-----|
-| L-1 | 14 | 14 | RBAC instances moved from `RuleEngine.sol` to `RuleEngineAccessControlShared.sol` |
-| L-2 | 23 | **27** | +4 files (per-file detector) |
-| L-3 | 28 | **32** | +4 files (per-file detector) |
-| L-4 | 1 | 1 | — |
-| L-5 | 9 | 9 | RBAC hooks moved to `RuleEngineAccessControlShared.sol` |
-| L-6 / L-7 | 4 / 4 | 4 / 4 | — |
-| L-8 | 1 | 1 | Moved to `RuleEngineAccessControlShared.sol:41` |
+| ID | rc6 | rc7, `850976f` + pragma | rc7 final, `3055fe2` | Why |
+|----|-----|-----|-----|-----|
+| L-1 | 14 | 14 | 14 | RBAC instances: `RuleEngine.sol` -> `RuleEngineAccessControlShared.sol` -> back to `RuleEngine.sol` (`D-2`) |
+| L-2 | 23 | 27 | **26** | per-file detector: +4 files with the ERC-2771 split, −1 when the shared RBAC base was folded |
+| L-3 | 28 | 32 | **31** | same as L-2 |
+| L-4 | 1 | 1 | 1 | — |
+| L-5 | 9 | 9 | 9 | RBAC hooks back in `RuleEngine.sol` |
+| L-6 / L-7 | 4 / 4 | 4 / 4 | 4 / 4 | — |
+| L-8 | 1 | 1 | 1 | `RuleEngine.sol:40` (was `RuleEngineAccessControlShared.sol:41`) |
+
+**Changes after the intermediate rc7 run** (the code-quality review fixes, up to `3055fe2`):
+`RuleEngineAccessControlShared` folded into `RuleEngine`, so `RuleEngine2771 is ERC2771ModuleStandalone, RuleEngine`
+(`D-2`), and the six deployables moved to `src/deployment/accessControl/` and `src/deployment/ownable/`; view loops
+read `_rules` directly (`A-3`, `B-1`); `addRule` / `removeRule` use the set's return value and the unreachable
+`OperationNotSuccessful` error is gone (`B-2`); every conditional `revert` became a `require` (`E-2`); `IRule`
+narrowed with the legacy ID still accepted (`I-1`); stale NatSpec fixed (`G-2`). None produced a new finding.
+nSLOC 707 -> 694, per file: `RuleEngine` 5 -> 54 and `RuleEngineAccessControlShared` 54 -> 0 (the fold),
+`RuleEngineBase` 145 -> 153 (`_supportsRuleInterface`, the `EnumerableSet` using-directive), `RulesManagementModule`
+109 -> 96 (`B-2`, `E-2`), `IRule` 5 -> 8 (the narrowed interface declares its own `transferred`),
+`RuleEngineOwnableShared` 23 -> 21, `TokenBindingModule` 51 -> 49, `RuleInterfaceId` 13 -> 12 and
+`RulesManagementModuleInvariantStorage` 17 -> 16 (`E-2`, `B-2`, `I-1`).
 
 **Where the change comes from.** rc7 made ERC-2771 opt-in: each access-control model now has a deployable
 without a forwarder (`RuleEngine`, `RuleEngineOwnable`, `RuleEngineOwnable2Step`) and a `*2771` deployable with one,
-and the RBAC logic moved to the abstract `RuleEngineAccessControlShared`. That adds four files. The three `*2771`
+and the RBAC logic moved to the abstract `RuleEngineAccessControlShared` (folded back into `RuleEngine` later, `D-2`). That added four files at the intermediate run. The three `*2771`
 contracts contain only a constructor and the three `Context` overrides, so they appear in the two per-file
 detectors and nowhere else: no centralization, empty-block or unchecked-return instance is duplicated, because the
 hooks and the constructor are inherited, not re-declared.
@@ -64,8 +76,8 @@ hooks and the constructor are inherited, not re-declared.
 `type(I).interfaceId` XOR expressions (`bdd59fd`, 17:22), so rc7 is the first run on their final form. +7 from the
 deployable split.
 
-**Runs:** `a91ca9a` (2026-10-14) and `4946c87` (2026-10-15) gave 84 instances on the pre-split code; this final run
-is on the six-deployable code with the corrected pragma. The ERC-2771 token-identity fix (`4946c87`) replaced
+**Runs:** `a91ca9a` (2026-10-14) and `4946c87` (2026-10-15) gave 84 instances on the pre-split code; `850976f` +
+pragma gave 92 on the six-deployable code; this final run at `3055fe2` gives 90. The ERC-2771 token-identity fix (`4946c87`) replaced
 `_msgSender()` with `msg.sender` in place and produced no finding.
 
 The build changes (solc 0.8.37, EVM Osaka, CMTAT v3.3.0-rc4, forge-std v1.17.0) produced nothing either.
@@ -74,8 +86,8 @@ The build changes (solc 0.8.37, EVM Osaka, CMTAT v3.3.0-rc4, forge-std v1.17.0) 
 
 ### L-1: Centralization Risk (14 instances)
 
-Flags the `onlyRole` / `onlyOwner` privileged functions: the RBAC ones in `RuleEngineAccessControlShared` and the
-ownable ones in `RuleEngineOwnable` / `RuleEngineOwnable2Step`. The `*2771` deployables inherit them and add none.
+Flags the `onlyRole` / `onlyOwner` privileged functions: the RBAC ones in `RuleEngine` and the
+ownable ones in `RuleEngineOwnable` / `RuleEngineOwnable2Step`. The `*2771` deployables inherit them and add none (`RuleEngine2771` extends `RuleEngine`).
 
 The RuleEngine is a compliance controller: an operator must be able to add and remove rules and bind tokens, or
 the contract has no purpose. The project deliberately ships three access-control shapes — RBAC (`RuleEngine`),
@@ -85,7 +97,7 @@ compliance contract.
 
 **Decision: accepted by design.**
 
-### L-2: Unspecific Solidity Pragma (27 instances) — pragma corrected
+### L-2: Unspecific Solidity Pragma (26 instances) — pragma corrected
 
 Every `src/` file declared `pragma solidity ^0.8.20;`, now **`^0.8.27`**.
 
@@ -109,11 +121,11 @@ The code uses `require(cond, CustomError())`, available on the legacy pipeline f
 `script/` now declares `^0.8.27`, the real floor. A consumer on 0.8.26 now gets a clear "no matching version" error
 from the pragma instead of a compile error deep in a `require`. Checked: `forge build --use 0.8.27` succeeds, 0.8.26
 is rejected by the pragma, and the full suite (default profile on 0.8.37, `erc3643` profile on 0.8.30, Hardhat)
-passes. The count rose 23 -> 27 with the four new files, unrelated to the fix.
+passes. The count moved 23 -> 27 -> 26 with the files added and folded during rc7, unrelated to the fix.
 
 **Decision: floating pragma accepted by design; its range corrected to `^0.8.27`.**
 
-### L-3: PUSH0 Opcode (32 instances)
+### L-3: PUSH0 Opcode (31 instances)
 
 `foundry.toml` sets `evm_version = 'osaka'` (Prague up to rc6). PUSH0 has been available since Shanghai, so its presence is
 expected for the declared target. A chain that has not adopted Shanghai must recompile with a lower
@@ -123,7 +135,7 @@ expected for the declared target. A chain that has not adopted Shanghai must rec
 
 ### L-4: Modifier Invoked Only Once (1 instance)
 
-`onlyRulesLimitManager` at `RulesManagementModule.sol:21` guards `setMaxRules` and nothing else. Inlining it
+`onlyRulesLimitManager` at `RulesManagementModule.sol:23` guards `setMaxRules` and nothing else. Inlining it
 would break the documented pattern in which every protected operation goes through a virtual `_onlyX` hook
 wrapped in an `onlyX` modifier, so each deployable variant can override the authorization independently.
 
@@ -131,8 +143,8 @@ wrapped in an `onlyX` modifier, so each deployable variant can override the auth
 
 ### L-5: Empty Block (9 instances)
 
-All nine are the same three hooks, declared once per access-control model (`RuleEngineAccessControlShared`,
-`RuleEngineOwnable`, `RuleEngineOwnable2Step`; the `*2771` deployables inherit them):
+All nine are the same three hooks, declared once per access-control model (`RuleEngine.sol:104/109/114`,
+`RuleEngineOwnable.sol:35/40/45`, `RuleEngineOwnable2Step.sol:55/60/65`; the `*2771` deployables inherit them):
 
 ```solidity
 function _onlyComplianceManager() internal virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {}
@@ -149,10 +161,13 @@ The body is empty because the modifier performs the check — the core access-co
 ### L-6: Loop Contains `require`/`revert` (4 instances)
 
 `TokenBindingExtendedModule` lines 39, 46 and 65 (`bindTokens`, `unbindTokens`,
-`setTokenSelfBindingApprovalBatch`) and `RulesManagementModule.setRules` line 62.
+`setTokenSelfBindingApprovalBatch`) and `RulesManagementModule.setRules` line 60.
 
 These are administrative batch operations. Reverting the whole batch on a bad element is the wanted semantics: a
-partially-applied compliance change is worse than a rejected one.
+partially-applied compliance change is worse than a rejected one. For `bindTokens` / `unbindTokens` this is now a
+recorded decision (code-quality review `C-3`): they stay atomic, unlike the skip-if-already-done convention of
+the reference `RuleAddressList` batches, because a binding change is security-relevant; the NatSpec of both
+functions and `TokenBinding-module.md` §4 say so, and tests pin the rollback.
 
 **Decision: accepted by design.**
 
@@ -168,7 +183,7 @@ Recorded as `A-3` in the rc5 `CLAUDE_ANALYSIS.md`, where the same conclusion was
 
 ### L-8: Unchecked Return (1 instance) — false positive
 
-`RuleEngineAccessControlShared.sol:41` (moved from `RuleEngine.sol` by the rc7 RBAC split):
+`RuleEngine.sol:40` (in `RuleEngineAccessControlShared.sol` at the intermediate rc7 run, back in `RuleEngine` since `D-2`):
 
 ```solidity
 _grantRole(DEFAULT_ADMIN_ROLE, admin);

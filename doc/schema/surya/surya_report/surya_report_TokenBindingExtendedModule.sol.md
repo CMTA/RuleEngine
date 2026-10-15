@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/TokenBindingExtendedModule.sol | e1440bc3566811a018a53341f62f5ea2b350eff4 |
+| ./modules/TokenBindingExtendedModule.sol | 07e45e7ed920f4a2a7cc4e53ce13eef9de80549a |
 
 
 ### Contracts Description Table

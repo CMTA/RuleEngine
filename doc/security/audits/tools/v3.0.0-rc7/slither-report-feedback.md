@@ -2,8 +2,8 @@
 
 **Tool:** [Slither](https://github.com/crytic/slither) 0.11.5 (run with `uvx --python 3.12 --from slither-analyzer==0.11.5`)
 **Report file:** `doc/security/audits/tools/v3.0.0-rc7/slither-report.md`
-**Assessment date:** 2026-10-15 (commit `850976f` + the `^0.8.27` pragma change: the final rc7 code; earlier runs at `a91ca9a` and `4946c87` gave the same findings)
-**Scope:** `src/`, **mocks excluded**, 112 contracts analysed, solc 0.8.37 / EVM Osaka, `pragma ^0.8.27`
+**Assessment date:** 2026-10-15 (commit `3055fe2`: the final rc7 code, after the code-quality review fixes; earlier runs at `a91ca9a`, `4946c87` and `850976f` + pragma gave the same findings)
+**Scope:** `src/`, **mocks excluded**, 111 contracts analysed, solc 0.8.37 / EVM Osaka, `pragma ^0.8.27`
 
 ```bash
 slither . --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" \
@@ -54,8 +54,17 @@ That holds although rc7 changed `src/` substantially, and it is worth recording 
   depends on it; the output is identical before and after.
 - `VERSION` string, `forge fmt` re-wrap of two interface-ID constants.
 
-**Runs:** `a91ca9a` (2026-10-14), `4946c87` and this final run (2026-10-15). Same 12 findings each time; only
-`file:line` positions moved with the edited files.
+- **Code-quality review fixes, after the previous run** (up to `3055fe2`): `RuleEngineAccessControlShared` folded
+  into `RuleEngine`, so `RuleEngine2771` extends `RuleEngine` (`D-2`; 112 -> 111 contracts); the deployables moved
+  to `src/deployment/accessControl/` and `src/deployment/ownable/`; the view loops read `_rules` directly and
+  cache the rule (`A-3`, `B-1`); `addRule` / `removeRule` rely on the set's return value (`B-2`); every
+  conditional `revert` became a `require` (`E-2`); `IRule` was narrowed with the legacy ID still accepted
+  (`I-1`); stale NatSpec fixed (`G-2`). The `calls-loop` instances are the same calls in the same five functions
+  (`IRule(_rules.pos(i))` instead of `IRule(rule(i))` in the views); the events are unchanged, and their NatSpec
+  now records why they stay unindexed.
+
+**Runs:** `a91ca9a` (2026-10-14), `4946c87`, `850976f` + pragma, and this final run at `3055fe2` (2026-10-15).
+Same 12 findings each time; only `file:line` positions moved with the edited files.
 
 The rest of rc7 is build and dependency changes: solc 0.8.36 -> **0.8.37**, EVM Prague -> **Osaka**, CMTAT
 v3.3.0-rc4 (NatSpec-only change to `IRuleEngine`), forge-std v1.17.0, and T-REX 4.2.0-beta1 in `lib/ERC-3643`.
@@ -70,9 +79,11 @@ results are comparable with rc6.
 
 ### IDs 0-9: `calls-loop`
 
-Ten instances across `RulesManagementModule._transferred` (both overloads),
-`RuleEngineBase._detectTransferRestriction`, `_detectTransferRestrictionFrom` and
-`_messageForTransferRestriction`.
+Ten instances across `RulesManagementModule._transferred` (both overloads, `RulesManagementModule.sol:205-210`
+and `:225-230`), `RuleEngineBase._detectTransferRestriction` (`RuleEngineBase.sol:169-178`),
+`_detectTransferRestrictionFrom` (`:188-202`) and `_messageForTransferRestriction` (`:214-226`). Slither counts one
+instance per call path that reaches the loop (for example `created`, `destroyed` and `transferred` all reach the
+3-argument `_transferred`).
 
 The engine exists to call a configurable list of rule contracts, so an external call inside a loop is the
 product, not a defect. The risk the detector points at — unbounded iteration — is bounded on-chain by
@@ -87,8 +98,8 @@ configured as a rule, and the documentation states that rule contracts must not 
 
 ### IDs 10-11: `unindexed-event-address`
 
-`TokenBound(address token)` and `TokenUnbound(address token)`, now declared in `ITokenBinding.sol` (lines 20 and
-26), pass their address parameter without `indexed`.
+`TokenBound(address token)` and `TokenUnbound(address token)`, declared in `ITokenBinding.sol` (lines 23 and
+31), pass their address parameter without `indexed`.
 
 The ERC-3643 reference implementation declares the same two events **unindexed**:
 
@@ -110,6 +121,9 @@ already understands.
 
 Note the contrast with `TokenSelfBindingApprovalSet`, which *is* indexed: it is specific to this project's
 extended module and carries no conformance obligation, so indexing it was free.
+
+Since the code-quality review (`C-2`), the NatSpec of both events in `ITokenBinding.sol` says they mirror the
+ERC-3643 declaration and must stay non-indexed, so the decision is recorded next to the code.
 
 **Decision: accepted by design (spec conformance).**
 

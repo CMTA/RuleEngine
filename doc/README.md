@@ -538,7 +538,7 @@ contract's surface.
 #### RuleEngine
 ![RuleEngineUML](./schema/sol2uml/RuleEngineUML.png)
 
-> The UML above predates the v3.0.0-rc7 split: it shows the RBAC engine with ERC-2771, which is now `RuleEngine2771`. The Surya inheritance graphs below are current.
+![RuleEngine2771UML](./schema/sol2uml/RuleEngine2771UML.png)
 
 ![surya_inheritance_RuleEngine](./schema/surya/surya_inheritance/surya_inheritance_RuleEngine.sol.png)
 ![surya_inheritance_RuleEngine2771](./schema/surya/surya_inheritance/surya_inheritance_RuleEngine2771.sol.png)
@@ -563,7 +563,7 @@ RuleEngine2771
 
 `RuleEngineOwnable` shares the same base functionality as `RuleEngine` but uses ERC-173 ownership instead of RBAC.
 
-> The UML above predates the v3.0.0-rc7 split: it shows the ownable engine with ERC-2771, which is now `RuleEngineOwnable2771`. The Surya inheritance graphs below are current.
+![RuleEngineOwnable2771UML](./schema/sol2uml/RuleEngineOwnable2771UML.png)
 
 ![surya_inheritance_RuleEngineOwnable](./schema/surya/surya_inheritance/surya_inheritance_RuleEngineOwnable.sol.png)
 ![surya_inheritance_RuleEngineOwnable2771](./schema/surya/surya_inheritance/surya_inheritance_RuleEngineOwnable2771.sol.png)
@@ -597,7 +597,7 @@ RuleEngineOwnable2771
 
 `RuleEngineOwnable2Step` shares the same base functionality as `RuleEngineOwnable` but uses OpenZeppelin's `Ownable2Step` for safer ownership handover.
 
-> The UML above predates the v3.0.0-rc7 split: it shows the two-step engine with ERC-2771, which is now `RuleEngineOwnable2Step2771`. The Surya inheritance graphs below are current.
+![RuleEngineOwnable2Step2771UML](./schema/sol2uml/RuleEngineOwnable2Step2771UML.png)
 
 ![surya_inheritance_RuleEngineOwnable2Step](./schema/surya/surya_inheritance/surya_inheritance_RuleEngineOwnable2Step.sol.png)
 ![surya_inheritance_RuleEngineOwnable2Step2771](./schema/surya/surya_inheritance/surya_inheritance_RuleEngineOwnable2Step2771.sol.png)
@@ -852,6 +852,7 @@ constructor(
 | └ | _detectTransferRestrictionFrom | Internal 🔒 |   | |
 | └ | _messageForTransferRestriction | Internal 🔒 |   | |
 | └ | _checkRule | Internal 🔒 |   | |
+| └ | _supportsRuleInterface | Internal 🔒 |   | |
 | └ | _supportsRuleEngineBaseInterface | Internal 🔒 |   | |
 
 
@@ -861,6 +862,16 @@ constructor(
 | :----: | ------------------------- |
 |   🛑    | Function can modify state |
 |   💵    | Function is payable       |
+
+#### IRule
+
+![IRuleUML](./schema/sol2uml/IRuleUML.png)
+
+What every rule implements (`src/interfaces/IRule.sol`). The diagram shows the two functions `IRule` declares
+itself; it also inherits `IERC1404Extend` (`detectTransferRestriction`, `detectTransferRestrictionFrom`,
+`messageForTransferRestriction`), `IERC3643IComplianceContract` (3-argument `transferred`) and `IERC165`, all
+described below. ERC-165 ID `0xb1a69752`; the legacy `0x2497d6cb` (which also includes `canTransfer` /
+`canTransferFrom`) is still accepted by the engine.
 
 #### IRuleEngine
 
