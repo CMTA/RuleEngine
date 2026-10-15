@@ -296,6 +296,8 @@ Key points:
 - Use `HelperContractOwnable2Step` for `RuleEngineOwnable2Step` tests
 - Always use specific error selectors in `vm.expectRevert()`
 - When adding a feature to `RuleEngineBase`, add tests for **all deployable variants**
+- Behaviour shared by the three variants is tested once in an abstract base under `test/utils/` (`ERC2771TokenGateTestBase`, `RuleAggregationTestBase`), with a short per-variant file in each `test/RuleEngine*/` directory that only deploys the variant
+- Before trusting a new test, check it can fail: break the line it guards and run the suite (the rc7 code-quality review mutation-tests the suite this way)
 
 ## RBAC Roles (RuleEngine only)
 

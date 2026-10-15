@@ -1686,7 +1686,7 @@ Here a summary of the main documentation
 | Token binding module (reusable outside this project) | [doc/technical/TokenBinding-module.md](./technical/TokenBinding-module.md) |
 | Toolchain    | [doc/TOOLCHAIN.md](./TOOLCHAIN.md)  |
 | Surya report | [doc/schema/surya](./schema/surya/) |
-| Code-quality review | [doc/security/audits/tools/v3.0.0-rc6/CLAUDE_ANALYSIS.md](./security/audits/tools/v3.0.0-rc6/CLAUDE_ANALYSIS.md) |
+| Code-quality review (incl. tests) | [doc/security/audits/tools/v3.0.0-rc7/CLAUDE_ANALYSIS.md](./security/audits/tools/v3.0.0-rc7/CLAUDE_ANALYSIS.md) |
 | Script review | [doc/security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md](./security/audits/tools/v3.0.0-rc5/CLAUDE_ANALYSIS_SCRIPT.md) |
 | Audit overview | [doc/security/audits/AUDIT_OVERVIEW.md](./security/audits/AUDIT_OVERVIEW.md) |
 

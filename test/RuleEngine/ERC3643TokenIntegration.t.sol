@@ -3,6 +3,7 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {RuleEngine} from "src/deployment/RuleEngine.sol";
 import {ERC3643TokenMock} from "src/mocks/ERC3643TokenMock.sol";
 import {RuleWhitelistMock} from "src/mocks/rules/validation/RuleWhitelistMock.sol";
@@ -13,7 +14,8 @@ import {TokenBindingModuleInvariantStorage} from "src/modules/library/TokenBindi
 /**
  * @title ERC3643TokenIntegrationTest
  * @notice Drives the RuleEngine through the ERC-3643 entry points, using a token whose compliance
- * interaction is modelled on `Token.sol` from the reference implementation in `lib/ERC-3643` (4.1.3).
+ * interaction is modelled on `Token.sol` from the ERC-3643 reference implementation (T-REX 4.1.3). The real
+ * token (T-REX 4.2.0-beta1, `lib/ERC-3643`) is exercised by `test/ERC3643Real/` under `FOUNDRY_PROFILE=erc3643`.
  * @dev Covers the entry points an ERC-3643 token actually uses: the `setCompliance` self-binding
  * dance, `transferred(from, to, value)` for transfers, and `created` / `destroyed` for mint and
  * burn. An ERC-3643 token never reaches the 4-argument `transferred(spender, ...)` overload, which
@@ -79,7 +81,13 @@ contract ERC3643TokenIntegrationTest is Test, TokenBindingModuleInvariantStorage
         RuleEngine engine2 = new RuleEngine(ADMIN, address(0), address(0));
 
         ERC3643TokenMock token2 = new ERC3643TokenMock();
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                address(token2),
+                engine2.COMPLIANCE_MANAGER_ROLE()
+            )
+        );
         token2.setCompliance(address(engine2));
     }
 
@@ -101,7 +109,7 @@ contract ERC3643TokenIntegrationTest is Test, TokenBindingModuleInvariantStorage
         token.mint(ALICE, 100);
 
         vm.prank(ALICE);
-        vm.expectRevert();
+        vm.expectRevert(ERC3643TokenMock.ERC3643TokenMock_ComplianceNotFollowed.selector);
         token.transfer(CAROL, 10);
     }
 

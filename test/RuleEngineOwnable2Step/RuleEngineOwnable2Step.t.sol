@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
+import {ITokenBindingExtended} from "src/interfaces/ITokenBindingExtended.sol";
 import {Test} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -45,6 +46,18 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
 
     function testHasRightVersion() public view {
         assertEq(ruleEngineMock.version(), "3.0.0-rc7");
+    }
+
+    function testSetTokenSelfBindingApprovalEmitsEvent() public {
+        vm.expectEmit(true, false, false, true, address(ruleEngineMock));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), true);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApproval(address(0x7070), true);
+
+        vm.expectEmit(true, false, false, true, address(ruleEngineMock));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), false);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApproval(address(0x7070), false);
     }
 
     function testCannotDeployContractIfOwnerAddressIsZero() public {

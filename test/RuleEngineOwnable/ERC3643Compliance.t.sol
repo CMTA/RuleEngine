@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import {ITokenBindingExtended} from "src/interfaces/ITokenBindingExtended.sol";
 import {Test} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -215,6 +216,18 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, user1));
         vm.prank(user1);
         ruleEngineMock.setTokenSelfBindingApproval(address(token1), true);
+    }
+
+    function testSetTokenSelfBindingApprovalEmitsEvent() public {
+        vm.expectEmit(true, false, false, true, address(ruleEngineMock));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), true);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApproval(address(0x7070), true);
+
+        vm.expectEmit(true, false, false, true, address(ruleEngineMock));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), false);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApproval(address(0x7070), false);
     }
 
     function testCannotSetTokenSelfBindingApprovalForZeroAddress() public {

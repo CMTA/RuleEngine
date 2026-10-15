@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import {ITokenBindingExtended} from "src/interfaces/ITokenBindingExtended.sol";
 import {Test} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
@@ -268,6 +269,18 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngine.setTokenSelfBindingApproval(address(token1), true);
     }
 
+    function testSetTokenSelfBindingApprovalEmitsEvent() public {
+        vm.expectEmit(true, false, false, true, address(ruleEngine));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), true);
+        vm.prank(operator);
+        ruleEngine.setTokenSelfBindingApproval(address(0x7070), true);
+
+        vm.expectEmit(true, false, false, true, address(ruleEngine));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), false);
+        vm.prank(operator);
+        ruleEngine.setTokenSelfBindingApproval(address(0x7070), false);
+    }
+
     function testCannotSetTokenSelfBindingApprovalForZeroAddress() public {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_InvalidTokenAddress.selector);
         vm.prank(operator);
@@ -399,6 +412,21 @@ contract RuleEngineTest is Test, HelperContract {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenAlreadyBound.selector);
         vm.prank(operator);
         ruleEngine.bindTokens(tokens);
+    }
+
+    /// @notice A token listed twice in one batch reverts on its second occurrence, and the whole batch rolls back.
+    function testCannotBindTokensBatchWithDuplicateToken() public {
+        address[] memory tokens = new address[](3);
+        tokens[0] = address(token1);
+        tokens[1] = address(token2);
+        tokens[2] = address(token1);
+
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenAlreadyBound.selector);
+        vm.prank(operator);
+        ruleEngine.bindTokens(tokens);
+
+        assertFalse(ruleEngine.isTokenBound(address(token1)));
+        assertFalse(ruleEngine.isTokenBound(address(token2)));
     }
 
     function testCannotUnbindTokensBatchWithTokenNotBound() public {
