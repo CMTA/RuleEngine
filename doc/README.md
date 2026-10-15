@@ -1242,6 +1242,8 @@ under `ERC3643ComplianceExtendedModule`, since that is the form in which the Rul
 | └ | setTokenSelfBindingApprovalBatch | Public ❗️ | 🛑  | onlyTokenBindingManager |
 | └ | isTokenSelfBindingApproved | Public ❗️ |   |NO❗️ |
 | └ | getTokenBounds | Public ❗️ |   |NO❗️ |
+| └ | _unbindToken | Internal 🔒 | 🛑  | |
+| └ | _setTokenSelfBindingApproval | Internal 🔒 | 🛑  | |
 | └ | _authorizeTokenBindingChange | Internal 🔒 | 🛑  | |
 
 ### ERC3643ComplianceModule

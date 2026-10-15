@@ -36,4 +36,14 @@ abstract contract ERC3643ComplianceExtendedModule is
     {
         TokenBindingExtendedModule._authorizeTokenBindingChange(token);
     }
+
+    /**
+     * @dev Disambiguates {_unbindToken}, inherited through {TokenBindingExtendedModule} and through
+     * {ERC3643ComplianceModule}. The extended behaviour wins: a manager unbind also revokes the token's
+     * self-binding approval.
+     * @param token The token to unbind.
+     */
+    function _unbindToken(address token) internal virtual override(TokenBindingModule, TokenBindingExtendedModule) {
+        TokenBindingExtendedModule._unbindToken(token);
+    }
 }

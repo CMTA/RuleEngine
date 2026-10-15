@@ -53,6 +53,8 @@ interface ITokenBindingExtended is ITokenBinding {
      * @dev Must be restricted by implementation-specific access control.
      * Atomic: reverts if any token is not currently bound, and then unbinds none of them. Deliberately not
      * the skip-if-already-done batch convention, for the same reason as {bindTokens}. An empty array is a no-op.
+     * Like a manager's {unbindToken}, revokes each token's self-binding approval (see
+     * {setTokenSelfBindingApproval}).
      * @param tokens The token addresses to unbind.
      */
     function unbindTokens(address[] calldata tokens) external;
@@ -60,6 +62,9 @@ interface ITokenBindingExtended is ITokenBinding {
     /**
      * @notice Sets whether a token is allowed to bind and unbind itself.
      * @dev Must be restricted by implementation-specific access control.
+     * An approval stays in force until it is revoked here or until the binding manager unbinds the token
+     * ({unbindToken} or {unbindTokens}), which revokes it and emits {TokenSelfBindingApprovalSet} with `false`.
+     * A token that unbinds itself keeps its approval, so it can bind itself again later.
      * @param token The token address to configure.
      * @param approved Whether self-binding is approved for `token`.
      */

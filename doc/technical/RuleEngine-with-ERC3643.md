@@ -83,6 +83,8 @@ engine.isTokenSelfBindingApproved(address(token));          // -> true
 2. Call `token.setCompliance(address(engine))`.
 3. Optionally revoke the approval afterwards if no further migration is expected.
 
+If the binding manager later unbinds the token (`unbindToken` / `unbindTokens`), the engine also revokes its self-binding approval, so the token cannot bind itself again without a new approval. A token that unbinds itself, when `setCompliance` moves it to another compliance contract, keeps its approval and can come back.
+
 Without step 1, `setCompliance` reverts. This is exercised by
 `testSetComplianceRevertsWithoutSelfBindingApproval`.
 

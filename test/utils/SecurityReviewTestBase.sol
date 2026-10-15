@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import {Test} from "forge-std/Test.sol";
+import {Test, Vm} from "forge-std/Test.sol";
+import {ITokenBindingExtended} from "src/interfaces/ITokenBindingExtended.sol";
 import {IRule} from "src/interfaces/IRule.sol";
 import {IRulesManagementModule} from "src/interfaces/IRulesManagementModule.sol";
 import {RuleEngineBase} from "src/RuleEngineBase.sol";
@@ -105,24 +106,67 @@ abstract contract SecurityReviewTestBase is Test {
         engine.destroyed(HOLDER, 1);
     }
 
-    /* ============ TB-2: self-binding approval survives an administrative unbind ============ */
+    /* ============ TB-2 / F-2: an administrative unbind revokes the self-binding approval ============ */
 
-    /// @notice TB-2 (proof of concept). The manager unbinds a token approved for self-binding; while the approval
-    /// stands, the token binds itself again and regains access to the rules.
-    function testApprovedTokenRebindsItselfAfterManagerUnbinds() public {
+    /// @notice F-2 regression (was the TB-2 proof of concept). When the manager unbinds a token approved for
+    /// self-binding, the approval is revoked with a `TokenSelfBindingApprovalSet(token, false)` event, so the
+    /// token cannot bind itself again.
+    function testManagerUnbindRevokesSelfBindingApproval() public {
         vm.startPrank(ADMIN);
         engine.setTokenSelfBindingApproval(TOKEN_2, true);
         engine.bindToken(TOKEN_2);
+        vm.expectEmit(address(engine));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(TOKEN_2, false);
         engine.unbindToken(TOKEN_2);
         vm.stopPrank();
-        assertFalse(engine.isTokenBound(TOKEN_2));
+        assertFalse(engine.isTokenSelfBindingApproved(TOKEN_2));
 
-        vm.prank(TOKEN_2);
+        _expectUnauthorized(TOKEN_2, COMPLIANCE_MANAGER_ROLE);
         engine.bindToken(TOKEN_2);
-        assertTrue(engine.isTokenBound(TOKEN_2), "the token undid the manager's unbind");
+        assertFalse(engine.isTokenBound(TOKEN_2));
     }
 
-    /// @notice TB-2 (mitigation). Revoking the approval before unbinding keeps the token out.
+    /// @notice F-2. The batch `unbindTokens` revokes the approvals the same way.
+    function testManagerBatchUnbindRevokesSelfBindingApproval() public {
+        address[] memory ts = new address[](1);
+        ts[0] = TOKEN_2;
+        vm.startPrank(ADMIN);
+        engine.setTokenSelfBindingApproval(TOKEN_2, true);
+        engine.bindToken(TOKEN_2);
+        engine.unbindTokens(ts);
+        vm.stopPrank();
+
+        assertFalse(engine.isTokenSelfBindingApproved(TOKEN_2));
+        _expectUnauthorized(TOKEN_2, COMPLIANCE_MANAGER_ROLE);
+        engine.bindToken(TOKEN_2);
+    }
+
+    /// @notice F-2. A token that unbinds itself (ERC-3643 `setCompliance` moving away) keeps its approval and can
+    /// bind itself again later.
+    function testTokenUnbindingItselfKeepsApproval() public {
+        vm.prank(ADMIN);
+        engine.setTokenSelfBindingApproval(TOKEN_2, true);
+
+        vm.startPrank(TOKEN_2);
+        engine.bindToken(TOKEN_2);
+        engine.unbindToken(TOKEN_2);
+        assertTrue(engine.isTokenSelfBindingApproved(TOKEN_2));
+        engine.bindToken(TOKEN_2);
+        vm.stopPrank();
+        assertTrue(engine.isTokenBound(TOKEN_2));
+    }
+
+    /// @notice F-2. Unbinding a token that was never approved emits no approval event.
+    function testManagerUnbindOfUnapprovedTokenEmitsNoApprovalEvent() public {
+        vm.recordLogs();
+        vm.prank(ADMIN);
+        engine.unbindToken(TOKEN);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        assertEq(logs.length, 1, "TokenUnbound only");
+        assertFalse(engine.isTokenSelfBindingApproved(TOKEN));
+    }
+
+    /// @notice TB-2. Revoking the approval explicitly before unbinding also keeps the token out.
     function testRevokingApprovalPreventsRebind() public {
         vm.startPrank(ADMIN);
         engine.setTokenSelfBindingApproval(TOKEN_2, true);

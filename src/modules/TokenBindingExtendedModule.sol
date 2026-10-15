@@ -51,8 +51,7 @@ abstract contract TokenBindingExtendedModule is TokenBindingModule, ITokenBindin
     /// @inheritdoc ITokenBindingExtended
     function setTokenSelfBindingApproval(address token, bool approved) public virtual override onlyTokenBindingManager {
         require(token != address(0), TokenBinding_InvalidTokenAddress());
-        _tokenSelfBindingApproval[token] = approved;
-        emit TokenSelfBindingApprovalSet(token, approved);
+        _setTokenSelfBindingApproval(token, approved);
     }
 
     /// @inheritdoc ITokenBindingExtended
@@ -84,6 +83,33 @@ abstract contract TokenBindingExtendedModule is TokenBindingModule, ITokenBindin
     /*//////////////////////////////////////////////////////////////
                             INTERNAL/PRIVATE FUNCTIONS
     //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @dev Removes a token from the bound set and, when the caller is not the token itself, revokes its
+     * self-binding approval. Without the revocation, a token approved for self-binding could bind itself again
+     * right after the binding manager unbound it, overriding the manager's decision. A token unbinding itself
+     * (ERC-3643 `setCompliance` moving to another compliance contract) keeps its approval, so it can come back.
+     * Covers both {unbindToken} and {unbindTokens}. Like the token self-binding check, the caller is the raw
+     * `msg.sender`, so a manager call relayed by the ERC-2771 forwarder also revokes the approval.
+     * @param token The token to unbind; reverts when it is not currently bound.
+     */
+    function _unbindToken(address token) internal virtual override {
+        TokenBindingModule._unbindToken(token);
+        if (msg.sender != token && _tokenSelfBindingApproval[token]) {
+            _setTokenSelfBindingApproval(token, false);
+        }
+    }
+
+    /**
+     * @dev Writes a token's self-binding approval and emits {TokenSelfBindingApprovalSet}. Single write path for
+     * the per-token event; the batch setter emits {TokenSelfBindingApprovalBatchSet} instead.
+     * @param token The token whose approval is set.
+     * @param approved Whether the token may bind and unbind itself.
+     */
+    function _setTokenSelfBindingApproval(address token, bool approved) internal virtual {
+        _tokenSelfBindingApproval[token] = approved;
+        emit TokenSelfBindingApprovalSet(token, approved);
+    }
 
     /**
      * @dev Authorizes bind/unbind operations.

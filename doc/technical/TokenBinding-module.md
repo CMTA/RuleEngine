@@ -119,6 +119,12 @@ These are properties of the registry itself, not of any standard built on it.
 - **Binding and unbinding are not idempotent.** Re-binding a bound token reverts with
   `TokenBinding_TokenAlreadyBound`, and unbinding an unbound one with `TokenBinding_TokenNotBound`, so a
   redundant administrative call is reported rather than silently accepted.
+- **An administrative unbind revokes the self-binding approval.** When the binding manager unbinds a token
+  (`unbindToken` or `unbindTokens`), `TokenBindingExtendedModule._unbindToken` also clears the token's
+  self-binding approval and emits `TokenSelfBindingApprovalSet(token, false)`, so the token cannot undo the
+  manager's decision by binding itself again. A token that unbinds itself (`msg.sender == token`) keeps its
+  approval. A host that combines this module with another one defining `_unbindToken` must disambiguate the
+  override in favour of `TokenBindingExtendedModule`, as `ERC3643ComplianceExtendedModule` does.
 - **Self-binding approvals have two events; indexers must handle both.** `setTokenSelfBindingApproval` emits
   `TokenSelfBindingApprovalSet(address indexed token, bool approved)`; `setTokenSelfBindingApprovalBatch` emits
   a single `TokenSelfBindingApprovalBatchSet(address[] tokens, bool approved)` with the array as passed, and no
