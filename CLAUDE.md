@@ -304,6 +304,7 @@ test/
 ├── RuleEngineOwnable2771/         # Tests for RuleEngineOwnable2771
 ├── RuleEngineOwnable2Step2771/     # Tests for RuleEngineOwnable2Step2771
 ├── ERC3643Real/                   # Real T-REX token tests (FOUNDRY_PROFILE=erc3643 only)
+├── RuleStandalone/                # A rule set directly as a CMTAT token's rule engine (no RuleEngine)
 └── RuleWhitelist/                 # Tests for the whitelist mock rule
 
 script/                            # Foundry example/deployment scripts
@@ -370,7 +371,7 @@ Key points:
 1. Create the rule in `src/mocks/rules/`
 2. Implement `IRule` (which extends `IRuleEngineERC1404`)
 3. Implement ERC-165 with `IRULE_INTERFACE_ID`
-4. `transferred*` hooks may update the rule's own storage but must not make a state-changing external call; external reads must be `view` (`STATICCALL`). Six CMTAT variants have no reentrancy guard around `transferred` (see `doc/technical/RuleEngine-with-CMTAT.md` §4.6)
+4. `transferred*` hooks may update the rule's own storage but must not make a state-changing external call; external reads must be `view` (`STATICCALL`). Six CMTAT variants have no reentrancy guard around `transferred` (see `doc/technical/RuleEngine-with-CMTAT.md` §4.6). A rule can also be set directly as a CMTAT token's rule engine (§4.8): keep `canTransfer*` consistent with `detectTransferRestriction*`, and a production stateful rule must restrict who calls `transferred`
 5. Add tests using the existing `HelperContract` base
 
 ### Modifying access control

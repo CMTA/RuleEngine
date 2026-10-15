@@ -648,7 +648,7 @@ Rules are maintained in a dedicated repository: [github.com/CMTA/Rules](https://
 
 Rules can be used in two ways:
 
-- Directly on CMTAT (single-rule setup, no RuleEngine orchestration). **Not for ERC-3643**: the token calls `bindToken`, `created` and `destroyed`, which most rules do not implement — use the engine.
+- Directly on CMTAT (single-rule setup, no RuleEngine orchestration: `token.setRuleEngine(rule)`). **Not for ERC-3643**: the token calls `bindToken`, `created` and `destroyed`, which most rules do not implement — use the engine. No bound-token gate stands in front of the rule, so a stateful rule must restrict who calls its `transferred`; see [RuleEngine-with-CMTAT.md §4.8](./technical/RuleEngine-with-CMTAT.md#48-a-single-rule-can-be-the-tokens-rule-engine). Tested with the reference rules in `test/RuleStandalone/`.
 - Through this RuleEngine (multi-rule orchestration with sequential execution).
 
 > **Warning:** `RuleConditionalTransferLightMultiToken` must be set **directly on each token** and never added to a RuleEngine: it keys approvals on the calling token (`msg.sender`), which is the engine when it sits behind one. It nevertheless advertises `IRule`, so `addRule` accepts it. See its [documentation](https://github.com/CMTA/Rules/blob/main/doc/technical/contracts/RuleConditionalTransferLightMultiToken.md).

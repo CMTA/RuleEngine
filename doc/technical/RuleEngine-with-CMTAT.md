@@ -224,6 +224,39 @@ signature-verifying ERC-2771 forwarder, or deploy the contract without the `2771
 is not needed. Details:
 [doc/README.md §Gasless support](../README.md#gasless-support-erc-2771).
 
+### 4.8 A single rule can be the token's rule engine
+
+A rule implements the whole engine-facing interface (`IRule is IRuleEngineERC1404`), and the reference rules
+advertise `RULE_ENGINE_INTERFACE_ID`. An issuer who needs exactly one rule can therefore skip the RuleEngine and
+call `token.setRuleEngine(rule)`. CMTAT's `setRuleEngine` performs no ERC-165 check, so the token accepts any
+contract with the right functions. The token then calls the rule directly: `transferred` (3- or 4-argument,
+see §2), `canTransfer` / `canTransferFrom`, and the ERC-1404 views `detectTransferRestriction(From)` and
+`messageForTransferRestriction`. This is the only configuration in which a rule's `canTransfer` /
+`canTransferFrom` are called; behind a RuleEngine the engine computes them from `detectTransferRestriction*`.
+
+What changes compared to a rule behind an engine, and what a rule must do to support the role:
+
+- **There is no bound-token gate in front of the rule.** Behind an engine, only a bound token reaches the
+  rules. Standalone, the token calls the rule, and so can anyone else: `transferred` is a public function of the
+  rule. **A stateful rule must restrict who may call `transferred`** (its token when standalone, its engine
+  otherwise), or any account can consume its state, for example a transfer approval or a minter's allowance,
+  and block the real operation. The reference rules `RuleConditionalTransferLightMock` and
+  `RuleMintAllowanceMock` do **not** do this: they are test doubles, not production rules. Note that the same
+  exposure exists behind an engine, since a direct call to the rule never goes through the engine at all.
+- **`canTransfer` / `canTransferFrom` must agree with `detectTransferRestriction*`.** The token answers
+  `canTransfer` from the rule's own function, not from the restriction code, so a stub that returns a constant
+  makes the token report a wrong answer.
+- **The rule's codes and messages are the token's.** No engine stands in between to aggregate them, so the
+  token's `detectTransferRestriction` and `messageForTransferRestriction` return the rule's values unchanged
+  (after CMTAT's own codes: paused, deactivated, frozen).
+- **One rule only.** Several restrictions need a RuleEngine.
+- **CMTAT only.** An ERC-3643 token calls `created` / `destroyed` and the binding functions, which a rule does
+  not implement, so a rule cannot replace the engine for an ERC-3643 token.
+
+Tested with each reference rule in `test/RuleStandalone/RuleStandaloneCMTAT.t.sol`: allowed and refused
+transfers with the rule's code and message, the spender check on `transferFrom`, a conditional-transfer approval
+consumed once, a mint allowance consumed by `mint`, and a reverting rule blocking the transfer.
+
 ## 5. What is tested
 
 | Area | File | Tests |
@@ -235,8 +268,9 @@ is not needed. Details:
 | Reverting rule propagation | `RuleEngine/RulesManagementModuleTest/RuleEngineOperationRevert.t.sol` | 1 |
 | Reverting rule, CMTAT v3.0.0 | `RuleEngine/RulesManagementModuleTest/RuleEngineOperationRevertV3.t.sol` | 1 |
 | Deployment script | `script/CMTATWithRuleEngineScript.t.sol` | 1 |
+| A rule as the token's engine, no RuleEngine (§4.8) | `RuleStandalone/RuleStandaloneCMTAT.t.sol` | 9 |
 
-**31 CMTAT-specific tests.** Coverage includes: a real `CMTATStandardStandalone` bound to the engine, transfers accepted and rejected through the whitelist, restriction-code propagation back to the token, and a rule that reverts mid-transfer.
+**40 CMTAT-specific tests.** Coverage includes: a real `CMTATStandardStandalone` bound to the engine, transfers accepted and rejected through the whitelist, restriction-code propagation back to the token, and a rule that reverts mid-transfer.
 
 **Backward compatibility is tested against two CMTAT versions.** The `…V3` suites deploy a real CMTAT **v3.0.0** token (submodule `lib/CMTATv3.0.0`, remapped `CMTATv3.0.0/`) alongside the current **v3.3.0-rc4** token (`lib/CMTAT`). 
 

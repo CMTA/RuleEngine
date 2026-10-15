@@ -7,20 +7,14 @@ import {RuleWhitelistCommon} from "./abstract/RuleWhitelistCommon.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
+import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
+import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 
 //import {ERC165, IERC165} from "@OZ/utils/introspection/ERC165.sol";
 /**
  * @title a whitelist manager
  */
 contract RuleWhitelistMock is RuleAddressList, RuleWhitelistCommon {
-    /**
-     * @notice ERC-165 interface ID of the CMTAT RuleEngine interface.
-     */
-    bytes4 private constant RULE_ENGINE_INTERFACE_ID = 0x20c49ce7;
-    /**
-     * @notice ERC-165 interface ID of the extended ERC-1404 interface.
-     */
-    bytes4 private constant ERC1404EXTEND_INTERFACE_ID = 0x78a8de7d;
     error RuleWhitelist_InvalidTransfer(address from, address to, uint256 value, uint8 code);
 
     /**
@@ -59,7 +53,8 @@ contract RuleWhitelistMock is RuleAddressList, RuleWhitelistCommon {
      * @return True if the interface is supported, false otherwise.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
-        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID
+        return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
+            || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
             || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || AccessControl.supportsInterface(interfaceId);
     }
 

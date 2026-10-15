@@ -68,7 +68,7 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | H-2 | Sender resolution after the ERC-2771 fix and the split | ⬜ verified — two identity sites, both `msg.sender`; no-forwarder variants ignore any suffix |
 | H-3 | A `*2771` deployable accepts `address(0)` as its forwarder | ⚠️ decide — new in the second pass |
 | I-1 | `IRule` demands two functions the engine never calls | ⚠️ still open — carried from rc6, re-verified and restated in full; narrowed id `0xb1a69752` recomputed |
-| I-2 | Standalone-rule configuration advertised but untested | ⚠️ still open — carried from rc6, restated; adds the unguarded `transferred` of the stateful mocks and the hardcoded `RULE_ENGINE_INTERFACE_ID` |
+| I-2 | Standalone-rule configuration advertised but untested | ✅ fixed after the second pass (option 1) — 9 integration tests, CMTAT guide §4.8, mocks import CMTAT's ids; mock `transferred` left unguarded, documented |
 | I-3 | Engine should call `canTransfer` on rules? | ⬜ no — carried from rc6 |
 | J-1 | Binding registry embeddable in a foreign host | Can ⬜ carried — inheritance of the registry unchanged |
 | J-2 | ERC-2771 in the shared ownable layer blocked a host with its own forwarder | ✅ fixed by the split — verified by compile probe |
@@ -79,8 +79,8 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | K-5 | No fuzz and no invariant test | ✅ partly — 2 fuzz properties on all six deployables; invariant test proposed |
 | K-6 | `TokenSelfBindingApprovalSet` was never asserted | ✅ fixed — asserted in the three access-control models |
 
-**Counted: 33 rows — 14 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
-no-finding / verified / left as is (⬜), 7 open decisions or carried items (⚠️, `G-2` counted here).**
+**Counted: 33 rows — 15 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
+no-finding / verified / left as is (⬜), 6 open decisions or carried items (⚠️, `G-2` counted here).**
 
 ## Outstanding
 
@@ -91,7 +91,7 @@ no-finding / verified / left as is (⬜), 7 open decisions or carried items (⚠
 | H-3 | Reject a zero forwarder in the `*2771` constructors | Changes the tests that use a zero forwarder; needs a new error |
 | K-5 | Handler-based invariant test over the rule set and the binding set | Needs a design for the handler |
 | C-2 / C-3 | Batch approval event shape; whether `bindTokens` / `unbindTokens` stay atomic or skip already-applied tokens | Event shape is API-visible to indexers; the binding batches deviate from the project's single-versus-batch revert convention, which is a product call |
-| I-1 / I-2 | Narrow `IRule`; test or drop the standalone-rule claim (one question: is a rule only a plug-in, or also a minimal engine?) | Coordinated with CMTA/Rules |
+| I-1 | Narrow `IRule` | Coordinated with CMTA/Rules. With `I-2` resolved as "rules are also minimal engines", rules that support the role keep `canTransfer*` anyway, so narrowing has documentation value for engine-only rules |
 | H-1 | View/enforcement divergence | Inherent to the ERC-1404 3-argument signature |
 
 ---
@@ -623,7 +623,7 @@ only broader than the engine needs. Not worth doing alone if the answer to `I-2`
 usable standalone", since every rule would then implement the two functions anyway; it is then documentation
 value only.
 
-### I-2. Rules advertise the standalone engine role, but nothing tests or documents it — still open
+### I-2. Rules advertise the standalone engine role, but nothing tests or documents it — fixed
 
 **What is advertised.** All four reference rules answer `true` to `supportsInterface(RULE_ENGINE_INTERFACE_ID)`
 (`RuleWhitelistMock.sol:62`, `RuleConditionalTransferLightMock.sol:130`, `RuleMintAllowanceMock.sol:125`,
@@ -644,6 +644,13 @@ ERC-165 check**. The token then calls the rule directly: `canTransfer` / `canTra
   `RuleEngineOperationRevertBase.sol:32`) all pass a `RuleEngine`, never a rule.
 - **No documentation.** Neither `README.md`, `doc/README.md`, `RuleEngine-with-CMTAT.md` nor
   `RuleEngine-with-ERC3643.md` describes a rule used without an engine.
+
+  **Correction (found while implementing):** this bullet is wrong for `doc/README.md`. Its §Available Rules
+  already says rules can be used "Directly on CMTAT (single-rule setup, no RuleEngine orchestration)", and warns
+  that `RuleConditionalTransferLightMultiToken` must be set directly on each token, so the role is used by a
+  production rule. The search behind the bullet used phrasings ("standalone rule", "without an engine") that did
+  not match. What was missing was the technical guide (what a rule must do to play the role) and a test, not any
+  mention at all.
 - **The id is hardcoded.** Each mock declares its own `RULE_ENGINE_INTERFACE_ID = 0x20c49ce7` literal instead
   of importing `CMTAT/library/RuleEngineInterfaceId.sol`. The value matches CMTAT today, but it is the hardcoded
   pattern `F-2` removed elsewhere in rc6: a CMTAT interface change would leave the mocks advertising a stale id
@@ -683,6 +690,32 @@ ERC-165 check**. The token then calls the rule directly: `canTransfer` / `canTra
 **Verdict: decide**, together with `I-1`, since they are the same question seen from two sides: is a rule
 only an engine plug-in, or also a minimal engine? Option 1 matches what the code advertises today and is the
 smaller change in this repository; option 2 is the cleaner interface, and needs CMTA/Rules to move in step.
+
+**Implemented after the second pass: option 1.** Chosen because it matches what the rules already advertise and
+because a production rule (`RuleConditionalTransferLightMultiToken`) already depends on the role.
+
+- **Tests:** `test/RuleStandalone/RuleStandaloneCMTAT.t.sol`, 9 tests on a real `CMTATStandardStandalone` with a
+  reference rule passed to `setRuleEngine` and no RuleEngine: all four rules advertise
+  `RULE_ENGINE_INTERFACE_ID`; whitelist transfer allowed, refused with code 22 and its message through the
+  token's `detectTransferRestriction` / `messageForTransferRestriction` / `canTransfer`, and `transferFrom`
+  refused on the spender (code 23, 4-argument `transferred`); conditional transfer refused with code 71, then
+  approved, executed once and refused again (the approval is consumed by the token's call); mint allowance
+  consumed by `mint` (minter as spender) and refused past the allowance, transfers unaffected; reverting rule
+  blocking the transfer with its own error. Checked that the suite can fail: removing
+  `RULE_ENGINE_INTERFACE_ID` from `RuleWhitelistMock.supportsInterface` fails one test, and making its
+  `canTransfer` return `true` fails another. Full suite 447/447 (438 + 9).
+- **Documentation:** new `RuleEngine-with-CMTAT.md` §4.8 "A single rule can be the token's rule engine": what
+  the token calls, why there is no bound-token gate, the obligations on a rule (restrict `transferred` for a
+  stateful rule, keep `canTransfer*` consistent with `detectTransferRestriction*`), one rule only, CMTAT only.
+  §5 lists the new suite. The `doc/README.md` bullet links to §4.8; `CLAUDE.md` / `AGENTS.md` list
+  `test/RuleStandalone/` and add the obligation to "Adding a new rule".
+- **Hardcoded ids:** the four mocks import `RuleEngineInterfaceId` and `ERC1404ExtendInterfaceId` from CMTAT
+  instead of declaring `0x20c49ce7` / `0x78a8de7d` literals, so a CMTAT interface change reaches them.
+- **Left as is:** the stateful mocks still accept `transferred` from any caller. Restricting it would change the
+  mocks' constructors and every test that deploys them, and they are documented as test doubles. Noted on the
+  way: `RuleConditionalTransferLightMock` already grants a `RULE_ENGINE_CONTRACT_ROLE` in its constructor but never
+  checks it, so the role is dead in the mock. Whether the CMTA/Rules production rules restrict `transferred` was
+  not checked.
 
 ## J. Modularity
 
