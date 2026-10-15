@@ -155,15 +155,17 @@ function _onlyComplianceManager() internal virtual override onlyOwner {}
 
 Rule validation uses a two-layer override:
 
-1. **`RulesManagementModule._checkRule()`** — checks zero address + duplicates
+1. **`RulesManagementModule._checkRule()`** — checks the zero address (duplicates are rejected by `_addRule` through the return value of `_rules.add`)
 2. **`RuleEngineBase._checkRule()`** — calls `RulesManagementModule._checkRule()` then validates ERC-165 interface
 
 ```solidity
 // RulesManagementModule (generic checks):
 function _checkRule(address rule_) internal view virtual {
     if (rule_ == address(0x0)) revert ...ZeroNotAllowed();
-    if (_rules.contains(rule_)) revert ...AlreadyExists();
 }
+
+// RulesManagementModule._addRule (duplicate check):
+require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_RuleAlreadyExists());
 
 // RuleEngineBase (adds ERC-165 check):
 function _checkRule(address rule_) internal view virtual override {

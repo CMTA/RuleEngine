@@ -49,10 +49,10 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | A-2 | Unbounded iteration over caller-supplied arrays | ⬜ left as is — admin-gated, carried from rc5/rc6 |
 | A-3 | View loops call the public `rule(i)`, re-checking the bound on every iteration | ✅ fixed after the second pass — −682 gas per detect call with 3 rules; paid on-chain by ERC-3643 tokens |
 | B-1 | `messageForTransferRestriction` resolves `rule(i)` twice, across an external call | ✅ fixed after the second pass — −375 gas per call on top of `A-3` |
-| B-2 | `contains()` before `add()` / `remove()` leaves two unreachable branches | ⚠️ decide — −271 / −268 gas, removes the only uncovered branches; the current form adds no security (assessed) |
+| B-2 | `contains()` before `add()` / `remove()` leaves two unreachable branches | ✅ fixed after the second pass — −271 / −268 gas, branch coverage 40/40; the old form added no security (assessed) |
 | C-1 | Every event has exactly one emit site | ⬜ verified — 8/8, unchanged by the split |
 | C-2 | Batch self-binding approval emits the input, not the effect | ⚠️ still open — carried from rc5 |
-| C-3 | Empty batches succeed silently, while `setRules([])` reverts | ⚠️ decide |
+| C-3 | Empty batches succeed silently, while `setRules([])` reverts | ⚠️ revised — empty batches and `setRules([])` both follow a convention; the open point is `bindTokens` / `unbindTokens` reverting on an already-applied element |
 | D-1 | ERC-2771 `Context` overrides repeated per deployable | ⬜ no finding — 3 copies, one per `*2771` contract (4 before the split), compiler-mandated |
 | D-2 | The RBAC and ownable families implement the ERC-2771 split two different ways | ⚠️ decide — new in the second pass |
 | E-1 | `virtual` on every internal function | ⬜ no finding — 0 missing, including the new contracts |
@@ -60,7 +60,7 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | F-1 | `pragma solidity ^0.8.20` was false: the code does not compile below 0.8.27 | ✅ fixed — `^0.8.27` everywhere (`3b94564`) |
 | F-2 | Advertised ERC-165 ids unchanged by rc7, and identical between each pair | ⬜ verified — pinned by `IRuleInterfaceId.t.sol` and `ERC2771VariantTestBase` |
 | G-1 | NatSpec length and documentation pointers | ⬜ no finding — median 5 lines, max 19, zero `.md` pointers |
-| G-2 | Stale or wrong NatSpec in production contracts | ⚠️ partly fixed — the 12 "MetaTxModule" sites are gone; 10 sites remain |
+| G-2 | Stale or wrong NatSpec in production contracts | ⚠️ partly fixed — the 12 "MetaTxModule" sites are gone, `_removeRule` fixed with `B-2`; 9 sites remain |
 | G-3 | `ERC3643TokenMock` header and a test header describe the pre-rc7 ERC-3643 setup | ✅ test header fixed / ⚠️ mock header still open |
 | G-4 | CHANGELOG rc7 said the `version()` string was "the only change under `src/`" | ✅ fixed |
 | G-5 | `RuleEngine-with-CMTAT.md` §4.7 said every deployable inherits `ERC2771Context` | ✅ fixed — new in the second pass |
@@ -73,27 +73,26 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | J-1 | Binding registry embeddable in a foreign host | ⬜ carried — inheritance of the registry unchanged |
 | J-2 | ERC-2771 in the shared ownable layer blocked a host with its own forwarder | ✅ fixed by the split — verified by compile probe |
 | K-1 | Two tests used a bare `vm.expectRevert()` | ✅ fixed — both name their error; 0 left |
-| K-2 | Coverage | ⬜ 100% lines / statements / functions; branches 41/43, the 2 missing are dead code (`B-2`) |
+| K-2 | Coverage | ⬜ 100% lines / statements / functions; branches 41/43 at the second pass (2 dead, `B-2`), **40/40** after `B-2` |
 | K-3 | Mutation testing | ✅ first pass: 4 of 32 survived, all 33 killed after new tests; second pass: see `K-3` |
 | K-4 | CI never runs the `erc3643` profile | ⚠️ decide — one workflow step |
 | K-5 | No fuzz and no invariant test | ✅ partly — 2 fuzz properties on all six deployables; invariant test proposed |
 | K-6 | `TokenSelfBindingApprovalSet` was never asserted | ✅ fixed — asserted in the three access-control models |
 
-**Counted: 33 rows — 11 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
-no-finding / verified / left as is (⬜), 10 open decisions or carried items (⚠️, `G-2` counted here).**
+**Counted: 33 rows — 12 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
+no-finding / verified / left as is (⬜), 9 open decisions or carried items (⚠️, `G-2` counted here).**
 
 ## Outstanding
 
 | ID | Item | Why it is still open |
 |----|------|----------------------|
-| B-2 | Use the `add` / `remove` return value instead of the preceding `contains()` | Measured twice and suite-verified (438/438 with the change); gas and coverage only, no security effect either way (see `B-2`). `A-3` and `B-1` are implemented |
 | E-2 | Convert the 9 remaining `if/revert` sites | Style only; the `^0.8.27` floor allows either form |
-| G-2 / G-3 | 10 comment fixes in `src/`, and the `ERC3643TokenMock` header | Comment-only, left for one `src/` commit |
+| G-2 / G-3 | 9 comment fixes in `src/`, and the `ERC3643TokenMock` header | Comment-only, left for one `src/` commit |
 | D-2 | One pattern for the ERC-2771 split in both families | Structural; no behaviour change, product of taste |
 | H-3 | Reject a zero forwarder in the `*2771` constructors | Changes the tests that use a zero forwarder; needs a new error |
 | K-4 | Run `FOUNDRY_PROFILE=erc3643 forge test` in CI | Workflow change |
 | K-5 | Handler-based invariant test over the rule set and the binding set | Needs a design for the handler |
-| C-2 / C-3 | Batch approval event shape; empty-batch semantics | Event shape is API-visible to indexers; empty-batch behaviour is a product call |
+| C-2 / C-3 | Batch approval event shape; whether `bindTokens` / `unbindTokens` stay atomic or skip already-applied tokens | Event shape is API-visible to indexers; the binding batches deviate from the project's single-versus-batch revert convention, which is a product call |
 | I-1 / I-2 | Narrow `IRule`; test or drop the standalone-rule claim | Coordinated with CMTA/Rules (see the rc6 report) |
 | H-1 | View/enforcement divergence | Inherent to the ERC-1404 3-argument signature |
 
@@ -198,7 +197,7 @@ both sides):
 The saving does not grow with the position of the claiming rule: only the claiming iteration made the second
 read. Full suite 438/438.
 
-### B-2. A `contains()` check before the mutation leaves two branches no test can reach — decide
+### B-2. A `contains()` check before the mutation leaves two branches no test can reach — fixed
 
 `RulesManagementModule.sol:97` checks membership before `_removeRule` removes at `:194`; `_addRule` does the same
 through `_checkRule` (`:255`, then `_rules.add` at `:181`). The second check is unreachable both times, and
@@ -246,6 +245,25 @@ already in the set has since stopped advertising `IRule` (after the fix that cas
 validation hook for a subclass that calls it on its own; no contract in this repository does. The case for the
 change remains gas (−271 / −268 on the success paths) and coverage (the only two dead branches in `src/`).
 
+**Implemented after the second pass.** `removeRule` no longer calls `contains()`; `_removeRule` reverts with
+`RuleDoNotMatch` when `_rules.remove` returns `false`. `_checkRule` keeps only the zero-address check; `_addRule`
+reverts with `RuleAlreadyExists` when `_rules.add` returns `false`, which also covers a duplicate inside one
+`setRules` batch. `RuleEngine_RulesManagementModule_OperationNotSuccessful` is removed (one error less in the ABI;
+the same was done for `RuleEngine_ERC3643Compliance_OperationNotSuccessful` in rc6). The stale `_removeRule`
+NatSpec ("specified index", `G-2`) is rewritten in the same edit.
+
+Measured with a throwaway probe (`RuleEngine`, `RuleCodeProbe` rules, 2 rules present):
+
+| Call | Before | After | Difference |
+|---|---|---|---|
+| `addRule` (success) | 68,327 | 68,056 | **−271** |
+| `removeRule` (success) | 16,560 | 16,292 | **−268** |
+| `addRule` of a rule already present (revert) | 6,088 | 11,042 | +4,954, the ERC-165 `staticcall` now runs first |
+| `removeRule` of a rule not present (revert) | 1,698 | 1,778 | +80 |
+
+Full suite 438/438. Each new `require` was mutated (the return value ignored): dropping the `add` check fails 6
+tests, dropping the `remove` check fails 3. Branch coverage of `src/` is now **100% (40/40)**.
+
 ## C. Events
 
 ### C-1. One emit site per event — verified
@@ -263,12 +281,57 @@ Unchanged by the split: the constructors of `RuleEngineAccessControlShared` and 
 
 Carried verbatim from rc6 `C-2`.
 
-### C-3. Empty batches are accepted, inconsistently with `setRules` — decide
+### C-3. Empty batches are accepted, inconsistently with `setRules` — revised
 
 `setRules([])` reverts (`RuleEngine_RulesManagementModule_ArrayIsEmpty`). `bindTokens([])`, `unbindTokens([])`
 and `setTokenSelfBindingApprovalBatch([], b)` succeed as no-ops, and the last one emits
 `TokenSelfBindingApprovalBatchSet([], b)`, an event that records nothing. Two conventions for the same input on
 sibling admin functions. **Verdict: decide**; no test was written because the expected value is the question.
+
+**Revised after the second pass, against the project's single-versus-batch convention.** The project already
+separates a single call from a batch call by whether a no-op reverts, for gas reasons. The reference rule
+`RuleAddressList` states it in its NatSpec (`RuleAddressList.sol:41-75`):
+
+- **single call** (`addAddressToTheList`, `removeAddressFromTheList`): an element that is already in the target
+  state reverts, "to save gas": the operator's mistake is reported and the transaction costs almost nothing;
+- **batch call** (`addAddressesToTheList`, `removeAddressesFromTheList`): an element already in the target state
+  is skipped and "the transaction remains valid (no revert)", so one stale entry does not throw away the gas of
+  the whole batch.
+
+Read against that convention, the original finding compared the wrong things:
+
+- **Empty batches succeeding is consistent.** An empty batch is the extreme case of a batch where no element
+  changes anything, and under the batch rule a no-op does not revert. Making `bindTokens([])` revert would be the
+  inconsistency.
+- **`setRules([])` reverting is not a batch rule, and is not about gas.** `setRules` replaces the whole set, so
+  `[]` would mean "remove every rule" and leave a bound token with no enforcement. The revert is a safety guard
+  that sends the operator to the explicit `clearRules()`; it was reviewed by Nethermind (best practice 7 in
+  `doc/README.md`) and kept by design. The two behaviours do not conflict: they answer different questions.
+- **The real deviation is elsewhere: `bindTokens` / `unbindTokens` follow the single-call rule inside a batch.**
+  Each element goes through `_bindToken` / `_unbindToken`, which `require` the `EnumerableSet` mutation to succeed
+  (`TokenBindingModule.sol:104` and `:115`). One token that is already bound (or not bound, for `unbindTokens`)
+  reverts the whole batch, and all the gas spent on the earlier elements is lost
+  (`testCannotBindTokensBatchWithDuplicateToken` pins this for a duplicate). This is the opposite of the
+  `RuleAddressList` batch rule. The Slither `L-6` triage records it as deliberate ("atomic batch operations",
+  `doc/README.md`), but the reason is not written next to the functions, and the two conventions sit in the same
+  repository.
+- **`setTokenSelfBindingApprovalBatch` is consistent.** Setting a flag to the value it already has is not an
+  error in the single call either, so neither form reverts on a no-op. Only the empty event remains, and it
+  belongs to `C-2` (the event reports the input, not the effect).
+
+**Verdict: revised.** Keep empty batches as no-ops and keep `setRules([])` reverting; both are now pinned to a
+reason. The open decision moves to the binding batches:
+
+- **keep them atomic**, and state in the `bindTokens` / `unbindTokens` NatSpec and in
+  `doc/technical/TokenBinding-module.md` that they deliberately depart from the batch rule: a binding change is
+  security-relevant, and an operator who lists a token that is already bound has probably made a mistake that
+  should stop the whole operation; or
+- **skip already-applied tokens**, like `RuleAddressList`: emit `TokenBound` / `TokenUnbound` only for tokens
+  that changed, keep the zero-address check as a revert, and update the test above.
+  Not measured; the cost of an atomic batch that reverts is the gas spent up to the failing element.
+
+Either way, a test for the empty batches can now be written, since the expected value (no-op, no revert) is no
+longer the question. Not written in this pass.
 
 ## D. Duplication
 
@@ -353,11 +416,11 @@ forwarder (ERC-2771 has no ERC-165 id).
 (there is no `MetaTxModule`, and the overrides are not optional) and the misplaced `ERC-2771` section header of
 `RuleEngine.sol`. The `*2771` contracts carry accurate NatSpec on their overrides.
 
-**Still open (10 sites):**
+**Still open (10 sites at the second pass; 9 after `B-2` fixed `_removeRule`):**
 
 | Site | Text | Problem |
 |---|---|---|
-| `RulesManagementModule.sol:186-188` (`_removeRule`) | "Revert if the rule found at the specified index does not match the rule in argument" | There is no index; describes a removed API |
+| `RulesManagementModule.sol:186-188` (`_removeRule`) | "Revert if the rule found at the specified index does not match the rule in argument" | There is no index; describes a removed API — **fixed with `B-2`** |
 | `RulesManagementModule.sol:201`, `:219` (`_transferred`) | "Go through all the rule to know if a restriction exists on the transfer" | These functions **enforce** (call `transferred`), they do not detect. The same sentence is correct on `detectTransferRestriction` (`RuleEngineBase.sol:87`) |
 | `RulesManagementModule.sol:13` | `@title RuleEngine -  part` | Placeholder title |
 | `RuleEngineBase.sol:59` | `// Apply  on RuleEngine` | Placeholder comment |
@@ -463,7 +526,7 @@ carry no ERC-2771 surface.
 
 - **Tautologies:** none. **Bare `vm.expectRevert()`:** 0 (2 fixed at the first pass).
 - **A negative test for every guard.** Every custom error in `src/` is reached by an `expectRevert`, except
-  `RuleEngine_RulesManagementModule_OperationNotSuccessful`, which is unreachable (`B-2`). The constructor guards
+  `RuleEngine_RulesManagementModule_OperationNotSuccessful`, which was unreachable (`B-2`; removed since). The constructor guards
   of the new contracts are covered: zero admin (`RuleEngine_AdminWithAddressZeroNotAllowed`) and zero owner
   (`OwnableInvalidOwner`) for all six deployables, through the deployment suites and `ERC2771VariantTestBase`.
 - **Through the public surface.** The shared suites assert observable behaviour (revert data, `isTokenBound`,
@@ -495,6 +558,9 @@ carry no ERC-2771 surface.
 statement of its own. The two uncovered branches are the same as at the first pass, both **dead code** (`B-2`):
 the false sides of `require(_rules.add(...), OperationNotSuccessful())` (`RulesManagementModule.sol:181`) and
 `require(_rules.remove(...), OperationNotSuccessful())` (`:194`).
+
+**After `B-2`:** both `require`s now carry the reachable error (`RuleAlreadyExists`, `RuleDoNotMatch`) and the
+dead `contains()` checks are gone. Re-run: lines 232/232, statements 222/222, **branches 40/40**, functions 81/81.
 
 ### K-3. Mutation testing
 
@@ -567,7 +633,7 @@ allowed and tested.
 | Family | Status | Missing / written |
 |---|---|---|
 | Zero and identity | `address(0)` rule, token, admin/owner for all six deployables: tested. `created` / `destroyed` zero-address side: written | Zero **forwarder** on a `*2771`: accepted, see `H-3` |
-| Boundaries | cap exact, cap + 1, lowered cap, `rule(i)` out of range, empty `setRules`, codes 1 and 255: tested | Empty `bindTokens` / `unbindTokens` / approval batch: question (`C-3`) |
+| Boundaries | cap exact, cap + 1, lowered cap, `rule(i)` out of range, empty `setRules`, codes 1 and 255: tested | Empty `bindTokens` / `unbindTokens` / approval batch: no test; the expected value is now a no-op (`C-3`, revised) |
 | Duplicates and order | duplicate in `setRules` and inside one bind batch, rule order for detect / message / enforcement: tested | — |
 | State transitions | unbind then callback, re-bind, clear then add, ownership hand-over, approval revoked: tested | — |
 | Authorization | unauthorized caller per protected function, rule as role holder or owner, relayed forwarder (`*2771`), appended sender ignored (no forwarder): tested | — |

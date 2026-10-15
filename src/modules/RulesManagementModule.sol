@@ -94,7 +94,6 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * @inheritdoc IRulesManagementModule
      */
     function removeRule(IRule rule_) public virtual override(IRulesManagementModule) onlyRulesManager {
-        require(_rules.contains(address(rule_)), RuleEngine_RulesManagementModule_RuleDoNotMatch());
         _removeRule(rule_);
     }
 
@@ -177,21 +176,19 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      */
     function _addRule(IRule rule_) internal virtual {
         _checkRule(address(rule_));
-        // Should never revert because we check the presence of the rule before
-        require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_OperationNotSuccessful());
+        // The set rejects a duplicate: `add` returns false when the rule is already present
+        require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_RuleAlreadyExists());
         emit AddRule(rule_);
     }
 
     /**
-     * @notice Remove a rule from the array of rules
-     * Revert if the rule found at the specified index does not match the rule in argument
+     * @notice Remove a rule from the array of rules and emit the corresponding event
+     * @dev Reverts with {RuleEngine_RulesManagementModule_RuleDoNotMatch} if the rule is not in the set.
      * @param rule_ address of the target rule
-     *
-     *
      */
     function _removeRule(IRule rule_) internal virtual {
-        // Should never revert because we check the presence of the rule before
-        require(_rules.remove(address(rule_)), RuleEngine_RulesManagementModule_OperationNotSuccessful());
+        // `remove` returns false when the rule is not in the set
+        require(_rules.remove(address(rule_)), RuleEngine_RulesManagementModule_RuleDoNotMatch());
         emit RemoveRule(rule_);
     }
 
@@ -245,15 +242,13 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     function _onlyRulesLimitManager() internal virtual;
 
     /**
-     * @dev check if a rule is valid, revert otherwise
+     * @dev check if a rule is valid, revert otherwise.
+     * Duplicates are not checked here: {_addRule} rejects them through the return value of the set insertion.
      * @param rule_ The candidate rule address to validate.
      */
     function _checkRule(address rule_) internal view virtual {
         if (rule_ == address(0x0)) {
             revert RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed();
-        }
-        if (_rules.contains(rule_)) {
-            revert RuleEngine_RulesManagementModule_RuleAlreadyExists();
         }
     }
 }

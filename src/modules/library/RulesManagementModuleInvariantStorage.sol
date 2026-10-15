@@ -20,7 +20,6 @@ abstract contract RulesManagementModuleInvariantStorage {
     error RuleEngine_RulesManagementModule_RuleAlreadyExists();
     error RuleEngine_RulesManagementModule_RuleDoNotMatch();
     error RuleEngine_RulesManagementModule_ArrayIsEmpty();
-    error RuleEngine_RulesManagementModule_OperationNotSuccessful();
     error RuleEngine_RulesManagementModule_MaxRulesExceeded(uint256 maxRules);
     error RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed();
     error RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges();
