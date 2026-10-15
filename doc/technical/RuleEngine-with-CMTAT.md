@@ -211,7 +211,7 @@ to an address currently configured as a rule, but the check is one-directional a
 
 ### 4.7 The trusted forwarder cannot act as a token
 
-Every deployable inherits `ERC2771Context`, but the bound-token gate (`onlyBoundToken`, on `transferred`,
+The three `*2771` deployables inherit `ERC2771Context` (the others have no forwarder at all), but the bound-token gate (`onlyBoundToken`, on `transferred`,
 `created` and `destroyed`) compares the raw **`msg.sender`**, not `_msgSender()`. CMTAT calls the engine directly
 from its own transfer, mint and burn, never through a forwarder, so nothing changes for a real token. A forwarder
 that appends a bound token's address, however, is rejected with `TokenBinding_UnauthorizedCaller`.
@@ -220,7 +220,8 @@ This has been the case since v3.0.0-rc7. Before that, the gate used `_msgSender(
 reach `transferred` "as" a bound token and drive stateful rules with no token movement: for example, consuming a
 per-minter mint quota with no mint. This follows CMTAT's integration guide, which recommends `msg.sender` for this
 check. Administrative calls still resolve through `_msgSender()`, so gasless administration keeps working. Use a
-signature-verifying ERC-2771 forwarder, or `address(0)` if gasless administration is not needed. Details:
+signature-verifying ERC-2771 forwarder, or deploy the contract without the `2771` suffix if gasless administration
+is not needed. Details:
 [doc/README.md §Gasless support](../README.md#gasless-support-erc-2771).
 
 ## 5. What is tested
