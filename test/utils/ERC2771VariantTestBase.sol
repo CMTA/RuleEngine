@@ -9,6 +9,7 @@ import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {ERC2771ModuleStandalone} from "src/modules/ERC2771ModuleStandalone.sol";
 import {VersionModule} from "src/modules/VersionModule.sol";
+import {RuleEngineBase} from "src/RuleEngineBase.sol";
 import {ComplianceInterfaceId} from "src/modules/library/ComplianceInterfaceId.sol";
 import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
 import {OwnableInterfaceId} from "src/modules/library/OwnableInterfaceId.sol";
@@ -51,6 +52,19 @@ abstract contract ERC2771VariantTestBase is Test {
         assertTrue(engine.isTrustedForwarder(FORWARDER));
         assertFalse(engine.isTrustedForwarder(ADMIN));
         assertEq(engine.trustedForwarder(), FORWARDER);
+    }
+
+    /// @notice Security review FW-1 (review item H-3): a `*2771` contract deployed with `address(0)` as forwarder
+    /// is accepted. No caller can be `address(0)`, so the contract behaves as the variant without forwarder, but
+    /// it still advertises a forwarder that cannot exist. This test pins the current behaviour.
+    function testZeroForwarderIsAccepted() public {
+        address engine = _deploy2771(ADMIN, address(0), TOKEN);
+        assertEq(ERC2771ModuleStandalone(engine).trustedForwarder(), address(0));
+        assertTrue(ERC2771ModuleStandalone(engine).isTrustedForwarder(address(0)));
+
+        vm.prank(ADMIN);
+        RuleEngineBase(engine).setMaxRules(5);
+        assertEq(RuleEngineBase(engine).maxRules(), 5);
     }
 
     function testHasRightVersion() public {
