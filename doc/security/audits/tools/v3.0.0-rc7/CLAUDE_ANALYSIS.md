@@ -47,7 +47,7 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 |----|---------|---------|
 | A-1 | Loop increment form and `unchecked` | ⬜ no finding — `++i` on 0.8.37, `unchecked` would buy nothing |
 | A-2 | Unbounded iteration over caller-supplied arrays | ⬜ left as is — admin-gated, carried from rc5/rc6 |
-| A-3 | View loops call the public `rule(i)`, re-checking the bound on every iteration | ⚠️ decide — re-measured −216 gas per rule per call (first pass −227); paid on-chain by ERC-3643 tokens |
+| A-3 | View loops call the public `rule(i)`, re-checking the bound on every iteration | ✅ fixed after the second pass — −682 gas per detect call with 3 rules; paid on-chain by ERC-3643 tokens |
 | B-1 | `messageForTransferRestriction` resolves `rule(i)` twice, across an external call | ⚠️ decide — part of a measured −1,229 gas (3 rules) |
 | B-2 | `contains()` before `add()` / `remove()` leaves two unreachable branches | ⚠️ decide — −271 / −268 gas, and removes the only uncovered branches |
 | C-1 | Every event has exactly one emit site | ⬜ verified — 8/8, unchanged by the split |
@@ -79,14 +79,14 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | K-5 | No fuzz and no invariant test | ✅ partly — 2 fuzz properties on all six deployables; invariant test proposed |
 | K-6 | `TokenSelfBindingApprovalSet` was never asserted | ✅ fixed — asserted in the three access-control models |
 
-**Counted: 33 rows — 9 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
-no-finding / verified / left as is (⬜), 12 open decisions or carried items (⚠️, `G-2` counted here).**
+**Counted: 33 rows — 10 fixed or partly fixed (✅, `G-3` and `K-5` counted here although part is open), 12
+no-finding / verified / left as is (⬜), 11 open decisions or carried items (⚠️, `G-2` counted here).**
 
 ## Outstanding
 
 | ID | Item | Why it is still open |
 |----|------|----------------------|
-| A-3 / B-1 / B-2 | Iterate `_rules.pos(i)` in the views, cache the rule in the message loop, use the `add` / `remove` return value | Measured twice and suite-verified (438/438 with the change), but a `src/` change |
+| B-1 / B-2 | Cache the rule in the message loop, use the `add` / `remove` return value | Measured twice and suite-verified (438/438 with the change), but a `src/` change (`A-3`, the view loops, is implemented) |
 | E-2 | Convert the 9 remaining `if/revert` sites | Style only; the `^0.8.27` floor allows either form |
 | G-2 / G-3 | 10 comment fixes in `src/`, and the `ERC3643TokenMock` header | Comment-only, left for one `src/` commit |
 | D-2 | One pattern for the ERC-2771 split in both families | Structural; no behaviour change, product of taste |
@@ -112,7 +112,7 @@ bounded loop counter is already elided (since 0.8.22).
 only the operator can pass an oversized array and only their own transaction runs out of gas. Carried from rc5
 `A-3` / rc6 `A-2`.
 
-### A-3. The view loops go through the public `rule(i)` getter — decide
+### A-3. The view loops go through the public `rule(i)` getter — fixed
 
 `RuleEngineBase.sol:169`, `:193` and `:217-218`:
 
@@ -144,6 +144,22 @@ every token operation, paid by users. CMTAT does not call the view on its transf
 **Fix:** `IRule(_rules.pos(i))` in the three view loops, and `using EnumerableSet for EnumerableSet.AddressSet;` in
 `RuleEngineBase`. With this change the full suite passed, 438/438. **Verdict: implement.**
 
+**Implemented after the second pass.** The three loops in `RuleEngineBase` (`_detectTransferRestriction`,
+`_detectTransferRestrictionFrom`, `_messageForTransferRestriction`) now read `_rules.length()` once and call
+`IRule(_rules.pos(i))`, the same form as the enforcement loops in `RulesManagementModule._transferred`. The bound
+also moved from the public `rulesCount()` to `_rules.length()`, which the measurements above did not include.
+Measured on the final edit with a throwaway probe (3 whitelist rules, all allowing, cold calls from a test; the
+absolute numbers include cold-access costs and are not comparable with the table above, only the differences are):
+
+| Path | Before | After | Difference |
+|---|---|---|---|
+| `detectTransferRestriction` | 40,269 | 39,587 | **−682** (−227 per rule) |
+| `detectTransferRestrictionFrom` | 9,915 | 9,233 | **−682** |
+| `messageForTransferRestriction` (code claimed by the first rule) | 5,262 | 4,794 | **−468** |
+
+Full suite 438/438. The message loop still resolves the rule twice when a rule claims the code; caching it is
+`B-1`, still open.
+
 ## B. Storage reads
 
 ### B-1. `messageForTransferRestriction` resolves the rule twice — decide
@@ -159,6 +175,10 @@ The second `rule(i)` re-reads the length and the set slot after an external call
 forward across. Caching it (`IRule rule_ = IRule(_rules.pos(i));`) together with `A-3` measured **30,340 -> 29,077
 (−1,263)** at the first pass and **30,318 -> 29,089 (−1,229)** at the second, with the claiming rule third of three.
 View-only, so it only matters for an on-chain caller. **Verdict: implement with `A-3`**; it is the same edit.
+
+**After `A-3`:** the two calls now read `IRule(_rules.pos(i))`, so what remains is one extra `pos(i)` storage read
+after the external call. The saving left for `B-1` is smaller than the combined figure above and has not been
+measured separately.
 
 ### B-2. A `contains()` check before the mutation leaves two branches no test can reach — decide
 

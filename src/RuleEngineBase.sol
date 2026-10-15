@@ -4,6 +4,7 @@ pragma solidity ^0.8.27;
 
 /* ==== OpenZeppelin === */
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 /* ==== CMTAT interface IDs === */
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
@@ -36,6 +37,8 @@ abstract contract RuleEngineBase is
     RuleEngineInvariantStorage,
     IRuleEngineERC1404
 {
+    using EnumerableSet for EnumerableSet.AddressSet;
+
     /* ============ State variables ============ */
     /**
      * @dev ERC-1404 reserves the code 0 as the "no restriction" sentinel. It is never claimed by a rule,
@@ -164,9 +167,9 @@ abstract contract RuleEngineBase is
      * @return The first non-zero ERC-1404 restriction code, or TRANSFER_OK when every rule allows it.
      */
     function _detectTransferRestriction(address from, address to, uint256 value) internal view virtual returns (uint8) {
-        uint256 rulesLength = rulesCount();
+        uint256 rulesLength = _rules.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRule(rule(i)).detectTransferRestriction(from, to, value);
+            uint8 restriction = IRule(_rules.pos(i)).detectTransferRestriction(from, to, value);
             if (restriction > 0) {
                 return restriction;
             }
@@ -188,9 +191,9 @@ abstract contract RuleEngineBase is
         virtual
         returns (uint8)
     {
-        uint256 rulesLength = rulesCount();
+        uint256 rulesLength = _rules.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRule(rule(i)).detectTransferRestrictionFrom(spender, from, to, value);
+            uint8 restriction = IRule(_rules.pos(i)).detectTransferRestrictionFrom(spender, from, to, value);
             if (restriction > 0) {
                 return restriction;
             }
@@ -212,10 +215,10 @@ abstract contract RuleEngineBase is
         if (restrictionCode == uint8(REJECTED_CODE_BASE.TRANSFER_OK)) {
             return TEXT_TRANSFER_OK;
         }
-        uint256 rulesLength = rulesCount();
+        uint256 rulesLength = _rules.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            if (IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)) {
-                return IRule(rule(i)).messageForTransferRestriction(restrictionCode);
+            if (IRule(_rules.pos(i)).canReturnTransferRestrictionCode(restrictionCode)) {
+                return IRule(_rules.pos(i)).messageForTransferRestriction(restrictionCode);
             }
         }
         return TEXT_CODE_NOT_FOUND;
