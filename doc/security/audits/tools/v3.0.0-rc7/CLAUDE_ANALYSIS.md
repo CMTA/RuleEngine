@@ -67,7 +67,7 @@ ERC-2771 / no-forwarder suites; see the CHANGELOG). No benchmark or probe file i
 | H-1 | View approves a mint that enforcement rejects | ⬜ documented — carried, unchanged |
 | H-2 | Sender resolution after the ERC-2771 fix and the split | ⬜ verified — two identity sites, both `msg.sender`; no-forwarder variants ignore any suffix |
 | H-3 | A `*2771` deployable accepts `address(0)` as its forwarder | ⚠️ decide — new in the second pass |
-| I-1 | `IRule` demands two functions the engine never calls | ✅ fixed after the second pass — `IRule` narrowed, ID `0xb1a69752`, strict gate (old ID rejected) |
+| I-1 | `IRule` demands two functions the engine never calls | ✅ fixed after the second pass — `IRule` narrowed, ID `0xb1a69752`; the legacy ID `0x2497d6cb` is still accepted |
 | I-2 | Standalone-rule configuration advertised but untested | ✅ fixed after the second pass (option 1) — 9 integration tests, CMTAT guide §4.8, mocks import CMTAT's ids; mock `transferred` left unguarded, documented |
 | I-3 | Engine should call `canTransfer` on rules? | ⬜ no — carried from rc6 |
 | J-1 | Binding registry embeddable in a foreign host | ⬜ re-verified by example — two hosts compile (no `5005`); size depends on the host's CMTAT deployment version |
@@ -799,6 +799,29 @@ nothing calls.
   (`testEngineOnlyRuleWithoutComplianceReadsIsAccepted`, and every rule-aggregation and real-T-REX test).
 - **Verified:** full suite 460/460, `FOUNDRY_PROFILE=erc3643 forge test` 13/13, production coverage 100% (lines,
   statements, branches 48/48, functions).
+
+**Revised: the legacy ID is accepted after all (maintainer decision).** The strict gate above was reversed so
+that rules built before rc7 keep working without a coordinated release. The bullet "Migration: strict" is
+superseded; the rest stands.
+
+- **Gate.** `RuleEngineBase._checkRule` now calls a new `internal view virtual` hook,
+  `_supportsRuleInterface(rule)`: it checks ERC-165 support once (`ERC165Checker.supportsERC165`, which also
+  rejects a contract answering `true` to `0xffffffff`), then `IRULE_INTERFACE_ID`, then, only if that fails,
+  `IRULE_LEGACY_INTERFACE_ID`. Accepting the legacy ID is safe: it describes a superset of the current interface
+  (the same six functions plus `canTransfer` / `canTransferFrom`), and the engine calls only the six.
+- **Constant.** `RuleInterfaceId.IRULE_LEGACY_INTERFACE_ID = IRULE_INTERFACE_ID ^ IERC3643ComplianceRead ^
+  IERC7551Compliance = 0x2497d6cb`, computed like the others and pinned by
+  `testIRuleIdExcludesTheComplianceReads`.
+- **Tests, on all six deployables** (`RuleAggregationTestBase`): `testRuleAdvertisingOnlyTheLegacyIdIsAccepted`
+  (was `...IsRejected`), and three negative tests: `testRuleAdvertisingNoRuleIdIsRejected`,
+  `testRuleClaimingEveryInterfaceIsRejected`, `testRuleWithoutErc165IsRejected` (an EOA). Checked that they can
+  fail: removing the legacy fallback fails 6 tests, removing the ERC-165 pre-check fails 6 (the
+  claim-everything case; the EOA case alone would not catch it, since a call to an EOA returns no data and
+  reads as `false`).
+- **Gas.** `addRule` with a current-ID rule: 68,069 -> 68,005 (−64), since ERC-165 support and the ID are now
+  queried in one pass. A legacy rule pays one more `staticcall` (not isolated).
+- **Verified:** full suite 481/481, `FOUNDRY_PROFILE=erc3643 forge test` 13/13, production coverage 100% (lines,
+  statements, branches 49/49, functions).
 
 The limit stated above still holds: the narrowed ID describes shape, not semantics.
 

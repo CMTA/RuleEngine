@@ -64,12 +64,45 @@ abstract contract RuleAggregationTestBase is Test {
         assertTrue(IRulesManagementModule(address(engine)).containsRule(IRule(address(first))));
     }
 
-    /// @notice A rule advertising only the pre-narrowing ID `0x2497d6cb` is rejected: the gate is strict.
-    function testRuleAdvertisingOnlyTheLegacyIdIsRejected() public {
+    /// @notice A rule advertising only the legacy ID `0x2497d6cb` (the interface before rc7, a superset of the
+    /// current one) is still accepted.
+    function testRuleAdvertisingOnlyTheLegacyIdIsAccepted() public {
         LegacyIRuleIdProbe legacy = new LegacyIRuleIdProbe();
+        assertFalse(legacy.supportsInterface(RuleInterfaceId.IRULE_INTERFACE_ID));
+        vm.prank(ADMIN);
+        IRulesManagementModule(address(engine)).addRule(IRule(address(legacy)));
+        assertTrue(IRulesManagementModule(address(engine)).containsRule(IRule(address(legacy))));
+    }
+
+    /// @notice A contract that implements ERC-165 but advertises neither rule ID is rejected.
+    function testRuleAdvertisingNoRuleIdIsRejected() public {
+        RuleCodeProbe probe = new RuleCodeProbe(1, "m");
+        vm.mockCall(
+            address(probe),
+            abi.encodeWithSignature("supportsInterface(bytes4)", RuleInterfaceId.IRULE_INTERFACE_ID),
+            abi.encode(false)
+        );
         vm.prank(ADMIN);
         vm.expectRevert(RuleEngineInvariantStorage.RuleEngine_RuleInvalidInterface.selector);
-        IRulesManagementModule(address(engine)).addRule(IRule(address(legacy)));
+        IRulesManagementModule(address(engine)).addRule(IRule(address(probe)));
+    }
+
+    /// @notice A contract that answers `true` to every interface ID, including the invalid `0xffffffff`, does not
+    /// implement ERC-165 correctly and is rejected, although it claims both rule IDs.
+    function testRuleClaimingEveryInterfaceIsRejected() public {
+        RuleCodeProbe probe = new RuleCodeProbe(1, "m");
+        vm.mockCall(address(probe), abi.encodeWithSignature("supportsInterface(bytes4)"), abi.encode(true));
+        vm.mockCall(address(probe), abi.encodeWithSelector(bytes4(0x01ffc9a7)), abi.encode(true));
+        vm.prank(ADMIN);
+        vm.expectRevert(RuleEngineInvariantStorage.RuleEngine_RuleInvalidInterface.selector);
+        IRulesManagementModule(address(engine)).addRule(IRule(address(probe)));
+    }
+
+    /// @notice An account with no ERC-165 support (here an EOA) is rejected before any rule ID is queried.
+    function testRuleWithoutErc165IsRejected() public {
+        vm.prank(ADMIN);
+        vm.expectRevert(RuleEngineInvariantStorage.RuleEngine_RuleInvalidInterface.selector);
+        IRulesManagementModule(address(engine)).addRule(IRule(address(0xBEEF)));
     }
 
     /* ============ detectTransferRestriction / canTransfer ============ */

@@ -167,9 +167,14 @@ require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_RuleAlready
 // RuleEngineBase (adds ERC-165 check):
 function _checkRule(address rule_) internal view virtual override {
     RulesManagementModule._checkRule(rule_);
-    require(
-        ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID), RuleEngine_RuleInvalidInterface()
-    );
+    require(_supportsRuleInterface(rule_), RuleEngine_RuleInvalidInterface());
+}
+
+// ERC-165 support checked once, then the current IRule ID, then the legacy (pre-rc7) one:
+function _supportsRuleInterface(address rule_) internal view virtual returns (bool) {
+    if (!ERC165Checker.supportsERC165(rule_)) return false;
+    return ERC165Checker.supportsERC165InterfaceUnchecked(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)
+        || ERC165Checker.supportsERC165InterfaceUnchecked(rule_, RuleInterfaceId.IRULE_LEGACY_INTERFACE_ID);
 }
 ```
 
@@ -246,7 +251,7 @@ This gives O(1) add/remove/contains and iterable storage.
 | `IRuleEngine` | Full CMTAT integration interface | `lib/CMTAT/contracts/interfaces/engine/IRuleEngine.sol` |
 
 **ERC-165 interface IDs:**
-- `IRule`: `0xb1a69752` (`src/modules/library/RuleInterfaceId.sol`). Narrowed in rc7 (was `0x2497d6cb`, which also covered `canTransfer` / `canTransferFrom`); the engine accepts only the new ID
+- `IRule`: `0xb1a69752` (`src/modules/library/RuleInterfaceId.sol`). Narrowed in rc7 (was `0x2497d6cb`, which also covers `canTransfer` / `canTransferFrom`); the engine accepts both, the legacy one as `IRULE_LEGACY_INTERFACE_ID` (`RuleEngineBase._supportsRuleInterface`)
 - `IERC3643Compliance`: `0x3144991c`, extended: `0x646ba2be`, `IERC7551Compliance`: `0x7157797f` (`ComplianceInterfaceId.sol`)
 - `IERC1404`: `0xab84a5c8` (`ERC1404InterfaceId.sol`)
 - `IRuleEngine`: from `CMTAT/library/RuleEngineInterfaceId.sol`
@@ -337,7 +342,7 @@ Key points:
 ## Key Invariants
 
 1. **Only bound tokens** can call `transferred()`, `created()`, `destroyed()`
-2. **Rules are validated via ERC-165** before being added — they must support `IRULE_INTERFACE_ID`
+2. **Rules are validated via ERC-165** before being added — they must support `IRULE_INTERFACE_ID` or the legacy `IRULE_LEGACY_INTERFACE_ID`
 3. **No duplicate rules** — `EnumerableSet` prevents this
 4. **No zero-address rules** — checked in `_checkRule`
 5. **Admin has all roles** in `RuleEngine` and `RuleEngine2771` (the `hasRole` override in `RuleEngine`, inherited by `RuleEngine2771`)

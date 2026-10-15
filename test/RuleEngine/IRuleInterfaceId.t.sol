@@ -88,6 +88,7 @@ contract IRuleInterfaceIdTest is Test {
         assertEq(
             RuleInterfaceId.IRULE_INTERFACE_ID ^ canTransfer ^ canTransferFrom, bytes4(0x2497d6cb), "pre-rc7 IRule id"
         );
+        assertEq(RuleInterfaceId.IRULE_LEGACY_INTERFACE_ID, bytes4(0x2497d6cb), "legacy constant");
     }
 
     /**

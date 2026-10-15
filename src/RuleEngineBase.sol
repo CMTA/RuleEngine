@@ -226,15 +226,30 @@ abstract contract RuleEngineBase is
     }
 
     /**
-     * @dev Override to add ERC-165 interface check for the full IRule hierarchy.
+     * @dev Override to add the ERC-165 interface check, see {_supportsRuleInterface}.
      * @param rule_ The candidate rule address to validate.
      */
     function _checkRule(address rule_) internal view virtual override {
         RulesManagementModule._checkRule(rule_);
-        require(
-            ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID),
-            RuleEngine_RuleInvalidInterface()
-        );
+        require(_supportsRuleInterface(rule_), RuleEngine_RuleInvalidInterface());
+    }
+
+    /**
+     * @dev Tells whether `rule_` advertises a rule interface the engine can use: the current
+     * {RuleInterfaceId-IRULE_INTERFACE_ID} or the legacy {RuleInterfaceId-IRULE_LEGACY_INTERFACE_ID}.
+     * The legacy interface (up to v3.0.0-rc6) is a superset of the current one, adding `canTransfer` and
+     * `canTransferFrom`, which the engine never calls, so a rule built against it remains usable.
+     * ERC-165 support itself is checked once, then each ID with a single call; the legacy ID is only
+     * queried when the current one is not advertised.
+     * @param rule_ The candidate rule address.
+     * @return True if the rule advertises the current or the legacy rule interface.
+     */
+    function _supportsRuleInterface(address rule_) internal view virtual returns (bool) {
+        if (!ERC165Checker.supportsERC165(rule_)) {
+            return false;
+        }
+        return ERC165Checker.supportsERC165InterfaceUnchecked(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)
+            || ERC165Checker.supportsERC165InterfaceUnchecked(rule_, RuleInterfaceId.IRULE_LEGACY_INTERFACE_ID);
     }
 
     /**

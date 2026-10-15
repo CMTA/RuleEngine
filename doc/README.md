@@ -456,9 +456,10 @@ Notes:
   `ruleEngine.supportsInterface(0xb1a69752)` to return true.
 - **`IRule` was narrowed in v3.0.0-rc7.** It requires the six functions the engine calls (`transferred` x2,
   `detectTransferRestriction(From)`, `messageForTransferRestriction`, `canReturnTransferRestrictionCode`) plus
-  ERC-165, and no longer `canTransfer` / `canTransferFrom`. The ID moved from `0x2497d6cb` to `0xb1a69752`, and
-  the engine accepts **only** the new one: a rule that advertises only `0x2497d6cb` is rejected by `addRule` /
-  `setRules` with `RuleEngine_RuleInvalidInterface`. A rule built for both generations advertises both IDs.
+  ERC-165, and no longer `canTransfer` / `canTransferFrom`. The ID moved from `0x2497d6cb` to `0xb1a69752`.
+  **The engine accepts both**: the legacy ID (`RuleInterfaceId.IRULE_LEGACY_INTERFACE_ID`) describes a superset
+  of the current interface, so rules built before rc7 can still be added. A contract advertising neither, or
+  not implementing ERC-165 correctly, is rejected with `RuleEngine_RuleInvalidInterface`.
 - **The IDs are computed from the interfaces, not hardcoded** — see `ComplianceInterfaceId`, `RuleInterfaceId`
   and `ERC1404InterfaceId`, and `test/RuleEngine/IRuleInterfaceId.t.sol`, which pins each one to the wire value
   above. `type(I).interfaceId` counts only the functions `I` declares *directly*, so every constant XORs the
@@ -667,7 +668,7 @@ Rule families:
 
 Additional integration notes:
 
-- For RuleEngine integration, a rule must implement `IRule` and advertise its ERC-165 ID `0xb1a69752`. Since v3.0.0-rc7 that ID no longer includes `canTransfer` / `canTransferFrom`, and a rule advertising only the older `0x2497d6cb` is rejected; rules from the Rules repository must advertise the new ID to be added to an rc7 engine.
+- For RuleEngine integration, a rule must implement `IRule` and advertise its ERC-165 ID `0xb1a69752`. Since v3.0.0-rc7 that ID no longer includes `canTransfer` / `canTransferFrom`. A rule advertising only the older `0x2497d6cb` (rules of the Rules repository built before rc7) is still accepted.
 - RuleEngine executes configured rules in order and reverts on the first failing rule in state-changing paths.
 - Restriction codes should remain unique across the composed rule set. Keep CMTAT-reserved ranges free and use dedicated code ranges per rule 
 - For the latest list of production rules, audits, and status, use the Rules repository as the source of truth.

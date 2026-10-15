@@ -111,7 +111,7 @@ Production rules are maintained at [github.com/CMTA/Rules](https://github.com/CM
 
 The Rules repository is the source of truth for this list; see [doc/README.md § Available Rules](./doc/README.md#available-rules) for details and caveats.
 
-To be usable by the engine, a rule must implement `IRule` and advertise it through ERC-165 (`0xb1a69752` since v3.0.0-rc7; the older `0x2497d6cb`, which also covered `canTransfer` / `canTransferFrom`, is rejected). Restriction codes should stay unique across the composed rule set.
+To be usable by the engine, a rule must implement `IRule` and advertise it through ERC-165 (`0xb1a69752` since v3.0.0-rc7; the older `0x2497d6cb`, which also covers `canTransfer` / `canTransferFrom`, is still accepted). Restriction codes should stay unique across the composed rule set.
 
 ## Quick start
 
