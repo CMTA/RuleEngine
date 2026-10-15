@@ -6,8 +6,8 @@
 | **Scope** | `src/`, **mocks excluded** (`-x mocks`) |
 | **Compiler** | solc 0.8.37, EVM Osaka |
 | **Files analysed** | 28 (700 nSLOC) |
-| **Date** | 2026-10-14 |
-| **Commit** | `a91ca9a` |
+| **Date** | 2026-10-15 (re-run; first run 2026-10-14 at `a91ca9a`) |
+| **Commit** | `4946c87` |
 
 ```bash
 aderyn -x mocks --output doc/security/audits/tools/v3.0.0-rc7/aderyn-report.md

@@ -2,7 +2,7 @@
 
 **Tool:** [Aderyn](https://github.com/Cyfrin/aderyn) 0.6.5
 **Report file:** `doc/security/audits/tools/v3.0.0-rc7/aderyn-report.md`
-**Assessment date:** 2026-10-14 (commit `a91ca9a`)
+**Assessment date:** 2026-10-15 (commit `4946c87`; re-run of the 2026-10-14 analysis at `a91ca9a`, output identical)
 **Scope:** `src/`, **mocks excluded** (`-x mocks`), 28 files analysed, 700 nSLOC, solc 0.8.37 / EVM Osaka
 
 ```bash
@@ -57,8 +57,14 @@ The only number that moved is nSLOC, 683 -> 700, all of it in the three interfac
 This is not an rc7 code change. The rc6 report was generated (`dc7a4d3`, 2026-08-20 16:09) about an hour before
 the rc6 commit that replaced those hardcoded constants with computed `type(I).interfaceId` XOR expressions
 (`bdd59fd`, 17:22). So rc7 is the first Aderyn run on their final form, which multiplies their line count but
-adds no finding. Under `src/`, rc7 itself changes only the `VERSION` string and a `forge fmt` re-wrap of two of
-those expressions.
+adds no finding. Under `src/`, rc7 itself changes the `VERSION` string, a `forge fmt` re-wrap of two of
+those expressions, and the ERC-2771 token-identity fix (`4946c87`).
+
+**Re-run after the ERC-2771 fix:** the report was first generated at `a91ca9a` (2026-10-14), then re-run at
+`4946c87` (2026-10-15) with the same command; the tool output is identical. The fix replaces `_msgSender()` with
+`msg.sender` in place (`TokenBindingModule.sol:149`, `TokenBindingExtendedModule.sol:99`) and adds NatSpec, which
+does not count toward nSLOC. Every line it shifts lies below the existing citations (the last one in those files
+is `TokenBindingExtendedModule.sol:65`), so nSLOC stays 700 and every `file:line` is unchanged.
 
 The build changes (solc 0.8.37, EVM Osaka, CMTAT v3.3.0-rc4, forge-std v1.17.0) produced nothing either.
 

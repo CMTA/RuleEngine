@@ -55,10 +55,11 @@ Every finding is by design, cosmetic, or a verified false positive. Highlights:
 - **`L-8 Unchecked Return` (Aderyn, 1)** — `_grantRole` in a constructor cannot return `false`. False positive.
 
 **No change from v3.0.0-rc6** in either tool: same detectors, same instance counts, and every `file:line`
-citation identical. rc7 changes only the `VERSION` string under `src/`, plus build updates (solc 0.8.37, EVM
+citation identical. Under `src/`, rc7 changes the `VERSION` string and the ERC-2771 token-identity fix
+(`msg.sender` in `_checkBoundToken` and the self-binding check), plus build updates (solc 0.8.37, EVM
 Osaka, CMTAT v3.3.0-rc4, forge-std v1.17.0) that produced no finding. Aderyn's nSLOC rose 683 -> 700 because
 the rc6 run predates the rc6 commit that computes the interface IDs (`bdd59fd`). This is the first run on that
-code, and it adds no finding.
+code, and it adds no finding. Both tools were re-run after the ERC-2771 fix (`4946c87`): output identical.
 
 v3.0.0-rc6 versus rc5: Slither unchanged. Aderyn: same 8 findings, 76 -> 84 instances, entirely from the file
 count: the token binding split added a net four files, and the two per-file detectors moved by exactly four.

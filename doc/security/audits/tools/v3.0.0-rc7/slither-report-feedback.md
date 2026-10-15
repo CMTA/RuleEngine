@@ -2,7 +2,7 @@
 
 **Tool:** [Slither](https://github.com/crytic/slither) 0.11.5 (run with `uvx --python 3.12 --from slither-analyzer==0.11.5`)
 **Report file:** `doc/security/audits/tools/v3.0.0-rc7/slither-report.md`
-**Assessment date:** 2026-10-14 (commit `a91ca9a`)
+**Assessment date:** 2026-10-15 (commit `4946c87`; re-run of the 2026-10-14 analysis at `a91ca9a`, output identical)
 **Scope:** `src/`, **mocks excluded**, 108 contracts analysed, solc 0.8.37 / EVM Osaka
 
 ```bash
@@ -43,7 +43,13 @@ citation (contract, function, `file:line`) identical.
 That is the expected outcome, and it is worth recording why. Under `src/`, rc7 changes only:
 
 - `VersionModule.VERSION` (`"3.0.0"` -> `"3.0.0-rc7"`), a string constant no detector looks at;
-- a `forge fmt` re-wrap of the `RuleInterfaceId` and `ComplianceInterfaceId` constants (line breaks only).
+- a `forge fmt` re-wrap of the `RuleInterfaceId` and `ComplianceInterfaceId` constants (line breaks only);
+- the ERC-2771 token-identity fix (`4946c87`): `TokenBindingModule._checkBoundToken` and the token self-binding
+  check in `TokenBindingExtendedModule._authorizeTokenBindingChange` compare `msg.sender` instead of
+  `_msgSender()`, plus NatSpec. Neither function contains a loop or an event, so no detector is concerned.
+
+**Re-run:** the report was first generated at `a91ca9a` (2026-10-14), before the fix, then re-run at `4946c87`
+(2026-10-15) with the same command. The two outputs are byte-identical.
 
 The rest of rc7 is build and dependency changes: solc 0.8.36 -> **0.8.37**, EVM Prague -> **Osaka**, CMTAT
 v3.3.0-rc4 (NatSpec-only change to `IRuleEngine`), forge-std v1.17.0, and T-REX 4.2.0-beta1 in `lib/ERC-3643`.

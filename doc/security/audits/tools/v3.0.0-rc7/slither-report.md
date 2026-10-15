@@ -6,8 +6,8 @@
 | **Scope** | `src/`, **mocks excluded** |
 | **Compiler** | solc 0.8.37, EVM Osaka |
 | **Contracts analysed** | 108 |
-| **Date** | 2026-10-14 |
-| **Commit** | `a91ca9a` |
+| **Date** | 2026-10-15 (re-run; first run 2026-10-14 at `a91ca9a`) |
+| **Commit** | `4946c87` |
 
 ```bash
 slither . --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" \
@@ -25,9 +25,12 @@ slither . --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-st
 no vendored dependency or mock contract entered the analysis.
 
 **Delta from v3.0.0-rc6: none.** Same two detectors, same 10 + 2 instances, and every citation (contract,
-function, `file:line`) is identical to rc6. The only `src/` change since rc6 is the `VERSION` string and a
-`forge fmt` re-wrap of two interface-ID constants. The build changes (solc 0.8.36 -> 0.8.37, EVM Prague -> Osaka,
+function, `file:line`) is identical to rc6. The `src/` changes since rc6 are the `VERSION` string, a
+`forge fmt` re-wrap of two interface-ID constants and the ERC-2771 token-identity fix (`msg.sender` in
+`_checkBoundToken` and the self-binding check). The build changes (solc 0.8.36 -> 0.8.37, EVM Prague -> Osaka,
 CMTAT v3.3.0-rc4, forge-std v1.17.0) produced no finding.
+
+**Re-run after the ERC-2771 fix (`4946c87`): output byte-identical** to the first rc7 run at `a91ca9a`.
 
 Triage and per-finding reasoning: [slither-report-feedback.md](./slither-report-feedback.md).
 Overview of all analyses: [AUDIT_OVERVIEW.md](../../AUDIT_OVERVIEW.md).
