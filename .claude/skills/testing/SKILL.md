@@ -37,12 +37,12 @@ test/
 ### Organization Rules
 
 - Tests for `RuleEngine` go in `test/RuleEngine/`
-- Tests for `RuleEngine2771` (RBAC + ERC-2771) go in `test/RuleEngine2771/`
+- Tests for each ERC-2771 contract go in its own directory: `test/RuleEngine2771/`, `test/RuleEngineOwnable2771/`, `test/RuleEngineOwnable2Step2771/`
 - Tests for `RuleEngineOwnable` go in `test/RuleEngineOwnable/`
 - Tests for `RuleEngineOwnable2Step` go in `test/RuleEngineOwnable2Step/`
 - Shared test logic uses `*Base.sol` abstract contracts with virtual hooks
 - Test files use `.t.sol` suffix; base/helper files use `.sol`
-- **Every variant must be tested.** When adding a feature to `RuleEngineBase`, add tests for all four deployables, preferably through a shared `test/utils/*TestBase.sol` with one short file per variant directory.
+- **Every variant must be tested.** When adding a feature to `RuleEngineBase`, add tests for all six deployables, preferably through a shared `test/utils/*TestBase.sol` with one short file per variant directory.
 
 ## Helper Contracts
 

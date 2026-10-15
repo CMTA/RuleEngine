@@ -8,7 +8,7 @@ AGENTS.md and CLAUDE.md files must always be identical — always update both to
 
 **RuleEngine** is a Solidity smart contract system that enforces transfer restrictions for [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens. It acts as an external controller that calls pluggable rule contracts on each token transfer, mint, or burn.
 
-- **Version:** 3.0.0-rc7 (defined in `src/modules/VersionModule.sol`; the string carries the release-candidate suffix and must be bumped with each tag — update the `version()` assertions in `test/RuleEngine/RuleEngineDeployment.t.sol`, `test/RuleEngine2771/RuleEngine2771Deployment.t.sol`, `test/RuleEngineOwnable/RuleEngineOwnableDeployment.t.sol`, `test/RuleEngineOwnable2Step/RuleEngineOwnable2Step.t.sol` and `test/hardhat/RuleEngine.smoke.js` with it)
+- **Version:** 3.0.0-rc7 (defined in `src/modules/VersionModule.sol`; the string carries the release-candidate suffix and must be bumped with each tag — update the `version()` assertions in `test/RuleEngine/RuleEngineDeployment.t.sol`, `test/utils/ERC2771VariantTestBase.sol`, `test/RuleEngineOwnable/RuleEngineOwnableDeployment.t.sol`, `test/RuleEngineOwnable2Step/RuleEngineOwnable2Step.t.sol` and `test/hardhat/RuleEngine.smoke.js` with it)
 - **Solidity:** ^0.8.20 (compiled with 0.8.37)
 - **EVM target:** Osaka (Fusaka upgrade)
 - **License:** MPL-2.0
@@ -61,16 +61,18 @@ Use `@openzeppelin/contracts/` for OpenZeppelin imports and `CMTAT/` for CMTAT i
 
 ## Architecture
 
-### Four Deployable Contracts
+### Six Deployable Contracts
 
 ```
-RuleEngine              — RBAC via AccessControl (multi-operator), no ERC-2771
-RuleEngine2771          — RBAC via AccessControl + ERC-2771 (immutable trusted forwarder)
-RuleEngineOwnable       — ERC-173 Ownable (single-owner)
-RuleEngineOwnable2Step  — ERC-173 Ownable2Step (single-owner, two-step handover)
+RuleEngine                  — RBAC via AccessControl (multi-operator), no ERC-2771
+RuleEngine2771              — RBAC via AccessControl + ERC-2771 (immutable trusted forwarder)
+RuleEngineOwnable           — ERC-173 Ownable (single-owner), no ERC-2771
+RuleEngineOwnable2771       — ERC-173 Ownable + ERC-2771
+RuleEngineOwnable2Step      — ERC-173 Ownable2Step (single-owner, two-step handover), no ERC-2771
+RuleEngineOwnable2Step2771  — ERC-173 Ownable2Step + ERC-2771
 ```
 
-All four share their core logic through `RuleEngineBase`, via `RuleEngineAccessControlShared` (the two RBAC variants) or `RuleEngineOwnableShared` (the two ownable variants). Only `RuleEngine` lacks ERC-2771; the ownable variants keep their forwarder parameter (`address(0)` disables it).
+All six share their core logic through `RuleEngineBase`, via `RuleEngineAccessControlShared` (the two RBAC variants) or `RuleEngineOwnableShared` (the four ownable variants). Each access-control model has a version without ERC-2771 (constructor `(admin|owner_, tokenContract)`) and a `*2771` version with an immutable trusted forwarder (constructor `(admin|owner_, forwarderIrrevocable, tokenContract)`). `RuleEngineOwnable2771` / `RuleEngineOwnable2Step2771` extend `RuleEngineOwnable` / `RuleEngineOwnable2Step` and add only `ERC2771ModuleStandalone` plus the three `Context` overrides.
 
 ### Inheritance Hierarchy
 
@@ -104,16 +106,22 @@ RuleEngine2771
 └── RuleEngineAccessControlShared
 
 RuleEngineOwnable
-├── ERC2771ModuleStandalone → gasless support
-├── RuleEngineOwnableShared
+├── RuleEngineOwnableShared             → no gasless support
 │   └── RuleEngineBase
 └── Ownable (OZ) → ERC-173
 
-RuleEngineOwnable2Step
+RuleEngineOwnable2771
 ├── ERC2771ModuleStandalone → gasless support
-├── RuleEngineOwnableShared
+└── RuleEngineOwnable
+
+RuleEngineOwnable2Step
+├── RuleEngineOwnableShared             → no gasless support
 │   └── RuleEngineBase
 └── Ownable2Step (OZ) → ERC-173
+
+RuleEngineOwnable2Step2771
+├── ERC2771ModuleStandalone → gasless support
+└── RuleEngineOwnable2Step
 ```
 
 ### Access Control Pattern
@@ -271,8 +279,10 @@ src/
 ├── deployment/
 │   ├── RuleEngine.sol             # RBAC variant, no ERC-2771 (deploy this)
 │   ├── RuleEngine2771.sol         # RBAC variant with ERC-2771 (deploy this)
-│   ├── RuleEngineOwnable.sol      # Ownable variant (deploy this)
-│   └── RuleEngineOwnable2Step.sol # Ownable2Step variant (deploy this)
+│   ├── RuleEngineOwnable.sol      # Ownable variant, no ERC-2771 (deploy this)
+│   ├── RuleEngineOwnable2771.sol  # Ownable variant with ERC-2771 (deploy this)
+│   ├── RuleEngineOwnable2Step.sol # Ownable2Step variant, no ERC-2771 (deploy this)
+│   └── RuleEngineOwnable2Step2771.sol # Ownable2Step variant with ERC-2771 (deploy this)
 ├── RuleEngineBase.sol             # Abstract core logic (do not deploy)
 ├── RuleEngineAccessControlShared.sol # Shared logic for the RBAC variants
 ├── RuleEngineOwnableShared.sol    # Shared logic for ownable variants
@@ -291,6 +301,8 @@ test/
 ├── RuleEngine2771/                # Tests for RuleEngine2771 (RBAC + ERC-2771)
 ├── RuleEngineOwnable/             # Tests for RuleEngineOwnable
 ├── RuleEngineOwnable2Step/        # Tests for RuleEngineOwnable2Step
+├── RuleEngineOwnable2771/         # Tests for RuleEngineOwnable2771
+├── RuleEngineOwnable2Step2771/     # Tests for RuleEngineOwnable2Step2771
 ├── ERC3643Real/                   # Real T-REX token tests (FOUNDRY_PROFILE=erc3643 only)
 └── RuleWhitelist/                 # Tests for the whitelist mock rule
 
@@ -304,12 +316,12 @@ For detailed test conventions, templates, helper contracts, test addresses, nami
 Key points:
 - Tests for `RuleEngine` go in `test/RuleEngine/`, tests for `RuleEngineOwnable` go in `test/RuleEngineOwnable/`
 - Tests for `RuleEngineOwnable2Step` go in `test/RuleEngineOwnable2Step/`
-- Tests for `RuleEngine2771` go in `test/RuleEngine2771/`
+- Tests for each `*2771` contract go in its own `test/<Contract>/` directory (`RuleEngine2771`, `RuleEngineOwnable2771`, `RuleEngineOwnable2Step2771`)
 - Use `HelperContract` for RBAC tests, `HelperContractOwnable` for Ownable tests
 - Use `HelperContractOwnable2Step` for `RuleEngineOwnable2Step` tests
 - Always use specific error selectors in `vm.expectRevert()`
 - When adding a feature to `RuleEngineBase`, add tests for **all deployable variants**
-- Behaviour shared by the variants is tested once in an abstract base under `test/utils/` (`ERC2771TokenGateTestBase`, `RuleAggregationTestBase`), with a short per-variant file in each `test/RuleEngine*/` directory that only deploys the variant
+- Behaviour shared by the variants is tested once in an abstract base under `test/utils/` (`ERC2771TokenGateTestBase`, `ERC2771VariantTestBase`, `NoForwarderTestBase`, `RuleAggregationTestBase`), with a short per-variant file in each `test/RuleEngine*/` directory that only deploys the variant
 - Before trusting a new test, check it can fail: break the line it guards and run the suite (the rc7 code-quality review mutation-tests the suite this way)
 
 ## RBAC Roles (RuleEngine and RuleEngine2771)
@@ -327,7 +339,7 @@ Key points:
 3. **No duplicate rules** — `EnumerableSet` prevents this
 4. **No zero-address rules** — checked in `_checkRule`
 5. **Admin has all roles** in `RuleEngine` and `RuleEngine2771` (the `hasRole` override in `RuleEngineAccessControlShared`)
-6. **Forwarder is immutable** — set at construction, cannot be changed (`RuleEngine2771` and the ownable variants; `RuleEngine` has none)
+6. **Forwarder is immutable** — set at construction, cannot be changed (the three `*2771` contracts; the others have none)
 7. **Token identity uses `msg.sender`, never `_msgSender()`** — `_checkBoundToken` (`onlyBoundToken`) and the token self-binding check in `_authorizeTokenBindingChange` compare the raw caller so the ERC-2771 forwarder cannot pass as a token; administrative checks keep `_msgSender()` (gasless admin). Pinned by `test/utils/ERC2771TokenGateTestBase.sol`
 8. **Rule contracts in `src/mocks/` are reference implementations** — they are useful for testing and examples, not as production rule contracts. Production rules live in a [separate repository](https://github.com/CMTA/Rules).
 
@@ -352,7 +364,7 @@ Key points:
 3. Add a virtual access control hook (e.g., `_onlyNewManager()`)
 4. Have `RuleEngineBase` inherit the module
 5. Override the hook in `RuleEngineAccessControlShared`, `RuleEngineOwnable` and `RuleEngineOwnable2Step`
-6. Add tests in `test/RuleEngine/`, `test/RuleEngine2771/`, `test/RuleEngineOwnable/`, and `test/RuleEngineOwnable2Step/`
+6. Add tests for all six deployables (one directory each under `test/`), preferably through a shared `test/utils/*TestBase.sol`
 
 ### Adding a new rule (mock)
 1. Create the rule in `src/mocks/rules/`

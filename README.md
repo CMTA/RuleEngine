@@ -15,14 +15,16 @@ It is an *external controller*: the token calls the engine on every transfer, mi
 
 ## Contract Variants
 
-Four deployable contracts share the same core logic and differ only in access control and ERC-2771 support:
+Six deployable contracts share the same core logic and differ only in access control and ERC-2771 support. Each access-control model comes in two versions: without ERC-2771, and with an immutable trusted forwarder (`*2771`):
 
 | Contract | Access Control | ERC-2771 (gasless) | Use Case |
 |----------|---------------|--------------------|----------|
 | `RuleEngine` | Role-based (`AccessControlEnumerable`) | No | Multi-operator environments with granular permissions |
 | `RuleEngine2771` | Role-based (`AccessControlEnumerable`) | Yes (immutable trusted forwarder) | Same, with administration through meta-transactions |
-| `RuleEngineOwnable` | ERC-173 `Ownable` | Yes (forwarder can be zero) | Single-owner setups, simpler administration |
-| `RuleEngineOwnable2Step` | ERC-173 `Ownable2Step` | Yes (forwarder can be zero) | Single-owner setups with safer ownership handover |
+| `RuleEngineOwnable` | ERC-173 `Ownable` | No | Single-owner setups, simpler administration |
+| `RuleEngineOwnable2771` | ERC-173 `Ownable` | Yes (immutable trusted forwarder) | Same, with administration through meta-transactions |
+| `RuleEngineOwnable2Step` | ERC-173 `Ownable2Step` | No | Single-owner setups with safer ownership handover |
+| `RuleEngineOwnable2Step2771` | ERC-173 `Ownable2Step` | Yes (immutable trusted forwarder) | Same, with administration through meta-transactions |
 
 All of them support ERC-1404 transfer restrictions, the ERC-3643 compliance interface and multiple token bindings.
 
@@ -61,8 +63,10 @@ RuleEngineBase (abstract)              — core logic, shared by all variants
 
 RuleEngine               = RuleEngineAccessControlShared (RuleEngineBase + AccessControlEnumerable)
 RuleEngine2771           = RuleEngineAccessControlShared + ERC2771ModuleStandalone
-RuleEngineOwnable        = RuleEngineOwnableShared + Ownable      + ERC2771ModuleStandalone
-RuleEngineOwnable2Step   = RuleEngineOwnableShared + Ownable2Step + ERC2771ModuleStandalone
+RuleEngineOwnable          = RuleEngineOwnableShared + Ownable
+RuleEngineOwnable2771      = RuleEngineOwnable       + ERC2771ModuleStandalone
+RuleEngineOwnable2Step     = RuleEngineOwnableShared + Ownable2Step
+RuleEngineOwnable2Step2771 = RuleEngineOwnable2Step  + ERC2771ModuleStandalone
 ```
 
 Token binding is deliberately split in two layers: `TokenBindingModule` / `TokenBindingExtendedModule` hold the whole registry (storage, `bindToken` / `unbindToken` / `isTokenBound`, batch binding, self-binding, the `onlyBoundToken` guard) and depend on nothing but OpenZeppelin, so they can be reused by any project that has to bind tokens; `ERC3643ComplianceModule` / `ERC3643ComplianceExtendedModule` are thin ERC-3643 adapters on top, adding `getTokenBound()` and the compliance-manager vocabulary. `src/mocks/TokenBindingStandaloneMock.sol` shows the registry used on its own, outside any compliance context.
@@ -76,11 +80,13 @@ src/
 ├── RuleEngineBase.sol              # abstract core logic (not deployable)
 ├── RuleEngineAccessControlShared.sol # shared logic for the two RBAC variants
 ├── RuleEngineOwnableShared.sol     # shared logic for the two ownable variants
-├── deployment/                     # the four deployable contracts
+├── deployment/                     # the six deployable contracts
 │   ├── RuleEngine.sol
 │   ├── RuleEngine2771.sol
 │   ├── RuleEngineOwnable.sol
-│   └── RuleEngineOwnable2Step.sol
+│   ├── RuleEngineOwnable2771.sol
+│   ├── RuleEngineOwnable2Step.sol
+│   └── RuleEngineOwnable2Step2771.sol
 ├── interfaces/                     # IRule, IRulesManagementModule, ITokenBinding(Extended),
 │                                   # IERC3643Compliance(Extended)
 ├── modules/                        # VersionModule, RulesManagementModule, TokenBinding(Extended)Module,

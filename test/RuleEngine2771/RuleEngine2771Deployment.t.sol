@@ -9,14 +9,14 @@ import {MinimalForwarderMock} from "CMTAT/mocks/MinimalForwarderMock.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {RuleEngine2771} from "src/deployment/RuleEngine2771.sol";
-import {RuleEngine2771Exposed} from "src/mocks/RuleEngineExposed.sol";
 import {ComplianceInterfaceId} from "src/modules/library/ComplianceInterfaceId.sol";
 import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
 import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvariantStorage.sol";
 
 /**
  * @title RuleEngine2771DeploymentTest
- * @notice Deployment, ERC-165 and ERC-2771 context tests for the RBAC `RuleEngine2771`.
+ * @notice Deployment and ERC-165 tests for the RBAC `RuleEngine2771`. The forwarder, `_msgData` and
+ * zero-admin checks shared with the ownable `*2771` variants are in `ERC2771Variant.t.sol`.
  */
 contract RuleEngine2771DeploymentTest is Test, RuleEngineInvariantStorage {
     address internal constant ADMIN = address(0xA11CE);
@@ -42,15 +42,6 @@ contract RuleEngine2771DeploymentTest is Test, RuleEngineInvariantStorage {
         assertEq(engine.maxRules(), 10);
     }
 
-    function testHasRightVersion() public view {
-        assertEq(engine.version(), "3.0.0-rc7");
-    }
-
-    function testCannotDeployIfAdminAddressIsZero() public {
-        vm.expectRevert(RuleEngine_AdminWithAddressZeroNotAllowed.selector);
-        new RuleEngine2771(address(0), address(forwarder), address(0));
-    }
-
     /// @notice Same interfaces as `RuleEngine`: ERC-2771 adds no ERC-165 id.
     function testSupportsInterfaces() public view {
         assertTrue(engine.supportsInterface(type(IERC165).interfaceId));
@@ -63,18 +54,5 @@ contract RuleEngine2771DeploymentTest is Test, RuleEngineInvariantStorage {
         assertTrue(engine.supportsInterface(ComplianceInterfaceId.ERC3643_COMPLIANCE_EXTENDED_INTERFACE_ID));
         assertTrue(engine.supportsInterface(ComplianceInterfaceId.IERC7551_COMPLIANCE_INTERFACE_ID));
         assertFalse(engine.supportsInterface(0xffffffff));
-    }
-
-    /// @notice `_msgData` returns the plain calldata on a direct call, and strips the sender on a relayed one.
-    function testMsgDataStripsTheRelayedSender() public {
-        RuleEngine2771Exposed exposed = new RuleEngine2771Exposed(ADMIN, address(forwarder), address(0));
-        bytes memory selector = abi.encodeCall(exposed.exposedMsgData, ());
-
-        assertEq(exposed.exposedMsgData(), selector);
-
-        vm.prank(address(forwarder));
-        (bool ok, bytes memory ret) = address(exposed).call(abi.encodePacked(selector, ADMIN));
-        assertTrue(ok);
-        assertEq(abi.decode(ret, (bytes)), selector);
     }
 }

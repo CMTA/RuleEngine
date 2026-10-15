@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 import {RuleEngine2771} from "../deployment/RuleEngine2771.sol";
-import {RuleEngineOwnable} from "../deployment/RuleEngineOwnable.sol";
-import {RuleEngineOwnable2Step} from "../deployment/RuleEngineOwnable2Step.sol";
+import {RuleEngineOwnable2771} from "../deployment/RuleEngineOwnable2771.sol";
+import {RuleEngineOwnable2Step2771} from "../deployment/RuleEngineOwnable2Step2771.sol";
 
 /**
  * @title RuleEngine2771Exposed
@@ -28,17 +28,17 @@ contract RuleEngine2771Exposed is RuleEngine2771 {
 }
 
 /**
- * @title RuleEngineOwnableExposed
+ * @title RuleEngineOwnable2771Exposed
  * @dev Exposes internal functions for testing coverage
  */
-contract RuleEngineOwnableExposed is RuleEngineOwnable {
+contract RuleEngineOwnable2771Exposed is RuleEngineOwnable2771 {
     /**
      * @notice Deploys the exposed engine.
      * @param owner_ Address receiving the initial privileges.
      * @param forwarder Address of the trusted ERC-2771 forwarder.
      * @param token Token to bind at deployment, or the zero address to bind none.
      */
-    constructor(address owner_, address forwarder, address token) RuleEngineOwnable(owner_, forwarder, token) {}
+    constructor(address owner_, address forwarder, address token) RuleEngineOwnable2771(owner_, forwarder, token) {}
 
     /**
      * @notice Exposes the internal {_msgData} for testing.
@@ -50,17 +50,19 @@ contract RuleEngineOwnableExposed is RuleEngineOwnable {
 }
 
 /**
- * @title RuleEngineOwnable2StepExposed
+ * @title RuleEngineOwnable2Step2771Exposed
  * @dev Exposes internal functions for testing coverage
  */
-contract RuleEngineOwnable2StepExposed is RuleEngineOwnable2Step {
+contract RuleEngineOwnable2Step2771Exposed is RuleEngineOwnable2Step2771 {
     /**
      * @notice Deploys the exposed engine.
      * @param owner_ Address receiving the initial privileges.
      * @param forwarder Address of the trusted ERC-2771 forwarder.
      * @param token Token to bind at deployment, or the zero address to bind none.
      */
-    constructor(address owner_, address forwarder, address token) RuleEngineOwnable2Step(owner_, forwarder, token) {}
+    constructor(address owner_, address forwarder, address token)
+        RuleEngineOwnable2Step2771(owner_, forwarder, token)
+    {}
 
     /**
      * @notice Exposes the internal {_msgData} for testing.

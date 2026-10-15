@@ -42,14 +42,16 @@ section 4.
 
 ### 3.1 Deploy the RuleEngine
 
-Same four variants as for CMTAT. ERC-3643's own specification points at ERC-173 for ownership:
+Same six variants as for CMTAT. ERC-3643's own specification points at ERC-173 for ownership:
 
 > The standard relies on ERC-173 to define contract ownership, with the owner having the responsibility of setting the Compliance parameters and binding the Compliance to a Token contract.
 
-so `RuleEngineOwnable` or `RuleEngineOwnable2Step` is the closest match to the spec, though `RuleEngine` / `RuleEngine2771` (role-based) work identically and are preferable with multiple operators.
+so `RuleEngineOwnable` or `RuleEngineOwnable2Step` (or their `*2771` versions) is the closest match to the spec, though `RuleEngine` / `RuleEngine2771` (role-based) work identically and are preferable with multiple operators.
 
 ```solidity
-RuleEngineOwnable engine = new RuleEngineOwnable(owner, forwarder, address(0));
+RuleEngineOwnable engine = new RuleEngineOwnable(owner, address(0));
+// or, with an ERC-2771 forwarder for gasless administration:
+RuleEngineOwnable2771 engine2771 = new RuleEngineOwnable2771(owner, forwarder, address(0));
 ```
 
 ### 3.2 Grant self-binding approval — required before `setCompliance`

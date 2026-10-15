@@ -5,7 +5,9 @@ import {Test} from "forge-std/Test.sol";
 import {RuleEngine} from "src/deployment/RuleEngine.sol";
 import {RuleEngine2771} from "src/deployment/RuleEngine2771.sol";
 import {RuleEngineOwnable} from "src/deployment/RuleEngineOwnable.sol";
+import {RuleEngineOwnable2771} from "src/deployment/RuleEngineOwnable2771.sol";
 import {RuleEngineOwnable2Step} from "src/deployment/RuleEngineOwnable2Step.sol";
+import {RuleEngineOwnable2Step2771} from "src/deployment/RuleEngineOwnable2Step2771.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 
 /**
@@ -33,12 +35,24 @@ contract RuleEngineMaxRulesEventTest is Test, RulesManagementModuleInvariantStor
     function testRuleEngineOwnableEmitsInitialMaxRulesOnDeployment() public {
         vm.expectEmit(true, true, true, true);
         emit SetMaxRules(DEFAULT_MAX_RULES);
-        new RuleEngineOwnable(ADMIN, FORWARDER, address(0));
+        new RuleEngineOwnable(ADMIN, address(0));
     }
 
     function testRuleEngineOwnable2StepEmitsInitialMaxRulesOnDeployment() public {
         vm.expectEmit(true, true, true, true);
         emit SetMaxRules(DEFAULT_MAX_RULES);
-        new RuleEngineOwnable2Step(ADMIN, FORWARDER, address(0));
+        new RuleEngineOwnable2Step(ADMIN, address(0));
+    }
+
+    function testRuleEngineOwnable2771EmitsInitialMaxRulesOnDeployment() public {
+        vm.expectEmit(true, true, true, true);
+        emit SetMaxRules(DEFAULT_MAX_RULES);
+        new RuleEngineOwnable2771(ADMIN, FORWARDER, address(0));
+    }
+
+    function testRuleEngineOwnable2Step2771EmitsInitialMaxRulesOnDeployment() public {
+        vm.expectEmit(true, true, true, true);
+        emit SetMaxRules(DEFAULT_MAX_RULES);
+        new RuleEngineOwnable2Step2771(ADMIN, FORWARDER, address(0));
     }
 }

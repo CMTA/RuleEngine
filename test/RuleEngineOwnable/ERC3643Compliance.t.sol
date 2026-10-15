@@ -42,7 +42,7 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
 
     function setUp() public {
         // Deploy RuleEngineOwnable with owner
-        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS);
 
         // Deploy multiple mock tokens
         token1 = new ERC3643MockTokenOwnable(address(ruleEngineMock));

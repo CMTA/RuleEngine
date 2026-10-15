@@ -3,11 +3,8 @@
 pragma solidity ^0.8.20;
 
 /* ==== OpenZeppelin === */
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-/* ==== Modules === */
-import {ERC2771ModuleStandalone, ERC2771Context} from "./modules/ERC2771ModuleStandalone.sol";
 /* ==== Base contract === */
 import {RuleEngineBase} from "./RuleEngineBase.sol";
 import {OwnableInterfaceId} from "./modules/library/OwnableInterfaceId.sol";
@@ -16,15 +13,15 @@ import {IRule} from "./interfaces/IRule.sol";
 /**
  * @title Shared Ownable deployment logic for RuleEngine variants
  * @dev Kept abstract to let child contracts choose the ownership mechanism
- * (`Ownable` or `Ownable2Step`) while reusing constructor, ERC-165 and ERC-2771 code.
+ * (`Ownable` or `Ownable2Step`) while reusing constructor and ERC-165 code. Free of ERC-2771:
+ * the `*2771` deployables add the trusted forwarder on top of the ownable deployables.
  */
-abstract contract RuleEngineOwnableShared is ERC2771ModuleStandalone, RuleEngineBase, ERC165 {
+abstract contract RuleEngineOwnableShared is RuleEngineBase, ERC165 {
     /**
-     * @notice Sets the trusted forwarder and optionally binds an initial token.
-     * @param forwarderIrrevocable Address of the trusted ERC-2771 forwarder, immutable after construction.
+     * @notice Optionally binds an initial token and emits the initial rule cap.
      * @param tokenContract Token to bind at deployment, or the zero address to bind none.
      */
-    constructor(address forwarderIrrevocable, address tokenContract) ERC2771ModuleStandalone(forwarderIrrevocable) {
+    constructor(address tokenContract) {
         if (tokenContract != address(0)) {
             _bindToken(tokenContract);
         }
@@ -51,33 +48,5 @@ abstract contract RuleEngineOwnableShared is ERC2771ModuleStandalone, RuleEngine
         if (containsRule(IRule(newOwner))) {
             revert RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges();
         }
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                           ERC-2771
-    //////////////////////////////////////////////////////////////*/
-
-    /**
-     * @dev This surcharge is not necessary if you do not use the MetaTxModule
-     * @return sender The transaction sender, unwrapped from the forwarder calldata when relayed.
-     */
-    function _msgSender() internal view virtual override(ERC2771Context, Context) returns (address sender) {
-        return ERC2771Context._msgSender();
-    }
-
-    /**
-     * @dev This surcharge is not necessary if you do not use the MetaTxModule
-     * @return The transaction calldata, with the appended sender stripped when relayed.
-     */
-    function _msgData() internal view virtual override(ERC2771Context, Context) returns (bytes calldata) {
-        return ERC2771Context._msgData();
-    }
-
-    /**
-     * @dev This surcharge is not necessary if you do not use the MetaTxModule
-     * @return The length of the ERC-2771 calldata suffix.
-     */
-    function _contextSuffixLength() internal view virtual override(ERC2771Context, Context) returns (uint256) {
-        return ERC2771Context._contextSuffixLength();
     }
 }

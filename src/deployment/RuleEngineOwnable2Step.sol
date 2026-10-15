@@ -5,24 +5,21 @@ pragma solidity ^0.8.20;
 /* ==== OpenZeppelin === */
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {RuleEngineOwnableShared} from "../RuleEngineOwnableShared.sol";
 import {Ownable2StepInterfaceId} from "../modules/library/Ownable2StepInterfaceId.sol";
 
 /**
  * @title Implementation of a ruleEngine with ERC-173 Ownable2Step access control
+ * @dev No ERC-2771 support: every caller is the raw `msg.sender`. Deploy {RuleEngineOwnable2Step2771} to
+ * administer the engine through a trusted forwarder (gasless transactions).
  */
 contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
     /**
-     * @notice Deploys a RuleEngine with ERC-173 two-step ownership transfer.
+     * @notice Deploys a RuleEngine with ERC-173 two-step ownership transfer, without a trusted forwarder.
      * @param owner_ Address of the initial contract owner (ERC-173).
-     * @param forwarderIrrevocable Address of the ERC-2771 trusted forwarder (use zero address to disable gasless).
      * @param tokenContract Address of the token contract to bind at deployment (use zero address to skip).
      */
-    constructor(address owner_, address forwarderIrrevocable, address tokenContract)
-        RuleEngineOwnableShared(forwarderIrrevocable, tokenContract)
-        Ownable(owner_)
-    {}
+    constructor(address owner_, address tokenContract) RuleEngineOwnableShared(tokenContract) Ownable(owner_) {}
 
     /**
      * @notice Starts ownership transfer to `newOwner`.
@@ -66,28 +63,4 @@ contract RuleEngineOwnable2Step is RuleEngineOwnableShared, Ownable2Step {
      * @dev Access control check using Ownable pattern
      */
     function _onlyComplianceManager() internal virtual override onlyOwner {}
-
-    /**
-     * @dev This surcharge is not necessary if you do not use the MetaTxModule
-     * @return sender The transaction sender, unwrapped from the forwarder calldata when relayed.
-     */
-    function _msgSender() internal view virtual override(RuleEngineOwnableShared, Context) returns (address sender) {
-        return RuleEngineOwnableShared._msgSender();
-    }
-
-    /**
-     * @dev This surcharge is not necessary if you do not use the MetaTxModule
-     * @return The transaction calldata, with the appended sender stripped when relayed.
-     */
-    function _msgData() internal view virtual override(RuleEngineOwnableShared, Context) returns (bytes calldata) {
-        return RuleEngineOwnableShared._msgData();
-    }
-
-    /**
-     * @dev This surcharge is not necessary if you do not use the MetaTxModule
-     * @return The length of the ERC-2771 calldata suffix.
-     */
-    function _contextSuffixLength() internal view virtual override(RuleEngineOwnableShared, Context) returns (uint256) {
-        return RuleEngineOwnableShared._contextSuffixLength();
-    }
 }

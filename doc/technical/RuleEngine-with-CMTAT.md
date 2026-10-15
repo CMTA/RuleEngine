@@ -84,14 +84,16 @@ predict a mint or a burn, call `canTransfer*` on the token, which branches on th
 
 ### 3.1 Deploy the RuleEngine
 
-Four deployable variants share identical core logic and differ only in access control and ERC-2771 support. Pick one:
+Six deployable variants share identical core logic and differ only in access control and ERC-2771 support. Pick one:
 
 | Contract | Access control | Use case |
 |---|---|---|
 | `RuleEngine` | Role-based (`AccessControlEnumerable`), no ERC-2771 | Multiple operators, granular permissions |
 | `RuleEngine2771` | Role-based, with an immutable ERC-2771 forwarder | Same, administered through meta-transactions |
-| `RuleEngineOwnable` | ERC-173 `Ownable` | Single owner |
-| `RuleEngineOwnable2Step` | ERC-173 `Ownable2Step` | Single owner, safer handover |
+| `RuleEngineOwnable` | ERC-173 `Ownable`, no ERC-2771 | Single owner |
+| `RuleEngineOwnable2771` | ERC-173 `Ownable`, with an immutable ERC-2771 forwarder | Single owner, meta-transactions |
+| `RuleEngineOwnable2Step` | ERC-173 `Ownable2Step`, no ERC-2771 | Single owner, safer handover |
+| `RuleEngineOwnable2Step2771` | ERC-173 `Ownable2Step`, with an immutable ERC-2771 forwarder | Single owner, safer handover, meta-transactions |
 
 ```solidity
 // admin, token to bind (may be address(0))
@@ -101,7 +103,8 @@ RuleEngine2771 engine2771 = new RuleEngine2771(admin, forwarder, address(0));
 ```
 
 The forwarder is **immutable** — it is fixed at construction and cannot be changed afterwards. The ownable
-variants also take a forwarder (`address(0)` disables gasless).
+variants follow the same pattern: `RuleEngineOwnable(owner, token)` / `RuleEngineOwnable2771(owner, forwarder, token)`,
+and likewise for `RuleEngineOwnable2Step` / `RuleEngineOwnable2Step2771`.
 
 ### 3.2 Bind the token to the engine
 

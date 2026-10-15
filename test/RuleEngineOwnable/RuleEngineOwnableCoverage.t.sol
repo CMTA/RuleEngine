@@ -5,7 +5,6 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContractOwnable.sol";
 
-import {RuleEngineOwnableExposed} from "src/mocks/RuleEngineExposed.sol";
 import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
@@ -21,8 +20,6 @@ import {OwnableInterfaceId} from "src/modules/library/OwnableInterfaceId.sol";
  * @title Coverage tests for RuleEngineOwnable (_msgData, ERC-165 rule check)
  */
 contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
-    RuleEngineOwnableExposed public ruleEngineOwnableExposed;
-
     // Known interface IDs
     bytes4 constant RULE_ENGINE_ID = 0x20c49ce7;
     bytes4 constant ERC1404_EXTEND_ID = 0x78a8de7d;
@@ -30,8 +27,7 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
     bytes4 constant INVALID_ID = 0xffffffff;
 
     function setUp() public {
-        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
-        ruleEngineOwnableExposed = new RuleEngineOwnableExposed(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -84,14 +80,6 @@ contract RuleEngineOwnableCoverageTest is Test, HelperContractOwnable {
     /*//////////////////////////////////////////////////////////////
                             MSG DATA
     //////////////////////////////////////////////////////////////*/
-
-    function testMsgDataReturnsCalldata() public view {
-        bytes memory data = ruleEngineOwnableExposed.exposedMsgData();
-        // Should return the calldata (selector of exposedMsgData)
-        assertEq(data.length, 4);
-        // forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(bytes4(data), ruleEngineOwnableExposed.exposedMsgData.selector);
-    }
 
     /*//////////////////////////////////////////////////////////////
                     ERC-165 RULE INTERFACE CHECK
