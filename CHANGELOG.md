@@ -48,6 +48,7 @@ forge lint
   - Perform a code coverage and update the files in the corresponding directory [./doc/coverage](./doc/coverage)
   - Perform an audit with several audit tools (Aderyn and Slither), update the report in the corresponding directory [./doc/security/audits/tools](./doc/security/audits/tools)
   - Update surya doc by running the 3 scripts in [./doc/script](./doc/script)
+  - Check that the compilation artifacts of the release are in [./doc/compilation](./doc/compilation), in a `vX.Y.Z` directory (`foundry/` from `forge build`, `hardhat/` from `npx hardhat compile --force`, one entry per deployable contract). Artifacts of a previous version may stay alongside, but the latest one must be present.
   - Update changelog
 
 
