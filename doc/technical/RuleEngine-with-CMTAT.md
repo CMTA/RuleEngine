@@ -58,12 +58,47 @@ Two consequences follow:
 - **On CMTAT v3.0.0 – v3.2.0, mint, burn and the minter transfer arrive on the 3-argument overload**
   (`_checkTransferred(address(0), ...)` in `lib/CMTATv3.0.0/contracts/modules/0_CMTATBaseCommon.sol`). The engine
   works with these versions, but a spender-keyed rule (a per-minter mint allowance, minter screening) is inert
-  there: it never sees the operator.
+  there: it never sees the operator. See [CMTAT v3.0.0](#cmtat-v300).
 
 **CMTAT never calls `created()` or `destroyed()`.** Those belong to `IERC3643Compliance` and are used only by ERC-3643 tokens. 
 
 The 4-argument `transferred` is conversely declared by CMTAT's `IRuleEngine` and is never
 reached by an ERC-3643 token.
+
+### CMTAT v3.0.0
+
+CMTAT v3.0.0 is the last audited CMTAT release, and the oldest one the engine supports. It is pinned as the
+submodule `lib/CMTATv3.0.0` (remapped `CMTATv3.0.0/`) so the engine is tested against it.
+
+The engine is unchanged: the token sets it with `setRuleEngine(IRuleEngine)` and calls the same two overloads,
+chosen by the same `spender != address(0)` branch (`ValidationModuleRuleEngine._transferred` in v3.0.0). What
+differs is the spender CMTAT passes. In v3.0.0 (`modules/0_CMTATBaseCommon.sol`) only `transferFrom` carries
+one; mint, burn and the minter transfer call `_checkTransferred(address(0), ...)`:
+
+| CMTAT v3.0.0 operation | `spender` passed | `from` | `to` | Overload called |
+|---|---|---|---|---|
+| `transfer(to, value)` | `address(0)` | holder | recipient | 3-argument |
+| `transferFrom(from, to, value)` | `_msgSender()` | holder | recipient | 4-argument |
+| `mint`, `batchMint`, `crosschainMint` | `address(0)` | `address(0)` | recipient | **3-argument** (4-argument since v3.3.0) |
+| `burn`, `batchBurn`, `burnFrom`, `crosschainBurn` | `address(0)` | holder | `address(0)` | **3-argument** (4-argument since v3.3.0) |
+| minter `batchTransfer(tos, values)` | `address(0)` | minter | recipient | **3-argument** (4-argument since v3.3.0) |
+| `forcedTransfer` | — | — | — | not called |
+
+Consequences for an integrator on v3.0.0 – v3.2.0:
+
+- **Spender-keyed rules are inert on mint and burn.** A rule that acts only on the 4-argument path, such as a
+  per-minter mint allowance (`RuleMintAllowance` in the Rules repository), never sees the operator, so it
+  neither debits nor blocks a mint. Minter screening by a deny-list does not happen either.
+- **Rules enforced on the 3-argument path still apply to mint and burn**, with `from == address(0)` for a mint
+  and `to == address(0)` for a burn, exactly as on an ERC-3643 token.
+- **`transferFrom` is the only operation with a spender**, so a spender whitelist screens it as on later
+  versions.
+
+Pinned by `RuleEngine/RulesManagementModuleTest/CMTATOperationRoutingV3.t.sol` (10 tests): for `transfer`,
+`transferFrom`, `mint` and `burn`, the exact overload and arguments reaching the engine and the rule
+(`vm.expectCall`), and the absence of the other overload. A rule rejecting that overload blocks each operation,
+and a rule enforced only on the 4-argument path lets mint and burn through. The other `…V3` suites (§5) run
+the integration and whitelist tests against the same v3.0.0 token.
 
 ### Read-only path
 
@@ -286,10 +321,11 @@ consumed once, a mint allowance consumed by `mint`, and a reverting rule blockin
 | Whitelist rule + CMTAT v3.0.0 | `RuleWhitelist/CMTATIntegrationV3.t.sol` | 11 |
 | Reverting rule propagation | `RuleEngine/RulesManagementModuleTest/RuleEngineOperationRevert.t.sol` | 1 |
 | Reverting rule, CMTAT v3.0.0 | `RuleEngine/RulesManagementModuleTest/RuleEngineOperationRevertV3.t.sol` | 1 |
+| Overload per operation (transfer, transferFrom, mint, burn), CMTAT v3.0.0 | `RuleEngine/RulesManagementModuleTest/CMTATOperationRoutingV3.t.sol` | 10 |
 | Deployment script | `script/CMTATWithRuleEngineScript.t.sol` | 1 |
 | A rule as the token's engine, no RuleEngine (§4.8) | `RuleStandalone/RuleStandaloneCMTAT.t.sol` | 9 |
 
-**40 CMTAT-specific tests.** Coverage includes: a real `CMTATStandardStandalone` bound to the engine, transfers accepted and rejected through the whitelist, restriction-code propagation back to the token, and a rule that reverts mid-transfer.
+**50 CMTAT-specific tests.** Coverage includes: a real `CMTATStandardStandalone` bound to the engine, transfers accepted and rejected through the whitelist, restriction-code propagation back to the token, and a rule that reverts mid-transfer.
 
 **Backward compatibility is tested against two CMTAT versions.** The `…V3` suites deploy a real CMTAT **v3.0.0** token (submodule `lib/CMTATv3.0.0`, remapped `CMTATv3.0.0/`) alongside the current **v3.3.0-rc4** token (`lib/CMTAT`). 
 

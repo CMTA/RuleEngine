@@ -154,7 +154,7 @@ _Diagram source: [doc/schema/plantuml/ruleengine-flow-erc3643.puml](./schema/pla
 | **v3.0.0-rc2**                                               | CMTAT ≥ v3.0.0<br />CMTAT target version: [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0) |
 | **[v1.0.2.1](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2.1)** | CMTAT v2.3.0 (audited)                                       |
 
-> **Note (CMTAT v3.0.0 – v3.2.0):** the engine works with every CMTAT ≥ v3.0.0, but on v3.0.0 – v3.2.0 mint, burn and the minter `batchTransfer` reach the engine on the **3-argument** `transferred` (no spender). Spender-keyed rules (a per-minter mint allowance, minter screening) are therefore inert on those versions. The 4-argument routing of mint and burn starts with CMTAT v3.3.0, see [Like CMTAT](#like-cmtat).
+> **Note (CMTAT v3.0.0 – v3.2.0):** the engine works with every CMTAT ≥ v3.0.0, but on v3.0.0 – v3.2.0 mint, burn and the minter `batchTransfer` reach the engine on the **3-argument** `transferred` (no spender). Spender-keyed rules (a per-minter mint allowance, minter screening) are therefore inert on those versions. The 4-argument routing of mint and burn starts with CMTAT v3.3.0, see [CMTAT v3.0.0](#cmtat-v300) and [Like CMTAT](#like-cmtat).
 
 #### CMTAT ≥ v3.0.0
 
@@ -165,6 +165,16 @@ setRuleEngine(IRuleEngine ruleEngine_)
 ```
 
 This function is defined in the extension module `ValidationModuleRuleEngine`
+
+#### CMTAT v3.0.0
+
+CMTAT v3.0.0, the last audited CMTAT release, is the oldest version the engine supports, and is tested against it (`lib/CMTATv3.0.0`). The engine needs no change, but the token routes operations differently from v3.3.0:
+
+- `transfer` → 3-argument `transferred(from, to, value)`; `transferFrom` → 4-argument `transferred(spender, from, to, value)`, as on later versions.
+- `mint` / `burn` (and their batch, cross-chain and `burnFrom` forms, and the minter `batchTransfer`) → **3-argument**, with no operator. Since v3.3.0 they take the 4-argument overload.
+- Consequence: a spender-keyed rule (per-minter mint allowance, minter screening) is inert on mint and burn up to v3.2.0, while rules enforced on the 3-argument path apply normally.
+
+Table, consequences and tests: [RuleEngine-with-CMTAT.md §CMTAT v3.0.0](./technical/RuleEngine-with-CMTAT.md#cmtat-v300). Pinned by `test/RuleEngine/RulesManagementModuleTest/CMTATOperationRoutingV3.t.sol`.
 
 #### ERC-3643 token
 
