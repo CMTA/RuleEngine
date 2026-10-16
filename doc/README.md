@@ -1880,20 +1880,27 @@ forge build --contracts src/deployment/accessControl/RuleEngine.sol
 forge build --contracts src/deployment/ownable/RuleEngineOwnable.sol
 forge build --contracts src/deployment/ownable/RuleEngineOwnable2Step.sol
 ```
+
+The compiled artifacts of the six deployables for v3.0.0-rc7 (ABI, bytecode, metadata; solc 0.8.37, EVM Osaka, optimizer 200 runs) are committed in [doc/compilation/v3.0.0-rc7](./compilation/v3.0.0-rc7): `foundry/` holds the `forge build` output (`out/`), `hardhat/` the `npx hardhat compile` output (`artifacts/`, the `.dbg.json` files point to a `build-info` file that is not committed). Both toolchains produce the same runtime bytecode size.
+
 ### Contract size
 
 ```bash
 forge build --sizes
 ```
 
-Latest output (`2026-03-18`) for the main RuleEngine contracts:
+Latest output (`2026-10-16`, v3.0.0-rc7) for the six deployables:
 
 | Contract | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
 |----------|------------------:|------------------:|--------------------:|---------------------:|
-| RuleEngine | 6,756 | 7,805 | 17,820 | 41,347 |
-| RuleEngineOwnable | 6,170 | 6,833 | 18,406 | 42,319 |
+| RuleEngine | 7,997 | 8,943 | 16,579 | 40,209 |
+| RuleEngine2771 | 8,400 | 9,616 | 16,176 | 39,536 |
+| RuleEngineOwnable | 6,970 | 7,708 | 17,606 | 41,444 |
+| RuleEngineOwnable2771 | 7,368 | 8,161 | 17,208 | 40,991 |
+| RuleEngineOwnable2Step | 7,219 | 7,982 | 17,357 | 41,170 |
+| RuleEngineOwnable2Step2771 | 7,657 | 8,475 | 16,919 | 40,677 |
 
-Both `RuleEngine` and `RuleEngineOwnable` remain well below the EIP-170 runtime limit. `RuleEngineOwnable` is slightly smaller because `Ownable` has less overhead than `AccessControl`.
+All six remain well below the EIP-170 runtime limit (24,576 B). The ownable variants are smaller because `Ownable` has less overhead than `AccessControlEnumerable`, and each `*2771` variant adds about 400 B for the trusted forwarder.
 
 ### Testing
 

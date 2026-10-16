@@ -188,6 +188,7 @@ rc7 is **not** a drop-in update from rc6: it changes three constructors, who may
   - The operation rules accept `transferred` only from a caller bound on the rule. The wiring an engine needs (`bindToken(token)` + `bindRuleEngine(engine)` for `RuleConditionalTransferLight`, `bindToken(engine)` for `RuleMintAllowance`) is now documented (`RuleEngine-with-CMTAT.md` §3.4, §4.8).
   - Rules up to v0.6.0 are built against RuleEngine v3.0.0-rc6 and advertise the legacy `IRule` ID `0x2497d6cb`, still accepted; stated in both READMEs and both integration guides. `RuleEngine-with-CMTAT.md` §3.4 no longer says that only `0xb1a69752` is accepted.
   - `RuleEngine-with-ERC3643.md` §3.4 lists the rules that are inert, need a variant or are unsupported on an ERC-3643 token; §4.2 describes how the production rules handle the `address(0)` sentinel.
+- Replace the v3.0.0-rc2 compilation artifacts in `doc/compilation/` with the v3.0.0-rc7 ones, for the six deployables (Foundry `out/` and Hardhat `artifacts/` JSON; solc 0.8.37, EVM Osaka). `doc/README.md` §Compilation points to them, and its contract-size table, last measured on 2026-03-18 for two contracts, now lists the six rc7 deployables.
 - Add the v3.0.0-rc6 specification PDFs under `doc/specification/previous_specification/rc6/` and the cover sources; add `doc/script/convert_links_for_pdf_root.sh`, which applies the PDF link conversion of `convert_links_for_pdf.sh` to the root `README.md`.
 
 ### Dependencies
