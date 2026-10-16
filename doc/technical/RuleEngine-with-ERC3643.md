@@ -104,7 +104,15 @@ Identical to the CMTAT case:
 engine.addRule(IRule(address(rule)));
 ```
 
-Rules must implement `IRule` and advertise `RuleInterfaceId.IRULE_INTERFACE_ID` via ERC-165. They run in declaration order; the first to revert aborts the transaction.
+Rules must implement `IRule` and advertise `RuleInterfaceId.IRULE_INTERFACE_ID` (`0xb1a69752`) or the pre-rc7 `IRULE_LEGACY_INTERFACE_ID` (`0x2497d6cb`, advertised by [CMTA/Rules](https://github.com/CMTA/Rules) up to v0.6.0) via ERC-165. They run in declaration order; the first to revert aborts the transaction.
+
+**Not every rule works on an ERC-3643 token.** The token forwards no spender (`transfer` and `transferFrom` both call the 3-argument `transferred`) and calls compliance *after* it moves the value. In CMTA/Rules this means:
+
+- spender checks and flags never fire (`RuleSpenderWhitelist` is inert, the spender leg of the deny-lists and of `RuleERC2980` is skipped);
+- the supply caps need their ERC-3643 variants, `RuleMaxTotalSupplyERC3643` and `RuleChainlinkPoRERC3643` (the stock rules count the minted amount twice);
+- `RuleMaxBalance` and `RuleConditionalTransferLightMultiToken` are not supported, and `RuleMintAllowance` is inert: every mint passes.
+
+`RuleConditionalTransferLight` works, once bound with `bindToken(token)` and `bindRuleEngine(engine)`. Per-rule table: [doc/README.md §Available Rules](../README.md#available-rules), from the Rules repository's [compatibility matrix](https://github.com/CMTA/Rules/blob/main/doc/technical/guides/RULE_SEMANTICS.md#6-erc-3643-compatibility--which-rules-actually-work-on-a-t-rex-token).
 
 ### 3.5 Batch helpers
 
@@ -137,8 +145,7 @@ The state-changing path is unaffected and still enforces correctly; the damage i
 
 ### 4.2 `address(0)` must be whitelisted for minting to work
 
-**This concerns `RuleWhitelistMock`, a reference rule in `src/mocks/`, not a production rule.** Production rules live in [CMTA/Rules](https://github.com/CMTA/Rules) and may handle the sentinel differently — check the
-rule you actually deploy.
+**This concerns `RuleWhitelistMock`, a reference rule in `src/mocks/`, not a production rule.** Production rules live in [CMTA/Rules](https://github.com/CMTA/Rules) and handle the sentinel differently: there, `address(0)` can never be listed, and `RuleWhitelist` / `RuleERC2980` permit mint and burn through explicit `allowMint` / `allowBurn` flags (v0.6.0). Check the rule you actually deploy.
 
 The behavior is described here because the mock is what the examples, scripts and tests in this repository use, and because integrators copy it.
 
@@ -159,6 +166,7 @@ per-address accounting mixes state across every bound token.
 
 - Only bind tokens that are equally trusted and governed together. 
 - Unbinding does not retroactively separate state already accumulated in a rule.
+- Some rules protect one token per instance: `RuleMaxTotalSupplyERC3643` and `RuleChainlinkPoRERC3643` read `totalSupply()` from a token set at deployment, and `RuleConditionalTransferLight` keys approvals with no token dimension. Use them only in an engine dedicated to that token.
 
 This matters more here than for CMTAT, because `bindTokens` makes multi-token binding a one-call operation.
 

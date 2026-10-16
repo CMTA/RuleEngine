@@ -139,7 +139,17 @@ engine.addRule(IRule(address(rule)));                  // RULES_MANAGEMENT_ROLE,
 engine.setRules(rulesArray);                           // replaces the whole set atomically
 ```
 
-A rule must implement `IRule` and advertise `RuleInterfaceId.IRULE_INTERFACE_ID` (`0xb1a69752`) through ERC-165; the engine validates this on `addRule` and rejects anything else. Rules run **in declaration order** and the first one to revert aborts the whole transaction.
+A rule must implement `IRule` and advertise `RuleInterfaceId.IRULE_INTERFACE_ID` (`0xb1a69752`) through ERC-165, or the pre-rc7 `IRULE_LEGACY_INTERFACE_ID` (`0x2497d6cb`); the engine validates this on `addRule` and rejects anything else. The rules of [CMTA/Rules](https://github.com/CMTA/Rules) up to v0.6.0 advertise the legacy ID. Rules run **in declaration order** and the first one to revert aborts the whole transaction.
+
+The operation rules of CMTA/Rules accept `transferred` only from a caller bound on the rule itself, so tell them about the engine before the first transfer:
+
+```solidity
+conditionalTransfer.bindToken(address(token));        // RuleConditionalTransferLight
+conditionalTransfer.bindRuleEngine(address(engine));   //   ... and the engine that relays the token
+mintAllowance.bindToken(address(engine));              // RuleMintAllowance: the engine is its caller
+```
+
+`RuleConditionalTransferLightMultiToken` is the exception: it is never added to an engine (see [doc/README.md §Available Rules](../README.md#available-rules)).
 
 ### 3.5 Roles reference (`RuleEngine` variant)
 
@@ -186,6 +196,11 @@ Any stateful rule that keeps per-address accounting therefore mixes state across
 
 Only bind tokens that are equally trusted and governed together. Unbinding does not retroactively separate state already accumulated.
 
+Some rules of [CMTA/Rules](https://github.com/CMTA/Rules) cannot be shared at all:
+
+- `RuleMaxTotalSupply`, `RuleChainlinkPoR` (and their ERC-3643 variants) and `RuleMaxBalance` read `totalSupply()` / `balanceOf()` from a token set at deployment, not from the token that triggered the check. Behind an engine bound to several tokens, every token is checked against that one token's supply or balances. Deploy one instance per token, in an engine dedicated to that token.
+- `RuleConditionalTransferLight` keys approvals `(from, to, value)` with no token dimension: an approval recorded for one token can be consumed by a transfer of another. Bind it only to an engine that serves a single token.
+
 ### 4.5 Restriction codes must be unique across the rule set
 
 The engine returns the first non-zero code, and `messageForTransferRestriction` resolves a code against the first rule claiming it. 
@@ -228,7 +243,7 @@ is not needed. Details:
 
 Since v3.0.0-rc7, `IRule` requires only what the engine calls, so it no longer includes `canTransfer` /
 `canTransferFrom`. A rule that also wants this role implements CMTAT's `IRuleEngineERC1404` on top of `IRule`
-and advertises `RULE_ENGINE_INTERFACE_ID`, as the four reference rules do. An issuer who needs exactly one rule can therefore skip the RuleEngine and
+and advertises `RULE_ENGINE_INTERFACE_ID`, as the four reference rules and every rule of [CMTA/Rules](https://github.com/CMTA/Rules) do. An issuer who needs exactly one rule can therefore skip the RuleEngine and
 call `token.setRuleEngine(rule)`. CMTAT's `setRuleEngine` performs no ERC-165 check, so the token accepts any
 contract with the right functions. The token then calls the rule directly: `transferred` (3- or 4-argument,
 see §2), `canTransfer` / `canTransferFrom`, and the ERC-1404 views `detectTransferRestriction(From)` and
@@ -241,9 +256,11 @@ What changes compared to a rule behind an engine, and what a rule must do to sup
   rules. Standalone, the token calls the rule, and so can anyone else: `transferred` is a public function of the
   rule. **A stateful rule must restrict who may call `transferred`** (its token when standalone, its engine
   otherwise), or any account can consume its state, for example a transfer approval or a minter's allowance,
-  and block the real operation. The reference rules `RuleConditionalTransferLightMock` and
-  `RuleMintAllowanceMock` do **not** do this: they are test doubles, not production rules. Note that the same
-  exposure exists behind an engine, since a direct call to the rule never goes through the engine at all.
+  and block the real operation. The operation rules of CMTA/Rules do this: their hooks accept only the token
+  bound on the rule (`bindToken`), plus, for `RuleConditionalTransferLight`, an engine bound with
+  `bindRuleEngine`. The reference rules `RuleConditionalTransferLightMock` and `RuleMintAllowanceMock` do
+  **not**: they are test doubles, not production rules. Note that the same exposure exists behind an engine,
+  since a direct call to the rule never goes through the engine at all.
 - **`canTransfer` / `canTransferFrom` must agree with `detectTransferRestriction*`.** The token answers
   `canTransfer` from the rule's own function, not from the restriction code, so a stub that returns a constant
   makes the token report a wrong answer.
@@ -251,8 +268,9 @@ What changes compared to a rule behind an engine, and what a rule must do to sup
   token's `detectTransferRestriction` and `messageForTransferRestriction` return the rule's values unchanged
   (after CMTAT's own codes: paused, deactivated, frozen).
 - **One rule only.** Several restrictions need a RuleEngine.
-- **CMTAT only.** An ERC-3643 token calls `created` / `destroyed` and the binding functions, which a rule does
-  not implement, so a rule cannot replace the engine for an ERC-3643 token.
+- **CMTAT only.** An ERC-3643 token calls `created` / `destroyed` and the binding functions, which the
+  validation rules do not implement, so a rule cannot replace the engine for an ERC-3643 token. CMTA/Rules
+  recommends an engine for every ERC-3643 setup.
 
 Tested with each reference rule in `test/RuleStandalone/RuleStandaloneCMTAT.t.sol`: allowed and refused
 transfers with the rule's code and message, the spender check on `transferFrom`, a conditional-transfer approval

@@ -109,9 +109,9 @@ Production rules are maintained at [github.com/CMTA/Rules](https://github.com/CM
 - **Validation rules (read-only)** — evaluate eligibility without mutating state: `RuleWhitelist`, `RuleWhitelistWrapper`, `RuleReceiverWhitelist`, `RuleBlacklist`, `RuleSanctionsList`, `RuleIdentityRegistry`, `RuleSpenderWhitelist`, `RuleERC2980`, `RuleMaxTotalSupply` / `RuleMaxTotalSupplyERC3643`, `RuleMaxBalance`, `RuleChainlinkPoR` / `RuleChainlinkPoRERC3643`
 - **Operation rules (read-write)** — may update rule state on transfer: `RuleConditionalTransferLight`, `RuleMintAllowance`, and `RuleConditionalTransferLightMultiToken` (set directly on each token, never behind a RuleEngine)
 
-The Rules repository is the source of truth for this list; see [doc/README.md § Available Rules](./doc/README.md#available-rules) for details and caveats.
+The Rules repository is the source of truth for this list; see [doc/README.md § Available Rules](./doc/README.md#available-rules) for details and caveats: restriction codes, ERC-3643 support per rule, rules that protect one token per instance, and how to bind the operation rules to the engine.
 
-To be usable by the engine, a rule must implement `IRule` and advertise it through ERC-165 (`0xb1a69752` since v3.0.0-rc7; the older `0x2497d6cb`, which also covers `canTransfer` / `canTransferFrom`, is still accepted). Restriction codes should stay unique across the composed rule set.
+To be usable by the engine, a rule must implement `IRule` and advertise it through ERC-165 (`0xb1a69752` since v3.0.0-rc7; the older `0x2497d6cb`, which also covers `canTransfer` / `canTransferFrom` and is advertised by Rules up to v0.6.0, is still accepted). Restriction codes should stay unique across the composed rule set.
 
 ## Quick start
 

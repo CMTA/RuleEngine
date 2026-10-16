@@ -5,6 +5,18 @@
       "rev": "78e6e48e491e01e853e6490e061189875d4785ea"
     }
   },
+  "lib/CMTATv3.0.0": {
+    "rev": "69eecc9735ce8ada84fd35801888b05747658939"
+  },
+  "lib/ERC-3643": {
+    "rev": "a708758313f7589c6709c29d003f73b6db24663a"
+  },
+  "lib/Rules": {
+    "tag": {
+      "name": "v0.6.0",
+      "rev": "283efe723225c89729fd618852a9c2705a47180b"
+    }
+  },
   "lib/forge-std": {
     "rev": "8bbcf6e3f8f62f419e5429a0bd89331c85c37824"
   },

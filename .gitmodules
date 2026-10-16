@@ -16,3 +16,6 @@
 [submodule "ERC-3643"]
 	path = lib/ERC-3643
 	url = https://github.com/ERC-3643/ERC-3643
+[submodule "lib/Rules"]
+	path = lib/Rules
+	url = https://github.com/CMTA/Rules
