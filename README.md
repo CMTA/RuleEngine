@@ -13,6 +13,16 @@ It is an *external controller*: the token calls the engine on every transfer, mi
 
 > This project has not undergone an audit and is provided as-is without any warranties.
 
+## CMTAT compatibility
+
+| RuleEngine | CMTAT | Tested against |
+|---|---|---|
+| **v3.0.0-rc7** (this version) | ≥ v3.0.0 | v3.0.0 (last audited CMTAT release) and v3.3.0-rc4 (target version) |
+| earlier v3.0.0 release candidates | ≥ v3.0.0 | their target version, see [doc/README.md § Compatibility](./doc/README.md#compatibility) |
+| [v1.0.2.1](https://github.com/CMTA/RuleEngine/releases/tag/v1.0.2.1) | v2.3.0 (audited) | — |
+
+For a **CMTAT v3.0.0** token, use RuleEngine **v3.0.0-rc7**: it is tested against that version (v1.0.2.1 is for CMTAT v2 only). Up to CMTAT v3.2.0, mint and burn reach the engine without the operator, so spender-keyed rules (per-minter mint allowance) do not apply to them; see [doc/README.md § CMTAT v3.0.0](./doc/README.md#cmtat-v300).
+
 ## Contract Variants
 
 Six deployable contracts share the same core logic and differ only in access control and ERC-2771 support. Each access-control model comes in two versions: without ERC-2771, and with an immutable trusted forwarder (`*2771`):
