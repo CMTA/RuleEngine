@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MPL-2.0
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
+import {IRuleEngine, IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
+import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
+import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {RuleMintAllowanceInvariantStorage} from "./abstract/RuleMintAllowanceInvariantStorage.sol";
 
 /**
@@ -14,16 +17,7 @@ import {RuleMintAllowanceInvariantStorage} from "./abstract/RuleMintAllowanceInv
  *         Each mint deducts from the minter's remaining allowance.
  *         Burns and regular transfers are unrestricted by this rule.
  */
-contract RuleMintAllowanceMock is AccessControl, RuleMintAllowanceInvariantStorage, IRule {
-    /**
-     * @notice ERC-165 interface ID of the CMTAT RuleEngine interface.
-     */
-    bytes4 private constant RULE_ENGINE_INTERFACE_ID = 0x20c49ce7;
-    /**
-     * @notice ERC-165 interface ID of the extended ERC-1404 interface.
-     */
-    bytes4 private constant ERC1404EXTEND_INTERFACE_ID = 0x78a8de7d;
-
+contract RuleMintAllowanceMock is AccessControl, RuleMintAllowanceInvariantStorage, IRule, IRuleEngineERC1404 {
     /**
      * @notice Remaining mint allowance per minter.
      */
@@ -103,12 +97,11 @@ contract RuleMintAllowanceMock is AccessControl, RuleMintAllowanceInvariantStora
         uint256 value
     )
         public
+        override(IRule, IRuleEngine)
     {
         if (from == address(0)) {
             uint256 allowance = mintAllowance[spender];
-            if (allowance < value) {
-                revert RuleMintAllowance_InsufficientAllowance(spender, allowance, value);
-            }
+            require(allowance >= value, RuleMintAllowance_InsufficientAllowance(spender, allowance, value));
             mintAllowance[spender] = allowance - value;
             emit MintAllowanceConsumed(spender, value, mintAllowance[spender]);
         }
@@ -122,7 +115,8 @@ contract RuleMintAllowanceMock is AccessControl, RuleMintAllowanceInvariantStora
      * @return True if the interface is supported, false otherwise.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
-        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID
+        return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
+            || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
             || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || AccessControl.supportsInterface(interfaceId);
     }
 

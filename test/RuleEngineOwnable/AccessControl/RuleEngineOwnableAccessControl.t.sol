@@ -13,7 +13,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract RuleEngineOwnableAccessControlTest is Test, HelperContractOwnable {
     // Arrange
     function setUp() public {
-        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS);
         ruleConditionalTransferLight =
             new RuleConditionalTransferLightMock(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
     }

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/ERC2771ModuleStandalone.sol | ca20e6f6f7f28ab2e5d90be759f773456dae36fb |
+| ./modules/ERC2771ModuleStandalone.sol | c02c92b754990e8e04045fb29006b4a2be3e0504 |
 
 
 ### Contracts Description Table

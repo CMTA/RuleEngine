@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./interfaces/IRule.sol | b4e0be299f2fe29785a03b1427992c6da26e2c5d |
+| ./interfaces/IRule.sol | f07328ac6f54dcc331e382085c513719a572b4ef |
 
 
 ### Contracts Description Table
@@ -15,7 +15,8 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **IRule** | Interface | IRuleEngineERC1404 |||
+| **IRule** | Interface | IERC1404Extend, IERC3643IComplianceContract, IERC165 |||
+| └ | transferred | External ❗️ | 🛑  |NO❗️ |
 | └ | canReturnTransferRestrictionCode | External ❗️ |   |NO❗️ |
 
 

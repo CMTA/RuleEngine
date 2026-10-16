@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 /* ==== Interface and other library === */
 import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
@@ -10,17 +10,19 @@ import {IERC3643Compliance} from "../interfaces/IERC3643Compliance.sol";
  * @notice Minimal ERC-3643 (T-REX) style token that drives a compliance contract exactly as the
  * reference implementation does, used to test the RuleEngine through the ERC-3643 entry points.
  * @dev The compliance interaction is modelled on `Token.sol` from the ERC-3643 reference
- * implementation (submodule `lib/ERC-3643`, tag 4.1.3):
+ * implementation (submodule `lib/ERC-3643`, T-REX 4.2.0-beta1):
  *
  * - `setCompliance`  unbinds the previous compliance, then binds itself to the new one
  * - `transfer`       calls `canTransfer(msg.sender, to, amount)` then `transferred(msg.sender, to, amount)`
  * - `mint`           calls `canTransfer(address(0), to, amount)` then `created(to, amount)`
  * - `burn`           calls `destroyed(from, amount)`
  *
- * NOTE: the reference token itself cannot be compiled into this test suite. It pins
- * `pragma solidity 0.8.17` (this project compiles with 0.8.36), depends on OpenZeppelin 4.8.x
- * (this project uses 5.7.0) and on the `onchain-id/solidity` package, which is not installed here.
- * This mock therefore reproduces the compliance-facing behaviour rather than vendoring the token.
+ * NOTE: the real token is tested too, in `test/ERC3643Real/` under the `erc3643` Foundry profile: it pins
+ * `pragma solidity 0.8.30` while this project builds with 0.8.37, and imports the `onchain-id/solidity`
+ * package, which that profile maps to local stubs. This mock stays because it runs in the default profile, with no identity
+ * registry, and keeps the compliance-facing calls in one small, readable contract. Like the real token, it
+ * updates balances before calling `created` / `destroyed`, so a rule reading the token's state sees the
+ * post-mint / post-burn values (see `RuleEngine-with-ERC3643.md` §4.9).
  *
  * ERC-3643 compliance callbacks carry no spender, so this token never reaches the 4-argument
  * `transferred(spender, from, to, value)` overload.

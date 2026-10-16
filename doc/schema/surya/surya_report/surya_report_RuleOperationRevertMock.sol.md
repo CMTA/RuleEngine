@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/operation/RuleOperationRevertMock.sol | 9ad9b2b293ec7c02b687f2d76565a22b47c90c0d |
+| ./mocks/rules/operation/RuleOperationRevertMock.sol | 29ecd636a3fff32f5db1116571e8233e312e0ee1 |
 
 
 ### Contracts Description Table
@@ -15,7 +15,7 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleOperationRevertMock** | Implementation | AccessControl, IRule, RuleCommonInvariantStorage |||
+| **RuleOperationRevertMock** | Implementation | AccessControl, IRule, IRuleEngineERC1404, RuleCommonInvariantStorage |||
 | └ | canReturnTransferRestrictionCode | External ❗️ |   |NO❗️ |
 | └ | messageForTransferRestriction | External ❗️ |   |NO❗️ |
 | └ | supportsInterface | Public ❗️ |   |NO❗️ |

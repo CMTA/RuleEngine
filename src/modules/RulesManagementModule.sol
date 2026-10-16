@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 /* ==== OpenZeppelin === */
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -10,7 +10,9 @@ import {IRule} from "../interfaces/IRule.sol";
 import {RulesManagementModuleInvariantStorage} from "./library/RulesManagementModuleInvariantStorage.sol";
 
 /**
- * @title RuleEngine -  part
+ * @title RulesManagementModule
+ * @notice Rule set of the RuleEngine: add, remove, replace and clear rules under a configurable cap, and
+ * apply every rule to a token operation.
  */
 abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage, IRulesManagementModule {
     modifier onlyRulesManager() {
@@ -50,12 +52,8 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * but should not also be granted {RULES_MANAGEMENT_ROLE}.
      */
     function setRules(IRule[] calldata rules_) public virtual override(IRulesManagementModule) onlyRulesManager {
-        if (rules_.length == 0) {
-            revert RuleEngine_RulesManagementModule_ArrayIsEmpty();
-        }
-        if (rules_.length > _maxRules) {
-            revert RuleEngine_RulesManagementModule_MaxRulesExceeded(_maxRules);
-        }
+        require(rules_.length != 0, RuleEngine_RulesManagementModule_ArrayIsEmpty());
+        require(rules_.length <= _maxRules, RuleEngine_RulesManagementModule_MaxRulesExceeded(_maxRules));
         if (_rules.length() > 0) {
             _clearRules();
         }
@@ -77,9 +75,9 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * Security convention: do not grant {RULES_MANAGEMENT_ROLE} to rule contracts.
      */
     function addRule(IRule rule_) public virtual override(IRulesManagementModule) onlyRulesManager {
-        if (_rules.length() >= _maxRules) {
-            revert RuleEngine_RulesManagementModule_MaxRulesExceeded(_maxRules);
-        }
+        // `require` evaluates the error arguments even when the check passes: cache the cap to read it once
+        uint256 maxRules_ = _maxRules;
+        require(_rules.length() < maxRules_, RuleEngine_RulesManagementModule_MaxRulesExceeded(maxRules_));
         _addRule(rule_);
     }
 
@@ -94,7 +92,6 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * @inheritdoc IRulesManagementModule
      */
     function removeRule(IRule rule_) public virtual override(IRulesManagementModule) onlyRulesManager {
-        require(_rules.contains(address(rule_)), RuleEngine_RulesManagementModule_RuleDoNotMatch());
         _removeRule(rule_);
     }
 
@@ -161,9 +158,7 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      * @param maxRules_ New maximum number of rules; must not be zero.
      */
     function _setMaxRules(uint256 maxRules_) internal virtual {
-        if (maxRules_ == 0) {
-            revert RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed();
-        }
+        require(maxRules_ != 0, RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed());
         _maxRules = maxRules_;
         emit SetMaxRules(maxRules_);
     }
@@ -177,28 +172,27 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
      */
     function _addRule(IRule rule_) internal virtual {
         _checkRule(address(rule_));
-        // Should never revert because we check the presence of the rule before
-        require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_OperationNotSuccessful());
+        // The set rejects a duplicate: `add` returns false when the rule is already present
+        require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_RuleAlreadyExists());
         emit AddRule(rule_);
     }
 
     /**
-     * @notice Remove a rule from the array of rules
-     * Revert if the rule found at the specified index does not match the rule in argument
+     * @notice Remove a rule from the array of rules and emit the corresponding event
+     * @dev Reverts with {RuleEngine_RulesManagementModule_RuleDoNotMatch} if the rule is not in the set.
      * @param rule_ address of the target rule
-     *
-     *
      */
     function _removeRule(IRule rule_) internal virtual {
-        // Should never revert because we check the presence of the rule before
-        require(_rules.remove(address(rule_)), RuleEngine_RulesManagementModule_OperationNotSuccessful());
+        // `remove` returns false when the rule is not in the set
+        require(_rules.remove(address(rule_)), RuleEngine_RulesManagementModule_RuleDoNotMatch());
         emit RemoveRule(rule_);
     }
 
     /* ============ Transferred functions ============ */
 
     /**
-     * @notice Go through all the rule to know if a restriction exists on the transfer
+     * @notice Applies every rule, in order, to an operation without a spender; reverts as soon as one rule
+     * rejects it (each rule's `transferred` reverts on a disallowed operation).
      * @dev Complexity is O(number of configured rules). Large rule sets can make
      * transfers too expensive on chains with lower block gas limits.
      * Security convention: rule contracts are expected to be trusted and must not
@@ -216,7 +210,8 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     }
 
     /**
-     * @notice Go through all the rule to know if a restriction exists on the transfer
+     * @notice Applies every rule, in order, to an operation with a spender; reverts as soon as one rule
+     * rejects it (each rule's `transferred` reverts on a disallowed operation).
      * @dev Complexity is O(number of configured rules). Large rule sets can make
      * transfers too expensive on chains with lower block gas limits.
      * Security convention: rule contracts are expected to be trusted and must not
@@ -245,15 +240,11 @@ abstract contract RulesManagementModule is RulesManagementModuleInvariantStorage
     function _onlyRulesLimitManager() internal virtual;
 
     /**
-     * @dev check if a rule is valid, revert otherwise
+     * @dev check if a rule is valid, revert otherwise.
+     * Duplicates are not checked here: {_addRule} rejects them through the return value of the set insertion.
      * @param rule_ The candidate rule address to validate.
      */
     function _checkRule(address rule_) internal view virtual {
-        if (rule_ == address(0x0)) {
-            revert RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed();
-        }
-        if (_rules.contains(rule_)) {
-            revert RuleEngine_RulesManagementModule_RuleAlreadyExists();
-        }
+        require(rule_ != address(0), RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed());
     }
 }

@@ -3,13 +3,13 @@ require("@nomicfoundation/hardhat-toolbox");
 require("@nomicfoundation/hardhat-foundry");
 module.exports = {
   solidity: {
-    version: "0.8.36",
+    version: "0.8.37",
     settings: {
       optimizer: {
         enabled: true,
         runs: 200
       },
-      evmVersion: "prague"
+      evmVersion: "osaka"
     }
   }
 };

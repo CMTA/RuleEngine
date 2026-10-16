@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./interfaces/IRulesManagementModule.sol | 19be4f04f6f4a4d36f36f3a7b0e4304b14c8a4b6 |
+| ./interfaces/IRulesManagementModule.sol | a959734e162212b999c59d9a7199db0c85fac567 |
 
 
 ### Contracts Description Table

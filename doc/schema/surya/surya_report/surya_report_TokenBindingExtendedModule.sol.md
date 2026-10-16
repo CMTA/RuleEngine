@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/TokenBindingExtendedModule.sol | d04d9b119b3a34f264d56830a6f41e57d9bc11de |
+| ./modules/TokenBindingExtendedModule.sol | c0f9b420d08f54a7fc4c133f7e3a5d336b991710 |
 
 
 ### Contracts Description Table
@@ -22,6 +22,8 @@
 | └ | setTokenSelfBindingApprovalBatch | Public ❗️ | 🛑  | onlyTokenBindingManager |
 | └ | isTokenSelfBindingApproved | Public ❗️ |   |NO❗️ |
 | └ | getTokenBounds | Public ❗️ |   |NO❗️ |
+| └ | _unbindToken | Internal 🔒 | 🛑  | |
+| └ | _setTokenSelfBindingApproval | Internal 🔒 | 🛑  | |
 | └ | _authorizeTokenBindingChange | Internal 🔒 | 🛑  | |
 
 

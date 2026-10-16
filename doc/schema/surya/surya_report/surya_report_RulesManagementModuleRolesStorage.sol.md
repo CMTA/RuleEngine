@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/library/RulesManagementModuleRolesStorage.sol | d60ca17bf8fd97d6904966f713e4613ce4d8e3c5 |
+| ./modules/library/RulesManagementModuleRolesStorage.sol | 087ccf16873a55d830bb4fde7296620b92f4cf73 |
 
 
 ### Contracts Description Table

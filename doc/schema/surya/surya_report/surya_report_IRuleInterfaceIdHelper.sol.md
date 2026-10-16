@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/IRuleInterfaceIdHelper.sol | 70fc82ab0f668a5d9ce3e3696a87de3618a5a630 |
+| ./mocks/IRuleInterfaceIdHelper.sol | 114878710f41bcf1831b2d302365b70a0762a1ba |
 
 
 ### Contracts Description Table
@@ -22,8 +22,6 @@
 | └ | detectTransferRestriction | External ❗️ |   |NO❗️ |
 | └ | messageForTransferRestriction | External ❗️ |   |NO❗️ |
 | └ | detectTransferRestrictionFrom | External ❗️ |   |NO❗️ |
-| └ | canTransfer | External ❗️ |   |NO❗️ |
-| └ | canTransferFrom | External ❗️ |   |NO❗️ |
 | └ | supportsInterface | External ❗️ |   |NO❗️ |
 ||||||
 | **IRuleInterfaceIdHelper** | Implementation |  |||

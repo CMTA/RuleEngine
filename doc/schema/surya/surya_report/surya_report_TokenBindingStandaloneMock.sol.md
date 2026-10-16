@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/TokenBindingStandaloneMock.sol | 69481db2ed47a2c69e7263f690fc92c9aa442070 |
+| ./mocks/TokenBindingStandaloneMock.sol | d3110a7d2011eb51de3c7b3dcc8d7b89af563e29 |
 
 
 ### Contracts Description Table

@@ -7,8 +7,8 @@ This is an *overview of analyses*. For vulnerability reporting, see
 
 | | |
 |---|---|
-| **Current version** | v3.0.0-rc6 |
-| **Compiler** | solc 0.8.36, EVM Prague, optimizer on (200 runs) |
+| **Current version** | v3.0.0-rc7 |
+| **Compiler** | solc 0.8.37, EVM Osaka, optimizer on (200 runs) |
 | **Audited?** | **No.** v1.0.2 was audited by ABDK in March 2022; the 3.0.0 line has not been audited. |
 
 ## Scope
@@ -25,6 +25,9 @@ concern a mock are labelled as such and do not apply to production deployments.
 
 | Analysis | Version | Report | Assessment |
 |---|---|---|---|
+| Slither | v3.0.0-rc7 | [slither-report.md](./tools/v3.0.0-rc7/slither-report.md) | [feedback](./tools/v3.0.0-rc7/slither-report-feedback.md) |
+| Aderyn | v3.0.0-rc7 | [aderyn-report.md](./tools/v3.0.0-rc7/aderyn-report.md) | [feedback](./tools/v3.0.0-rc7/aderyn-report-feedback.md) |
+| Code-quality review (incl. tests, two passes) | v3.0.0-rc7 | [CLAUDE_ANALYSIS.md](./tools/v3.0.0-rc7/CLAUDE_ANALYSIS.md) | — |
 | Slither | v3.0.0-rc6 | [slither-report.md](./tools/v3.0.0-rc6/slither-report.md) | [feedback](./tools/v3.0.0-rc6/slither-report-feedback.md) |
 | Aderyn | v3.0.0-rc6 | [aderyn-report.md](./tools/v3.0.0-rc6/aderyn-report.md) | [feedback](./tools/v3.0.0-rc6/aderyn-report-feedback.md) |
 | Code-quality review | v3.0.0-rc6 | [CLAUDE_ANALYSIS.md](./tools/v3.0.0-rc6/CLAUDE_ANALYSIS.md) | — |
@@ -37,12 +40,12 @@ concern a mock are labelled as such and do not apply to production deployments.
 | Nethermind AuditAgent | v3.0.0-rc1 | [report](./tools/nethermind-audit-agent/v3.0.0-rc1/audit_agent_report_1_v3.0.0-rc1.pdf) | [feedback](./tools/nethermind-audit-agent/v3.0.0-rc1/audit_agent_report_1_v3.0.0-rc1-feedback.md) |
 | ABDK (external audit) | v1.0.1 -> v1.0.2 | [ABDK report (CMTAT repo)](https://github.com/CMTA/CMTAT/blob/master/doc/audits/ABDK_CMTA_CMTATRuleEngine_v_1_0/ABDK_CMTA_CMTATRuleEngine_v_1_0.pdf) | — |
 
-## Static analysis results — v3.0.0-rc6
+## Static analysis results — v3.0.0-rc7
 
 | Tool | High | Medium | Low | Info | Relevant to fix? |
 |---|---|---|---|---|---|
 | Slither 0.11.5 | 0 | 0 | 10 | 2 | **No** |
-| Aderyn 0.6.5 | 0 | — | 8 (84 instances) | — | **No** |
+| Aderyn 0.6.5 | 0 | — | 8 (91 instances) | — | **No** (one improvement made: `L-2`, pragma corrected to `^0.8.27`) |
 
 Every finding is by design, cosmetic, or a verified false positive. Highlights:
 
@@ -52,9 +55,23 @@ Every finding is by design, cosmetic, or a verified false positive. Highlights:
   match the ERC-3643 reference interface, which declares them unindexed. Conformance, not an oversight.
 - **`L-8 Unchecked Return` (Aderyn, 1)** — `_grantRole` in a constructor cannot return `false`. False positive.
 
-Slither: no change in counts from v3.0.0-rc5. Aderyn: same 8 findings, 76 -> 84 instances, entirely from the
-file count — the token binding split added a net four files, and the two per-file detectors (`L-2` pragma,
-`L-3` PUSH0) each moved by exactly four. No new finding came from the refactor.
+- **`L-2 Unspecific Solidity Pragma` (Aderyn, 26)** — the floating pragma is kept for integrators, but the
+  range it stated was false: the code needs solc 0.8.27 (`require` with a custom error). Every `src/` and
+  `script/` file now declares `^0.8.27`.
+
+**Same findings as v3.0.0-rc6** in both tools, on the final rc7 code (`29556e5`: six deployables, after the
+code-quality review and security review fixes). Slither: same 12 results, 108 -> 111 contracts. Aderyn: same 8
+findings, 84 -> 91 instances: the two per-file detectors (`L-2`, `L-3`) on the three new `*2771` deployables, and
+one `L-5` empty block, the default `_checkBindingTarget` hook added by the security review fix F-3; nSLOC
+683 -> 716. The run before the security review fixes (`3055fe2`) gave the same Slither output and 90 Aderyn
+instances / 694 nSLOC. An intermediate rc7 run (`850976f` + pragma) counted 112 contracts / 92 instances / 707 nSLOC, with
+the abstract `RuleEngineAccessControlShared` since folded into `RuleEngine` (`D-2`). Under `src/`, rc7 changes the `VERSION` string, the
+ERC-2771 token-identity fix, ERC-2771 made opt-in (six deployables) and the pragma; build updates (solc 0.8.37,
+EVM Osaka, CMTAT v3.3.0-rc4, forge-std v1.17.0) produced no finding. Earlier rc7 runs (`a91ca9a`, `4946c87`) gave
+the same findings.
+
+v3.0.0-rc6 versus rc5: Slither unchanged. Aderyn: same 8 findings, 76 -> 84 instances, entirely from the file
+count: the token binding split added a net four files, and the two per-file detectors moved by exactly four.
 
 ## Substantive findings that were fixed
 

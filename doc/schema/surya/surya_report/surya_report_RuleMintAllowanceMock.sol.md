@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/operation/RuleMintAllowanceMock.sol | 8624614de65b7b571307995c38ac3911f2355e2f |
+| ./mocks/rules/operation/RuleMintAllowanceMock.sol | cda8a7b400c1f35e7aaa804fe235dcdc9e8f3707 |
 
 
 ### Contracts Description Table
@@ -15,7 +15,7 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleMintAllowanceMock** | Implementation | AccessControl, RuleMintAllowanceInvariantStorage, IRule |||
+| **RuleMintAllowanceMock** | Implementation | AccessControl, RuleMintAllowanceInvariantStorage, IRule, IRuleEngineERC1404 |||
 | └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
 | └ | setMintAllowance | External ❗️ | 🛑  | onlyRole |
 | └ | canReturnTransferRestrictionCode | External ❗️ |   |NO❗️ |

@@ -14,7 +14,7 @@ contract RulesManagementModuleInvariantStorageTest is Test, HelperContract {
     // Arrange
     function setUp() public {
         vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS);
         ruleConditionalTransferLight =
             new RuleConditionalTransferLightMock(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
 

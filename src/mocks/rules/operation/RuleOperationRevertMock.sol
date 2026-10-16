@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 import {RuleCommonInvariantStorage} from "../validation/abstract/RuleCommonInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
+import {IRuleEngine, IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
+import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
+import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
@@ -12,22 +15,13 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  * @dev Requires operator approval for each ERC20 transfer.
  *      Same transfer (from, to, value) can be approved multiple times.
  */
-contract RuleOperationRevertMock is AccessControl, IRule, RuleCommonInvariantStorage {
+contract RuleOperationRevertMock is AccessControl, IRule, IRuleEngineERC1404, RuleCommonInvariantStorage {
     error RuleConditionalTransferLight_InvalidTransfer();
     // It is very important that each rule uses an unique code
     /**
      * @notice Restriction code raised when the transfer request was not approved.
      */
     uint8 public constant CODE_TRANSFER_REQUEST_NOT_APPROVED = 71;
-
-    /**
-     * @notice ERC-165 interface ID of the CMTAT RuleEngine interface.
-     */
-    bytes4 private constant RULE_ENGINE_INTERFACE_ID = 0x20c49ce7;
-    /**
-     * @notice ERC-165 interface ID of the extended ERC-1404 interface.
-     */
-    bytes4 private constant ERC1404EXTEND_INTERFACE_ID = 0x78a8de7d;
 
     /**
      * @notice To know if the restriction code is valid for this rule or not.
@@ -61,7 +55,8 @@ contract RuleOperationRevertMock is AccessControl, IRule, RuleCommonInvariantSto
      * @return True if the interface is supported, false otherwise.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
-        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID
+        return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
+            || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
             || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || AccessControl.supportsInterface(interfaceId);
     }
 
@@ -96,13 +91,14 @@ contract RuleOperationRevertMock is AccessControl, IRule, RuleCommonInvariantSto
     )
         public
         pure
+        override(IRule, IRuleEngine)
     {
         revert RuleConditionalTransferLight_InvalidTransfer();
     }
 
     /**
      * @notice Check if the transfer is valid
-     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     * @return The restriction code or REJECTED_CODE_BASE.TRANSFER_OK
      *
      */
     function detectTransferRestriction(
@@ -125,7 +121,7 @@ contract RuleOperationRevertMock is AccessControl, IRule, RuleCommonInvariantSto
      * @param from the origin address
      * @param to the destination address
      * @param value the amount to transfer
-     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     * @return The restriction code or REJECTED_CODE_BASE.TRANSFER_OK
      *
      */
     function detectTransferRestrictionFrom(

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 /**
  * @title a list manager
@@ -59,9 +59,7 @@ abstract contract RuleAddressListInternal {
      * @param targetAddress The address to list
      */
     function _addAddressToThelist(address targetAddress) internal virtual {
-        if (list[targetAddress]) {
-            revert Rulelist_AddressAlreadylisted();
-        }
+        require(!list[targetAddress], Rulelist_AddressAlreadylisted());
         list[targetAddress] = true;
         ++numAddressesList;
     }
@@ -73,9 +71,7 @@ abstract contract RuleAddressListInternal {
      *
      */
     function _removeAddressFromThelist(address targetAddress) internal virtual {
-        if (!list[targetAddress]) {
-            revert Rulelist_AddressNotPresent();
-        }
+        require(list[targetAddress], Rulelist_AddressNotPresent());
         list[targetAddress] = false;
         --numAddressesList;
     }

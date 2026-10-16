@@ -2,10 +2,10 @@
 
 // Documentation :
 // https://book.getfoundry.sh/tutorials/solidity-scripting
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 import {Script, console} from "forge-std/Script.sol";
-import {RuleEngine} from "../src/deployment/RuleEngine.sol";
+import {RuleEngine} from "../src/deployment/accessControl/RuleEngine.sol";
 import {RuleWhitelistMock} from "../src/mocks/rules/validation/RuleWhitelistMock.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {
@@ -49,7 +49,7 @@ contract RuleEngineScript is Script {
         listed[1] = address(0);
         ruleWhitelist.addAddressesToTheList(listed);
         // ruleEngine, bound to the CMTAT token
-        RuleEngine ruleEngine = new RuleEngine(admin, address(0), cmtatAddress);
+        RuleEngine ruleEngine = new RuleEngine(admin, cmtatAddress);
         console.log("RuleEngine: ", address(ruleEngine));
         ruleEngine.addRule(ruleWhitelist);
         // Configure the new ruleEngine for CMTAT.

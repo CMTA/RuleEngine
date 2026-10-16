@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import {ITokenBindingExtended} from "src/interfaces/ITokenBindingExtended.sol";
 import {Test} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
@@ -68,7 +69,7 @@ contract RuleEngineTest is Test, HelperContract {
 
     function setUp() public {
         // Deploy RuleEngine with admin
-        ruleEngine = new RuleEngine(admin, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngine = new RuleEngine(admin, ZERO_ADDRESS);
 
         // Deploy multiple mock tokens
         token1 = new ERC3643MockToken(address(ruleEngine));
@@ -268,6 +269,18 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngine.setTokenSelfBindingApproval(address(token1), true);
     }
 
+    function testSetTokenSelfBindingApprovalEmitsEvent() public {
+        vm.expectEmit(true, false, false, true, address(ruleEngine));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), true);
+        vm.prank(operator);
+        ruleEngine.setTokenSelfBindingApproval(address(0x7070), true);
+
+        vm.expectEmit(true, false, false, true, address(ruleEngine));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), false);
+        vm.prank(operator);
+        ruleEngine.setTokenSelfBindingApproval(address(0x7070), false);
+    }
+
     function testCannotSetTokenSelfBindingApprovalForZeroAddress() public {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_InvalidTokenAddress.selector);
         vm.prank(operator);
@@ -388,10 +401,12 @@ contract RuleEngineTest is Test, HelperContract {
         ruleEngine.bindTokens(tokens);
     }
 
+    /// @notice Batch binding is atomic on purpose (rc7 code-quality review `C-3`): one token already bound
+    /// reverts the whole batch, including the tokens bound before it in the same call.
     function testCannotBindTokensBatchWithAlreadyBoundToken() public {
         address[] memory tokens = new address[](2);
-        tokens[0] = address(token1);
-        tokens[1] = address(token2);
+        tokens[0] = address(token2);
+        tokens[1] = address(token1);
 
         vm.prank(operator);
         ruleEngine.bindToken(address(token1));
@@ -399,6 +414,23 @@ contract RuleEngineTest is Test, HelperContract {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenAlreadyBound.selector);
         vm.prank(operator);
         ruleEngine.bindTokens(tokens);
+
+        assertFalse(ruleEngine.isTokenBound(address(token2)), "the token before the failing one is rolled back");
+    }
+
+    /// @notice A token listed twice in one batch reverts on its second occurrence, and the whole batch rolls back.
+    function testCannotBindTokensBatchWithDuplicateToken() public {
+        address[] memory tokens = new address[](3);
+        tokens[0] = address(token1);
+        tokens[1] = address(token2);
+        tokens[2] = address(token1);
+
+        vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenAlreadyBound.selector);
+        vm.prank(operator);
+        ruleEngine.bindTokens(tokens);
+
+        assertFalse(ruleEngine.isTokenBound(address(token1)));
+        assertFalse(ruleEngine.isTokenBound(address(token2)));
     }
 
     function testCannotUnbindTokensBatchWithTokenNotBound() public {
@@ -412,6 +444,23 @@ contract RuleEngineTest is Test, HelperContract {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenNotBound.selector);
         vm.prank(operator);
         ruleEngine.unbindTokens(tokens);
+
+        assertTrue(ruleEngine.isTokenBound(address(token1)), "the token before the failing one stays bound");
+    }
+
+    /// @notice An empty batch is a no-op: no revert, no event, no state change (rc7 code-quality review `C-3`).
+    function testEmptyBindAndUnbindBatchesAreNoOps() public {
+        address[] memory empty = new address[](0);
+        uint256 before = ruleEngine.getTokenBounds().length;
+
+        vm.recordLogs();
+        vm.startPrank(operator);
+        ruleEngine.bindTokens(empty);
+        ruleEngine.unbindTokens(empty);
+        vm.stopPrank();
+
+        assertEq(vm.getRecordedLogs().length, 0);
+        assertEq(ruleEngine.getTokenBounds().length, before);
     }
 
     function testCannotCreatedIfNotBound() public {
@@ -430,7 +479,7 @@ contract RuleEngineTest is Test, HelperContract {
     }
 
     function testTokenSetComplianceCanMigrateBetweenRuleEngines() public {
-        RuleEngine ruleEngine2 = new RuleEngine(admin, ZERO_ADDRESS, ZERO_ADDRESS);
+        RuleEngine ruleEngine2 = new RuleEngine(admin, ZERO_ADDRESS);
         ERC3643MockTokenWithSetCompliance trexLikeToken = new ERC3643MockTokenWithSetCompliance(user1);
 
         vm.startPrank(admin);

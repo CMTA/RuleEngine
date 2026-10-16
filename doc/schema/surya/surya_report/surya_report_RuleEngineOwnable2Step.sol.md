@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./deployment/RuleEngineOwnable2Step.sol | f4789549d0abc15201d8503c2295f13de54ff336 |
+| ./deployment/ownable/RuleEngineOwnable2Step.sol | 82975ed5f799da2ddd0071c884ca09d8458a86b4 |
 
 
 ### Contracts Description Table
@@ -18,13 +18,11 @@
 | **RuleEngineOwnable2Step** | Implementation | RuleEngineOwnableShared, Ownable2Step |||
 | └ | <Constructor> | Public ❗️ | 🛑  | RuleEngineOwnableShared Ownable |
 | └ | transferOwnership | Public ❗️ | 🛑  | onlyOwner |
+| └ | acceptOwnership | Public ❗️ | 🛑  |NO❗️ |
 | └ | supportsInterface | Public ❗️ |   |NO❗️ |
 | └ | _onlyRulesManager | Internal 🔒 | 🛑  | onlyOwner |
 | └ | _onlyRulesLimitManager | Internal 🔒 | 🛑  | onlyOwner |
 | └ | _onlyComplianceManager | Internal 🔒 | 🛑  | onlyOwner |
-| └ | _msgSender | Internal 🔒 |   | |
-| └ | _msgData | Internal 🔒 |   | |
-| └ | _contextSuffixLength | Internal 🔒 |   | |
 
 
 ### Legend

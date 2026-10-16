@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import {ITokenBindingExtended} from "src/interfaces/ITokenBindingExtended.sol";
 import {Test} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -41,7 +42,7 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
 
     function setUp() public {
         // Deploy RuleEngineOwnable with owner
-        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngineOwnable(OWNER_ADDRESS, ZERO_ADDRESS);
 
         // Deploy multiple mock tokens
         token1 = new ERC3643MockTokenOwnable(address(ruleEngineMock));
@@ -217,6 +218,18 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         ruleEngineMock.setTokenSelfBindingApproval(address(token1), true);
     }
 
+    function testSetTokenSelfBindingApprovalEmitsEvent() public {
+        vm.expectEmit(true, false, false, true, address(ruleEngineMock));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), true);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApproval(address(0x7070), true);
+
+        vm.expectEmit(true, false, false, true, address(ruleEngineMock));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), false);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApproval(address(0x7070), false);
+    }
+
     function testCannotSetTokenSelfBindingApprovalForZeroAddress() public {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_InvalidTokenAddress.selector);
         vm.prank(OWNER_ADDRESS);
@@ -325,10 +338,12 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         ruleEngineMock.bindTokens(tokens);
     }
 
+    /// @notice Batch binding is atomic on purpose (rc7 code-quality review `C-3`): one token already bound
+    /// reverts the whole batch, including the tokens bound before it in the same call.
     function testCannotBindTokensBatchWithAlreadyBoundToken() public {
         address[] memory tokens = new address[](2);
-        tokens[0] = address(token1);
-        tokens[1] = address(token2);
+        tokens[0] = address(token2);
+        tokens[1] = address(token1);
 
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindToken(address(token1));
@@ -336,6 +351,8 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenAlreadyBound.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindTokens(tokens);
+
+        assertFalse(ruleEngineMock.isTokenBound(address(token2)), "the token before the failing one is rolled back");
     }
 
     function testCannotUnbindTokensBatchWithTokenNotBound() public {
@@ -349,6 +366,23 @@ contract RuleEngineOwnableERC3643Test is Test, HelperContractOwnable {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenNotBound.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.unbindTokens(tokens);
+
+        assertTrue(ruleEngineMock.isTokenBound(address(token1)), "the token before the failing one stays bound");
+    }
+
+    /// @notice An empty batch is a no-op: no revert, no event, no state change (rc7 code-quality review `C-3`).
+    function testEmptyBindAndUnbindBatchesAreNoOps() public {
+        address[] memory empty = new address[](0);
+        uint256 before = ruleEngineMock.getTokenBounds().length;
+
+        vm.recordLogs();
+        vm.startPrank(OWNER_ADDRESS);
+        ruleEngineMock.bindTokens(empty);
+        ruleEngineMock.unbindTokens(empty);
+        vm.stopPrank();
+
+        assertEq(vm.getRecordedLogs().length, 0);
+        assertEq(ruleEngineMock.getTokenBounds().length, before);
     }
 
     function testCannotCreatedIfNotBound() public {

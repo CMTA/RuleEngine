@@ -8,9 +8,9 @@ AGENTS.md and CLAUDE.md files must always be identical — always update both to
 
 **RuleEngine** is a Solidity smart contract system that enforces transfer restrictions for [CMTAT](https://github.com/CMTA/CMTAT) and [ERC-3643](https://eips.ethereum.org/EIPS/eip-3643) tokens. It acts as an external controller that calls pluggable rule contracts on each token transfer, mint, or burn.
 
-- **Version:** 3.0.0 (defined in `src/modules/VersionModule.sol`)
-- **Solidity:** ^0.8.20 (compiled with 0.8.36)
-- **EVM target:** Prague
+- **Version:** 3.0.0-rc7 (defined in `src/modules/VersionModule.sol`; the string carries the release-candidate suffix and must be bumped with each tag — update the `version()` assertions in `test/RuleEngine/RuleEngineDeployment.t.sol`, `test/utils/ERC2771VariantTestBase.sol`, `test/RuleEngineOwnable/RuleEngineOwnableDeployment.t.sol`, `test/RuleEngineOwnable2Step/RuleEngineOwnable2Step.t.sol` and `test/hardhat/RuleEngine.smoke.js` with it)
+- **Solidity:** ^0.8.27 (compiled with 0.8.37). `src/` and `script/` declare `^0.8.27`: it is the first version that supports `require(cond, CustomError())` on the legacy pipeline, so do not lower it
+- **EVM target:** Osaka (Fusaka upgrade)
 - **License:** MPL-2.0
 
 ## Build & Test Commands
@@ -23,10 +23,18 @@ forge test --match-contract <Name> --match-test <fn>  # Run specific test
 forge coverage           # Code coverage
 forge coverage --no-match-coverage "(mocks|test)" --report lcov  # Production coverage (src/ + script/)
 forge fmt                # Format code
+FOUNDRY_PROFILE=erc3643 forge test  # Real ERC-3643 token suite (test/ERC3643Real/, solc 0.8.30)
+FOUNDRY_INVARIANT_RUNS=256 FOUNDRY_INVARIANT_DEPTH=500 forge test --match-contract InvariantTest  # deeper invariant run (foundry.toml caps it at 64 x 50)
 ```
 
-Dependencies are git submodules. Initialize with `forge install`, update with `forge update`.
-CMTAT submodule also needs `cd lib/CMTAT && npm install` for its OpenZeppelin deps.
+`test/ERC3643Real/` deploys the vendored T-REX 4.2.0-beta1 `Token`, which pins `pragma solidity 0.8.30`. It is
+skipped by the default profile and built by `[profile.erc3643]` (solc 0.8.30, `out-erc3643/`, context-scoped
+`@onchain-id` remapping to the stubs in `test/utils/onchainid/`). Files there must pin `pragma solidity 0.8.30`.
+Never move the context-scoped remapping into `remappings.txt`: `hardhat-foundry` rejects it.
+
+Dependencies are git submodules. Initialize with `git submodule update --init` (non-recursive is enough), update with `forge update`.
+`remappings.txt` resolves `@openzeppelin/...` to this repo's own submodules for every file, including the CMTAT sources,
+so `cd lib/CMTAT && npm install` and `--recursive` are only needed to run CMTAT's own Hardhat suite.
 
 ## Agent Workflow
 
@@ -54,21 +62,24 @@ Use `@openzeppelin/contracts/` for OpenZeppelin imports and `CMTAT/` for CMTAT i
 
 ## Architecture
 
-### Three Deployable Contracts
+### Six Deployable Contracts
 
 ```
-RuleEngine              — RBAC via AccessControl (multi-operator)
-RuleEngineOwnable       — ERC-173 Ownable (single-owner)
-RuleEngineOwnable2Step  — ERC-173 Ownable2Step (single-owner, two-step handover)
+RuleEngine                  — RBAC via AccessControl (multi-operator), no ERC-2771
+RuleEngine2771              — RBAC via AccessControl + ERC-2771 (immutable trusted forwarder)
+RuleEngineOwnable           — ERC-173 Ownable (single-owner), no ERC-2771
+RuleEngineOwnable2771       — ERC-173 Ownable + ERC-2771
+RuleEngineOwnable2Step      — ERC-173 Ownable2Step (single-owner, two-step handover), no ERC-2771
+RuleEngineOwnable2Step2771  — ERC-173 Ownable2Step + ERC-2771
 ```
 
-All three share their core logic through `RuleEngineBase` directly or via `RuleEngineOwnableShared`.
+All six share their core logic through `RuleEngineBase`: `RuleEngine` extends it directly with RBAC, and the four ownable variants go through `RuleEngineOwnableShared`. Each access-control model has a version without ERC-2771 (constructor `(admin|owner_, tokenContract)`) and a `*2771` version with an immutable trusted forwarder (constructor `(admin|owner_, forwarderIrrevocable, tokenContract)`). Every `X2771` extends its counterpart `X` (`RuleEngine2771 is ERC2771ModuleStandalone, RuleEngine`, and likewise for the ownable pair) and adds only `ERC2771ModuleStandalone` plus the three `Context` overrides. The deployables live in `src/deployment/accessControl/` (RBAC) and `src/deployment/ownable/` (ERC-173).
 
 ### Inheritance Hierarchy
 
 ```
 RuleEngineBase (abstract)
-├── VersionModule                         → version() returns "3.0.0"
+├── VersionModule                         → version() returns "3.0.0-rc7"
 ├── RulesManagementModule                 → add/remove/set/clear rules, maxRules cap
 │   ├── AccessControl (OZ)
 │   └── RulesManagementModuleInvariantStorage  → errors, events, roles
@@ -83,21 +94,32 @@ RuleEngineBase (abstract)
 ├── RuleEngineInvariantStorage            → errors
 └── IRuleEngineERC1404                    → CMTAT interface
 
-RuleEngine
+RuleEngine                              → no gasless support
+├── RuleEngineBase
+├── AccessControlEnumerable (OZ)
+└── ERC3643ComplianceRolesStorage, RulesManagementModuleRolesStorage → roles
+
+RuleEngine2771
 ├── ERC2771ModuleStandalone → gasless support
-└── RuleEngineBase
+└── RuleEngine
 
 RuleEngineOwnable
-├── ERC2771ModuleStandalone → gasless support
-├── RuleEngineOwnableShared
+├── RuleEngineOwnableShared             → no gasless support
 │   └── RuleEngineBase
 └── Ownable (OZ) → ERC-173
 
-RuleEngineOwnable2Step
+RuleEngineOwnable2771
 ├── ERC2771ModuleStandalone → gasless support
-├── RuleEngineOwnableShared
+└── RuleEngineOwnable
+
+RuleEngineOwnable2Step
+├── RuleEngineOwnableShared             → no gasless support
 │   └── RuleEngineBase
 └── Ownable2Step (OZ) → ERC-173
+
+RuleEngineOwnable2Step2771
+├── ERC2771ModuleStandalone → gasless support
+└── RuleEngineOwnable2Step
 ```
 
 ### Access Control Pattern
@@ -114,7 +136,7 @@ function _onlyTokenBindingManager() internal virtual;
 // wired by ERC3643ComplianceModule to its own abstract hook:
 function _onlyComplianceManager() internal virtual;
 
-// RuleEngine overrides with RBAC:
+// RuleEngine (and RuleEngine2771, which extends it) overrides with RBAC:
 function _onlyRulesManager() internal virtual override onlyRole(RULES_MANAGEMENT_ROLE) {}
 function _onlyRulesLimitManager() internal virtual override onlyRole(DEFAULT_ADMIN_ROLE) {}
 function _onlyComplianceManager() internal virtual override onlyRole(COMPLIANCE_MANAGER_ROLE) {}
@@ -131,21 +153,29 @@ function _onlyComplianceManager() internal virtual override onlyOwner {}
 
 Rule validation uses a two-layer override:
 
-1. **`RulesManagementModule._checkRule()`** — checks zero address + duplicates
+1. **`RulesManagementModule._checkRule()`** — checks the zero address (duplicates are rejected by `_addRule` through the return value of `_rules.add`)
 2. **`RuleEngineBase._checkRule()`** — calls `RulesManagementModule._checkRule()` then validates ERC-165 interface
 
 ```solidity
 // RulesManagementModule (generic checks):
 function _checkRule(address rule_) internal view virtual {
-    if (rule_ == address(0x0)) revert ...ZeroNotAllowed();
-    if (_rules.contains(rule_)) revert ...AlreadyExists();
+    require(rule_ != address(0), RuleEngine_RulesManagementModule_RuleAddressZeroNotAllowed());
 }
+
+// RulesManagementModule._addRule (duplicate check):
+require(_rules.add(address(rule_)), RuleEngine_RulesManagementModule_RuleAlreadyExists());
 
 // RuleEngineBase (adds ERC-165 check):
 function _checkRule(address rule_) internal view virtual override {
     RulesManagementModule._checkRule(rule_);
-    if (!ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID))
-        revert RuleEngine_RuleInvalidInterface();
+    require(_supportsRuleInterface(rule_), RuleEngine_RuleInvalidInterface());
+}
+
+// ERC-165 support checked once, then the current IRule ID, then the legacy (pre-rc7) one:
+function _supportsRuleInterface(address rule_) internal view virtual returns (bool) {
+    if (!ERC165Checker.supportsERC165(rule_)) return false;
+    return ERC165Checker.supportsERC165InterfaceUnchecked(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)
+        || ERC165Checker.supportsERC165InterfaceUnchecked(rule_, RuleInterfaceId.IRULE_LEGACY_INTERFACE_ID);
 }
 ```
 
@@ -214,7 +244,7 @@ This gives O(1) add/remove/contains and iterable storage.
 
 | Interface | Purpose | Where Defined |
 |-----------|---------|---------------|
-| `IRule` | What every rule must implement (extends `IRuleEngineERC1404`) | `src/interfaces/IRule.sol` |
+| `IRule` | What every rule must implement: the six functions the engine calls + ERC-165 (extends `IERC1404Extend`, `IERC3643IComplianceContract`, `IERC165`; no `canTransfer*`) | `src/interfaces/IRule.sol` |
 | `IRulesManagementModule` | Rule CRUD operations | `src/interfaces/IRulesManagementModule.sol` |
 | `ITokenBinding` | Token binding registry, standard-agnostic | `src/interfaces/ITokenBinding.sol` |
 | `ITokenBindingExtended` | Batch binding, token self-binding, `getTokenBounds` | `src/interfaces/ITokenBindingExtended.sol` |
@@ -222,7 +252,7 @@ This gives O(1) add/remove/contains and iterable storage.
 | `IRuleEngine` | Full CMTAT integration interface | `lib/CMTAT/contracts/interfaces/engine/IRuleEngine.sol` |
 
 **ERC-165 interface IDs:**
-- `IRule`: `0x2497d6cb` (`src/modules/library/RuleInterfaceId.sol`)
+- `IRule`: `0xb1a69752` (`src/modules/library/RuleInterfaceId.sol`). Narrowed in rc7 (was `0x2497d6cb`, which also covers `canTransfer` / `canTransferFrom`); the engine accepts both, the legacy one as `IRULE_LEGACY_INTERFACE_ID` (`RuleEngineBase._supportsRuleInterface`)
 - `IERC3643Compliance`: `0x3144991c`, extended: `0x646ba2be`, `IERC7551Compliance`: `0x7157797f` (`ComplianceInterfaceId.sol`)
 - `IERC1404`: `0xab84a5c8` (`ERC1404InterfaceId.sol`)
 - `IRuleEngine`: from `CMTAT/library/RuleEngineInterfaceId.sol`
@@ -253,9 +283,14 @@ Errors, events, and role constants are centralized in "invariant storage" abstra
 ```
 src/
 ├── deployment/
-│   ├── RuleEngine.sol             # RBAC variant (deploy this)
-│   ├── RuleEngineOwnable.sol      # Ownable variant (deploy this)
-│   └── RuleEngineOwnable2Step.sol # Ownable2Step variant (deploy this)
+│   ├── accessControl/
+│   │   ├── RuleEngine.sol         # RBAC variant, no ERC-2771 (deploy this)
+│   │   └── RuleEngine2771.sol     # RBAC variant with ERC-2771 (deploy this)
+│   └── ownable/
+│       ├── RuleEngineOwnable.sol      # Ownable variant, no ERC-2771 (deploy this)
+│       ├── RuleEngineOwnable2771.sol  # Ownable variant with ERC-2771 (deploy this)
+│       ├── RuleEngineOwnable2Step.sol # Ownable2Step variant, no ERC-2771 (deploy this)
+│       └── RuleEngineOwnable2Step2771.sol # Ownable2Step variant with ERC-2771 (deploy this)
 ├── RuleEngineBase.sol             # Abstract core logic (do not deploy)
 ├── RuleEngineOwnableShared.sol    # Shared logic for ownable variants
 ├── interfaces/                    # IRule, IRulesManagementModule, ITokenBinding(Extended), IERC3643Compliance(Extended)
@@ -270,8 +305,13 @@ test/
 ├── HelperContractOwnable2Step.sol # Base helper for RuleEngineOwnable2Step tests
 ├── utils/                         # CMTAT deployment helpers
 ├── RuleEngine/                    # Tests for RuleEngine (RBAC)
+├── RuleEngine2771/                # Tests for RuleEngine2771 (RBAC + ERC-2771)
 ├── RuleEngineOwnable/             # Tests for RuleEngineOwnable
 ├── RuleEngineOwnable2Step/        # Tests for RuleEngineOwnable2Step
+├── RuleEngineOwnable2771/         # Tests for RuleEngineOwnable2771
+├── RuleEngineOwnable2Step2771/     # Tests for RuleEngineOwnable2Step2771
+├── ERC3643Real/                   # Real T-REX token tests (FOUNDRY_PROFILE=erc3643 only)
+├── RuleStandalone/                # A rule set directly as a CMTAT token's rule engine (no RuleEngine)
 └── RuleWhitelist/                 # Tests for the whitelist mock rule
 
 script/                            # Foundry example/deployment scripts
@@ -284,12 +324,15 @@ For detailed test conventions, templates, helper contracts, test addresses, nami
 Key points:
 - Tests for `RuleEngine` go in `test/RuleEngine/`, tests for `RuleEngineOwnable` go in `test/RuleEngineOwnable/`
 - Tests for `RuleEngineOwnable2Step` go in `test/RuleEngineOwnable2Step/`
+- Tests for each `*2771` contract go in its own `test/<Contract>/` directory (`RuleEngine2771`, `RuleEngineOwnable2771`, `RuleEngineOwnable2Step2771`)
 - Use `HelperContract` for RBAC tests, `HelperContractOwnable` for Ownable tests
 - Use `HelperContractOwnable2Step` for `RuleEngineOwnable2Step` tests
 - Always use specific error selectors in `vm.expectRevert()`
 - When adding a feature to `RuleEngineBase`, add tests for **all deployable variants**
+- Behaviour shared by the variants is tested once in an abstract base under `test/utils/` (`ERC2771TokenGateTestBase`, `ERC2771VariantTestBase`, `NoForwarderTestBase`, `RuleAggregationTestBase`, `RuleEngineInvariantTestBase`), with a short per-variant file in each `test/RuleEngine*/` directory that only deploys the variant
+- Before trusting a new test, check it can fail: break the line it guards and run the suite (the rc7 code-quality review mutation-tests the suite this way)
 
-## RBAC Roles (RuleEngine only)
+## RBAC Roles (RuleEngine and RuleEngine2771)
 
 | Role | Identifier | Purpose |
 |------|-----------|---------|
@@ -300,12 +343,14 @@ Key points:
 ## Key Invariants
 
 1. **Only bound tokens** can call `transferred()`, `created()`, `destroyed()`
-2. **Rules are validated via ERC-165** before being added — they must support `IRULE_INTERFACE_ID`
+2. **Rules are validated via ERC-165** before being added — they must support `IRULE_INTERFACE_ID` or the legacy `IRULE_LEGACY_INTERFACE_ID`
 3. **No duplicate rules** — `EnumerableSet` prevents this
 4. **No zero-address rules** — checked in `_checkRule`
-5. **Admin has all roles** in `RuleEngine` (the `hasRole` override)
-6. **Forwarder is immutable** — set at construction, cannot be changed
-7. **Rule contracts in `src/mocks/` are reference implementations** — they are useful for testing and examples, not as production rule contracts. Production rules live in a [separate repository](https://github.com/CMTA/Rules).
+5. **Admin has all roles** in `RuleEngine` and `RuleEngine2771` (the `hasRole` override in `RuleEngine`, inherited by `RuleEngine2771`)
+6. **Forwarder is immutable** — set at construction, cannot be changed (the three `*2771` contracts; the others have none)
+7. **Token identity uses `msg.sender`, never `_msgSender()`** — `_checkBoundToken` (`onlyBoundToken`) and the token self-binding check in `_authorizeTokenBindingChange` compare the raw caller so the ERC-2771 forwarder cannot pass as a token; administrative checks keep `_msgSender()` (gasless admin). Pinned by `test/utils/ERC2771TokenGateTestBase.sol`
+8. **Rules and bound tokens are disjoint** — `RuleEngineBase._checkBindingTarget` rejects binding a current rule and `_checkRule` rejects adding a bound token as a rule, both with `RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges`. Pinned by `invariant_RulesAndBoundTokensAreDisjoint`
+9. **Rule contracts in `src/mocks/` are reference implementations** — they are useful for testing and examples, not as production rule contracts. Production rules live in a [separate repository](https://github.com/CMTA/Rules).
 
 ## Solidity Style
 
@@ -314,7 +359,7 @@ Key points:
 - Function ordering: constructor, receive, fallback, external, public, internal, private (view/pure last within each group)
 - Function declaration order: visibility, mutability, virtual, override, custom modifiers
 - All `internal` functions must be marked `virtual`, so inheriting contracts can override them.
-- Use `require(condition, CustomError(...))` for custom errors; avoid direct `revert CustomError(...)`.
+- Use `require(condition, CustomError(...))` for custom errors; avoid direct `revert CustomError(...)`. `src/` has no conditional `revert` left (the only two are the unconditional ones of `RuleOperationRevertMock`). Note that `require` evaluates the error's arguments even when the check passes: an argument read from storage costs an extra read, so cache it in a local first (see `RulesManagementModule.addRule`).
 - In `src/`, avoid `super` calls and prefer explicit parent-contract calls (e.g., `AccessControl.grantRole(...)`) for readability and deterministic inheritance behavior.
 - Section headers: `/* ============ SECTION ============ */`
 - **No emoji in code comments or NatSpec.** Use a plain word marker instead: `WARNING:`, `NOTE:`, `IMPORTANT:`. Emoji render inconsistently across editors, terminals, `forge doc` output and diffs; they are not searchable (`grep WARNING` finds the marker, `grep ⚠️` depends on the shell); and they encode as multi-byte sequences that can be silently mangled by tooling. This applies to `src/`, `test/` and `script/`. Markdown documentation may use emoji freely — the restriction is Solidity comments only.
@@ -327,16 +372,17 @@ Key points:
 2. Create an invariant storage contract in `src/modules/library/` for errors/events
 3. Add a virtual access control hook (e.g., `_onlyNewManager()`)
 4. Have `RuleEngineBase` inherit the module
-5. Override the hook in both `RuleEngine` and `RuleEngineOwnable`
-6. Add tests in `test/RuleEngine/`, `test/RuleEngineOwnable/`, and `test/RuleEngineOwnable2Step/`
+5. Override the hook in `RuleEngine`, `RuleEngineOwnable` and `RuleEngineOwnable2Step`
+6. Add tests for all six deployables (one directory each under `test/`), preferably through a shared `test/utils/*TestBase.sol`
 
 ### Adding a new rule (mock)
 1. Create the rule in `src/mocks/rules/`
-2. Implement `IRule` (which extends `IRuleEngineERC1404`)
+2. Implement `IRule`; to also support the standalone role (set directly as a CMTAT token's rule engine), implement CMTAT's `IRuleEngineERC1404` too and advertise `RULE_ENGINE_INTERFACE_ID`. The 4-argument `transferred` then needs `override(IRule, IRuleEngine)`
 3. Implement ERC-165 with `IRULE_INTERFACE_ID`
-4. Add tests using the existing `HelperContract` base
+4. `transferred*` hooks may update the rule's own storage but must not make a state-changing external call; external reads must be `view` (`STATICCALL`). Six CMTAT variants have no reentrancy guard around `transferred` (see `doc/technical/RuleEngine-with-CMTAT.md` §4.6). A rule can also be set directly as a CMTAT token's rule engine (§4.8): keep `canTransfer*` consistent with `detectTransferRestriction*`, and a production stateful rule must restrict who calls `transferred`
+5. Add tests using the existing `HelperContract` base
 
 ### Modifying access control
 1. Update the virtual hook in the relevant module
-2. Update overrides in **both** `RuleEngine.sol` and `RuleEngineOwnable.sol`
+2. Update overrides in `RuleEngine.sol`, `RuleEngineOwnable.sol` and `RuleEngineOwnable2Step.sol`
 3. Update tests in all affected test directories

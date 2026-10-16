@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./deployment/RuleEngine.sol | 369509e7c8c3020b8898a8620a09cbeeddbc0aed |
+| ./deployment/accessControl/RuleEngine.sol | 473eace2772720a5cf37a39e4d18fc0d2c71ac27 |
 
 
 ### Contracts Description Table
@@ -15,17 +15,14 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleEngine** | Implementation | ERC2771ModuleStandalone, RuleEngineBase, AccessControlEnumerable, ERC3643ComplianceRolesStorage, RulesManagementModuleRolesStorage |||
-| └ | <Constructor> | Public ❗️ | 🛑  | ERC2771ModuleStandalone |
+| **RuleEngine** | Implementation | RuleEngineBase, AccessControlEnumerable, ERC3643ComplianceRolesStorage, RulesManagementModuleRolesStorage |||
+| └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
 | └ | grantRole | Public ❗️ | 🛑  |NO❗️ |
 | └ | hasRole | Public ❗️ |   |NO❗️ |
 | └ | supportsInterface | Public ❗️ |   |NO❗️ |
 | └ | _onlyComplianceManager | Internal 🔒 | 🛑  | onlyRole |
 | └ | _onlyRulesManager | Internal 🔒 | 🛑  | onlyRole |
 | └ | _onlyRulesLimitManager | Internal 🔒 | 🛑  | onlyRole |
-| └ | _msgSender | Internal 🔒 |   | |
-| └ | _msgData | Internal 🔒 |   | |
-| └ | _contextSuffixLength | Internal 🔒 |   | |
 
 
 ### Legend

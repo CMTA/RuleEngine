@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
-import {MinimalForwarderMock} from "CMTAT/mocks/MinimalForwarderMock.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IAccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/IAccessControlEnumerable.sol";
@@ -25,24 +24,17 @@ contract RuleEngineTest is Test, HelperContract {
     function setUp() public {}
 
     function testRightDeployment() public {
-        // Arrange
-        vm.prank(RULE_ENGINE_OPERATOR_ADDRESS);
-        MinimalForwarderMock forwarder = new MinimalForwarderMock();
-        forwarder.initialize(ERC2771ForwarderDomain);
-
         // Act
-        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, address(forwarder), ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS);
 
         // assert
         resBool = ruleEngineMock.hasRole(RULES_MANAGEMENT_ROLE, RULE_ENGINE_OPERATOR_ADDRESS);
-        assertEq(resBool, true);
-        resBool = ruleEngineMock.isTrustedForwarder(address(forwarder));
         assertEq(resBool, true);
     }
 
     function testReturnZeroAddressForRule() public {
         // Arrange
-        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, address(0x0), ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS);
         // Act
         resAddr = ruleEngineMock.rule(0);
         // Assert
@@ -51,15 +43,15 @@ contract RuleEngineTest is Test, HelperContract {
 
     function testHasRightVersion() public {
         // Act
-        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, address(0x0), ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS);
 
         // Assert
-        assertEq(ruleEngineMock.version(), "3.0.0");
+        assertEq(ruleEngineMock.version(), "3.0.0-rc7");
     }
 
     function testSupportsInterfaces() public {
         // Arrange
-        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, address(0x0), ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS);
 
         // Act & Assert
         assertTrue(ruleEngineMock.supportsInterface(type(IERC165).interfaceId));
@@ -76,12 +68,8 @@ contract RuleEngineTest is Test, HelperContract {
     }
 
     function testCannotDeployContractifAdminAddressIsZero() public {
-        // Arrange
-        vm.prank(WHITELIST_OPERATOR_ADDRESS);
-        MinimalForwarderMock forwarder = new MinimalForwarderMock();
-        forwarder.initialize(ERC2771ForwarderDomain);
         vm.expectRevert(RuleEngine_AdminWithAddressZeroNotAllowed.selector);
         // Act
-        ruleEngineMock = new RuleEngine(address(0x0), address(forwarder), ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngine(address(0x0), ZERO_ADDRESS);
     }
 }

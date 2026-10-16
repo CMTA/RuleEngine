@@ -9,7 +9,7 @@ import {RuleEngineInvariantStorage} from "src/modules/library/RuleEngineInvarian
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
 import {RulesManagementModuleRolesStorage} from "src/modules/library/RulesManagementModuleRolesStorage.sol";
 // RuleEngine
-import {RuleEngine} from "src/deployment/RuleEngine.sol";
+import {RuleEngine} from "src/deployment/accessControl/RuleEngine.sol";
 // forge-lint: disable-next-line(unused-import)
 import {RulesManagementModule} from "src/RuleEngineBase.sol";
 // forge-lint: disable-next-line(unused-import)

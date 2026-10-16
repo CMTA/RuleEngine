@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 /* ==== OpenZeppelin === */
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 /* ==== CMTAT interface IDs === */
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
@@ -36,6 +37,8 @@ abstract contract RuleEngineBase is
     RuleEngineInvariantStorage,
     IRuleEngineERC1404
 {
+    using EnumerableSet for EnumerableSet.AddressSet;
+
     /* ============ State variables ============ */
     /**
      * @dev ERC-1404 reserves the code 0 as the "no restriction" sentinel. It is never claimed by a rule,
@@ -56,7 +59,7 @@ abstract contract RuleEngineBase is
         override(IRuleEngine)
         onlyBoundToken
     {
-        // Apply  on RuleEngine
+        // Every rule is applied; the first one that rejects the operation reverts it
         RulesManagementModule._transferred(spender, from, to, value);
     }
 
@@ -84,11 +87,11 @@ abstract contract RuleEngineBase is
 
     /* ============ View functions ============ */
     /**
-     * @notice Go through all the rule to know if a restriction exists on the transfer
+     * @notice Queries every rule, in order, and returns the first restriction code that is not zero
      * @param from the origin address
      * @param to the destination address
      * @param value to transfer
-     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK (0) if the transfer is valid
+     * @return The restriction code or REJECTED_CODE_BASE.TRANSFER_OK (0) if the transfer is valid
      *
      */
     function detectTransferRestriction(address from, address to, uint256 value)
@@ -164,9 +167,9 @@ abstract contract RuleEngineBase is
      * @return The first non-zero ERC-1404 restriction code, or TRANSFER_OK when every rule allows it.
      */
     function _detectTransferRestriction(address from, address to, uint256 value) internal view virtual returns (uint8) {
-        uint256 rulesLength = rulesCount();
+        uint256 rulesLength = _rules.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRule(rule(i)).detectTransferRestriction(from, to, value);
+            uint8 restriction = IRule(_rules.pos(i)).detectTransferRestriction(from, to, value);
             if (restriction > 0) {
                 return restriction;
             }
@@ -188,9 +191,9 @@ abstract contract RuleEngineBase is
         virtual
         returns (uint8)
     {
-        uint256 rulesLength = rulesCount();
+        uint256 rulesLength = _rules.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            uint8 restriction = IRule(rule(i)).detectTransferRestrictionFrom(spender, from, to, value);
+            uint8 restriction = IRule(_rules.pos(i)).detectTransferRestrictionFrom(spender, from, to, value);
             if (restriction > 0) {
                 return restriction;
             }
@@ -212,24 +215,53 @@ abstract contract RuleEngineBase is
         if (restrictionCode == uint8(REJECTED_CODE_BASE.TRANSFER_OK)) {
             return TEXT_TRANSFER_OK;
         }
-        uint256 rulesLength = rulesCount();
+        uint256 rulesLength = _rules.length();
         for (uint256 i = 0; i < rulesLength; ++i) {
-            if (IRule(rule(i)).canReturnTransferRestrictionCode(restrictionCode)) {
-                return IRule(rule(i)).messageForTransferRestriction(restrictionCode);
+            IRule rule_ = IRule(_rules.pos(i));
+            if (rule_.canReturnTransferRestrictionCode(restrictionCode)) {
+                return rule_.messageForTransferRestriction(restrictionCode);
             }
         }
         return TEXT_CODE_NOT_FOUND;
     }
 
     /**
-     * @dev Override to add ERC-165 interface check for the full IRule hierarchy.
+     * @dev Override to add the ERC-165 interface check, see {_supportsRuleInterface}, and to reject a bound
+     * token: an address may be a rule or a bound token, never both (see {_checkBindingTarget}).
      * @param rule_ The candidate rule address to validate.
      */
     function _checkRule(address rule_) internal view virtual override {
         RulesManagementModule._checkRule(rule_);
-        if (!ERC165Checker.supportsInterface(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)) {
-            revert RuleEngine_RuleInvalidInterface();
+        require(!_boundTokens.contains(rule_), RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges());
+        require(_supportsRuleInterface(rule_), RuleEngine_RuleInvalidInterface());
+    }
+
+    /**
+     * @dev Rejects binding an address that is currently a rule. Binding lets an address drive every rule, so a
+     * rule that was also a bound token could call the engine's callbacks from inside its own `transferred` hook.
+     * Together with the bound-token check in {_checkRule}, the rule set and the bound tokens stay disjoint.
+     * @param token The address about to be bound.
+     */
+    function _checkBindingTarget(address token) internal view virtual override {
+        require(!_rules.contains(token), RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges());
+    }
+
+    /**
+     * @dev Tells whether `rule_` advertises a rule interface the engine can use: the current
+     * {RuleInterfaceId-IRULE_INTERFACE_ID} or the legacy {RuleInterfaceId-IRULE_LEGACY_INTERFACE_ID}.
+     * The legacy interface (up to v3.0.0-rc6) is a superset of the current one, adding `canTransfer` and
+     * `canTransferFrom`, which the engine never calls, so a rule built against it remains usable.
+     * ERC-165 support itself is checked once, then each ID with a single call; the legacy ID is only
+     * queried when the current one is not advertised.
+     * @param rule_ The candidate rule address.
+     * @return True if the rule advertises the current or the legacy rule interface.
+     */
+    function _supportsRuleInterface(address rule_) internal view virtual returns (bool) {
+        if (!ERC165Checker.supportsERC165(rule_)) {
+            return false;
         }
+        return ERC165Checker.supportsERC165InterfaceUnchecked(rule_, RuleInterfaceId.IRULE_INTERFACE_ID)
+            || ERC165Checker.supportsERC165InterfaceUnchecked(rule_, RuleInterfaceId.IRULE_LEGACY_INTERFACE_ID);
     }
 
     /**

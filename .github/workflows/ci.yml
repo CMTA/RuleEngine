@@ -25,7 +25,11 @@ jobs:
 
       - name: Run Forge tests
         run: forge test -vvv
-        
+
+      # test/ERC3643Real/ is skipped by the default profile: it deploys the vendored T-REX token (solc 0.8.30)
+      - name: Run Forge tests against the real ERC-3643 token
+        run: FOUNDRY_PROFILE=erc3643 forge test -vvv
+
       - name: Setup NodeJS 20.5.0
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 #v4.4.0
         with:

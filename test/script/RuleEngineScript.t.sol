@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {CMTATDeployment} from "../utils/CMTATDeployment.sol";
 import {CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.sol";
 import {RuleEngineScript} from "../../script/RuleEngineScript.s.sol";
-import {RuleEngine} from "src/deployment/RuleEngine.sol";
+import {RuleEngine} from "src/deployment/accessControl/RuleEngine.sol";
 
 /**
  * @title Test for the RuleEngineScript deployment script

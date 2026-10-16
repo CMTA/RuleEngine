@@ -61,6 +61,7 @@ Two hooks are left to the embedding contract:
 |---|---|---|
 | `_onlyTokenBindingManager()` | access control for binding administration | abstract, must be implemented |
 | `_authorizeTokenBindingChange(address token)` | authorizes one bind/unbind | manager check |
+| `_checkBindingTarget(address token)` | host-specific restriction on which addresses may be bound; reverts to reject | empty (`RuleEngineBase` rejects current rules) |
 
 A minimal deployment therefore only has to wire its access control model:
 
@@ -111,17 +112,52 @@ These are properties of the registry itself, not of any standard built on it.
   while the token was bound.
 - **`address(0)` cannot be bound.** It could never call the engine, and binding it would only emit a
   `TokenBound` event that indexers would have to filter out.
+- **Token identity uses `msg.sender`, administration uses `_msgSender()`.** `onlyBoundToken` and the token
+  self-binding check compare the raw `msg.sender`. A token never calls through a forwarder, so in a host that
+  inherits `ERC2771Context` the forwarder cannot pass as a bound or self-binding token. The manager path
+  (`_onlyTokenBindingManager`) is left to the host and normally resolves through `_msgSender()`, so binding
+  administration can stay gasless. Do not override `_checkBoundToken` back to `_msgSender()`.
 - **Binding and unbinding are not idempotent.** Re-binding a bound token reverts with
   `TokenBinding_TokenAlreadyBound`, and unbinding an unbound one with `TokenBinding_TokenNotBound`, so a
   redundant administrative call is reported rather than silently accepted.
+- **Binding is a trust decision.** A bound address can drive every stateful downstream check (consume
+  approvals, allowances, counters) without moving any token. The registry cannot tell a token contract from an
+  EOA or any other contract, and a code-size check would not help: it is false for a contract under
+  construction, and it would block binding a token before it is deployed at a counterfactual (CREATE2) address.
+  Bind only the token contracts the host is meant to serve. The RuleEngine adds one restriction through
+  `_checkBindingTarget`: an address that is currently a rule cannot be bound, and `_checkRule` rejects a bound
+  token as a rule, so the two sets stay disjoint.
+- **An administrative unbind revokes the self-binding approval.** When the binding manager unbinds a token
+  (`unbindToken` or `unbindTokens`), `TokenBindingExtendedModule._unbindToken` also clears the token's
+  self-binding approval and emits `TokenSelfBindingApprovalSet(token, false)`, so the token cannot undo the
+  manager's decision by binding itself again. A token that unbinds itself (`msg.sender == token`) keeps its
+  approval. A host that combines this module with another one defining `_unbindToken` must disambiguate the
+  override in favour of `TokenBindingExtendedModule`, as `ERC3643ComplianceExtendedModule` does.
+- **Self-binding approvals have two events; indexers must handle both.** `setTokenSelfBindingApproval` emits
+  `TokenSelfBindingApprovalSet(address indexed token, bool approved)`; `setTokenSelfBindingApprovalBatch` emits
+  a single `TokenSelfBindingApprovalBatchSet(address[] tokens, bool approved)` with the array as passed, and no
+  per-token event. A log filter on the indexed `token` therefore misses batch updates, and the batch array also
+  lists tokens that were already at the requested value, and duplicates. Monitoring that must catch every token
+  gaining self-binding rights (which lets it unbind itself) subscribes to both events, or reads
+  `isTokenSelfBindingApproved(token)`, which is authoritative. Kept as is by decision; the alternatives
+  (per-token events, with or without a change check) are measured in the rc7 code-quality review, `C-2`.
+- **The batch functions are atomic, on purpose.** `bindTokens` / `unbindTokens` apply the single-call rule to
+  every element: one token already bound (or listed twice) in `bindTokens`, or not bound in `unbindTokens`,
+  reverts the whole call, and the tokens processed before it in the same call are rolled back. This departs
+  from the batch convention used elsewhere in the project (the reference `RuleAddressList` rule skips elements
+  already in the target state so that one stale entry does not waste the whole batch). Binding is treated
+  differently because a binding change is security-relevant: a token that is already bound in the list is most
+  likely an operator mistake (wrong list, wrong environment), and it should stop the operation rather than be
+  silently skipped. The cost is that the operator re-submits a corrected list. An empty array is accepted as a
+  no-op, consistent with the batch rule (nothing to change, nothing reverts).
 
 ## 5. What is tested
 
 | Area | File | Tests |
 |---|---|---|
 | Standalone reuse, outside any compliance context | `test/TokenBinding/TokenBindingStandalone.t.sol` | 10 |
-| Registry through the ERC-3643 surface, RBAC variant | `test/RuleEngine/ERC3643Compliance.t.sol` | 30 |
-| Registry through the ERC-3643 surface, ownable variant | `test/RuleEngineOwnable/ERC3643Compliance.t.sol` | 29 |
+| Registry through the ERC-3643 surface, RBAC variant | `test/RuleEngine/ERC3643Compliance.t.sol` | 31 |
+| Registry through the ERC-3643 surface, ownable variant | `test/RuleEngineOwnable/ERC3643Compliance.t.sol` | 30 |
 
 ## 6. Related documents
 

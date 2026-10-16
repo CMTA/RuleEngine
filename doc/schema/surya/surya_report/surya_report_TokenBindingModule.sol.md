@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./modules/TokenBindingModule.sol | db8a2e23dc811ccc424861b398b305fb425b3e6c |
+| ./modules/TokenBindingModule.sol | 290217014db5b97af70da677d27a410d8bff13a8 |
 
 
 ### Contracts Description Table
@@ -20,6 +20,7 @@
 | └ | unbindToken | Public ❗️ | 🛑  |NO❗️ |
 | └ | isTokenBound | Public ❗️ |   |NO❗️ |
 | └ | _bindToken | Internal 🔒 | 🛑  | |
+| └ | _checkBindingTarget | Internal 🔒 |   | |
 | └ | _unbindToken | Internal 🔒 | 🛑  | |
 | └ | _authorizeTokenBindingChange | Internal 🔒 | 🛑  | |
 | └ | _onlyTokenBindingManager | Internal 🔒 | 🛑  | |

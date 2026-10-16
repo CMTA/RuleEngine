@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 /* ==== CMTAT === */
 import {IERC3643ComplianceRead, IERC3643IComplianceContract} from "CMTAT/interfaces/tokenization/IERC3643Partial.sol";
@@ -31,9 +31,9 @@ library ComplianceInterfaceId {
      * `ITokenBinding` (bindToken, unbindToken, isTokenBound), `IERC3643ComplianceRead` (canTransfer)
      * and `IERC3643IComplianceContract` (transferred). Equals `0x3144991c`.
      */
-    bytes4 public constant ERC3643_COMPLIANCE_INTERFACE_ID =
-        type(IERC3643Compliance).interfaceId ^ type(ITokenBinding).interfaceId
-        ^ type(IERC3643ComplianceRead).interfaceId ^ type(IERC3643IComplianceContract).interfaceId;
+    bytes4 public constant ERC3643_COMPLIANCE_INTERFACE_ID = type(IERC3643Compliance).interfaceId
+        ^ type(ITokenBinding).interfaceId ^ type(IERC3643ComplianceRead).interfaceId
+        ^ type(IERC3643IComplianceContract).interfaceId;
 
     /**
      * @notice ERC-165 interface ID of the extended ERC-3643 compliance interface.

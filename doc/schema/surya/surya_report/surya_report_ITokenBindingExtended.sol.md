@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./interfaces/ITokenBindingExtended.sol | 07d4c02721bfac635a599088a2966730295d2570 |
+| ./interfaces/ITokenBindingExtended.sol | 62b0c3b010c8497dbb743dca983288d4802ac857 |
 
 
 ### Contracts Description Table

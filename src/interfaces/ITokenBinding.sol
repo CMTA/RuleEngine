@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 /**
  * @title ITokenBinding
@@ -15,12 +15,17 @@ interface ITokenBinding {
     /* ============ Events ============ */
     /**
      * @notice Emitted when a token is successfully bound.
+     * @dev Same declaration as ERC-3643 `TokenBound(address _token)`, which does not index the token. Keep it
+     * non-indexed: `indexed` would move `token` from the data to a topic and break consumers decoding with
+     * the standard ERC-3643 ABI.
      * @param token The address of the token that was bound.
      */
     event TokenBound(address token);
 
     /**
      * @notice Emitted when a token is successfully unbound.
+     * @dev Same declaration as ERC-3643 `TokenUnbound(address _token)`; kept non-indexed for the same reason as
+     * {TokenBound}.
      * @param token The address of the token that was unbound.
      */
     event TokenUnbound(address token);
@@ -35,6 +40,9 @@ interface ITokenBinding {
      *      when all bound tokens are equally trusted and governed together, since the
      *      bound-token entry points do not necessarily carry the calling token address to the
      *      downstream logic.
+     *      Trust note: a bound address can drive every stateful downstream check without moving any
+     *      token, and the registry cannot tell a token contract from an EOA or another contract. Bind only
+     *      the token contracts the host is meant to serve.
      *      Complexity: O(1).
      * @param token The address of the token to bind.
      */

@@ -5,7 +5,6 @@ import {Test} from "forge-std/Test.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContract.sol";
 
-import {RuleEngineExposed} from "src/mocks/RuleEngineExposed.sol";
 import {RuleInvalidMock} from "src/mocks/RuleInvalidMock.sol";
 import {ICompliance} from "src/mocks/ICompliance.sol";
 import {IERC3643ComplianceExtendedSubset} from "src/mocks/IERC3643ComplianceExtendedSubset.sol";
@@ -15,11 +14,9 @@ import {ComplianceInterfaceId} from "src/modules/library/ComplianceInterfaceId.s
 import {ERC1404InterfaceId} from "src/modules/library/ERC1404InterfaceId.sol";
 
 /**
- * @title Coverage tests for RuleEngine (supportsInterface, _msgData, ERC-165 rule check)
+ * @title Coverage tests for RuleEngine (supportsInterface, ERC-165 rule check)
  */
 contract RuleEngineCoverageTest is Test, HelperContract {
-    RuleEngineExposed public ruleEngineExposed;
-
     // Known interface IDs
     bytes4 constant RULE_ENGINE_ID = 0x20c49ce7;
     bytes4 constant ERC1404_EXTEND_ID = 0x78a8de7d;
@@ -27,8 +24,7 @@ contract RuleEngineCoverageTest is Test, HelperContract {
     bytes4 constant INVALID_ID = 0xffffffff;
 
     function setUp() public {
-        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
-        ruleEngineExposed = new RuleEngineExposed(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngine(RULE_ENGINE_OPERATOR_ADDRESS, ZERO_ADDRESS);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -67,18 +63,6 @@ contract RuleEngineCoverageTest is Test, HelperContract {
 
     function testDoesNotSupportInvalidInterface() public view {
         assertFalse(ruleEngineMock.supportsInterface(INVALID_ID));
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                            MSG DATA
-    //////////////////////////////////////////////////////////////*/
-
-    function testMsgDataReturnsCalldata() public view {
-        bytes memory data = ruleEngineExposed.exposedMsgData();
-        // Should return the calldata (selector of exposedMsgData)
-        assertEq(data.length, 4);
-        // forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(bytes4(data), ruleEngineExposed.exposedMsgData.selector);
     }
 
     /*//////////////////////////////////////////////////////////////

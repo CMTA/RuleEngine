@@ -2,13 +2,13 @@
 
 // Documentation :
 // https://book.getfoundry.sh/tutorials/solidity-scripting
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 import {Script, console} from "forge-std/Script.sol";
 import {ICMTATConstructor, CMTATStandardStandalone} from "CMTAT/deployment/CMTATStandardStandalone.sol";
 import {IERC1643CMTAT} from "CMTAT/interfaces/tokenization/draft-IERC1643CMTAT.sol";
 import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
-import {RuleEngine} from "../src/deployment/RuleEngine.sol";
+import {RuleEngine} from "../src/deployment/accessControl/RuleEngine.sol";
 import {RuleWhitelistMock} from "../src/mocks/rules/validation/RuleWhitelistMock.sol";
 
 /**
@@ -48,7 +48,7 @@ contract CMTATWithRuleEngineScript is Script {
         RuleWhitelistMock ruleWhitelist = new RuleWhitelistMock(admin, trustedForwarder);
         console.log("whitelist: ", address(ruleWhitelist));
         // ruleEngine
-        RuleEngine ruleEngine = new RuleEngine(admin, trustedForwarder, address(cmtatContract));
+        RuleEngine ruleEngine = new RuleEngine(admin, address(cmtatContract));
         console.log("RuleEngine : ", address(ruleEngine));
         ruleEngine.addRule(ruleWhitelist);
         cmtatContract.setRuleEngine(ruleEngine);

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 /* ==== CMTAT === */
 import {IERC3643Version} from "CMTAT/interfaces/tokenization/IERC3643Partial.sol";
@@ -15,9 +15,8 @@ abstract contract VersionModule is IERC3643Version {
      * @dev
      * Get the current version of the smart contract
      */
-    string internal constant VERSION = "3.0.0";
+    string internal constant VERSION = "3.0.0-rc7";
 
-    /* ============ Events ============ */
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/

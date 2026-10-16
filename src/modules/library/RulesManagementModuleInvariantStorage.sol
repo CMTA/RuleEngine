@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 import {IRule} from "../../interfaces/IRule.sol";
 
@@ -20,7 +20,6 @@ abstract contract RulesManagementModuleInvariantStorage {
     error RuleEngine_RulesManagementModule_RuleAlreadyExists();
     error RuleEngine_RulesManagementModule_RuleDoNotMatch();
     error RuleEngine_RulesManagementModule_ArrayIsEmpty();
-    error RuleEngine_RulesManagementModule_OperationNotSuccessful();
     error RuleEngine_RulesManagementModule_MaxRulesExceeded(uint256 maxRules);
     error RuleEngine_RulesManagementModule_MaxRulesZeroNotAllowed();
     error RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges();

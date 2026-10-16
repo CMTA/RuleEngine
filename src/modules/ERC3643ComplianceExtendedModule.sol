@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 /* ==== Modules === */
 import {ERC3643ComplianceModule} from "./ERC3643ComplianceModule.sol";
@@ -35,5 +35,15 @@ abstract contract ERC3643ComplianceExtendedModule is
         override(TokenBindingModule, TokenBindingExtendedModule)
     {
         TokenBindingExtendedModule._authorizeTokenBindingChange(token);
+    }
+
+    /**
+     * @dev Disambiguates {_unbindToken}, inherited through {TokenBindingExtendedModule} and through
+     * {ERC3643ComplianceModule}. The extended behaviour wins: a manager unbind also revokes the token's
+     * self-binding approval.
+     * @param token The token to unbind.
+     */
+    function _unbindToken(address token) internal virtual override(TokenBindingModule, TokenBindingExtendedModule) {
+        TokenBindingExtendedModule._unbindToken(token);
     }
 }

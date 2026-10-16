@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import {RuleEngineOwnable2Step} from "src/deployment/RuleEngineOwnable2Step.sol";
+import {RuleEngineOwnable2Step} from "src/deployment/ownable/RuleEngineOwnable2Step.sol";
 import {RuleConditionalTransferLightMock} from "src/mocks/rules/operation/RuleConditionalTransferLightMock.sol";
 
 /**

@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
-import {IRuleEngine} from "CMTAT/interfaces/engine/IRuleEngine.sol";
+import {IRuleEngine, IRuleEngineERC1404} from "CMTAT/interfaces/engine/IRuleEngine.sol";
 import {
     RuleConditionalTransferLightInvariantStorage
 } from "./abstract/RuleConditionalTransferLightInvariantStorage.sol";
 import {IRule} from "../../../interfaces/IRule.sol";
 import {RuleInterfaceId} from "../../../modules/library/RuleInterfaceId.sol";
+import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
+import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
@@ -15,15 +17,12 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  * @dev Requires operator approval for each ERC20 transfer.
  *      Same transfer (from, to, value) can be approved multiple times.
  */
-contract RuleConditionalTransferLightMock is AccessControl, RuleConditionalTransferLightInvariantStorage, IRule {
-    /**
-     * @notice ERC-165 interface ID of the CMTAT RuleEngine interface.
-     */
-    bytes4 private constant RULE_ENGINE_INTERFACE_ID = 0x20c49ce7;
-    /**
-     * @notice ERC-165 interface ID of the extended ERC-1404 interface.
-     */
-    bytes4 private constant ERC1404EXTEND_INTERFACE_ID = 0x78a8de7d;
+contract RuleConditionalTransferLightMock is
+    AccessControl,
+    RuleConditionalTransferLightInvariantStorage,
+    IRule,
+    IRuleEngineERC1404
+{
     // Mapping from transfer hash to approval count
     /**
      * @notice Number of outstanding approvals per transfer hash.
@@ -117,6 +116,7 @@ contract RuleConditionalTransferLightMock is AccessControl, RuleConditionalTrans
         uint256 value
     )
         public
+        override(IRule, IRuleEngine)
     {
         transferred(from, to, value);
     }
@@ -127,7 +127,8 @@ contract RuleConditionalTransferLightMock is AccessControl, RuleConditionalTrans
      * @return True if the interface is supported, false otherwise.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, IERC165) returns (bool) {
-        return interfaceId == RULE_ENGINE_INTERFACE_ID || interfaceId == ERC1404EXTEND_INTERFACE_ID
+        return interfaceId == RuleEngineInterfaceId.RULE_ENGINE_INTERFACE_ID
+            || interfaceId == ERC1404ExtendInterfaceId.ERC1404EXTEND_INTERFACE_ID
             || interfaceId == RuleInterfaceId.IRULE_INTERFACE_ID || AccessControl.supportsInterface(interfaceId);
     }
 
@@ -149,7 +150,7 @@ contract RuleConditionalTransferLightMock is AccessControl, RuleConditionalTrans
      * @param from the origin address
      * @param to the destination address
      * @param value the amount to transfer
-     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     * @return The restriction code or REJECTED_CODE_BASE.TRANSFER_OK
      *
      */
     function detectTransferRestriction(address from, address to, uint256 value) public view override returns (uint8) {
@@ -167,7 +168,7 @@ contract RuleConditionalTransferLightMock is AccessControl, RuleConditionalTrans
      * @param from the origin address
      * @param to the destination address
      * @param value the amount to transfer
-     * @return The restricion code or REJECTED_CODE_BASE.TRANSFER_OK
+     * @return The restriction code or REJECTED_CODE_BASE.TRANSFER_OK
      *
      */
     function detectTransferRestrictionFrom(

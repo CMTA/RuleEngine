@@ -37,10 +37,12 @@ test/
 ### Organization Rules
 
 - Tests for `RuleEngine` go in `test/RuleEngine/`
+- Tests for each ERC-2771 contract go in its own directory: `test/RuleEngine2771/`, `test/RuleEngineOwnable2771/`, `test/RuleEngineOwnable2Step2771/`
 - Tests for `RuleEngineOwnable` go in `test/RuleEngineOwnable/`
+- Tests for `RuleEngineOwnable2Step` go in `test/RuleEngineOwnable2Step/`
 - Shared test logic uses `*Base.sol` abstract contracts with virtual hooks
 - Test files use `.t.sol` suffix; base/helper files use `.sol`
-- **Both variants must be tested.** When adding a feature to `RuleEngineBase`, add tests in both `test/RuleEngine/` and `test/RuleEngineOwnable/`.
+- **Every variant must be tested.** When adding a feature to `RuleEngineBase`, add tests for all six deployables, preferably through a shared `test/utils/*TestBase.sol` with one short file per variant directory.
 
 ## Helper Contracts
 
@@ -176,8 +178,7 @@ contract MyFeatureTest is Test, HelperContract {
         ruleWhitelist = new RuleWhitelist(DEFAULT_ADMIN_ADDRESS, ZERO_ADDRESS);
         ruleEngineMock = new RuleEngine(
             DEFAULT_ADMIN_ADDRESS,
-            ZERO_ADDRESS,  // forwarder
-            ZERO_ADDRESS   // token (bound later)
+            ZERO_ADDRESS   // token (bound later); use RuleEngine2771 to test a forwarder
         );
     }
 

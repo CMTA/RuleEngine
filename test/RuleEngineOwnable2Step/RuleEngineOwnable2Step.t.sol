@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
+import {ITokenBindingExtended} from "src/interfaces/ITokenBindingExtended.sol";
 import {Test} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {MinimalForwarderMock} from "CMTAT/mocks/MinimalForwarderMock.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {ERC1404ExtendInterfaceId} from "CMTAT/library/ERC1404ExtendInterfaceId.sol";
 import {RuleEngineInterfaceId} from "CMTAT/library/RuleEngineInterfaceId.sol";
@@ -20,7 +20,6 @@ import {OwnableInterfaceId} from "src/modules/library/OwnableInterfaceId.sol";
 import {Ownable2StepInterfaceId} from "src/modules/library/Ownable2StepInterfaceId.sol";
 import {TokenBindingModuleInvariantStorage} from "src/modules/library/TokenBindingModuleInvariantStorage.sol";
 import {RulesManagementModuleInvariantStorage} from "src/modules/library/RulesManagementModuleInvariantStorage.sol";
-import {RuleEngineOwnable2StepExposed} from "src/mocks/RuleEngineExposed.sol";
 // forge-lint: disable-next-line(unaliased-plain-import)
 import "../HelperContractOwnable2Step.sol";
 
@@ -30,11 +29,9 @@ import "../HelperContractOwnable2Step.sol";
 contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
     address internal constant TOKEN_1 = address(0x1111);
     address internal constant TOKEN_2 = address(0x2222);
-    RuleEngineOwnable2StepExposed internal ruleEngineOwnable2StepExposed;
 
     function setUp() public {
-        ruleEngineMock = new RuleEngineOwnable2Step(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
-        ruleEngineOwnable2StepExposed = new RuleEngineOwnable2StepExposed(OWNER_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+        ruleEngineMock = new RuleEngineOwnable2Step(OWNER_ADDRESS, ZERO_ADDRESS);
         ruleConditionalTransferLight =
             new RuleConditionalTransferLightMock(CONDITIONAL_TRANSFER_OPERATOR_ADDRESS, ruleEngineMock);
     }
@@ -43,18 +40,25 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         assertEq(ruleEngineMock.owner(), OWNER_ADDRESS);
     }
 
-    function testCannotDeployContractIfOwnerAddressIsZero() public {
-        vm.expectRevert(abi.encodeWithSignature("OwnableInvalidOwner(address)", ZERO_ADDRESS));
-        new RuleEngineOwnable2Step(ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS);
+    function testHasRightVersion() public view {
+        assertEq(ruleEngineMock.version(), "3.0.0-rc7");
     }
 
-    function testTrustedForwarderSetAtDeployment() public {
-        MinimalForwarderMock forwarder = new MinimalForwarderMock();
-        forwarder.initialize(ERC2771_FORWARDER_DOMAIN);
+    function testSetTokenSelfBindingApprovalEmitsEvent() public {
+        vm.expectEmit(true, false, false, true, address(ruleEngineMock));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), true);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApproval(address(0x7070), true);
 
-        RuleEngineOwnable2Step ruleEngineWithForwarder =
-            new RuleEngineOwnable2Step(OWNER_ADDRESS, address(forwarder), ZERO_ADDRESS);
-        assertTrue(ruleEngineWithForwarder.isTrustedForwarder(address(forwarder)));
+        vm.expectEmit(true, false, false, true, address(ruleEngineMock));
+        emit ITokenBindingExtended.TokenSelfBindingApprovalSet(address(0x7070), false);
+        vm.prank(OWNER_ADDRESS);
+        ruleEngineMock.setTokenSelfBindingApproval(address(0x7070), false);
+    }
+
+    function testCannotDeployContractIfOwnerAddressIsZero() public {
+        vm.expectRevert(abi.encodeWithSignature("OwnableInvalidOwner(address)", ZERO_ADDRESS));
+        new RuleEngineOwnable2Step(ZERO_ADDRESS, ZERO_ADDRESS);
     }
 
     function testSupportsOwnableAndComplianceInterfaces() public view {
@@ -332,10 +336,12 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         ruleEngineMock.bindTokens(tokens);
     }
 
+    /// @notice Batch binding is atomic on purpose (rc7 code-quality review `C-3`): one token already bound
+    /// reverts the whole batch, including the tokens bound before it in the same call.
     function testCannotBindTokensBatchWithAlreadyBoundToken() public {
         address[] memory tokens = new address[](2);
-        tokens[0] = TOKEN_1;
-        tokens[1] = TOKEN_2;
+        tokens[0] = TOKEN_2;
+        tokens[1] = TOKEN_1;
 
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindToken(TOKEN_1);
@@ -343,6 +349,8 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenAlreadyBound.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.bindTokens(tokens);
+
+        assertFalse(ruleEngineMock.isTokenBound(TOKEN_2), "the token before the failing one is rolled back");
     }
 
     function testCannotUnbindTokensBatchWithTokenNotBound() public {
@@ -356,13 +364,23 @@ contract RuleEngineOwnable2StepTest is Test, HelperContractOwnable2Step {
         vm.expectRevert(TokenBindingModuleInvariantStorage.TokenBinding_TokenNotBound.selector);
         vm.prank(OWNER_ADDRESS);
         ruleEngineMock.unbindTokens(tokens);
+
+        assertTrue(ruleEngineMock.isTokenBound(TOKEN_1), "the token before the failing one stays bound");
     }
 
-    function testMsgDataReturnsCalldata() public view {
-        bytes memory data = ruleEngineOwnable2StepExposed.exposedMsgData();
-        assertEq(data.length, 4);
-        // forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(bytes4(data), ruleEngineOwnable2StepExposed.exposedMsgData.selector);
+    /// @notice An empty batch is a no-op: no revert, no event, no state change (rc7 code-quality review `C-3`).
+    function testEmptyBindAndUnbindBatchesAreNoOps() public {
+        address[] memory empty = new address[](0);
+        uint256 before = ruleEngineMock.getTokenBounds().length;
+
+        vm.recordLogs();
+        vm.startPrank(OWNER_ADDRESS);
+        ruleEngineMock.bindTokens(empty);
+        ruleEngineMock.unbindTokens(empty);
+        vm.stopPrank();
+
+        assertEq(vm.getRecordedLogs().length, 0);
+        assertEq(ruleEngineMock.getTokenBounds().length, before);
     }
 
     function testMessageForTransferRestrictionWithTransferOKCode() public {

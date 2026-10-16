@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MPL-2.0
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 /* ==== OpenZeppelin === */
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -33,7 +33,7 @@ abstract contract ERC3643ComplianceModule is TokenBindingModule, IERC3643Complia
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /*//////////////////////////////////////////////////////////////
-                            PUBLIC/public FUNCTIONS
+                            PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
     /* ============ View functions ============ */

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./mocks/rules/validation/RuleWhitelistMock.sol | 269a711aa637cfd9640a7cbb83a5d34c963c1d17 |
+| ./mocks/rules/validation/RuleWhitelistMock.sol | 5fcab0ff3605e97ef5212f320b0d138902a97e62 |
 
 
 ### Contracts Description Table
@@ -15,7 +15,7 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **RuleWhitelistMock** | Implementation | RuleAddressList, RuleWhitelistCommon |||
+| **RuleWhitelistMock** | Implementation | RuleAddressList, RuleWhitelistCommon, IRuleEngineERC1404 |||
 | └ | <Constructor> | Public ❗️ | 🛑  | RuleAddressList |
 | └ | transferred | Public ❗️ | 🛑  |NO❗️ |
 | └ | transferred | Public ❗️ | 🛑  |NO❗️ |
