@@ -234,6 +234,63 @@ enforcement path may still accept the operation. Dismissed: the CMTAT guide alre
 contract "still blocks the operation and the token's views, so it is trusted for availability too". Wrapping the
 calls in `try/catch` would hide a broken rule behind an arbitrary answer, so the current behaviour is preferable.
 
+#### Follow-up: should `canTransfer` catch a reverting rule?
+
+Asked after the review. A `try/catch` around each rule call in `canTransfer` / `canTransferFrom` would return `false`
+(not allowed) instead of reverting when a rule's view reverts. A prototype was built and measured on `RuleEngine`
+with three rules, then removed:
+
+```solidity
+for (uint256 i = 0; i < _rules.length(); ++i) {
+    try IRule(_rules.pos(i)).detectTransferRestriction(from, to, value) returns (uint8 code) {
+        if (code != uint8(REJECTED_CODE_BASE.TRANSFER_OK)) return false;
+    } catch {
+        return false; // fail closed
+    }
+}
+return true;
+```
+
+| Case | Today | With `try/catch` |
+|---|---|---|
+| Three allowing rules, gas of `canTransfer` | 32,308 | 32,229 (−79: the loop skips the internal call to `detectTransferRestriction`) |
+| A rule whose view reverts | reverts | returns `false` |
+| A rule that returns malformed data (empty return) | reverts | **still reverts**: `try/catch` does not catch a failure to decode the return data in the caller |
+
+What it would buy:
+
+- **A boolean that never reverts for a reverting rule.** An on-chain integrator that checks eligibility in a loop,
+  such as a distributor or a contract screening many holders, would get `false` for one address instead of losing
+  the whole call.
+- **Fail-closed semantics are preserved.** "Not allowed" is the safe answer for a rule that cannot answer.
+
+What it would not buy, or would cost:
+
+- **No change for the tokens.** T-REX requires `canTransfer == true` before `transfer`, `transferFrom` and `mint`, so
+  the operation is blocked either way, only with T-REX's own error instead of the rule's. CMTAT never calls the
+  view on its transfer path. Enforcement (`transferred`) must keep reverting in any case.
+- **The views would disagree.** `detectTransferRestriction` has to return an ERC-1404 code, and there is no code
+  for "a rule failed" that cannot collide with the codes rules choose. Unless a code is reserved for the engine,
+  `detectTransferRestriction` keeps reverting while `canTransfer` returns `false`, and the property
+  `canTransfer == (detectTransferRestriction == 0)` (INV-7) no longer holds as an equality.
+- **A broken rule looks like an ordinary refusal.** A view cannot emit an event, so the revert is the only signal
+  that a rule is broken. Catching it turns a configuration fault into a compliance "no" that an operator may not
+  notice.
+- **It is partial.** Malformed return data still reverts (measured above), and a rule that burns its gas leaves the
+  engine only 1/64 of it in the `catch` branch, which may not be enough to finish the loop.
+
+**Opinion: not now.** The engine's own consumers (T-REX, CMTAT) get the same outcome either way, and the change
+would split the two standard views and hide broken rules, against a benefit only a third-party on-chain integrator
+would see. It becomes worth doing if such an integrator appears and needs a non-reverting boolean. In that case:
+
+- apply it to `canTransfer` / `canTransferFrom` only, failing closed, and leave `transferred` and
+  `detectTransferRestriction(From)` / `messageForTransferRestriction` reverting;
+- document INV-7 as `canTransfer => detectTransferRestriction == 0`, and "a reverting rule makes `canTransfer`
+  return `false`";
+- state in the NatSpec that malformed return data still reverts;
+- test it with `RevertingViewRule` (now returns `false`), a malformed-return rule (still reverts), and the
+  rule-aggregation fuzz (unchanged for well-behaved rules).
+
 ### F-5 — `*2771` deployables accept `address(0)` as forwarder (duplicate)
 
 Already open as `H-3` in the rc7 code-quality review. With a zero forwarder the contract behaves as the variant
