@@ -6,8 +6,8 @@
 | **Scope** | `src/`, **mocks excluded** |
 | **Compiler** | solc 0.8.37, EVM Osaka, `pragma solidity ^0.8.27` |
 | **Contracts analysed** | 111 |
-| **Date** | 2026-10-15 |
-| **Commit** | `3055fe2` (final rc7 code, after the code-quality review fixes) |
+| **Date** | 2026-10-16 |
+| **Commit** | `29556e5` (final rc7 code: `src/` as of `c7a19c7`, after the rc7 security review fixes F-1 to F-3) |
 
 ```bash
 slither . --checklist --filter-paths "openzeppelin-contracts|test|CMTAT|forge-std|mocks" \
@@ -30,6 +30,11 @@ instances, in the same functions; only `file:line` positions moved. The contract
 since (`A-3`, `B-1`, `B-2`, `E-2`, `I-1`, `G-2`, deployables moved to `src/deployment/accessControl/` and
 `src/deployment/ownable/`) touch the loops' bodies, the error style and comments, not the looped external calls
 or the events. **Delta from v3.0.0-rc6: none in findings** (108 contracts then).
+
+**Delta from the run at `3055fe2` (before the rc7 security review fixes): none.** The output is byte-identical,
+including every `file:line`. The fixes (rule-account check in `RuleEngineOwnable2Step.acceptOwnership`, approval
+revoked on an administrative unbind, rules and bound tokens kept disjoint) add checks and one internal hook, but
+no external call in a loop and no event.
 
 Triage and per-finding reasoning: [slither-report-feedback.md](./slither-report-feedback.md).
 Overview of all analyses: [AUDIT_OVERVIEW.md](../../AUDIT_OVERVIEW.md).

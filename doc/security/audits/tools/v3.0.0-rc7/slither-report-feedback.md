@@ -2,7 +2,7 @@
 
 **Tool:** [Slither](https://github.com/crytic/slither) 0.11.5 (run with `uvx --python 3.12 --from slither-analyzer==0.11.5`)
 **Report file:** `doc/security/audits/tools/v3.0.0-rc7/slither-report.md`
-**Assessment date:** 2026-10-15 (commit `3055fe2`: the final rc7 code, after the code-quality review fixes; earlier runs at `a91ca9a`, `4946c87` and `850976f` + pragma gave the same findings)
+**Assessment date:** 2026-10-16 (commit `29556e5`: the final rc7 code, `src/` as of `c7a19c7`, after the rc7 security review fixes; earlier runs at `3055fe2`, `a91ca9a`, `4946c87` and `850976f` + pragma gave the same findings)
 **Scope:** `src/`, **mocks excluded**, 111 contracts analysed, solc 0.8.37 / EVM Osaka, `pragma ^0.8.27`
 
 ```bash
@@ -63,7 +63,13 @@ That holds although rc7 changed `src/` substantially, and it is worth recording 
   (`IRule(_rules.pos(i))` instead of `IRule(rule(i))` in the views); the events are unchanged, and their NatSpec
   now records why they stay unindexed.
 
-**Runs:** `a91ca9a` (2026-10-14), `4946c87`, `850976f` + pragma, and this final run at `3055fe2` (2026-10-15).
+- **rc7 security review fixes, after the `3055fe2` run** (`efaf860` F-1, `9c43b01` F-2, `c7a19c7` F-3):
+  `RuleEngineOwnable2Step.acceptOwnership` re-checks the rule-account guard; an administrative unbind revokes the
+  token's self-binding approval (`TokenBindingExtendedModule._unbindToken` override); rules and bound tokens are
+  kept disjoint (`_checkBindingTarget` hook, bound-token check in `_checkRule`). Checks and one internal hook: no
+  external call in a loop, no event. The report is byte-identical to the `3055fe2` one.
+
+**Runs:** `a91ca9a` (2026-10-14), `4946c87`, `850976f` + pragma, `3055fe2` (2026-10-15), and this final run at `29556e5` (2026-10-16).
 Same 12 findings each time; only `file:line` positions moved with the edited files.
 
 The rest of rc7 is build and dependency changes: solc 0.8.36 -> **0.8.37**, EVM Prague -> **Osaka**, CMTAT

@@ -2,8 +2,8 @@
 
 **Tool:** [Aderyn](https://github.com/Cyfrin/aderyn) 0.6.5
 **Report file:** `doc/security/audits/tools/v3.0.0-rc7/aderyn-report.md`
-**Assessment date:** 2026-10-15 (commit `3055fe2`: the final rc7 code, after the code-quality review fixes; earlier runs at `a91ca9a`, `4946c87` and `850976f` + pragma)
-**Scope:** `src/`, **mocks excluded** (`-x mocks`), 31 files analysed, 694 nSLOC, solc 0.8.37 / EVM Osaka, `pragma ^0.8.27`
+**Assessment date:** 2026-10-16 (commit `29556e5`: the final rc7 code, `src/` as of `c7a19c7`, after the rc7 security review fixes; earlier runs at `3055fe2`, `a91ca9a`, `4946c87` and `850976f` + pragma)
+**Scope:** `src/`, **mocks excluded** (`-x mocks`), 31 files analysed, 716 nSLOC, solc 0.8.37 / EVM Osaka, `pragma ^0.8.27`
 
 ```bash
 aderyn -x mocks --output doc/security/audits/tools/v3.0.0-rc7/aderyn-report.md
@@ -17,12 +17,12 @@ aderyn -x mocks --output doc/security/audits/tools/v3.0.0-rc7/aderyn-report.md
 | L-2 | Unspecific Solidity Pragma | Low | 26 | The floating range is kept for integrators, but it was wrong: raised from `^0.8.20` to the real floor `^0.8.27`; the build pins 0.8.37 | **Fixed (pragma corrected)**, floating kept by design |
 | L-3 | PUSH0 Opcode | Low | 31 | EVM target is Osaka, which includes PUSH0 (since Shanghai) | Accepted by design |
 | L-4 | Modifier Invoked Only Once | Low | 1 | `onlyRulesLimitManager`, kept for symmetry with the hook pattern | Cosmetic, kept |
-| L-5 | Empty Block | Low | 9 | The three access-control hooks × three access-control models; the modifier does the work | Accepted by design |
+| L-5 | Empty Block | Low | 10 | The three access-control hooks × three access-control models, where the modifier does the work, plus the empty default of the `_checkBindingTarget` hook (F-3) | Accepted by design |
 | L-6 | Loop Contains `require`/`revert` | Low | 4 | Admin batch operations, atomic on purpose (code-quality review `C-3`) | Accepted by design |
 | L-7 | Costly operations inside loop | Low | 4 | Admin-gated batch writes; inherent to a batch operation | Accepted by design |
 | L-8 | Unchecked Return | Low | 1 | `_grantRole` cannot return `false` in a constructor | False positive |
 
-**0 High · 8 Low (90 instances). Nothing exploitable; one change made (`L-2`: pragma corrected to `^0.8.27`).**
+**0 High · 8 Low (91 instances). Nothing exploitable; one change made (`L-2`: pragma corrected to `^0.8.27`).**
 
 ## Scope verification
 
@@ -40,17 +40,17 @@ produced 84 such links, so it was re-run with the output inside the repository t
 
 ## Changes since v3.0.0-rc6
 
-**Same 8 findings, 84 -> 90 instances** (92 at the intermediate rc7 run, before `D-2`).
+**Same 8 findings, 84 -> 91 instances** (92 at the intermediate rc7 run, before `D-2`; 90 at `3055fe2`, before the security review fixes).
 
-| ID | rc6 | rc7, `850976f` + pragma | rc7 final, `3055fe2` | Why |
-|----|-----|-----|-----|-----|
-| L-1 | 14 | 14 | 14 | RBAC instances: `RuleEngine.sol` -> `RuleEngineAccessControlShared.sol` -> back to `RuleEngine.sol` (`D-2`) |
-| L-2 | 23 | 27 | **26** | per-file detector: +4 files with the ERC-2771 split, −1 when the shared RBAC base was folded |
-| L-3 | 28 | 32 | **31** | same as L-2 |
-| L-4 | 1 | 1 | 1 | — |
-| L-5 | 9 | 9 | 9 | RBAC hooks back in `RuleEngine.sol` |
-| L-6 / L-7 | 4 / 4 | 4 / 4 | 4 / 4 | — |
-| L-8 | 1 | 1 | 1 | `RuleEngine.sol:40` (was `RuleEngineAccessControlShared.sol:41`) |
+| ID | rc6 | rc7, `850976f` + pragma | rc7, `3055fe2` | rc7 final, `29556e5` | Why |
+|----|-----|-----|-----|-----|-----|
+| L-1 | 14 | 14 | 14 | 14 | RBAC instances: `RuleEngine.sol` -> `RuleEngineAccessControlShared.sol` -> back to `RuleEngine.sol` (`D-2`) |
+| L-2 | 23 | 27 | 26 | 26 | per-file detector: +4 files with the ERC-2771 split, −1 when the shared RBAC base was folded |
+| L-3 | 28 | 32 | 31 | 31 | same as L-2 |
+| L-4 | 1 | 1 | 1 | 1 | — |
+| L-5 | 9 | 9 | 9 | **10** | RBAC hooks back in `RuleEngine.sol`; +1 `TokenBindingModule._checkBindingTarget` (F-3) |
+| L-6 / L-7 | 4 / 4 | 4 / 4 | 4 / 4 | 4 / 4 | — |
+| L-8 | 1 | 1 | 1 | 1 | `RuleEngine.sol:40` (was `RuleEngineAccessControlShared.sol:41`) |
 
 **Changes after the intermediate rc7 run** (the code-quality review fixes, up to `3055fe2`):
 `RuleEngineAccessControlShared` folded into `RuleEngine`, so `RuleEngine2771 is ERC2771ModuleStandalone, RuleEngine`
@@ -63,6 +63,13 @@ nSLOC 707 -> 694, per file: `RuleEngine` 5 -> 54 and `RuleEngineAccessControlSha
 109 -> 96 (`B-2`, `E-2`), `IRule` 5 -> 8 (the narrowed interface declares its own `transferred`),
 `RuleEngineOwnableShared` 23 -> 21, `TokenBindingModule` 51 -> 49, `RuleInterfaceId` 13 -> 12 and
 `RulesManagementModuleInvariantStorage` 17 -> 16 (`E-2`, `B-2`, `I-1`).
+
+**Changes after the `3055fe2` run** (the rc7 security review fixes, `efaf860` F-1, `9c43b01` F-2, `c7a19c7` F-3):
+one new instance, `L-5` on `TokenBindingModule._checkBindingTarget` (see L-5 below). nSLOC 694 -> 716:
+`TokenBindingExtendedModule` 48 -> 57 (`_unbindToken` override, `_setTokenSelfBindingApproval`), `RuleEngineBase`
+153 -> 157 (`_checkBindingTarget` override, bound-token check in `_checkRule`), `RuleEngineOwnable2Step` 25 -> 29
+(`acceptOwnership`), `ERC3643ComplianceExtendedModule` 18 -> 21 (disambiguating override), `TokenBindingModule`
+49 -> 51 (the hook). No other finding moved.
 
 **Where the change comes from.** rc7 made ERC-2771 opt-in: each access-control model now has a deployable
 without a forwarder (`RuleEngine`, `RuleEngineOwnable`, `RuleEngineOwnable2Step`) and a `*2771` deployable with one,
@@ -77,7 +84,7 @@ hooks and the constructor are inherited, not re-declared.
 deployable split.
 
 **Runs:** `a91ca9a` (2026-10-14) and `4946c87` (2026-10-15) gave 84 instances on the pre-split code; `850976f` +
-pragma gave 92 on the six-deployable code; this final run at `3055fe2` gives 90. The ERC-2771 token-identity fix (`4946c87`) replaced
+pragma gave 92 on the six-deployable code; `3055fe2` gave 90; this final run at `29556e5` gives 91. The ERC-2771 token-identity fix (`4946c87`) replaced
 `_msgSender()` with `msg.sender` in place and produced no finding.
 
 The build changes (solc 0.8.37, EVM Osaka, CMTAT v3.3.0-rc4, forge-std v1.17.0) produced nothing either.
@@ -141,9 +148,9 @@ wrapped in an `onlyX` modifier, so each deployable variant can override the auth
 
 **Decision: cosmetic, kept deliberately.**
 
-### L-5: Empty Block (9 instances)
+### L-5: Empty Block (10 instances)
 
-All nine are the same three hooks, declared once per access-control model (`RuleEngine.sol:104/109/114`,
+Nine are the same three hooks, declared once per access-control model (`RuleEngine.sol:104/109/114`,
 `RuleEngineOwnable.sol:35/40/45`, `RuleEngineOwnable2Step.sol:55/60/65`; the `*2771` deployables inherit them):
 
 ```solidity
@@ -155,6 +162,17 @@ function _onlyRulesLimitManager() internal virtual override onlyRole(DEFAULT_ADM
 The body is empty because the modifier performs the check — the core access-control pattern described in
 `CLAUDE.md`. The rc6 token binding split added one more indirection (`ERC3643ComplianceModule._onlyTokenBindingManager()` calls
 `_onlyComplianceManager()`), but that body is not empty, so the count is unchanged.
+
+The tenth, since the F-3 fix, is the default of the binding-target hook in the standalone registry
+(`TokenBindingModule.sol:119`):
+
+```solidity
+function _checkBindingTarget(address token) internal view virtual {}
+```
+
+The registry is reusable outside the engine and has no notion of a rule, so by default it accepts any target.
+`RuleEngineBase` overrides the hook to reject an address that is a current rule
+(`RuleEngine_RulesManagementModule_RuleAccountCannotReceivePrivileges`). An empty default is the point of the hook.
 
 **Decision: accepted by design.**
 
