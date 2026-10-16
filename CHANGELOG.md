@@ -113,7 +113,7 @@ v3.0.0 turns the RuleEngine into a generic compliance controller for both CMTAT 
 - Static-analysis (Slither, Aderyn) and automated-review reports per release candidate, indexed in `doc/security/audits/AUDIT_OVERVIEW.md`.
 - PlantUML flow and access-control diagrams, sol2uml and Surya diagrams.
 
-### v3.0.0-rc7 - 2026-10-14
+### v3.0.0-rc7 - 2026-10-16
 
 Commit: 
 
